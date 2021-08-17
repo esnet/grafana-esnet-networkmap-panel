@@ -56,7 +56,50 @@ function renderEdges(g,data){
   zaLines.exit().remove();
 }
 
-function renderEdgeControlPoints(g,data,ref){
+
+function addControlPoint(evt,obj,ref){
+  console.log("add control point");
+
+  var mapDiv = ref.leafletMap.getContainer();
+  var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt,mapDiv)));
+
+  // we know the mouse is on one of the segmets
+  // figure out difference in able between each pair of points and the click point
+  // if the delta is nearly 0 we have a match
+  // https://stackoverflow.com/questions/21608853/add-a-vertex-in-the-middle-of-a-path-with-d3js
+  var latLngs = obj.__data__.latLngs;
+  var target  = [ll.lat,ll.lng];
+
+  var idx=0;
+  var splicePoint =0;
+  var found=0;
+  var minDelta = 1000;
+  for(idx = 0;idx < latLngs.length-1;idx++){
+    var angleA = Math.abs(Math.atan((latLngs[idx][1] - target[1]) / (latLngs[idx][0] - target[0])));
+    var angleB = Math.abs(Math.atan((latLngs[idx][1] - latLngs[idx+1][1]) / (latLngs[idx][0] - latLngs[idx+1][0])));
+
+    var delta = Math.abs(angleA - angleB);
+    if(delta   < .1 && delta < minDelta){
+      // with slop click point lays on the line between current and next point
+      console.log("split between: "+ idx + " and " + (idx+1));
+      minDelta = delta;
+      splicePoint = idx+1;
+      found=1;
+    }
+  }
+
+  if(found==1){
+    // insert target into the array at idx
+    var tmp = latLngs.slice(0,splicePoint);
+    tmp.push(target);
+    latLngs = tmp.concat(latLngs.slice(splicePoint));
+    obj.__data__.latLngs = latLngs;
+    ref.update();
+  }
+
+}
+
+function renderEdgeControl(g,data,ref){
   var lines = g.selectAll("path")
                 .data(data.edges);
 
@@ -64,19 +107,22 @@ function renderEdgeControlPoints(g,data,ref){
     .append("path")
     .merge(lines)
     .attr('d',function(d){return d.controlPointPath;})
-    .attr('class','control');
+    .attr('class','control')
+    // still need to figure out how to not zoom when doubleclicking here
+    .on("dblclick",function(d){addControlPoint(d,this,ref);})
+    //--- when mouse is on the dot, make sure d3 gets the even and dont let map pan
+    .on("mouseenter",function(){ref.leafletMap.dragging.disable();})
+    .on("mouseout",function(){ref.leafletMap.dragging.enable();});
+
 
   lines.exit().remove();
 
   g.selectAll('g').remove();
 
-  function dragged(event, d) {
+  function dragged(evt, d) {
+    var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng 
-    var foo = ref.leafletMap.containerPointToLayerPoint(L.point(event));
-    d3.select(this).attr("transform",function(d){
-        return "translate(" + foo.x + "," + foo.y +")";
-      })
-    var ll = ref.leafletMap.layerPointToLatLng(foo); 
+    var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt,mapDiv))); 
     d[0]=ll.lat;
     d[1]=ll.lng;
     //--- rerender stuff
@@ -90,7 +136,7 @@ function renderEdgeControlPoints(g,data,ref){
 
     feature.enter()
       .append('circle')
-      .attr('r',3)
+      .attr('r',4)
       .attr('class','control controlPoint')
       .merge(feature)
       .call(d3.drag().on("drag", dragged));
@@ -118,7 +164,7 @@ function renderNodes(g,data,ref){
 
   feature.enter()
     .append('circle')
-    .attr('r',5)
+    .attr('r',4)
     .attr('class','node');
 
   g.selectAll("circle")
@@ -219,15 +265,32 @@ class esmap {
     this.lineGen    = d3.line().curve(curve);
     this.edit       = 0;
 
-    _createSvgMarker(this.svg)
+    _createSvgMarker(this.svg);
+
+
+    // 
+    let ref = this;
+    this.leafletMap.on("moveend",function(){ref.update();});
+    this.leafletMap.on("viewreset",function(){ref.update();});
+
+  }
+
+  editMode(setting){
+    if(setting === null || setting === undefined){ return this.edit;}
+
+    if(setting >0){
+      this.edit = 1;
+    }else{
+      this.edit = 0;
+    }
+    this.update();
+    return this.edit;
   }
 
   updateCoordinates(data){
-    //console.log("updateCoordinates");
     var ref = this;
 
     var idx =0;
-
     var newEdges = [];
     data.edges.forEach(function(d){
       var reject = 0;
@@ -283,7 +346,7 @@ class esmap {
 
   //--- loop through data and map objects and refresh them
   update(){
-    console.log("update");
+    this.leafletMap.dragging.enable();
     for(const [name,data] of Object.entries(this.data)){
       this.updateCoordinates(data);
     }
@@ -294,11 +357,14 @@ class esmap {
       var cp_g   = g.select("g.cp");
       var data   = this.data[name];
 
-      if(this.edit){
-         renderEdgeControlPoints(cp_g,data,this);
-       }
-       renderNodes(node_g,data,this);
-       renderEdges(edge_g,data);
+      if(this.edit ==1){
+         renderEdgeControl(cp_g,data,this);
+      }else{
+	//  delete all the control point g children
+        cp_g.selectAll("*").remove();
+      }
+      renderNodes(node_g,data,this);
+      renderEdges(edge_g,data);
     }
   }
 
@@ -314,9 +380,6 @@ class esmap {
   
     //--- render layer and ensure events are hooked up to map 
     this.update();
-    var ref = this;
-    ref.leafletMap.on("moveend",function(){ref.update();});
-    ref.leafletMap.on("viewreset",function(){ref.update();});
 
     return map_g;
   }

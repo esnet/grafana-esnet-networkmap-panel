@@ -1,3 +1,8 @@
+.leaflet-pane > svg path {
+    pointer-events: auto ;
+}
+
+
 svg circle.node {
         fill: #999;
         stroke: #777;
@@ -37,17 +42,18 @@ svg path.animated-edge {
 }
 
 
-svg .control {
-        stroke-dasharray: 1,4;
-        stroke-linecap: round;
-        stroke-width: 1;
-        stroke: #333;
+svg path.control {
+        stroke-dasharray: 8 1;
+        stroke-width: 6;
+        stroke: #f808;
         fill:  none;
+	cursor: crosshair;
 }
 
 svg circle.controlPoint {
-	stroke-dasharray: 1;
-        fill: #f93;
+	stroke: black;
+	stroke-width: 1;
+        fill: #f80;
         cursor: move;
 }
 
