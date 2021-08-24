@@ -1,0 +1,42 @@
+{
+  "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
+  "type": "panel",
+  "name": "Network Map Panel",
+  "id": "esnet-networkmap-panel",
+  "info": {
+    "description": "Network Map Panel",
+    "author": {
+      "name": "ESnet"
+    },
+    "keywords": [
+      "panel",
+      "template"
+    ],
+    "logos": {
+      "small": "img/logo.svg",
+      "large": "img/logo.svg"
+    },
+    "links": [
+      {
+        "name": "Website",
+        "url": "https://github.com/esnet/grafana-esnet-networkmap-panel"
+      },
+      {
+        "name": "License",
+        "url": "https://github.com/esnet/grafana-esnet-networkmap-panel/blob/main/LICENSE"
+      }
+    ],
+    "screenshots": [
+      {
+        "name": "slopegraph-example",
+        "path": "img/slopegraph.png"
+      }
+    ],
+    "version": "%VERSION%",
+    "updated": "%TODAY%"
+  },
+  "dependencies": {
+    "grafanaDependency": ">=7.0.0",
+    "plugins": []
+  }
+}
