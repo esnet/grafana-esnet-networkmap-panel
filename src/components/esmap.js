@@ -36,7 +36,7 @@ function createSvgMarker(svg) {
     .attr('fill', function (d, i) {
       return '#333';
     })
-    .attr('stroke', '#555')
+    .attr('stroke', '#555') // color
     .attr('stroke-width', 0.5);
   return marker;
 }

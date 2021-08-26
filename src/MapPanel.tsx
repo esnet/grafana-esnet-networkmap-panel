@@ -1,7 +1,7 @@
 import React from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
-import { parseData } from 'parseData.js';
+import { parseData } from 'dataParser';
 import { Canvas } from 'components/Canvas';
 
 interface Props extends PanelProps<MapOptions> {}

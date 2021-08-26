@@ -22,32 +22,17 @@ export default class NetworkMap {
     }
 
     // SUPER IMPORTANT! This clears old chart before drawing new one...
-    d3.select('#' + this.containerID)
-      .select('svg')
-      .remove();
-    d3.select('#' + this.containerID)
-      .select('.tooltip')
-      .remove();
+    // d3.select('#' + this.containerID)
+    //   .select('svg')
+    //   .remove();
+    // d3.select('#' + this.containerID)
+    //   .select('.tooltip')
+    //   .remove();
     // ----------------------------------------------------------
 
-    // let panelWidth = document.getElementById(this.containerID).offsetWidth;
-    // let panelHeight = document.getElementById(this.containerID).offsetHeight;
-
-    // // set the dimensions and margins of the graph
-    // var margin = { top: 50, right: 400, bottom: 25, left: 400 },
-    //   width = panelWidth - margin.left - margin.right,
-    //   height = panelHeight - margin.top - margin.bottom;
-
-    // // append the svg object to the body of the page
-    // var svg = d3
-    //   .select("#" + this.containerID)
-    //   .append("svg")
-    //   .attr("width", width + margin.left + margin.right)
-    //   .attr("height", height + margin.top + margin.bottom)
-    //   .append("g")
-    //   .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    //----------------------------------------------
+    const dataPairs = parsedData[0];
+    const dataEnd1 = parsedData[1];
+    const dataEnd2 = parsedData[2];
 
     //--- Create Leaflet Map with custom tile layer
     var map = L.map(this.containerID, {
@@ -107,7 +92,8 @@ export default class NetworkMap {
       ],
     };
     var g = nm.addNetLayer('JohnNet', map1); // DO IT LIKE THISSSSS
-    var g2 = nm.addNetLayer('test', JSON.parse(mapData));  // DO IT LIKE THISSSSS
+    var g2 = nm.addNetLayer('test', JSON.parse(mapData)); // DO IT LIKE THISSSSS
+    twinkle(nm, g, 'esnet');
 
     //--- lets configure a popup to fire when a user clicks on CKT-BIG-A-Z
     if (0) {
