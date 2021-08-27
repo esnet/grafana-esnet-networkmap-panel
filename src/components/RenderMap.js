@@ -22,9 +22,9 @@ export default class NetworkMap {
     }
 
     // SUPER IMPORTANT! This clears old chart before drawing new one...
-    // d3.select('#' + this.containerID)
-    //   .select('svg')
-    //   .remove();
+    d3.select('#' + this.containerID)
+      .selectAll('svg')
+      .remove();
     // d3.select('#' + this.containerID)
     //   .select('.tooltip')
     //   .remove();
@@ -75,25 +75,26 @@ export default class NetworkMap {
     var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
 
     //--- test 1 loads data from inline json
-    var map1 = {
-      edges: [
-        {
-          name: 'CKT-BIG-A-Z',
-          latLngs: [
-            [50, -120],
-            [55, -110],
-            [45, -77],
-          ],
-        },
-      ],
-      nodes: [
-        { name: 'A', latLng: [50, -120] },
-        { name: 'Z', latLng: [45, -77] },
-      ],
-    };
-    var g = nm.addNetLayer('JohnNet', map1); // DO IT LIKE THISSSSS
-    var g2 = nm.addNetLayer('test', JSON.parse(mapData)); // DO IT LIKE THISSSSS
-    twinkle(nm, g, 'esnet');
+    // var map1 = {
+    //   edges: [
+    //     {
+    //       name: 'CKT-BIG-A-Z',
+    //       latLngs: [
+    //         [50, -120],
+    //         [55, -110],
+    //         [45, -77],
+    //       ],
+    //       color: 'blue'
+    //     },
+    //   ],
+    //   nodes: [
+    //     { name: 'A', latLng: [50, -120], color: 'grey' },
+    //     { name: 'Z', latLng: [45, -77], color: 'grey' },
+    //   ],
+    // };
+    // var g = nm.addNetLayer('JohnNet', map1); // DO IT LIKE THISSSSS
+    var g2 = nm.addNetLayer('esnet', mapData); // DO IT LIKE THISSSSS
+    // twinkle(nm, g2, 'esnet');
 
     //--- lets configure a popup to fire when a user clicks on CKT-BIG-A-Z
     if (0) {

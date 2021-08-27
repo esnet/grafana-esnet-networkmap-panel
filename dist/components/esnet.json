@@ -1,6 +1,23 @@
 {
    "edges": [
       {
+         "name": "sunn-cr6::sacr-bb-c--sunn-cr6::cenic_se-263",
+         "latLngs": [
+            [
+               50,
+               -120
+            ],
+            [
+               55,
+               -110
+            ],
+            [
+               45,
+               -77
+            ]
+         ]
+      },
+      {
          "latLngs": [
             [
                40.3572976,
@@ -1252,6 +1269,18 @@
       }
    ],
    "nodes": [
+      { "name": "sunn-cr6::sacr-bb-c", 
+         "latLng": [
+            50,
+            -120
+         ]
+      },
+      { "name": "sunn-cr6::cenic_se-263", 
+         "latLng": [
+            45,
+            -77
+         ]
+      },
       {
          "latLng": [
             35.088312,

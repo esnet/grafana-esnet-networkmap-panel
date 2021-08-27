@@ -12,9 +12,10 @@ export const MapPanel: React.FC<Props> = ({ options, data, width, height, id }) 
   };
 
   var parsedData = {};
+  var mapData;
   try {
-    parsedData = parseData(data);
-    console.log(parsedData);
+    parsedData = parseData(data, graphOptions.mapjson);
+    mapData = parsedData[3];
   } catch (error) {
     console.error('Parsing error : ', error);
   }
@@ -22,13 +23,6 @@ export const MapPanel: React.FC<Props> = ({ options, data, width, height, id }) 
   // return <div>Hello World</div>;
 
   return (
-    <Canvas
-      height={height}
-      width={width}
-      panelId={id}
-      options={graphOptions}
-      data={parsedData}
-      mapData={graphOptions.mapjson}
-    />
+    <Canvas height={height} width={width} panelId={id} options={graphOptions} data={parsedData} mapData={mapData} />
   );
 };

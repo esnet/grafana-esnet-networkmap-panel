@@ -51,6 +51,9 @@ function renderEdges(g, data) {
     .attr('d', function (d) {
       return d.azPath;
     })
+    .attr('stroke', function (d) {
+      return d.color;
+    })
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
     })
@@ -78,6 +81,9 @@ function renderEdges(g, data) {
     .merge(zaLines)
     .attr('d', function (d) {
       return d.zaPath;
+    })
+    .attr('stroke', function (d) {
+      return d.color;
     })
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
@@ -211,7 +217,14 @@ function renderEdgeControl(g, data, ref) {
 function renderNodes(g, data, ref) {
   var feature = g.selectAll('circle').data(data.nodes);
 
-  feature.enter().append('circle').attr('r', 4).attr('class', 'node');
+  feature
+    .enter()
+    .append('circle')
+    .attr('r', 4)
+    .attr('class', 'node')
+    .attr('fill', function (d) {
+      return d.color;
+    });
 
   g.selectAll('circle').attr('transform', function (d) {
     var ll = L.latLng(d.latLng);
@@ -406,7 +419,12 @@ export class EsMap {
         cp_g.selectAll('*').remove();
       }
       renderNodes(node_g, data, this);
-      renderEdges(edge_g, data);
+      console.log(data);
+      if (data.name === 'PPPL--WASH') {
+        renderEdges(edge_g, data, 'red');
+      } else {
+        renderEdges(edge_g, data, 'grey');
+      }
     }
   }
 
