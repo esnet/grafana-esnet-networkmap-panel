@@ -17,11 +17,26 @@ export const plugin = new PanelPlugin<MapOptions>(MapPanel)
       .addColorPicker({
         path: 'color',
         name: 'Color',
-        defaultValue: 'black',
+        defaultValue: 'grey',
       })
       .addTextInput({
         path: 'mapjson',
         name: 'Map data (json)',
         defaultValue: '',
+      })
+      .addColorPicker({
+        path: 'nodeHighlight',
+        name: 'Node highlight color',
+        defaultValue: 'red',
+      })
+      .addColorPicker({
+        path: 'azHighlight',
+        name: 'AZ highlight color',
+        defaultValue: 'blue',
+      })
+      .addColorPicker({
+        path: 'zaHighlight',
+        name: 'ZA highlight color',
+        defaultValue: 'blue',
       });
   });

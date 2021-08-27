@@ -52,7 +52,7 @@ function renderEdges(g, data) {
       return d.azPath;
     })
     .attr('stroke', function (d) {
-      return d.color;
+      return d.azColor;
     })
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
@@ -83,7 +83,7 @@ function renderEdges(g, data) {
       return d.zaPath;
     })
     .attr('stroke', function (d) {
-      return d.color;
+      return d.zaColor;
     })
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
