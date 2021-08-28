@@ -8,7 +8,12 @@ export const Canvas = (props) => {
     const id = props.panelId;
     const map = new NetworkMap('Map_' + id);
 
-    map.renderMap(props.data, props.mapData);
+    var thisMap = map.renderMap(props.data, props.mapData);
+    // SUPER IMPORTANT!!! this removes the old map before rerendering
+    return () => {
+      thisMap.off();
+      thisMap.remove();
+    };
   });
   const mapHeight = props.height - 150;
 

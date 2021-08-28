@@ -22,9 +22,10 @@ export default class NetworkMap {
     }
 
     // SUPER IMPORTANT! This clears old chart before drawing new one...
-    d3.select('#' + this.containerID)
-      .selectAll('svg')
-      .remove();
+    // d3.select('#' + this.containerID)
+    //   .selectAll('svg')
+    //   .remove();
+
     // d3.select('#' + this.containerID)
     //   .select('.tooltip')
     //   .remove();
@@ -164,5 +165,6 @@ export default class NetworkMap {
         await sleep(10);
       }
     }
+    return map;
   }
 }

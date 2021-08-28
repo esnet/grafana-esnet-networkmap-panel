@@ -420,11 +420,8 @@ export class EsMap {
       }
       renderNodes(node_g, data, this);
       console.log(data);
-      if (data.name === 'PPPL--WASH') {
-        renderEdges(edge_g, data, 'red');
-      } else {
-        renderEdges(edge_g, data, 'grey');
-      }
+
+      renderEdges(edge_g, data);
     }
   }
 
