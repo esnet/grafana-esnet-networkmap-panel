@@ -1,9 +1,6 @@
 import { DataFrameView } from '@grafana/data';
 
-export function parseData(data: { series: any[] }, mapData, colors) {
-  const series = data.series[0];
-  const frame = new DataFrameView(series);
-
+export function parseData(data: { series: any[] }, mapData, colors, fields) {
   // helper function to parse grafana colors
   function fixColor(color: string) {
     switch (color) {
@@ -88,38 +85,63 @@ export function parseData(data: { series: any[] }, mapData, colors) {
   // fix the colors
   colors.defaultColor = fixColor(colors.defaultColor);
   colors.nodeHighlight = fixColor(colors.nodeHighlight);
-  colors.azHighlight = fixColor(colors.azHighlight);
-  colors.zaHighlight = fixColor(colors.zaHighlight);
+
+  const series = data.series[0];
+  const frame = new DataFrameView(series);
+  var srcKey = fields.srcField;
+  var dstKey = fields.dstField;
+  var valKey = fields.valField;
 
   // initialize arrays
   let parsedData: Array<{ in: any; out: any; azName: string; zaName: string; value: number }> = [];
   let infIn: Array<{ name: any; value: number }> = [];
   let infOut: Array<{ name: any; value: number }> = [];
 
-  // hardcoded right now!!! group by src and dst
+  // const valueField = valKey
+  //   ? data.series.map((series: { fields: any[] }) =>
+  //       series.fields.find((field: { name: any }) => field.name === valKey)
+  //     )
+  //   : data.series.map((series: { fields: any[] }) =>
+  //       series.fields.find((field: { type: string }) => field.type === 'number')
+  //     );
+
+  const valueField = data.series.map((series: { fields: any[] }) =>
+    series.fields.find((field: { type: string }) => field.type === 'number')
+  );
+
+  // set defaults if fields were not chosen
+  if (srcKey === undefined) {
+    srcKey = 0;
+  }
+  if (dstKey === undefined) {
+    dstKey = 1;
+  }
+  // if (valKey === undefined) {
+  //   valKey = series.fields.findIndex((field: { type: string }) => field.type === 'number');
+  // }
 
   // Retrieve panel data from panel
   frame.forEach((row) => {
     parsedData.push({
-      in: row[0],
-      out: row[1],
-      azName: `${row[0]}--${row[1]}`,
-      zaName: `${row[1]}--${row[0]}`,
+      in: row[srcKey],
+      out: row[dstKey],
+      azName: `${row[srcKey]}--${row[dstKey]}`,
+      zaName: `${row[dstKey]}--${row[srcKey]}`,
       value: row[2],
     });
 
-    let indexIn = infIn.findIndex((e) => e.name === row[0]);
+    let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
     if (indexIn >= 0) {
       infIn[indexIn].value += row[2];
     } else {
-      infIn.push({ name: row[0], value: row[2] });
+      infIn.push({ name: row[srcKey], value: row[2] });
     }
 
-    let indexOut = infOut.findIndex((e) => e.name === row[1]);
+    let indexOut = infOut.findIndex((e) => e.name === row[dstKey]);
     if (indexOut >= 0) {
       infOut[indexOut].value += row[2];
     } else {
-      infOut.push({ name: row[1], value: row[2] });
+      infOut.push({ name: row[dstKey], value: row[2] });
     }
   });
 
@@ -129,12 +151,12 @@ export function parseData(data: { series: any[] }, mapData, colors) {
     let matchAZ = parsedData.find((d) => d.azName === edge.name);
     let matchZA = parsedData.find((d) => d.zaName === edge.name);
     if (matchAZ) {
-      edge.azColor = colors.azHighlight;
+      edge.azColor = valueField[0].display(matchAZ.value).color;
     } else {
       edge.azColor = colors.defaultColor;
     }
     if (matchZA) {
-      edge.zaColor = colors.zaHighlight;
+      edge.zaColor = valueField[0].display(matchZA.value).color;
     } else {
       edge.zaColor = colors.defaultColor;
     }
@@ -151,5 +173,5 @@ export function parseData(data: { series: any[] }, mapData, colors) {
   });
 
   // returns parsedData: pairs & their value, infIn: aggregated by first group by, infOut: appregated by 2nd group by
-  return [parsedData, infIn, infOut, mapJson];
+  return [parsedData, infIn, infOut, mapJson, srcKey, dstKey, valKey];
 }

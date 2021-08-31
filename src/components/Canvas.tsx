@@ -19,8 +19,6 @@ export const Canvas = (props) => {
 
   return (
     <div>
-      {console.log('map data')}
-      {console.log(props.mapData)}
       <div style={{ height: '100px', width: props.width }}>
         Put some thing here to test layout and click to geo mapping
       </div>

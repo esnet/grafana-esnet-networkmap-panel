@@ -13,13 +13,16 @@ export const MapPanel: React.FC<Props> = ({ options, data, width, height, id }) 
   var colors = {
     defaultColor: graphOptions.color,
     nodeHighlight: graphOptions.nodeHighlight,
-    azHighlight: graphOptions.azHighlight,
-    zaHighlight: graphOptions.zaHighlight,
+  };
+  var fields = {
+    srcField: graphOptions.srcField,
+    dstField: graphOptions.dstField,
+    valField: graphOptions.valField,
   };
   var parsedData = {};
   var mapData;
   try {
-    parsedData = parseData(data, graphOptions.mapjson, colors);
+    parsedData = parseData(data, graphOptions.mapjson, colors, fields);
     mapData = parsedData[3];
   } catch (error) {
     console.error('Parsing error : ', error);
