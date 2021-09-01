@@ -125,8 +125,8 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
     parsedData.push({
       in: row[srcKey],
       out: row[dstKey],
-      azName: `${row[srcKey]}--${row[dstKey]}`,
-      zaName: `${row[dstKey]}--${row[srcKey]}`,
+      azName: `${row[srcKey]}---${row[dstKey]}`,
+      zaName: `${row[dstKey]}---${row[srcKey]}`,
       value: row[2],
     });
 
