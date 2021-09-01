@@ -60,6 +60,9 @@ function renderEdges(g, data) {
     .attr('class', function (d) {
       return 'edge edge-az edge-az-' + d.name;
     })
+    .attr('text', function (d) {
+      return d.name;
+    })
     .on('mouseover', function (d, i) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
@@ -90,6 +93,9 @@ function renderEdges(g, data) {
     })
     .attr('class', function (d) {
       return 'edge edge-za edge-za-' + d.name;
+    })
+    .attr('text', function (d) {
+      return d.name;
     })
     .on('mouseover', function (d, i) {
       d3.select(this).attr('class', function (d) {
@@ -222,6 +228,9 @@ function renderNodes(g, data, ref) {
     .append('circle')
     .attr('r', 4)
     .attr('class', 'node')
+    .attr('text', function (d) {
+      return d.name;
+    })
     .attr('fill', function (d) {
       return d.color;
     });

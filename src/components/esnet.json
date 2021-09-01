@@ -1,7 +1,7 @@
 {
    "edges": [
       {
-         "name": "sunn-cr6::sacr-bb-c--sunn-cr6::cenic_se-263",
+         "name": "sunn-cr6::sacr-bb-c---sunn-cr6::cenic_se-263",
          "latLngs": [
             [
                50,
@@ -32,7 +32,7 @@
                -77.211598
             ]
          ],
-         "name": "PPPL--WASH"
+         "name": "PPPL---WASH"
       },
       {
          "latLngs": [
@@ -49,10 +49,10 @@
                -110
             ]
          ],
-         "name": "DENV--NREL"
+         "name": "DENV---NREL"
       },
       {
-         "name": "DENV--NGA-SW"
+         "name": "DENV---NGA-SW"
       },
       {
          "latLngs": [
@@ -69,7 +69,7 @@
                -106.5346377
             ]
          ],
-         "name": "ALBQ--SNLA"
+         "name": "ALBQ---SNLA"
       },
       {
          "latLngs": [
@@ -86,7 +86,7 @@
                -121.987817
             ]
          ],
-         "name": "EQX-SJ--SUNN"
+         "name": "EQX-SJ---SUNN"
       },
       {
          "latLngs": [
@@ -103,7 +103,7 @@
                -79.9862555
             ]
          ],
-         "name": "EQX-ASH--NETL-PGH"
+         "name": "EQX-ASH---NETL-PGH"
       },
       {
          "latLngs": [
@@ -120,7 +120,7 @@
                -77.0244547
             ]
          ],
-         "name": "ALBQ--LANL"
+         "name": "ALBQ---LANL"
       },
       {
          "latLngs": [
@@ -137,7 +137,7 @@
                -79.974862706
             ]
          ],
-         "name": "EQX-ASH--NETL-MGN"
+         "name": "EQX-ASH---NETL-MGN"
       },
       {
          "latLngs": [
@@ -154,7 +154,7 @@
                -87.6173266
             ]
          ],
-         "name": "AMES--STAR"
+         "name": "AMES---STAR"
       },
       {
          "latLngs": [
@@ -171,7 +171,7 @@
                -122.33867157
             ]
          ],
-         "name": "PNNL--PNWG"
+         "name": "PNNL---PNWG"
       },
       {
          "latLngs": [
@@ -188,7 +188,7 @@
                -121.710767
             ]
          ],
-         "name": "SACR--SNLL"
+         "name": "SACR---SNLL"
       },
       {
          "latLngs": [
@@ -205,7 +205,7 @@
                -121.987817
             ]
          ],
-         "name": "LSVN--SUNN"
+         "name": "LSVN---SUNN"
       },
       {
          "latLngs": [
@@ -222,7 +222,7 @@
                -106.6180019
             ]
          ],
-         "name": "ALBQ--KCNSC-NM"
+         "name": "ALBQ---KCNSC-NM"
       },
       {
          "latLngs": [
@@ -239,7 +239,7 @@
                -74.0033873
             ]
          ],
-         "name": "BNL--NEWY"
+         "name": "BNL---NEWY"
       },
       {
          "latLngs": [
@@ -256,7 +256,7 @@
                -81.7239402
             ]
          ],
-         "name": "ATLA--SRS"
+         "name": "ATLA---SRS"
       },
       {
          "latLngs": [
@@ -273,7 +273,7 @@
                -101.8177288
             ]
          ],
-         "name": "HOUS--PANTEX"
+         "name": "HOUS---PANTEX"
       },
       {
          "latLngs": [
@@ -290,7 +290,7 @@
                -87.6183422
             ]
          ],
-         "name": "EQX-ASH--EQX-CHI"
+         "name": "EQX-ASH---EQX-CHI"
       },
       {
          "latLngs": [
@@ -307,13 +307,13 @@
                -122.33867157
             ]
          ],
-         "name": "BOIS--PNWG"
+         "name": "BOIS---PNWG"
       },
       {
-         "name": "BOST--PSFC"
+         "name": "BOST---PSFC"
       },
       {
-         "name": "BOST--LNS"
+         "name": "BOST---LNS"
       },
       {
          "latLngs": [
@@ -330,7 +330,7 @@
                -122.33867157
             ]
          ],
-         "name": "LIGO--PNWG"
+         "name": "LIGO---PNWG"
       },
       {
          "latLngs": [
@@ -347,7 +347,7 @@
                -94.54657
             ]
          ],
-         "name": "KANS--KCNSC"
+         "name": "KANS---KCNSC"
       },
       {
          "latLngs": [
@@ -364,7 +364,7 @@
                -112.04925
             ]
          ],
-         "name": "BOIS--INL"
+         "name": "BOIS---INL"
       },
       {
          "latLngs": [
@@ -381,7 +381,7 @@
                -71.086401
             ]
          ],
-         "name": "AMST--BOST"
+         "name": "AMST---BOST"
       },
       {
          "latLngs": [
@@ -398,7 +398,7 @@
                -121.987817
             ]
          ],
-         "name": "LBNL--SUNN"
+         "name": "LBNL---SUNN"
       },
       {
          "latLngs": [
@@ -415,7 +415,7 @@
                -84.2219658
             ]
          ],
-         "name": "ATLA--ORAU"
+         "name": "ATLA---ORAU"
       },
       {
          "latLngs": [
@@ -432,7 +432,7 @@
                -94.58238
             ]
          ],
-         "name": "HOUS--KANS"
+         "name": "HOUS---KANS"
       },
       {
          "latLngs": [
@@ -449,7 +449,7 @@
                -77.211598
             ]
          ],
-         "name": "JLAB--WASH"
+         "name": "JLAB---WASH"
       },
       {
          "latLngs": [
@@ -466,7 +466,7 @@
                -104.979509
             ]
          ],
-         "name": "ALBQ--DENV"
+         "name": "ALBQ---DENV"
       },
       {
          "latLngs": [
@@ -483,7 +483,7 @@
                -94.58238
             ]
          ],
-         "name": "CHIC--KANS"
+         "name": "CHIC---KANS"
       },
       {
          "latLngs": [
@@ -500,7 +500,7 @@
                -86.755051
             ]
          ],
-         "name": "ATLA--NASH"
+         "name": "ATLA---NASH"
       },
       {
          "latLngs": [
@@ -517,7 +517,7 @@
                -77.211598
             ]
          ],
-         "name": "CHIC--WASH"
+         "name": "CHIC---WASH"
       },
       {
          "latLngs": [
@@ -534,7 +534,7 @@
                -115.136187
             ]
          ],
-         "name": "LSVN--NNSS"
+         "name": "LSVN---NNSS"
       },
       {
          "latLngs": [
@@ -551,7 +551,7 @@
                6.055021916
             ]
          ],
-         "name": "CERN-513--CERN-773"
+         "name": "CERN-513---CERN-773"
       },
       {
          "latLngs": [
@@ -568,7 +568,7 @@
                -86.755051
             ]
          ],
-         "name": "HOUS--NASH"
+         "name": "HOUS---NASH"
       },
       {
          "latLngs": [
@@ -585,7 +585,7 @@
                -87.6173266
             ]
          ],
-         "name": "CHIC--STAR"
+         "name": "CHIC---STAR"
       },
       {
          "latLngs": [
@@ -602,7 +602,7 @@
                -121.530186
             ]
          ],
-         "name": "PNWG--SACR"
+         "name": "PNWG---SACR"
       },
       {
          "latLngs": [
@@ -619,7 +619,7 @@
                -84.23764
             ]
          ],
-         "name": "ATLA--Y12"
+         "name": "ATLA---Y12"
       },
       {
          "latLngs": [
@@ -636,7 +636,7 @@
                -74.0033873
             ]
          ],
-         "name": "LOND--NEWY"
+         "name": "LOND---NEWY"
       },
       {
          "latLngs": [
@@ -653,7 +653,7 @@
                -84.2505363
             ]
          ],
-         "name": "ATLA--ORNL"
+         "name": "ATLA---ORNL"
       },
       {
          "latLngs": [
@@ -670,7 +670,7 @@
                -87.6173266
             ]
          ],
-         "name": "AOFA--STAR"
+         "name": "AOFA---STAR"
       },
       {
          "latLngs": [
@@ -687,7 +687,7 @@
                -77.211598
             ]
          ],
-         "name": "EQX-ASH--WASH"
+         "name": "EQX-ASH---WASH"
       },
       {
          "latLngs": [
@@ -704,7 +704,7 @@
                -87.6173266
             ]
          ],
-         "name": "BOST--STAR"
+         "name": "BOST---STAR"
       },
       {
          "latLngs": [
@@ -721,7 +721,7 @@
                6.0749791
             ]
          ],
-         "name": "AMST--CERN-513"
+         "name": "AMST---CERN-513"
       },
       {
          "latLngs": [
@@ -738,7 +738,7 @@
                -74.0033873
             ]
          ],
-         "name": "BOST--NEWY"
+         "name": "BOST---NEWY"
       },
       {
          "latLngs": [
@@ -755,7 +755,7 @@
                -77.211598
             ]
          ],
-         "name": "NASH--WASH"
+         "name": "NASH---WASH"
       },
       {
          "latLngs": [
@@ -772,7 +772,7 @@
                -121.987817
             ]
          ],
-         "name": "ELPA--SUNN"
+         "name": "ELPA---SUNN"
       },
       {
          "latLngs": [
@@ -789,7 +789,7 @@
                -0.0143605
             ]
          ],
-         "name": "CERN-773--LOND"
+         "name": "CERN-773---LOND"
       },
       {
          "latLngs": [
@@ -806,7 +806,7 @@
                -77.211598
             ]
          ],
-         "name": "ATLA--WASH"
+         "name": "ATLA---WASH"
       },
       {
          "latLngs": [
@@ -823,7 +823,7 @@
                -77.211598
             ]
          ],
-         "name": "CERN-513--WASH"
+         "name": "CERN-513---WASH"
       },
       {
          "latLngs": [
@@ -840,7 +840,7 @@
                -121.530186
             ]
          ],
-         "name": "CHIC--SACR"
+         "name": "CHIC---SACR"
       },
       {
          "latLngs": [
@@ -857,7 +857,7 @@
                -77.211598
             ]
          ],
-         "name": "AOFA--WASH"
+         "name": "AOFA---WASH"
       },
       {
          "latLngs": [
@@ -874,7 +874,7 @@
                -104.979509
             ]
          ],
-         "name": "BOIS--DENV"
+         "name": "BOIS---DENV"
       },
       {
          "latLngs": [
@@ -891,7 +891,7 @@
                -87.6183422
             ]
          ],
-         "name": "CHIC--EQX-CHI"
+         "name": "CHIC---EQX-CHI"
       },
       {
          "latLngs": [
@@ -908,7 +908,7 @@
                -95.417176
             ]
          ],
-         "name": "ELPA--HOUS"
+         "name": "ELPA---HOUS"
       },
       {
          "latLngs": [
@@ -925,7 +925,7 @@
                -74.0033873
             ]
          ],
-         "name": "AOFA--NEWY"
+         "name": "AOFA---NEWY"
       },
       {
          "latLngs": [
@@ -942,7 +942,7 @@
                -121.530186
             ]
          ],
-         "name": "DENV--SACR"
+         "name": "DENV---SACR"
       },
       {
          "latLngs": [
@@ -959,7 +959,7 @@
                -121.987817
             ]
          ],
-         "name": "SACR--SUNN"
+         "name": "SACR---SUNN"
       },
       {
          "latLngs": [
@@ -976,7 +976,7 @@
                -106.48972
             ]
          ],
-         "name": "ALBQ--ELPA"
+         "name": "ALBQ---ELPA"
       },
       {
          "latLngs": [
@@ -993,7 +993,7 @@
                -121.987817
             ]
          ],
-         "name": "NERSC--SUNN"
+         "name": "NERSC---SUNN"
       },
       {
          "latLngs": [
@@ -1010,7 +1010,7 @@
                -0.0143605
             ]
          ],
-         "name": "AOFA--LOND"
+         "name": "AOFA---LOND"
       },
       {
          "latLngs": [
@@ -1027,7 +1027,7 @@
                -121.987817
             ]
          ],
-         "name": "LLNL--SUNN"
+         "name": "LLNL---SUNN"
       },
       {
          "latLngs": [
@@ -1044,7 +1044,7 @@
                -121.987817
             ]
          ],
-         "name": "SLAC--SUNN"
+         "name": "SLAC---SUNN"
       },
       {
          "latLngs": [
@@ -1061,7 +1061,7 @@
                -86.755051
             ]
          ],
-         "name": "CHIC--NASH"
+         "name": "CHIC---NASH"
       },
       {
          "latLngs": [
@@ -1078,7 +1078,7 @@
                -84.391604
             ]
          ],
-         "name": "ATLA--ETTP"
+         "name": "ATLA---ETTP"
       },
       {
          "latLngs": [
@@ -1095,7 +1095,7 @@
                -87.6173266
             ]
          ],
-         "name": "EQX-CHI--STAR"
+         "name": "EQX-CHI---STAR"
       },
       {
          "latLngs": [
@@ -1112,7 +1112,7 @@
                -95.417176
             ]
          ],
-         "name": "ATLA--HOUS"
+         "name": "ATLA---HOUS"
       },
       {
          "latLngs": [
@@ -1129,7 +1129,7 @@
                -122.33867157
             ]
          ],
-         "name": "NETL-ALB--PNWG"
+         "name": "NETL-ALB---PNWG"
       },
       {
          "latLngs": [
@@ -1146,7 +1146,7 @@
                -121.987817
             ]
          ],
-         "name": "GA--SUNN"
+         "name": "GA---SUNN"
       },
       {
          "latLngs": [
@@ -1163,7 +1163,7 @@
                -87.6173266
             ]
          ],
-         "name": "ANL--STAR"
+         "name": "ANL---STAR"
       },
       {
          "latLngs": [
@@ -1180,7 +1180,7 @@
                -87.6173266
             ]
          ],
-         "name": "FNAL--STAR"
+         "name": "FNAL---STAR"
       },
       {
          "latLngs": [
@@ -1197,7 +1197,7 @@
                6.0749791
             ]
          ],
-         "name": "CERN--CERN-513"
+         "name": "CERN---CERN-513"
       },
       {
          "latLngs": [
@@ -1214,7 +1214,7 @@
                -94.58238
             ]
          ],
-         "name": "DENV--KANS"
+         "name": "DENV---KANS"
       },
       {
          "latLngs": [
@@ -1231,7 +1231,7 @@
                -122.33867157
             ]
          ],
-         "name": "DENV--PNWG"
+         "name": "DENV---PNWG"
       },
       {
          "latLngs": [
@@ -1248,7 +1248,7 @@
                -115.1173021
             ]
          ],
-         "name": "DENV--LSVN"
+         "name": "DENV---LSVN"
       },
       {
          "latLngs": [
@@ -1265,7 +1265,7 @@
                -0.0143605
             ]
          ],
-         "name": "AMST--LOND"
+         "name": "AMST---LOND"
       }
    ],
    "nodes": [
