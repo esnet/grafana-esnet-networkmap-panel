@@ -57,3 +57,17 @@ svg circle.controlPoint {
         cursor: move;
 }
 
+div.tooltip {	
+    position: absolute;			
+    text-align: left;
+    color: black;			
+    width: auto;					
+    height: auto;					
+    padding: 8px 8px 0px 8px;				
+    font: medium sans-serif;		
+    background: #d3d3d3;	
+    border: 5px solid white;		
+    border-radius: 8px;			
+    pointer-events: none;	
+}
+

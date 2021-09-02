@@ -63,15 +63,24 @@ function renderEdges(g, data) {
     .attr('text', function (d) {
       return d.name;
     })
-    .on('mouseover', function (d, i) {
+    .attr('pointer-events', 'visible')
+    .on('mouseover', function (event, d) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
       });
+      div
+        .html(() => {
+          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.displayValue + '</p>';
+          return text;
+        })
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY - 28 + 'px');
     })
     .on('mouseout', function (d, i) {
       d3.select(this).attr('class', function (d) {
         return 'edge edge-az edge-az-' + d.name;
       });
+      div.transition().duration(500).style('opacity', 0);
     });
 
   azLines.exit().remove();
@@ -97,15 +106,23 @@ function renderEdges(g, data) {
     .attr('text', function (d) {
       return d.name;
     })
-    .on('mouseover', function (d, i) {
+    .on('mouseover', function (event, d) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-za edge-za-' + d.name;
       });
+      div
+        .html(() => {
+          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.displayValue + '</p>';
+          return text;
+        })
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY - 28 + 'px');
     })
     .on('mouseout', function (d, i) {
       d3.select(this).attr('class', function (d) {
         return 'edge edge-za edge-za-' + d.name;
       });
+      div.transition().duration(500).style('opacity', 0);
     });
 
   zaLines.exit().remove();
@@ -167,7 +184,7 @@ function renderEdgeControl(g, data, ref) {
     .on('dblclick', function (d) {
       addControlPoint(d, this, ref);
     })
-    //--- when mouse is on the dot, make sure d3 gets the even and dont let map pan
+    //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
     })
@@ -222,17 +239,33 @@ function renderEdgeControl(g, data, ref) {
 
 function renderNodes(g, data, ref) {
   var feature = g.selectAll('circle').data(data.nodes);
+  var div = ref.div;
 
   feature
     .enter()
     .append('circle')
-    .attr('r', 4)
+    .attr('r', 5)
     .attr('class', 'node')
     .attr('text', function (d) {
       return d.name;
     })
     .attr('fill', function (d) {
       return d.color;
+    })
+    .on('mouseover', function (event, d) {
+      div
+        .html(() => {
+          var text = `<p><b>${d.name}</b></p>`;
+          return text;
+        })
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY - 28 + 'px')
+        .transition()
+        .duration(500)
+        .style('opacity', 0.8);
+    })
+    .on('mouseout', function (d) {
+      div.transition().duration(500).style('opacity', 0);
     });
 
   g.selectAll('circle').attr('transform', function (d) {
@@ -318,7 +351,7 @@ function offsetPoints(origPoints, offset) {
 }
 
 export class EsMap {
-  constructor(leafletMap, svg, curve) {
+  constructor(leafletMap, svg, div, curve) {
     this.leafletMap = leafletMap;
     this.svg = svg;
     this.data = {};
@@ -326,6 +359,7 @@ export class EsMap {
     this.offset = 3;
     this.lineGen = d3.line().curve(curve);
     this.edit = 0;
+    this.div = div;
 
     createSvgMarker(this.svg);
 

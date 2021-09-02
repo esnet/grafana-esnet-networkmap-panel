@@ -152,13 +152,21 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
     let matchZA = parsedData.find((d) => d.zaName === edge.name);
     if (matchAZ) {
       edge.azColor = valueField[0].display(matchAZ.value).color;
+      edge.displayValue = `${valueField[0].display(matchAZ.value).text} ${valueField[0].display(matchAZ.value).suffix}`;
+      edge.value = matchAZ.value;
     } else {
       edge.azColor = colors.defaultColor;
+      edge.displayValue = 'N/A';
+      edge.value = null;
     }
     if (matchZA) {
       edge.zaColor = valueField[0].display(matchZA.value).color;
+      edge.displayValue = `${valueField[0].display(matchZA.value).text} ${valueField[0].display(matchZA.value).suffix}`;
+      edge.value = matchZA.value;
     } else {
       edge.zaColor = colors.defaultColor;
+      edge.displayValue = 'N/A';
+      edge.value = null;
     }
   });
 

@@ -26,15 +26,16 @@ export default class NetworkMap {
     //   .selectAll('svg')
     //   .remove();
 
-    // d3.select('#' + this.containerID)
-    //   .select('.tooltip')
-    //   .remove();
+    d3.select('#' + this.containerID)
+      .select('.tooltip')
+      .remove();
     // ----------------------------------------------------------
 
     const dataPairs = parsedData[0];
     const dataEnd1 = parsedData[1];
     const dataEnd2 = parsedData[2];
 
+    var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
     //--- Create Leaflet Map with custom tile layer
     var map = L.map(this.containerID, {
       zoomAnimation: false,
@@ -58,7 +59,7 @@ export default class NetworkMap {
     //---  note:  1 map could have multiple esmap svg layers
     //---         this can be used to allow leaflet to turn on and off layers at
     //---         different zoom levels in the future(imagine a regional and national map)
-    var nm = new es.EsMap(map, svg, d3.curveNatural);
+    var nm = new es.EsMap(map, svg, div, d3.curveNatural);
 
     nm.editMode(1);
 
@@ -66,10 +67,10 @@ export default class NetworkMap {
       var d = d3.select('button#edit_mode');
       if (nm.edit == 1) {
         nm.editMode(0);
-        d.html('Turn Edit Mode Off');
+        d.html('Turn Edit Mode On');
       } else {
         nm.editMode(1);
-        d.html('Turn Edit Mode On');
+        d.html('Turn Edit Mode Off');
       }
     }
 
