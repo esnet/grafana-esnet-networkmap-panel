@@ -211,6 +211,11 @@ function renderEdgeControl(g, data, ref) {
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     d[0] = ll.lat;
     d[1] = ll.lng;
+    //--- this is where we can update json????
+    // newjson = get current json
+    // find point to change
+    // change point to d[0], d[1]
+    // options.mapjson = JSON.stringify(newjson)
     //--- rerender stuff
     ref.update();
   }

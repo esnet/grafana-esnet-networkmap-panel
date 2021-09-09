@@ -1,7 +1,6 @@
 import * as d3 from './d3.min.js';
 import * as L from 'components/leaflet';
 import * as es from './esmap.js';
-import esnetjson from './esnet.json';
 
 export default class NetworkMap {
   constructor(id) {
@@ -16,7 +15,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData) {
+  renderMap(parsedData, mapData, startLat, startLng, startZoom) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -40,7 +39,7 @@ export default class NetworkMap {
     var map = L.map(this.containerID, {
       zoomAnimation: false,
       fadeAnimation: false,
-    }).setView([42, -105], 4);
+    }).setView([startLat, startLng], startZoom);
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
       {

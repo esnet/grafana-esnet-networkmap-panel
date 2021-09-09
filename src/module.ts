@@ -25,6 +25,28 @@ plugin.setPanelOptions((builder) => {
     description: 'The color to highlight nodes that match the query',
     defaultValue: 'red',
   });
+  builder.addNumberInput({
+    path: 'startLat',
+    name: 'Starting Latitude of map',
+    description: 'This will be the center of the map when it loads. (numbers only)',
+    defaultValue: 42,
+  });
+  builder.addNumberInput({
+    path: 'startLng',
+    name: 'Starting Longitude of map',
+    description: 'This will be the center of the map when it loads. (numbers only)',
+    defaultValue: -105,
+  });
+  builder.addSliderInput({
+    path: 'startZoom',
+    name: 'Starting zoom level of map',
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 1,
+    },
+  });
   builder.addSelect({
     path: 'srcField',
     name: 'Source Field',

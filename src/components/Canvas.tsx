@@ -8,7 +8,13 @@ export const Canvas = (props) => {
     const id = props.panelId;
     const map = new NetworkMap('Map_' + id);
 
-    var thisMap = map.renderMap(props.data, props.mapData);
+    var thisMap = map.renderMap(
+      props.data,
+      props.mapData,
+      props.options.startLat,
+      props.options.startLng,
+      props.options.startZoom
+    );
     // SUPER IMPORTANT!!! this removes the old map before rerendering
     return () => {
       thisMap.off();
