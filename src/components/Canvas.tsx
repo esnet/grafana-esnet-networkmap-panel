@@ -15,13 +15,11 @@ export const Canvas = (props) => {
       thisMap.remove();
     };
   });
-  const mapHeight = props.height - 150;
+  const mapHeight = props.height - 100;
 
   return (
     <div>
-      <div style={{ height: '100px', width: props.width }}>
-        Put some thing here to test layout and click to geo mapping
-      </div>
+      <div style={{ height: '50px', width: props.width }}>ESnet Network Map - Alpha</div>
       <div className={'tooltip'}></div>
       <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: props.width }}></div>
       <button type="button" id="edit_mode">

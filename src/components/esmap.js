@@ -20,8 +20,8 @@ function createSvgMarker(svg) {
     .attr('id', function (d) {
       return d.name;
     })
-    .attr('markerHeight', 3)
-    .attr('markerWidth', 3)
+    .attr('markerHeight', 5)
+    .attr('markerWidth', 4)
     .attr('markerUnits', 'strokeWidth')
     .attr('orient', 'auto')
     .attr('refX', 10)
@@ -41,7 +41,8 @@ function createSvgMarker(svg) {
   return marker;
 }
 
-function renderEdges(g, data) {
+function renderEdges(g, data, ref) {
+  var div = ref.div;
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
     .enter()
@@ -70,11 +71,14 @@ function renderEdges(g, data) {
       });
       div
         .html(() => {
-          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.displayValue + '</p>';
+          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
           return text;
         })
-        .style('left', event.pageX + 'px')
-        .style('top', event.pageY - 28 + 'px');
+        .style('left', event.pageX + 10 + 'px')
+        .style('top', event.pageY - 28 + 'px')
+        .transition()
+        .duration(500)
+        .style('opacity', 0.8);
     })
     .on('mouseout', function (d, i) {
       d3.select(this).attr('class', function (d) {
@@ -104,19 +108,24 @@ function renderEdges(g, data) {
       return 'edge edge-za edge-za-' + d.name;
     })
     .attr('text', function (d) {
-      return d.name;
+      return d.ZAname;
     })
+    .attr('pointer-events', 'visible')
     .on('mouseover', function (event, d) {
+      div
+        .html(() => {
+          var text = '<p><b>' + d.ZAname + '</b></p><p><b>Volume: </b> ' + d.ZAdisplayValue + '</p>';
+          return text;
+        })
+        // .attr('class', 'tooltip')
+        .style('left', event.pageX + 'px')
+        .style('top', event.pageY - 28 + 'px')
+        .transition()
+        .duration(500)
+        .style('opacity', 0.8);
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-za edge-za-' + d.name;
       });
-      div
-        .html(() => {
-          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.displayValue + '</p>';
-          return text;
-        })
-        .style('left', event.pageX + 'px')
-        .style('top', event.pageY - 28 + 'px');
     })
     .on('mouseout', function (d, i) {
       d3.select(this).attr('class', function (d) {
@@ -255,7 +264,9 @@ function renderNodes(g, data, ref) {
     .on('mouseover', function (event, d) {
       div
         .html(() => {
-          var text = `<p><b>${d.name}</b></p>`;
+          var text = `<p><b>${d.name}</b></p>
+            <p><b>In Volume: </b> ${d.inValue}</p>
+            <p><b>Out Volume: </b> ${d.outValue}</p>`;
           return text;
         })
         .style('left', event.pageX + 'px')
@@ -464,7 +475,7 @@ export class EsMap {
       renderNodes(node_g, data, this);
       console.log(data);
 
-      renderEdges(edge_g, data);
+      renderEdges(edge_g, data, this);
     }
   }
 

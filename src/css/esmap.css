@@ -1,5 +1,5 @@
 .leaflet-pane > svg path {
-    pointer-events: auto ;
+    pointer-events: all;
 }
 
 
@@ -7,26 +7,28 @@ svg circle.node {
         /* fill: #999; */
         stroke: #777;
         stroke-width: 1;
+        pointer-events: all;
 }
 
 svg path.edge {
         stroke-linecap: butt;
         stroke-width: 3;
         /* stroke: #aaa; */
-        fill:  none;
+        fill:  transparent;
+        pointer-events: all;
 }
 
 svg path.animated-edge {
 	stroke-linecap: butt;
         stroke-width: 5;
-        stroke: #aaa;
+        /* stroke: #aaa; */
         fill:  none;
 	cursor: crosshair;
 
-        stroke-dasharray:  247 3 ;
-        stroke-dashoffset: 250;
+        stroke-dasharray:  90 10 ;
+        stroke-dashoffset: 100;
         animation-name: dash;
-        animation-duration: 10s;
+        animation-duration: 5s;
         animation-timing-function: steps(25,start);
         animation-delay: 0s;
         animation-direction: forwards;

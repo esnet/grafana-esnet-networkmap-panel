@@ -1,0 +1,6620 @@
+{
+  "name": "ES.net",
+  "pathLayout": {
+    "type": "curveCardinal",
+    "tension": 0.6
+  },
+  "edges": [
+    {
+      "name": "sunn-cr6---elpa-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "El Paso",
+            "Santa Clara"
+          ],
+          "pops": [
+            "elpa",
+            "sunn"
+          ],
+          "geohash": [
+            "9tsk8v0d3sjt",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          31.75639,
+          -106.48972
+        ],
+        [
+          34.5649175,
+          -114.2387685
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---eqxsv5-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "Seven Trees"
+          ],
+          "pops": [
+            "sunn",
+            "eqxsv5"
+          ],
+          "geohash": [
+            "9q9k85ehjg4g",
+            "9q97ug8m50qp"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.373445,
+          -121.987817
+        ],
+        [
+          37.30760585,
+          -121.88539195000001
+        ],
+        [
+          37.2417667,
+          -121.7829669
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---ga-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "La Jolla",
+            "Santa Clara"
+          ],
+          "pops": [
+            "ga",
+            "sunn"
+          ],
+          "geohash": [
+            "9muehhpkkkru",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          32.8938196,
+          -117.2359445
+        ],
+        [
+          35.1336323,
+          -119.61188075000001
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---lbnl50-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Berkeley",
+            "Santa Clara"
+          ],
+          "pops": [
+            "lbnl50",
+            "sunn"
+          ],
+          "geohash": [
+            "9q9p6ph785q2",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.8759845,
+          -122.2500142
+        ],
+        [
+          37.624714749999995,
+          -122.11891560000001
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---lbnl59-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "Berkeley"
+          ],
+          "pops": [
+            "sunn",
+            "lbnl59"
+          ],
+          "geohash": [
+            "9q9k85ehjg4g",
+            "9q9p6ph785q2"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.373445,
+          -121.987817
+        ],
+        [
+          37.624714749999995,
+          -122.11891560000001
+        ],
+        [
+          37.8759845,
+          -122.2500142
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---llnl-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Livermore",
+            "Santa Clara"
+          ],
+          "pops": [
+            "llnl",
+            "sunn"
+          ],
+          "geohash": [
+            "9q9qqe2systw",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.6798263,
+          -121.7055697
+        ],
+        [
+          37.52663565,
+          -121.84669335000001
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---losa-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Los Angeles",
+            "Santa Clara"
+          ],
+          "pops": [
+            "losa",
+            "sunn"
+          ],
+          "geohash": [
+            "9q5csymvujt3",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          34.049021,
+          -118.259747
+        ],
+        [
+          35.711233,
+          -120.123782
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---sacr-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "West Sacramento"
+          ],
+          "pops": [
+            "sunn",
+            "sacr"
+          ],
+          "geohash": [
+            "9q9k85ehjg4g",
+            "9qced882jktm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.373445,
+          -121.987817
+        ],
+        [
+          37.9801005,
+          -121.75900150000001
+        ],
+        [
+          38.586756,
+          -121.530186
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---slac50s-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Stanford",
+            "Santa Clara"
+          ],
+          "pops": [
+            "slac50s",
+            "sunn"
+          ],
+          "geohash": [
+            "9q9hgv91vpm1",
+            "9q9k85ehjg4g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.42801285,
+          -122.1773605
+        ],
+        [
+          37.400728924999996,
+          -122.08258875000001
+        ],
+        [
+          37.373445,
+          -121.987817
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---snlca-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "Livermore"
+          ],
+          "pops": [
+            "sunn",
+            "snlca"
+          ],
+          "geohash": [
+            "9q9k85ehjg4g",
+            "9q9qq7kutwfk"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.373445,
+          -121.987817
+        ],
+        [
+          37.526619999999994,
+          -121.849292
+        ],
+        [
+          37.679795,
+          -121.710767
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr6---sunn-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "Santa Clara"
+          ],
+          "pops": [
+            "sunn",
+            "sunn"
+          ],
+          "geohash": [
+            "9q9k85ehjg4g",
+            "9q9k85e5ysyz"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.373445,
+          -121.987817
+        ],
+        [
+          37.3734286,
+          -121.98779825
+        ],
+        [
+          37.3734122,
+          -121.9877795
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---lbnl50-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "Berkeley"
+          ],
+          "pops": [
+            "sacr",
+            "lbnl50"
+          ],
+          "geohash": [
+            "9qced882jktm",
+            "9q9p6ph785q2"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.586756,
+          -121.530186
+        ],
+        [
+          38.23137025,
+          -121.8901001
+        ],
+        [
+          37.8759845,
+          -122.2500142
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---lbnl59-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Berkeley",
+            "West Sacramento"
+          ],
+          "pops": [
+            "lbnl59",
+            "sacr"
+          ],
+          "geohash": [
+            "9q9p6ph785q2",
+            "9qced882jktm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.8759845,
+          -122.2500142
+        ],
+        [
+          38.23137025,
+          -121.8901001
+        ],
+        [
+          38.586756,
+          -121.530186
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---llnl-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Livermore",
+            "West Sacramento"
+          ],
+          "pops": [
+            "llnl",
+            "sacr"
+          ],
+          "geohash": [
+            "9q9qqe2systw",
+            "9qced882jktm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.6798263,
+          -121.7055697
+        ],
+        [
+          38.133291150000005,
+          -121.61787785
+        ],
+        [
+          38.586756,
+          -121.530186
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---seat-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Seattle",
+            "West Sacramento"
+          ],
+          "pops": [
+            "seat",
+            "sacr"
+          ],
+          "geohash": [
+            "c23p07prqy6u",
+            "9qced882jktm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          47.654477,
+          -122.3225138
+        ],
+        [
+          43.1206165,
+          -121.92634989999999
+        ],
+        [
+          38.586756,
+          -121.530186
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---slac50n-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "Stanford"
+          ],
+          "pops": [
+            "sacr",
+            "slac50n"
+          ],
+          "geohash": [
+            "9qced882jktm",
+            "9q9hgv91vpm1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.586756,
+          -121.530186
+        ],
+        [
+          38.007384425,
+          -121.85377325
+        ],
+        [
+          37.42801285,
+          -122.1773605
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---snlca-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "Livermore"
+          ],
+          "pops": [
+            "sacr",
+            "snlca"
+          ],
+          "geohash": [
+            "9qced882jktm",
+            "9q9qq7kutwfk"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.586756,
+          -121.530186
+        ],
+        [
+          38.133275499999996,
+          -121.6204765
+        ],
+        [
+          37.679795,
+          -121.710767
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---sacr-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "West Sacramento"
+          ],
+          "pops": [
+            "sacr",
+            "sacr"
+          ],
+          "geohash": [
+            "9qced882jktm",
+            "9qced8828jyk"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.586756,
+          -121.530186
+        ],
+        [
+          38.5868022,
+          -121.53029785000001
+        ],
+        [
+          38.5868484,
+          -121.5304097
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---denv-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "Denver"
+          ],
+          "pops": [
+            "sacr",
+            "denv"
+          ],
+          "geohash": [
+            "9qced882jktm",
+            "9xj655s221hw"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.586756,
+          -121.530186
+        ],
+        [
+          39.166297,
+          -113.2548475
+        ],
+        [
+          39.745838,
+          -104.979509
+        ]
+      ]
+    },
+    {
+      "name": "sacr-cr6---salt-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Salt Lake City",
+            "West Sacramento"
+          ],
+          "pops": [
+            "salt",
+            "sacr"
+          ],
+          "geohash": [
+            "9x0ru7kyxene",
+            "9qced882jktm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.75629,
+          -111.954816
+        ],
+        [
+          39.671523,
+          -116.742501
+        ],
+        [
+          38.586756,
+          -121.530186
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---anl541b-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Lemont",
+            "Chicago"
+          ],
+          "pops": [
+            "anl541b",
+            "star"
+          ],
+          "geohash": [
+            "dp3mmbw34r58",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.70705741,
+          -87.9808173
+        ],
+        [
+          41.801616554999995,
+          -87.79907195
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---bost-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Cambridge",
+            "Chicago"
+          ],
+          "pops": [
+            "bost",
+            "star"
+          ],
+          "geohash": [
+            "drt3n2u2qv1w",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.367472,
+          -71.086401
+        ],
+        [
+          42.13182385,
+          -79.35186379999999
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---chic-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "chic",
+            "star"
+          ],
+          "geohash": [
+            "dp3wmehp2yx1",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          41.89690885,
+          -87.63035875
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---eqxch2-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "eqxch2",
+            "star"
+          ],
+          "geohash": [
+            "dp3wn5nr0tub",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8536495,
+          -87.6183422
+        ],
+        [
+          41.8749126,
+          -87.61783439999999
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---fnalfcc-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Batavia",
+            "Chicago"
+          ],
+          "pops": [
+            "fnalfcc",
+            "star"
+          ],
+          "geohash": [
+            "dp3np9n8nws6",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.841466,
+          -88.254949
+        ],
+        [
+          41.86882085,
+          -87.9361378
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---newy1118th-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Chicago"
+          ],
+          "pops": [
+            "newy1118th",
+            "star"
+          ],
+          "geohash": [
+            "dr5ru08ryftm",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.741396,
+          -74.003266
+        ],
+        [
+          41.31878585,
+          -80.8102963
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---newy32aoa-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Chicago"
+          ],
+          "pops": [
+            "newy32aoa",
+            "star"
+          ],
+          "geohash": [
+            "dr5reuze3u0f",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.72003174,
+          -74.0045166
+        ],
+        [
+          41.308103720000005,
+          -80.8109216
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr6---star-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "star",
+            "star"
+          ],
+          "geohash": [
+            "dp3wq4znbm4n",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8961757,
+          -87.6173266
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---chic-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "chic",
+            "chic"
+          ],
+          "geohash": [
+            "dp3wmehp2yx1",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---eqx-chi-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "eqx",
+            "chic"
+          ],
+          "geohash": [
+            "dp3wn5nr0tub",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8536495,
+          -87.6183422
+        ],
+        [
+          41.875645750000004,
+          -87.63086655000001
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---kans-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Kansas City",
+            "Chicago"
+          ],
+          "pops": [
+            "kans",
+            "chic"
+          ],
+          "geohash": [
+            "9yuwrwp1jx3g",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.100553,
+          -94.5824337
+        ],
+        [
+          40.4990975,
+          -91.1129123
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---nash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Oak Hill",
+            "Chicago"
+          ],
+          "pops": [
+            "nash",
+            "chic"
+          ],
+          "geohash": [
+            "dn6m3u6ff5mu",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          36.1029378,
+          -86.7551629
+        ],
+        [
+          39.0002899,
+          -87.1992769
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---sacr-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Sacramento",
+            "Chicago"
+          ],
+          "pops": [
+            "sacr",
+            "chic"
+          ],
+          "geohash": [
+            "9qced8828jyk",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.5868484,
+          -121.5304097
+        ],
+        [
+          40.2422452,
+          -104.5869003
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---star-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "star",
+            "chic"
+          ],
+          "geohash": [
+            "dp3wq4znbm4n",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8961757,
+          -87.6173266
+        ],
+        [
+          41.89690885,
+          -87.63035875
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr55---wash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Pimmit Hills",
+            "Chicago"
+          ],
+          "pops": [
+            "wash",
+            "chic"
+          ],
+          "geohash": [
+            "dqcj6vpvg164",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.9200615,
+          -77.2121259
+        ],
+        [
+          40.40885175,
+          -82.4277584
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---albq-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Albuquerque",
+            "Denver"
+          ],
+          "pops": [
+            "albq",
+            "denv"
+          ],
+          "geohash": [
+            "9whpt5n0m17j",
+            "9xj650cgjf7b"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          35.0848894,
+          -106.6468148
+        ],
+        [
+          37.40804945,
+          -105.81475565
+        ],
+        [
+          39.7312095,
+          -104.9826965
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---bois-cr1",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Boise",
+            "Denver"
+          ],
+          "pops": [
+            "bois",
+            "denv"
+          ],
+          "geohash": [
+            "9rtru4up2chx",
+            "9xj650cgjf7b"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          43.566162,
+          -116.1858748
+        ],
+        [
+          41.64868575,
+          -110.58428565
+        ],
+        [
+          39.7312095,
+          -104.9826965
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---kans-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Denver",
+            "Kansas City"
+          ],
+          "pops": [
+            "denv",
+            "kans"
+          ],
+          "geohash": [
+            "9xj650cgjf7b",
+            "9yuwrwp1jx3g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.7312095,
+          -104.9826965
+        ],
+        [
+          39.41588125,
+          -99.7825651
+        ],
+        [
+          39.100553,
+          -94.5824337
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---lsvn-cr1",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Denver",
+            "North Las Vegas"
+          ],
+          "pops": [
+            "denv",
+            "lsvn"
+          ],
+          "geohash": [
+            "9xj650cgjf7b",
+            "9qqnhkwjk2w4"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.7312095,
+          -104.9826965
+        ],
+        [
+          37.9838853,
+          -110.0499993
+        ],
+        [
+          36.2365611,
+          -115.1173021
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---denv-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Denver",
+            "Denver"
+          ],
+          "pops": [
+            "denv",
+            "denv"
+          ],
+          "geohash": [
+            "9xj655s221hw",
+            "9xj650cgjf7b"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.745838,
+          -104.979509
+        ],
+        [
+          39.73852375,
+          -104.98110274999999
+        ],
+        [
+          39.7312095,
+          -104.9826965
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr5---pnwg-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Seattle",
+            "Denver"
+          ],
+          "pops": [
+            "pnwg",
+            "denv"
+          ],
+          "geohash": [
+            "c23nb5gwn3dg",
+            "9xj650cgjf7b"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          47.614411462,
+          -122.33867157
+        ],
+        [
+          43.672810481,
+          -113.660684035
+        ],
+        [
+          39.7312095,
+          -104.9826965
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr6---anl221-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Darien",
+            "Chicago"
+          ],
+          "pops": [
+            "anl221",
+            "chic"
+          ],
+          "geohash": [
+            "dp3mmfh753e9",
+            "dp3wmehp2yx1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.71561118,
+          -87.98352097
+        ],
+        [
+          41.80662659,
+          -87.81345593500001
+        ],
+        [
+          41.897642,
+          -87.6433909
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr6---eqxch2-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "chic",
+            "eqxch2"
+          ],
+          "geohash": [
+            "dp3wmehp2yx1",
+            "dp3wn5nr0tub"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          41.875645750000004,
+          -87.63086655000001
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr6---fnalgcc-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "West Chicago"
+          ],
+          "pops": [
+            "chic",
+            "fnalgcc"
+          ],
+          "geohash": [
+            "dp3wmehp2yx1",
+            "dp3npfz2g82n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          41.8744084,
+          -87.943229
+        ],
+        [
+          41.8511748,
+          -88.2430671
+        ]
+      ]
+    },
+    {
+      "name": "chic-cr6---kans-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Kansas City"
+          ],
+          "pops": [
+            "chic",
+            "kans"
+          ],
+          "geohash": [
+            "dp3wmehp2yx1",
+            "9yuwrwp4yz9v"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.897642,
+          -87.6433909
+        ],
+        [
+          40.4992485,
+          -91.11288545
+        ],
+        [
+          39.100855,
+          -94.58238
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---aofa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "New York City"
+          ],
+          "pops": [
+            "newy",
+            "aofa"
+          ],
+          "geohash": [
+            "dr5ru0b2k04z",
+            "dr5reuze0y20"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.7414688,
+          -74.0033873
+        ],
+        [
+          40.73073465,
+          -74.00397395
+        ],
+        [
+          40.7200005,
+          -74.0045606
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---bnl515b-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Ridge",
+            "New York City"
+          ],
+          "pops": [
+            "bnl515b",
+            "newy"
+          ],
+          "geohash": [
+            "drk0mz2yrg7e",
+            "dr5ru0b2k04z"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.8661116,
+          -72.8709471
+        ],
+        [
+          40.8037902,
+          -73.4371672
+        ],
+        [
+          40.7414688,
+          -74.0033873
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---bost-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Somerville",
+            "New York City"
+          ],
+          "pops": [
+            "bost",
+            "newy"
+          ],
+          "geohash": [
+            "drt3n982tpnb",
+            "dr5ru0b2k04z"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.3716445,
+          -71.0809757
+        ],
+        [
+          41.556556650000005,
+          -72.5421815
+        ],
+        [
+          40.7414688,
+          -74.0033873
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---lond-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Poplar",
+            "New York City"
+          ],
+          "pops": [
+            "lond",
+            "newy"
+          ],
+          "geohash": [
+            "gcpuzwvtcrun",
+            "dr5ru0b2k04z"
+          ],
+          "country": [
+            "GB",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          51.4980695,
+          -0.0143605
+        ],
+        [
+          46.119769149999996,
+          -37.0088739
+        ],
+        [
+          40.7414688,
+          -74.0033873
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---newy1118th-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "New York City"
+          ],
+          "pops": [
+            "newy1118th",
+            "newy"
+          ],
+          "geohash": [
+            "dr5ru08ryftm",
+            "dr5ru0b2k04z"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.741396,
+          -74.003266
+        ],
+        [
+          40.7414324,
+          -74.00332664999999
+        ],
+        [
+          40.7414688,
+          -74.0033873
+        ]
+      ]
+    },
+    {
+      "name": "newy-cr5---star-cr55",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "New York City"
+          ],
+          "pops": [
+            "star",
+            "newy"
+          ],
+          "geohash": [
+            "dp3wq4znbm4n",
+            "dr5ru0b2k04z"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8961757,
+          -87.6173266
+        ],
+        [
+          41.31882225,
+          -80.81035695
+        ],
+        [
+          40.7414688,
+          -74.0033873
+        ]
+      ]
+    },
+    {
+      "name": "wash-cr5---aofa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "aofa",
+            "wash"
+          ],
+          "geohash": [
+            "dr5reuze0y20",
+            "dqcj6vpvg164"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.7200005,
+          -74.0045606
+        ],
+        [
+          39.820031,
+          -75.60834325
+        ],
+        [
+          38.9200615,
+          -77.2121259
+        ]
+      ]
+    },
+    {
+      "name": "wash-cr5---atla-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Atlanta",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "atla",
+            "wash"
+          ],
+          "geohash": [
+            "dn5bp9wd306c",
+            "dqcj6vpvg164"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          33.7586275,
+          -84.3879994
+        ],
+        [
+          36.3393445,
+          -80.80006265
+        ],
+        [
+          38.9200615,
+          -77.2121259
+        ]
+      ]
+    },
+    {
+      "name": "wash-cr5---cern-513-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Meyrin",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "cern",
+            "wash"
+          ],
+          "geohash": [
+            "u0hr40z9v72w",
+            "dqcj6vpvg164"
+          ],
+          "country": [
+            "CH",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          46.2349075,
+          6.0749791
+        ],
+        [
+          42.5774845,
+          -35.568573400000005
+        ],
+        [
+          38.9200615,
+          -77.2121259
+        ]
+      ]
+    },
+    {
+      "name": "wash-cr5---eqx-ash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Sterling",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "eqx",
+            "wash"
+          ],
+          "geohash": [
+            "dqbvvqsnccnt",
+            "dqcj6vpvg164"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.0163627,
+          -77.4590225
+        ],
+        [
+          38.9682121,
+          -77.3355742
+        ],
+        [
+          38.9200615,
+          -77.2121259
+        ]
+      ]
+    },
+    {
+      "name": "wash-cr5---nash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Oak Hill",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "nash",
+            "wash"
+          ],
+          "geohash": [
+            "dn6m3u6ff5mu",
+            "dqcj6vpvg164"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          36.1029378,
+          -86.7551629
+        ],
+        [
+          37.511499650000005,
+          -81.9836444
+        ],
+        [
+          38.9200615,
+          -77.2121259
+        ]
+      ]
+    },
+    {
+      "name": "star-cr55---aofa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Chicago"
+          ],
+          "pops": [
+            "aofa",
+            "star"
+          ],
+          "geohash": [
+            "dr5reuze0y20",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.7200005,
+          -74.0045606
+        ],
+        [
+          41.3080881,
+          -80.8109436
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr55---bost-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Somerville",
+            "Chicago"
+          ],
+          "pops": [
+            "bost",
+            "star"
+          ],
+          "geohash": [
+            "drt3n982tpnb",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.3716445,
+          -71.0809757
+        ],
+        [
+          42.1339101,
+          -79.34915115
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "star-cr55---eqx-chi-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "eqx",
+            "star"
+          ],
+          "geohash": [
+            "dp3wn5nr0tub",
+            "dp3wq4znbm4n"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8536495,
+          -87.6183422
+        ],
+        [
+          41.8749126,
+          -87.61783439999999
+        ],
+        [
+          41.8961757,
+          -87.6173266
+        ]
+      ]
+    },
+    {
+      "name": "newy32aoa-cr6---bnl515b-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Ridge"
+          ],
+          "pops": [
+            "newy32aoa",
+            "bnl515b"
+          ],
+          "geohash": [
+            "dr5reuze3u0f",
+            "drk0mz2yrg7e"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.72003174,
+          -74.0045166
+        ],
+        [
+          40.79307167,
+          -73.43773185
+        ],
+        [
+          40.8661116,
+          -72.8709471
+        ]
+      ]
+    },
+    {
+      "name": "newy32aoa-cr6---newy1118th-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "New York City"
+          ],
+          "pops": [
+            "newy32aoa",
+            "newy1118th"
+          ],
+          "geohash": [
+            "dr5reuze3u0f",
+            "dr5ru08ryftm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.72003174,
+          -74.0045166
+        ],
+        [
+          40.73071387,
+          -74.00389129999999
+        ],
+        [
+          40.741396,
+          -74.003266
+        ]
+      ]
+    },
+    {
+      "name": "newy32aoa-cr6---wash-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Pimmit Hills",
+            "New York City"
+          ],
+          "pops": [
+            "wash",
+            "newy32aoa"
+          ],
+          "geohash": [
+            "dqcj7j0jxqee",
+            "dr5reuze3u0f"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          38.920047,
+          -77.211598
+        ],
+        [
+          39.82003937,
+          -75.6080573
+        ],
+        [
+          40.72003174,
+          -74.0045166
+        ]
+      ]
+    },
+    {
+      "name": "newy32aoa-cr6---aofa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "New York City"
+          ],
+          "pops": [
+            "newy32aoa",
+            "aofa"
+          ],
+          "geohash": [
+            "dr5reuze3u0f",
+            "dr5reuze0y20"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.72003174,
+          -74.0045166
+        ],
+        [
+          40.72001612,
+          -74.0045386
+        ],
+        [
+          40.7200005,
+          -74.0045606
+        ]
+      ]
+    },
+    {
+      "name": "newy32aoa-cr6---bnl515-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Ridge"
+          ],
+          "pops": [
+            "newy32aoa",
+            "bnl515"
+          ],
+          "geohash": [
+            "dr5reuze3u0f",
+            "drk0mz2yrg7e"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.72003174,
+          -74.0045166
+        ],
+        [
+          40.79307167,
+          -73.43773185
+        ],
+        [
+          40.8661116,
+          -72.8709471
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr6---albq-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Albuquerque",
+            "Denver"
+          ],
+          "pops": [
+            "albq",
+            "denv"
+          ],
+          "geohash": [
+            "9whpt5dk0rrq",
+            "9xj655s221hw"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          35.088312,
+          -106.652163
+        ],
+        [
+          37.417075,
+          -105.81583599999999
+        ],
+        [
+          39.745838,
+          -104.979509
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr6---kans-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Denver",
+            "Kansas City"
+          ],
+          "pops": [
+            "denv",
+            "kans"
+          ],
+          "geohash": [
+            "9xj655s221hw",
+            "9yuwrwp4yz9v"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.745838,
+          -104.979509
+        ],
+        [
+          39.4233465,
+          -99.7809445
+        ],
+        [
+          39.100855,
+          -94.58238
+        ]
+      ]
+    },
+    {
+      "name": "denv-cr6---salt-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Denver",
+            "Salt Lake City"
+          ],
+          "pops": [
+            "denv",
+            "salt"
+          ],
+          "geohash": [
+            "9xj655s221hw",
+            "9x0ru7kyxene"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.745838,
+          -104.979509
+        ],
+        [
+          40.251064,
+          -108.4671625
+        ],
+        [
+          40.75629,
+          -111.954816
+        ]
+      ]
+    },
+    {
+      "name": "elpa-cr6---albq-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Albuquerque",
+            "El Paso"
+          ],
+          "pops": [
+            "albq",
+            "elpa"
+          ],
+          "geohash": [
+            "9whpt5dk0rrq",
+            "9tsk8v0d3sjt"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          35.088312,
+          -106.652163
+        ],
+        [
+          33.422351,
+          -106.5709415
+        ],
+        [
+          31.75639,
+          -106.48972
+        ]
+      ]
+    },
+    {
+      "name": "elpa-cr6---hous-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "El Paso",
+            "Aldine"
+          ],
+          "pops": [
+            "elpa",
+            "hous"
+          ],
+          "geohash": [
+            "9tsk8v0d3sjt",
+            "9vk4kdxr6xsf"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          31.75639,
+          -106.48972
+        ],
+        [
+          30.849083,
+          -100.95344800000001
+        ],
+        [
+          29.941776,
+          -95.417176
+        ]
+      ]
+    },
+    {
+      "name": "elpa-cr6---sand-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "El Paso",
+            "San Diego"
+          ],
+          "pops": [
+            "elpa",
+            "sand"
+          ],
+          "geohash": [
+            "9tsk8v0d3sjt",
+            "9mudws8nrxzc"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          31.75639,
+          -106.48972
+        ],
+        [
+          32.2827135,
+          -111.812809
+        ],
+        [
+          32.809037,
+          -117.135898
+        ]
+      ]
+    },
+    {
+      "name": "elpa-cr6---elpa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "El Paso",
+            "El Paso"
+          ],
+          "pops": [
+            "elpa",
+            "elpa"
+          ],
+          "geohash": [
+            "9tsk8v0d3sjt",
+            "9tsk8svycrwx"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          31.75639,
+          -106.48972
+        ],
+        [
+          31.75609915,
+          -106.49161295
+        ],
+        [
+          31.7558083,
+          -106.4935059
+        ]
+      ]
+    },
+    {
+      "name": "aofa-cr5---lond-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "New York City",
+            "Poplar"
+          ],
+          "pops": [
+            "aofa",
+            "lond"
+          ],
+          "geohash": [
+            "dr5reuze0y20",
+            "gcpuzwvtcrun"
+          ],
+          "country": [
+            "US",
+            "GB"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.7200005,
+          -74.0045606
+        ],
+        [
+          46.109035,
+          -37.00946055
+        ],
+        [
+          51.4980695,
+          -0.0143605
+        ]
+      ]
+    },
+    {
+      "name": "eqxch2-cr6---bost-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Cambridge",
+            "Chicago"
+          ],
+          "pops": [
+            "bost",
+            "eqxch2"
+          ],
+          "geohash": [
+            "drt3n2u2qv1w",
+            "dp3wn5nr0tub"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.367472,
+          -71.086401
+        ],
+        [
+          42.110560750000005,
+          -79.3523716
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ]
+      ]
+    },
+    {
+      "name": "eqxch2-cr6---eqx-chi-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chicago",
+            "Chicago"
+          ],
+          "pops": [
+            "eqx",
+            "eqxch2"
+          ],
+          "geohash": [
+            "dp3wn5nr0tub",
+            "dp3wn5nr0tub"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8536495,
+          -87.6183422
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ]
+      ]
+    },
+    {
+      "name": "eqxch2-cr6---eqxdc4-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Sterling",
+            "Chicago"
+          ],
+          "pops": [
+            "eqxdc4",
+            "eqxch2"
+          ],
+          "geohash": [
+            "dqbvvqsqtync",
+            "dp3wn5nr0tub"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.016346,
+          -77.458507
+        ],
+        [
+          40.43499775,
+          -82.5384246
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ]
+      ]
+    },
+    {
+      "name": "kans-cr6---eqxda3-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Dallas",
+            "Kansas City"
+          ],
+          "pops": [
+            "eqxda3",
+            "kans"
+          ],
+          "geohash": [
+            "9vg4sg0edd3r",
+            "9yuwrwp4yz9v"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          32.8002967,
+          -96.8217141
+        ],
+        [
+          35.95057585,
+          -95.70204705
+        ],
+        [
+          39.100855,
+          -94.58238
+        ]
+      ]
+    },
+    {
+      "name": "kans-cr6---hous-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Aldine",
+            "Kansas City"
+          ],
+          "pops": [
+            "hous",
+            "kans"
+          ],
+          "geohash": [
+            "9vk4kdxr6xsf",
+            "9yuwrwp4yz9v"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          29.941776,
+          -95.417176
+        ],
+        [
+          34.5213155,
+          -94.99977799999999
+        ],
+        [
+          39.100855,
+          -94.58238
+        ]
+      ]
+    },
+    {
+      "name": "kans-cr6---kans-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Kansas City",
+            "Kansas City"
+          ],
+          "pops": [
+            "kans",
+            "kans"
+          ],
+          "geohash": [
+            "9yuwrwp4yz9v",
+            "9yuwrwp1jx3g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.100855,
+          -94.58238
+        ],
+        [
+          39.100704,
+          -94.58240685
+        ],
+        [
+          39.100553,
+          -94.5824337
+        ]
+      ]
+    },
+    {
+      "name": "lond-cr5---amst-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Diemen",
+            "Poplar"
+          ],
+          "pops": [
+            "amst",
+            "lond"
+          ],
+          "geohash": [
+            "u179benr9wue",
+            "gcpuzwvtcrun"
+          ],
+          "country": [
+            "NL",
+            "GB"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          52.356671,
+          4.9525013
+        ],
+        [
+          51.927370249999996,
+          2.4690703999999997
+        ],
+        [
+          51.4980695,
+          -0.0143605
+        ]
+      ]
+    },
+    {
+      "name": "lond-cr5---cern-773-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Poplar",
+            "Chevry"
+          ],
+          "pops": [
+            "lond",
+            "cern"
+          ],
+          "geohash": [
+            "gcpuzwvtcrun",
+            "u0hr1u9hsnrt"
+          ],
+          "country": [
+            "GB",
+            "FR"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          51.4980695,
+          -0.0143605
+        ],
+        [
+          48.8770322225,
+          3.020330708
+        ],
+        [
+          46.255994945,
+          6.055021916
+        ]
+      ]
+    },
+    {
+      "name": "atla-cr5---ornl-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Atlanta",
+            "Oak Ridge"
+          ],
+          "pops": [
+            "atla",
+            "ornl"
+          ],
+          "geohash": [
+            "dn5bp9wd306c",
+            "dnkhdgddujwg"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          33.7586275,
+          -84.3879994
+        ],
+        [
+          34.86281065,
+          -84.31926784999999
+        ],
+        [
+          35.9669938,
+          -84.2505363
+        ]
+      ]
+    },
+    {
+      "name": "atla-cr5---nash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Atlanta",
+            "Oak Hill"
+          ],
+          "pops": [
+            "atla",
+            "nash"
+          ],
+          "geohash": [
+            "dn5bp9wd306c",
+            "dn6m3u6ff5mu"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          33.7586275,
+          -84.3879994
+        ],
+        [
+          34.93078265,
+          -85.57158115
+        ],
+        [
+          36.1029378,
+          -86.7551629
+        ]
+      ]
+    },
+    {
+      "name": "atla-cr5---hous-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Atlanta",
+            "Aldine"
+          ],
+          "pops": [
+            "atla",
+            "hous"
+          ],
+          "geohash": [
+            "dn5bp9wd306c",
+            "9vk4kfbffw6r"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          33.7586275,
+          -84.3879994
+        ],
+        [
+          31.85049915,
+          -89.90155935
+        ],
+        [
+          29.9423708,
+          -95.4151193
+        ]
+      ]
+    },
+    {
+      "name": "nash-cr5---hous-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Aldine",
+            "Oak Hill"
+          ],
+          "pops": [
+            "hous",
+            "nash"
+          ],
+          "geohash": [
+            "9vk4kfbffw6r",
+            "dn6m3u6ff5mu"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          29.9423708,
+          -95.4151193
+        ],
+        [
+          33.0226543,
+          -91.0851411
+        ],
+        [
+          36.1029378,
+          -86.7551629
+        ]
+      ]
+    },
+    {
+      "name": "hous-cr5---elpa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Aldine",
+            "El Paso"
+          ],
+          "pops": [
+            "hous",
+            "elpa"
+          ],
+          "geohash": [
+            "9vk4kfbffw6r",
+            "9tsk8svycrwx"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          29.9423708,
+          -95.4151193
+        ],
+        [
+          30.849089550000002,
+          -100.95431260000001
+        ],
+        [
+          31.7558083,
+          -106.4935059
+        ]
+      ]
+    },
+    {
+      "name": "hous-cr5---kans-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Aldine",
+            "Kansas City"
+          ],
+          "pops": [
+            "hous",
+            "kans"
+          ],
+          "geohash": [
+            "9vk4kfbffw6r",
+            "9yuwrwp1jx3g"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          29.9423708,
+          -95.4151193
+        ],
+        [
+          34.5214619,
+          -94.99877649999999
+        ],
+        [
+          39.100553,
+          -94.5824337
+        ]
+      ]
+    },
+    {
+      "name": "salt-cr6---bois-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Ontario",
+            "Salt Lake City"
+          ],
+          "pops": [
+            "bois",
+            "salt"
+          ],
+          "geohash": [
+            "9ruf66u49wvg",
+            "9x0ru7kyxene"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          44.00483,
+          -116.96587
+        ],
+        [
+          42.38056,
+          -114.460343
+        ],
+        [
+          40.75629,
+          -111.954816
+        ]
+      ]
+    },
+    {
+      "name": "salt-cr6---lasv-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "North Las Vegas",
+            "Salt Lake City"
+          ],
+          "pops": [
+            "lasv",
+            "salt"
+          ],
+          "geohash": [
+            "9qqnhky0h1z7",
+            "9x0ru7kyxene"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          36.23704,
+          -115.117311
+        ],
+        [
+          38.496665,
+          -113.5360635
+        ],
+        [
+          40.75629,
+          -111.954816
+        ]
+      ]
+    },
+    {
+      "name": "bost-cr5---amst-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Somerville",
+            "Diemen"
+          ],
+          "pops": [
+            "bost",
+            "amst"
+          ],
+          "geohash": [
+            "drt3n982tpnb",
+            "u179benr9wue"
+          ],
+          "country": [
+            "US",
+            "NL"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.3716445,
+          -71.0809757
+        ],
+        [
+          47.364157750000004,
+          -33.0642372
+        ],
+        [
+          52.356671,
+          4.9525013
+        ]
+      ]
+    },
+    {
+      "name": "bost-cr5---bost-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Cambridge",
+            "Somerville"
+          ],
+          "pops": [
+            "bost",
+            "bost"
+          ],
+          "geohash": [
+            "drt3n2u2qv1w",
+            "drt3n982tpnb"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.367472,
+          -71.086401
+        ],
+        [
+          42.36955825,
+          -71.08368834999999
+        ],
+        [
+          42.3716445,
+          -71.0809757
+        ]
+      ]
+    },
+    {
+      "name": "bost-cr6---newy1118th-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Cambridge",
+            "New York City"
+          ],
+          "pops": [
+            "bost",
+            "newy1118th"
+          ],
+          "geohash": [
+            "drt3n2u2qv1w",
+            "dr5ru08ryftm"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          42.367472,
+          -71.086401
+        ],
+        [
+          41.554434,
+          -72.5448335
+        ],
+        [
+          40.741396,
+          -74.003266
+        ]
+      ]
+    },
+    {
+      "name": "eqx-chi-cr5---eqx-ash-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Sterling",
+            "Chicago"
+          ],
+          "pops": [
+            "eqx",
+            "eqx"
+          ],
+          "geohash": [
+            "dqbvvqsnccnt",
+            "dp3wn5nr0tub"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.0163627,
+          -77.4590225
+        ],
+        [
+          40.4350061,
+          -82.53868235
+        ],
+        [
+          41.8536495,
+          -87.6183422
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr55---eqx-sj-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Seven Trees",
+            "Santa Clara"
+          ],
+          "pops": [
+            "eqx",
+            "sunn"
+          ],
+          "geohash": [
+            "9q97ug8m50qp",
+            "9q9k85e5ysyz"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.2417667,
+          -121.7829669
+        ],
+        [
+          37.307589449999995,
+          -121.8853732
+        ],
+        [
+          37.3734122,
+          -121.9877795
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr55---lsvn-cr1",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "North Las Vegas",
+            "Santa Clara"
+          ],
+          "pops": [
+            "lsvn",
+            "sunn"
+          ],
+          "geohash": [
+            "9qqnhkwjk2w4",
+            "9q9k85e5ysyz"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          36.2365611,
+          -115.1173021
+        ],
+        [
+          36.804986650000004,
+          -118.5525408
+        ],
+        [
+          37.3734122,
+          -121.9877795
+        ]
+      ]
+    },
+    {
+      "name": "sunn-cr55---sunn-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Santa Clara",
+            "Santa Clara"
+          ],
+          "pops": [
+            "sunn",
+            "sunn"
+          ],
+          "geohash": [
+            "9q9k85e5ysyz",
+            "9q9k85e5ysyz"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.3734122,
+          -121.9877795
+        ],
+        [
+          37.3734122,
+          -121.9877795
+        ],
+        [
+          37.3734122,
+          -121.9877795
+        ]
+      ]
+    },
+    {
+      "name": "lbnl59-cr6---slac50n-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Berkeley",
+            "Stanford"
+          ],
+          "pops": [
+            "lbnl59",
+            "slac50n"
+          ],
+          "geohash": [
+            "9q9p6ph785q2",
+            "9q9hgv91vpm1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.8759845,
+          -122.2500142
+        ],
+        [
+          37.651998675,
+          -122.21368735
+        ],
+        [
+          37.42801285,
+          -122.1773605
+        ]
+      ]
+    },
+    {
+      "name": "lbnl59-cr6---lbnl50-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Berkeley",
+            "Berkeley"
+          ],
+          "pops": [
+            "lbnl59",
+            "lbnl50"
+          ],
+          "geohash": [
+            "9q9p6ph785q2",
+            "9q9p6ph785q2"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.8759845,
+          -122.2500142
+        ],
+        [
+          37.8759845,
+          -122.2500142
+        ],
+        [
+          37.8759845,
+          -122.2500142
+        ]
+      ]
+    },
+    {
+      "name": "albq-cr5---albq-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Albuquerque",
+            "Albuquerque"
+          ],
+          "pops": [
+            "albq",
+            "albq"
+          ],
+          "geohash": [
+            "9whpt5n0m17j",
+            "9whpt5dk0rrq"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          35.0848894,
+          -106.6468148
+        ],
+        [
+          35.086600700000005,
+          -106.6494889
+        ],
+        [
+          35.088312,
+          -106.652163
+        ]
+      ]
+    },
+    {
+      "name": "albq-cr5---elpa-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Albuquerque",
+            "El Paso"
+          ],
+          "pops": [
+            "albq",
+            "elpa"
+          ],
+          "geohash": [
+            "9whpt5n0m17j",
+            "9tsk8svycrwx"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          35.0848894,
+          -106.6468148
+        ],
+        [
+          33.42034885,
+          -106.57016035000001
+        ],
+        [
+          31.7558083,
+          -106.4935059
+        ]
+      ]
+    },
+    {
+      "name": "amst-cr5---cern-513-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Meyrin",
+            "Diemen"
+          ],
+          "pops": [
+            "cern",
+            "amst"
+          ],
+          "geohash": [
+            "u0hr40z9v72w",
+            "u179benr9wue"
+          ],
+          "country": [
+            "CH",
+            "NL"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          46.2349075,
+          6.0749791
+        ],
+        [
+          49.29578925,
+          5.5137402
+        ],
+        [
+          52.356671,
+          4.9525013
+        ]
+      ]
+    },
+    {
+      "name": "cern-513-cr5---cern-773-cr5",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Chevry",
+            "Meyrin"
+          ],
+          "pops": [
+            "cern",
+            "cern"
+          ],
+          "geohash": [
+            "u0hr1u9hsnrt",
+            "u0hr40z9v72w"
+          ],
+          "country": [
+            "FR",
+            "CH"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          46.255994945,
+          6.055021916
+        ],
+        [
+          46.245451222499995,
+          6.065000508000001
+        ],
+        [
+          46.2349075,
+          6.0749791
+        ]
+      ]
+    },
+    {
+      "name": "bnl515b-cr6---bnl515-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Ridge",
+            "Ridge"
+          ],
+          "pops": [
+            "bnl515",
+            "bnl515b"
+          ],
+          "geohash": [
+            "drk0mz2yrg7e",
+            "drk0mz2yrg7e"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          40.8661116,
+          -72.8709471
+        ],
+        [
+          40.8661116,
+          -72.8709471
+        ],
+        [
+          40.8661116,
+          -72.8709471
+        ]
+      ]
+    },
+    {
+      "name": "pnwg-cr5---bois-cr1",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Boise",
+            "Seattle"
+          ],
+          "pops": [
+            "bois",
+            "pnwg"
+          ],
+          "geohash": [
+            "9rtru4up2chx",
+            "c23nb5gwn3dg"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          43.566162,
+          -116.1858748
+        ],
+        [
+          45.590286731,
+          -119.262273185
+        ],
+        [
+          47.614411462,
+          -122.33867157
+        ]
+      ]
+    },
+    {
+      "name": "pnwg-cr5---seat-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Seattle",
+            "Seattle"
+          ],
+          "pops": [
+            "seat",
+            "pnwg"
+          ],
+          "geohash": [
+            "c23p07prqy6u",
+            "c23nb5gwn3dg"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          47.654477,
+          -122.3225138
+        ],
+        [
+          47.634444231,
+          -122.330592685
+        ],
+        [
+          47.614411462,
+          -122.33867157
+        ]
+      ]
+    },
+    {
+      "name": "seat-cr6---bois-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Ontario",
+            "Seattle"
+          ],
+          "pops": [
+            "bois",
+            "seat"
+          ],
+          "geohash": [
+            "9ruf66u49wvg",
+            "c23p07prqy6u"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          44.00483,
+          -116.96587
+        ],
+        [
+          45.8296535,
+          -119.6441919
+        ],
+        [
+          47.654477,
+          -122.3225138
+        ]
+      ]
+    },
+    {
+      "name": "hous-cr6---eqxda3-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Dallas",
+            "Aldine"
+          ],
+          "pops": [
+            "eqxda3",
+            "hous"
+          ],
+          "geohash": [
+            "9vg4sg0edd3r",
+            "9vk4kdxr6xsf"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          32.8002967,
+          -96.8217141
+        ],
+        [
+          31.371036349999997,
+          -96.11944505
+        ],
+        [
+          29.941776,
+          -95.417176
+        ]
+      ]
+    },
+    {
+      "name": "eqx-ash-cr5---eqxdc4-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Sterling",
+            "Sterling"
+          ],
+          "pops": [
+            "eqxdc4",
+            "eqx"
+          ],
+          "geohash": [
+            "dqbvvqsqtync",
+            "dqbvvqsnccnt"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.016346,
+          -77.458507
+        ],
+        [
+          39.01635435,
+          -77.45876475
+        ],
+        [
+          39.0163627,
+          -77.4590225
+        ]
+      ]
+    },
+    {
+      "name": "eqxdc4-cr6---wash-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Sterling",
+            "Pimmit Hills"
+          ],
+          "pops": [
+            "eqxdc4",
+            "wash"
+          ],
+          "geohash": [
+            "dqbvvqsqtync",
+            "dqcj7j0jxqee"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          39.016346,
+          -77.458507
+        ],
+        [
+          38.9681965,
+          -77.33505249999999
+        ],
+        [
+          38.920047,
+          -77.211598
+        ]
+      ]
+    },
+    {
+      "name": "losa-cr6---lasv-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "North Las Vegas",
+            "Los Angeles"
+          ],
+          "pops": [
+            "lasv",
+            "losa"
+          ],
+          "geohash": [
+            "9qqnhky0h1z7",
+            "9q5csymvujt3"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          36.23704,
+          -115.117311
+        ],
+        [
+          35.1430305,
+          -116.688529
+        ],
+        [
+          34.049021,
+          -118.259747
+        ]
+      ]
+    },
+    {
+      "name": "losa-cr6---sand-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Los Angeles",
+            "San Diego"
+          ],
+          "pops": [
+            "losa",
+            "sand"
+          ],
+          "geohash": [
+            "9q5csymvujt3",
+            "9mudws8nrxzc"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          34.049021,
+          -118.259747
+        ],
+        [
+          33.429029,
+          -117.6978225
+        ],
+        [
+          32.809037,
+          -117.135898
+        ]
+      ]
+    },
+    {
+      "name": "slac50n-cr6---slac50s-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Stanford",
+            "Stanford"
+          ],
+          "pops": [
+            "slac50s",
+            "slac50n"
+          ],
+          "geohash": [
+            "9q9hgv91vpm1",
+            "9q9hgv91vpm1"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.42801285,
+          -122.1773605
+        ],
+        [
+          37.42801285,
+          -122.1773605
+        ],
+        [
+          37.42801285,
+          -122.1773605
+        ]
+      ]
+    },
+    {
+      "name": "llnl-cr6---snlca-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Livermore",
+            "Livermore"
+          ],
+          "pops": [
+            "llnl",
+            "snlca"
+          ],
+          "geohash": [
+            "9q9qqe2systw",
+            "9q9qq7kutwfk"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          37.6798263,
+          -121.7055697
+        ],
+        [
+          37.67981065,
+          -121.70816835
+        ],
+        [
+          37.679795,
+          -121.710767
+        ]
+      ]
+    },
+    {
+      "name": "anl221-cr6---anl541b-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "Darien",
+            "Lemont"
+          ],
+          "pops": [
+            "anl221",
+            "anl541b"
+          ],
+          "geohash": [
+            "dp3mmfh753e9",
+            "dp3mmbw34r58"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.71561118,
+          -87.98352097
+        ],
+        [
+          41.711334295,
+          -87.98216913499999
+        ],
+        [
+          41.70705741,
+          -87.9808173
+        ]
+      ]
+    },
+    {
+      "name": "fnalgcc-cr6---fnalfcc-cr6",
+      "meta": {
+        "capacity": 100000000000,
+        "endpoint_identifiers": {
+          "cities": [
+            "West Chicago",
+            "Batavia"
+          ],
+          "pops": [
+            "fnalgcc",
+            "fnalfcc"
+          ],
+          "geohash": [
+            "dp3npfz2g82n",
+            "dp3np9n8nws6"
+          ],
+          "country": [
+            "US",
+            "US"
+          ]
+        },
+        "latLngs": [
+          [
+            50,
+            -120
+          ],
+          [
+            55,
+            -110
+          ],
+          [
+            45,
+            -77
+          ]
+        ],
+        "children": []
+      },
+      "latLngs": [
+        [
+          41.8511748,
+          -88.2430671
+        ],
+        [
+          41.846320399999996,
+          -88.24900805
+        ],
+        [
+          41.841466,
+          -88.254949
+        ]
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "name": "elpa-cr6",
+      "meta": {},
+      "latLng": [
+        31.75639,
+        -106.48972
+      ],
+      "children": []
+    },
+    {
+      "name": "eqxsv5-cr6",
+      "meta": {},
+      "latLng": [
+        37.373445,
+        -121.987817
+      ],
+      "children": []
+    },
+    {
+      "name": "ga-cr6",
+      "meta": {},
+      "latLng": [
+        32.8938196,
+        -117.2359445
+      ],
+      "children": []
+    },
+    {
+      "name": "lbnl50-cr6",
+      "meta": {},
+      "latLng": [
+        38.586756,
+        -121.530186
+      ],
+      "children": []
+    },
+    {
+      "name": "lbnl59-cr6",
+      "meta": {},
+      "latLng": [
+        37.8759845,
+        -122.2500142
+      ],
+      "children": []
+    },
+    {
+      "name": "llnl-cr6",
+      "meta": {},
+      "latLng": [
+        37.6798263,
+        -121.7055697
+      ],
+      "children": []
+    },
+    {
+      "name": "losa-cr6",
+      "meta": {},
+      "latLng": [
+        34.049021,
+        -118.259747
+      ],
+      "children": []
+    },
+    {
+      "name": "sacr-cr6",
+      "meta": {},
+      "latLng": [
+        37.373445,
+        -121.987817
+      ],
+      "children": []
+    },
+    {
+      "name": "slac50s-cr6",
+      "meta": {},
+      "latLng": [
+        37.42801285,
+        -122.1773605
+      ],
+      "children": []
+    },
+    {
+      "name": "snlca-cr6",
+      "meta": {},
+      "latLng": [
+        37.6798263,
+        -121.7055697
+      ],
+      "children": []
+    },
+    {
+      "name": "sunn-cr55",
+      "meta": {},
+      "latLng": [
+        37.373445,
+        -121.987817
+      ],
+      "children": []
+    },
+    {
+      "name": "sunn-cr6",
+      "meta": {},
+      "latLng": [
+        37.373445,
+        -121.987817
+      ],
+      "children": []
+    },
+    {
+      "name": "seat-cr6",
+      "meta": {},
+      "latLng": [
+        47.654477,
+        -122.3225138
+      ],
+      "children": []
+    },
+    {
+      "name": "slac50n-cr6",
+      "meta": {},
+      "latLng": [
+        37.8759845,
+        -122.2500142
+      ],
+      "children": []
+    },
+    {
+      "name": "sacr-cr55",
+      "meta": {},
+      "latLng": [
+        38.586756,
+        -121.530186
+      ],
+      "children": []
+    },
+    {
+      "name": "denv-cr6",
+      "meta": {},
+      "latLng": [
+        39.745838,
+        -104.979509
+      ],
+      "children": []
+    },
+    {
+      "name": "salt-cr6",
+      "meta": {},
+      "latLng": [
+        36.23704,
+        -115.117311
+      ],
+      "children": []
+    },
+    {
+      "name": "anl541b-cr6",
+      "meta": {},
+      "latLng": [
+        41.70705741,
+        -87.9808173
+      ],
+      "children": []
+    },
+    {
+      "name": "bost-cr6",
+      "meta": {},
+      "latLng": [
+        42.367472,
+        -71.086401
+      ],
+      "children": []
+    },
+    {
+      "name": "chic-cr6",
+      "meta": {},
+      "latLng": [
+        41.897642,
+        -87.6433909
+      ],
+      "children": []
+    },
+    {
+      "name": "eqxch2-cr6",
+      "meta": {},
+      "latLng": [
+        39.016346,
+        -77.458507
+      ],
+      "children": []
+    },
+    {
+      "name": "fnalfcc-cr6",
+      "meta": {},
+      "latLng": [
+        41.841466,
+        -88.254949
+      ],
+      "children": []
+    },
+    {
+      "name": "newy1118th-cr6",
+      "meta": {},
+      "latLng": [
+        40.741396,
+        -74.003266
+      ],
+      "children": []
+    },
+    {
+      "name": "newy32aoa-cr6",
+      "meta": {},
+      "latLng": [
+        40.72003174,
+        -74.0045166
+      ],
+      "children": []
+    },
+    {
+      "name": "star-cr55",
+      "meta": {},
+      "latLng": [
+        41.8961757,
+        -87.6173266
+      ],
+      "children": []
+    },
+    {
+      "name": "star-cr6",
+      "meta": {},
+      "latLng": [
+        41.8961757,
+        -87.6173266
+      ],
+      "children": []
+    },
+    {
+      "name": "eqx-chi-cr5",
+      "meta": {},
+      "latLng": [
+        39.0163627,
+        -77.4590225
+      ],
+      "children": []
+    },
+    {
+      "name": "kans-cr5",
+      "meta": {},
+      "latLng": [
+        39.7312095,
+        -104.9826965
+      ],
+      "children": []
+    },
+    {
+      "name": "nash-cr5",
+      "meta": {},
+      "latLng": [
+        36.1029378,
+        -86.7551629
+      ],
+      "children": []
+    },
+    {
+      "name": "wash-cr5",
+      "meta": {},
+      "latLng": [
+        36.1029378,
+        -86.7551629
+      ],
+      "children": []
+    },
+    {
+      "name": "chic-cr55",
+      "meta": {},
+      "latLng": [
+        38.9200615,
+        -77.2121259
+      ],
+      "children": []
+    },
+    {
+      "name": "albq-cr5",
+      "meta": {},
+      "latLng": [
+        35.0848894,
+        -106.6468148
+      ],
+      "children": []
+    },
+    {
+      "name": "bois-cr1",
+      "meta": {},
+      "latLng": [
+        43.566162,
+        -116.1858748
+      ],
+      "children": []
+    },
+    {
+      "name": "lsvn-cr1",
+      "meta": {},
+      "latLng": [
+        36.2365611,
+        -115.1173021
+      ],
+      "children": []
+    },
+    {
+      "name": "pnwg-cr5",
+      "meta": {},
+      "latLng": [
+        47.654477,
+        -122.3225138
+      ],
+      "children": []
+    },
+    {
+      "name": "denv-cr5",
+      "meta": {},
+      "latLng": [
+        47.614411462,
+        -122.33867157
+      ],
+      "children": []
+    },
+    {
+      "name": "anl221-cr6",
+      "meta": {},
+      "latLng": [
+        41.71561118,
+        -87.98352097
+      ],
+      "children": []
+    },
+    {
+      "name": "fnalgcc-cr6",
+      "meta": {},
+      "latLng": [
+        41.8511748,
+        -88.2430671
+      ],
+      "children": []
+    },
+    {
+      "name": "kans-cr6",
+      "meta": {},
+      "latLng": [
+        39.745838,
+        -104.979509
+      ],
+      "children": []
+    },
+    {
+      "name": "aofa-cr5",
+      "meta": {},
+      "latLng": [
+        40.7414688,
+        -74.0033873
+      ],
+      "children": []
+    },
+    {
+      "name": "bnl515b-cr6",
+      "meta": {},
+      "latLng": [
+        40.8661116,
+        -72.8709471
+      ],
+      "children": []
+    },
+    {
+      "name": "bost-cr5",
+      "meta": {},
+      "latLng": [
+        42.367472,
+        -71.086401
+      ],
+      "children": []
+    },
+    {
+      "name": "lond-cr5",
+      "meta": {},
+      "latLng": [
+        40.7200005,
+        -74.0045606
+      ],
+      "children": []
+    },
+    {
+      "name": "newy-cr5",
+      "meta": {},
+      "latLng": [
+        41.8961757,
+        -87.6173266
+      ],
+      "children": []
+    },
+    {
+      "name": "atla-cr5",
+      "meta": {},
+      "latLng": [
+        33.7586275,
+        -84.3879994
+      ],
+      "children": []
+    },
+    {
+      "name": "cern-513-cr5",
+      "meta": {},
+      "latLng": [
+        46.255994945,
+        6.055021916
+      ],
+      "children": []
+    },
+    {
+      "name": "eqx-ash-cr5",
+      "meta": {},
+      "latLng": [
+        39.0163627,
+        -77.4590225
+      ],
+      "children": []
+    },
+    {
+      "name": "wash-cr6",
+      "meta": {},
+      "latLng": [
+        39.016346,
+        -77.458507
+      ],
+      "children": []
+    },
+    {
+      "name": "bnl515-cr6",
+      "meta": {},
+      "latLng": [
+        40.72003174,
+        -74.0045166
+      ],
+      "children": []
+    },
+    {
+      "name": "albq-cr6",
+      "meta": {},
+      "latLng": [
+        35.088312,
+        -106.652163
+      ],
+      "children": []
+    },
+    {
+      "name": "hous-cr6",
+      "meta": {},
+      "latLng": [
+        32.8002967,
+        -96.8217141
+      ],
+      "children": []
+    },
+    {
+      "name": "sand-cr6",
+      "meta": {},
+      "latLng": [
+        31.75639,
+        -106.48972
+      ],
+      "children": []
+    },
+    {
+      "name": "elpa-cr5",
+      "meta": {},
+      "latLng": [
+        35.0848894,
+        -106.6468148
+      ],
+      "children": []
+    },
+    {
+      "name": "eqxdc4-cr6",
+      "meta": {},
+      "latLng": [
+        39.016346,
+        -77.458507
+      ],
+      "children": []
+    },
+    {
+      "name": "eqxda3-cr6",
+      "meta": {},
+      "latLng": [
+        32.8002967,
+        -96.8217141
+      ],
+      "children": []
+    },
+    {
+      "name": "amst-cr5",
+      "meta": {},
+      "latLng": [
+        46.2349075,
+        6.0749791
+      ],
+      "children": []
+    },
+    {
+      "name": "cern-773-cr5",
+      "meta": {},
+      "latLng": [
+        46.255994945,
+        6.055021916
+      ],
+      "children": []
+    },
+    {
+      "name": "ornl-cr5",
+      "meta": {},
+      "latLng": [
+        33.7586275,
+        -84.3879994
+      ],
+      "children": []
+    },
+    {
+      "name": "hous-cr5",
+      "meta": {},
+      "latLng": [
+        29.9423708,
+        -95.4151193
+      ],
+      "children": []
+    },
+    {
+      "name": "bois-cr6",
+      "meta": {},
+      "latLng": [
+        44.00483,
+        -116.96587
+      ],
+      "children": []
+    },
+    {
+      "name": "lasv-cr6",
+      "meta": {},
+      "latLng": [
+        36.23704,
+        -115.117311
+      ],
+      "children": []
+    },
+    {
+      "name": "eqx-sj-cr5",
+      "meta": {},
+      "latLng": [
+        37.2417667,
+        -121.7829669
+      ],
+      "children": []
+    },
+    {
+      "name": "sunn-cr5",
+      "meta": {},
+      "latLng": [
+        37.3734122,
+        -121.9877795
+      ],
+      "children": []
+    }
+  ]
+}
