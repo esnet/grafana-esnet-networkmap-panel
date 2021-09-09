@@ -148,33 +148,48 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   const mapJson = JSON.parse(mapData);
 
   mapJson.edges.forEach((edge) => {
+    // create za name
+    let splitName = edge.name.split('---');
+    edge.ZAname = `${splitName[1]}---${splitName[0]}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.name);
-    let matchZA = parsedData.find((d) => d.zaName === edge.name);
+    let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
+
     if (matchAZ) {
-      edge.azColor = valueField[0].display(matchAZ.value).color;
-      edge.displayValue = `${valueField[0].display(matchAZ.value).text} ${valueField[0].display(matchAZ.value).suffix}`;
-      edge.value = matchAZ.value;
+      edge.AZvalue = matchAZ.value;
+      edge.azColor = valueField[0].display(edge.AZvalue).color;
+      let display = valueField[0].display(edge.AZvalue);
+      edge.AZdisplayValue = `${display.text} ${display.suffix}`;
     } else {
       edge.azColor = colors.defaultColor;
-      edge.displayValue = 'N/A';
-      edge.value = null;
+      edge.AZdisplayValue = 'N/A';
+      edge.AZvalue += null;
     }
+
     if (matchZA) {
-      edge.zaColor = valueField[0].display(matchZA.value).color;
-      edge.displayValue = `${valueField[0].display(matchZA.value).text} ${valueField[0].display(matchZA.value).suffix}`;
-      edge.value = matchZA.value;
+      edge.ZAvalue = matchZA.value;
+      edge.zaColor = valueField[0].display(edge.ZAvalue).color;
+      let display = valueField[0].display(edge.ZAvalue);
+      edge.ZAdisplayValue = `${display.text} ${display.suffix}`;
     } else {
       edge.zaColor = colors.defaultColor;
-      edge.displayValue = 'N/A';
-      edge.value = null;
+      edge.ZAdisplayValue = 'N/A';
+      edge.ZAvalue = null;
     }
   });
 
   mapJson.nodes.forEach((node) => {
     let match1 = infIn.find((d) => d.name === node.name);
     let match2 = infOut.find((d) => d.name === node.name);
+    node.inValue = 'N/A';
+    node.outValue = 'N/A';
     if (match1 || match2) {
       node.color = colors.nodeHighlight;
+      if (match1) {
+        node.inValue = `${valueField[0].display(match1.value).text} ${valueField[0].display(match1.value).suffix}`;
+      }
+      if (match2) {
+        node.outValue = `${valueField[0].display(match2.value).text} ${valueField[0].display(match2.value).suffix}`;
+      }
     } else {
       node.color = colors.defaultColor;
     }
