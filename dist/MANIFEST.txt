@@ -14,7 +14,7 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1631258974684,
+  "time": 1631260609105,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
@@ -34,9 +34,9 @@ Hash: SHA512
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqEEARMKAAYFAmE7CV4ACgkQfk0ManCIZuejlAIJAcYvbXVSztBmtInH6gOc
-FHtG6z6OEdUpVxj7q4VhZO4pnTad/CXdKirL8hVNhkcN+MGsla9FMYxs0e+3
-YvwNXUN8AgiF3NmqSaDW4aV/KM+xVkPSSHrqulhBXGB5lMOpH6BEONnjFzY7
-mCwJzCAhuneZGshiXu+8nZiNnWA0aPJpaD10zg==
-=DCog
+wqEEARMKAAYFAmE7D8EACgkQfk0ManCIZuc4kQIIrwIudoG0zQz8H4jD+oxi
++c7prMO8keDyL3dsU0M6CF2R2EEsSEIH2mRz7W7MbwoGaFspiFOpoQRnjORh
+t5zkaEACCQFGZwSBr+ZfJO6gm7N1fWzFsv7kIuEh5fMXERdQHQrM6sLQiobW
+o2keglnPcgYLAkqGU7QsjZRoUa6aQFGBrAJBxA==
+=ne4j
 -----END PGP SIGNATURE-----
