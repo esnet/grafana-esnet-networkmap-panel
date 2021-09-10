@@ -14,21 +14,18 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1631235800712,
+  "time": 1631258974684,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "95efede2671f7967592b43ec0b831fb12fd69783319585840b25f3f9d2076392",
     "module.js.map": "4c231c67f8e59f513fe13af990eb89204c072a3ddfc08b5b23b89d11cbd4e204",
-    "plugin.json": "c7ca201d3ba9987a8ff2c438e9c620c2be41f079c8d8aba767b0aabdfe09a36e",
+    "plugin.json": "838bc78a2f3893dc21f32c8c1f6b54e08a917d3a20fac0eec8928f6a313a8ea9",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
-    "components/test.json": "66ce9031f1162643a42967c5a84ed46fe4ea8c947ac7ff0767aff2f00ac6577d",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
-    "components/esnet.json": "3ad43d07c47cc4ef896a3a1261fea15b102d124c9080ba7880f24366657aae32",
-    "components/test2.json": "a7de0a1406b556bc4f11c4649cdd3de3e78b1a41e094c13601ab86fe2e134fc0",
     "components/cr.json": "5b983d22eb47413cd7560a8362dabb3fb4d7e150f17fb55aa34ae76a98260fe3",
     "module.js": "7dbd5ec333ca37fb9f1c05749462433243916c116e6e2da88dae686e4ce0368a"
   }
@@ -37,9 +34,9 @@ Hash: SHA512
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqEEARMKAAYFAmE6rtgACgkQfk0ManCIZudc4QII4NG/6np58z9B3HsQ0n6z
-hXJZzKvIpSUgL+1LCA60Aq6jOMuJ7kR4JKIWqzkRV32H1ga0yqgqQu7G/9L6
-qb+DUdQCCQE+z86S6tYpsDfqmI/ccjbgzYlg7GRy3ToPfjSyEOJisxdGlKh+
-Rv0Z4kkQgn/kDS/vdvizBnDnMUVDAKHAT5TVLw==
-=wMVv
+wqEEARMKAAYFAmE7CV4ACgkQfk0ManCIZuejlAIJAcYvbXVSztBmtInH6gOc
+FHtG6z6OEdUpVxj7q4VhZO4pnTad/CXdKirL8hVNhkcN+MGsla9FMYxs0e+3
+YvwNXUN8AgiF3NmqSaDW4aV/KM+xVkPSSHrqulhBXGB5lMOpH6BEONnjFzY7
+mCwJzCAhuneZGshiXu+8nZiNnWA0aPJpaD10zg==
+=DCog
 -----END PGP SIGNATURE-----
