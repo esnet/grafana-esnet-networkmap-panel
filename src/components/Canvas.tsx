@@ -27,7 +27,6 @@ export const Canvas = (props) => {
 
   return (
     <div>
-      {console.log('canvas')}
       <div className={'tooltip'}></div>
       <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: props.width }}></div>
       <button type="button" id="edit_mode">

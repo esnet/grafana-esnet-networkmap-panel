@@ -1,6 +1,7 @@
 import * as d3 from './d3.min.js';
 import * as L from 'components/leaflet';
 import * as es from './esmap.js';
+import { urlUtil } from '@grafana/data';
 
 export default class NetworkMap {
   constructor(id) {
@@ -60,7 +61,16 @@ export default class NetworkMap {
     //---         different zoom levels in the future(imagine a regional and national map)
     var nm = new es.EsMap(map, svg, div, d3.curveNatural);
 
-    nm.editMode(1);
+    const params = urlUtil.getUrlSearchParams();
+    if (params.editPanel != null) {
+      nm.editMode(1);
+      d3.select('button#edit_mode').style('visibility', 'visible');
+    } else {
+      nm.editMode(0);
+      d3.select('button#edit_mode').style('visibility', 'hidden');
+    }
+
+    // nm.editMode(1);
 
     function toggleEdit(e) {
       var d = d3.select('button#edit_mode');
