@@ -17,14 +17,17 @@ export const Canvas = (props) => {
     );
     // SUPER IMPORTANT!!! this removes the old map before rerendering
     return () => {
-      thisMap.off();
-      thisMap.remove();
+      if (thisMap) {
+        thisMap.off();
+        thisMap.remove();
+      }
     };
   });
   const mapHeight = props.height - 25;
 
   return (
     <div>
+      {console.log('canvas')}
       <div className={'tooltip'}></div>
       <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: props.width }}></div>
       <button type="button" id="edit_mode">

@@ -62,7 +62,7 @@ function renderEdges(g, data, ref) {
       return 'edge edge-az edge-az-' + d.name;
     })
     .attr('text', function (d) {
-      return d.name;
+      return d.AZname;
     })
     .attr('pointer-events', 'visible')
     .on('mouseover', function (event, d) {
@@ -71,7 +71,7 @@ function renderEdges(g, data, ref) {
       });
       div
         .html(() => {
-          var text = '<p><b>' + d.name + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
+          var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
           return text;
         })
         .style('left', event.pageX + 10 + 'px')

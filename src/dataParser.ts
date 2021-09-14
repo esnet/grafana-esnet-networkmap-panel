@@ -148,10 +148,13 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   const mapJson = JSON.parse(mapData);
 
   mapJson.edges.forEach((edge) => {
+    // Find A and Z node
+    let nodeA = edge.meta.endpoint_identifiers.router[0];
+    let nodeZ = edge.meta.endpoint_identifiers.router[1];
     // create za name
-    let splitName = edge.name.split('---');
-    edge.ZAname = `${splitName[1]}---${splitName[0]}`;
-    let matchAZ = parsedData.find((d) => d.azName === edge.name);
+    edge.AZname = `${nodeA}---${nodeZ}`;
+    edge.ZAname = `${nodeZ}---${nodeA}`;
+    let matchAZ = parsedData.find((d) => d.azName === edge.AZname);
     let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
 
     if (matchAZ) {
