@@ -5,6 +5,7 @@ export interface MapOptions {
   srcField: string;
   dstField: string;
   valField: string;
+  endpointId: string;
   startLat: number;
   startLng: number;
   startZoom: number;

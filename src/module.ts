@@ -19,6 +19,12 @@ plugin.setPanelOptions((builder) => {
     description: 'JSON with edges and nodes of network map',
     defaultValue: '',
   });
+  builder.addTextInput({
+    path: 'endpointId',
+    name: 'Endpoint Identifier',
+    description: 'The endpoint identifier in the meta data to match to the query',
+    defaultValue: 'router',
+  });
   builder.addColorPicker({
     path: 'nodeHighlight',
     name: 'Node highlight color',

@@ -146,11 +146,12 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   });
 
   const mapJson = JSON.parse(mapData);
+  const endpointId = fields.endpointId;
 
   mapJson.edges.forEach((edge) => {
     // Find A and Z node
-    let nodeA = edge.meta.endpoint_identifiers.router[0];
-    let nodeZ = edge.meta.endpoint_identifiers.router[1];
+    let nodeA = edge.meta.endpoint_identifiers[endpointId][0];
+    let nodeZ = edge.meta.endpoint_identifiers[endpointId][1];
     // create za name
     edge.AZname = `${nodeA}---${nodeZ}`;
     edge.ZAname = `${nodeZ}---${nodeA}`;

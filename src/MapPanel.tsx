@@ -18,6 +18,7 @@ export const MapPanel: React.FC<Props> = ({ options, data, width, height, id }) 
     srcField: graphOptions.srcField,
     dstField: graphOptions.dstField,
     valField: graphOptions.valField,
+    endpointId: graphOptions.endpointId,
   };
   var parsedData = {};
   var mapData;
