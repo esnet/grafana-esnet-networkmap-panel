@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
@@ -6,32 +6,53 @@ import { Canvas } from 'components/Canvas';
 
 interface Props extends PanelProps<MapOptions> {}
 
-export const MapPanel: React.FC<Props> = ({ options, data, width, height, id }) => {
-  let graphOptions = {
-    ...options,
-  };
-  var colors = {
-    defaultColor: graphOptions.color,
-    nodeHighlight: graphOptions.nodeHighlight,
-  };
-  var fields = {
-    srcField: graphOptions.srcField,
-    dstField: graphOptions.dstField,
-    valField: graphOptions.valField,
-    endpointId: graphOptions.endpointId,
-  };
-  var parsedData = {};
-  var mapData;
-  try {
-    parsedData = parseData(data, graphOptions.mapjson, colors, fields);
-    mapData = parsedData[3];
-  } catch (error) {
-    console.error('Parsing error : ', error);
+export class MapPanel extends Component<Props> {
+  //= ({ options, data, width, height, id }) =>
+  constructor(props: Props) {
+    super(props);
   }
 
-  // return <div>Hello World</div>;
+  updateMapJson = (newData) => {
+    const { options } = this.props;
+    let { mapjson } = options;
+    // const { data } = this.props;
+    mapjson = JSON.stringify(newData);
+    this.props.onOptionsChange({ ...options, mapjson });
+  };
 
-  return (
-    <Canvas height={height} width={width} panelId={id} options={graphOptions} data={parsedData} mapData={mapData} />
-  );
-};
+  render() {
+    const { options, data, width, height, id } = this.props;
+    var colors = {
+      defaultColor: options.color,
+      nodeHighlight: options.nodeHighlight,
+    };
+    var fields = {
+      srcField: options.srcField,
+      dstField: options.dstField,
+      valField: options.valField,
+      endpointId: options.endpointId,
+    };
+    var parsedData = {};
+    var mapData;
+
+    try {
+      parsedData = parseData(data, options.mapjson, colors, fields);
+      mapData = parsedData[3];
+    } catch (error) {
+      console.error('Parsing error : ', error);
+    }
+    return (
+      <Canvas
+        height={height}
+        width={width}
+        panelId={id}
+        options={options}
+        data={parsedData}
+        mapData={mapData}
+        updateMapJson={this.updateMapJson}
+        // json={json}
+        // setJson={setJson}
+      />
+    );
+  }
+}

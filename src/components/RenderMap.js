@@ -2,6 +2,7 @@ import * as d3 from './d3.min.js';
 import * as L from 'components/leaflet';
 import * as es from './esmap.js';
 import { urlUtil } from '@grafana/data';
+import React from 'react';
 
 export default class NetworkMap {
   constructor(id) {
@@ -16,7 +17,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData, startLat, startLng, startZoom) {
+  renderMap(parsedData, mapData, options, updateMapJson) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -31,9 +32,13 @@ export default class NetworkMap {
       .remove();
     // ----------------------------------------------------------
 
+    // set variables
     const dataPairs = parsedData[0];
     const dataEnd1 = parsedData[1];
     const dataEnd2 = parsedData[2];
+    const startLat = options.startLat;
+    const startLng = options.startLng;
+    const startZoom = options.startZoom;
 
     var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
     //--- Create Leaflet Map with custom tile layer
@@ -59,12 +64,13 @@ export default class NetworkMap {
     //---  note:  1 map could have multiple esmap svg layers
     //---         this can be used to allow leaflet to turn on and off layers at
     //---         different zoom levels in the future(imagine a regional and national map)
-    var nm = new es.EsMap(map, svg, div, d3.curveNatural);
+    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson);
 
     const params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
       nm.editMode(1);
       d3.select('button#edit_mode').style('visibility', 'visible');
+      // call update map?
     } else {
       nm.editMode(0);
       d3.select('button#edit_mode').style('visibility', 'hidden');
@@ -85,69 +91,42 @@ export default class NetworkMap {
 
     var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
 
-    //--- test 1 loads data from inline json
-    // var map1 = {
-    //   edges: [
-    //     {
-    //       name: 'CKT-BIG-A-Z',
-    //       latLngs: [
-    //         [50, -120],
-    //         [55, -110],
-    //         [45, -77],
-    //       ],
-    //       color: 'blue'
-    //     },
-    //   ],
-    //   nodes: [
-    //     { name: 'A', latLng: [50, -120], color: 'grey' },
-    //     { name: 'Z', latLng: [45, -77], color: 'grey' },
-    //   ],
-    // };
-    // var g = nm.addNetLayer('JohnNet', map1); // DO IT LIKE THISSSSS
     var g2 = nm.addNetLayer('esnet', mapData); // DO IT LIKE THISSSSS
     // twinkle(nm, g2, 'esnet');
 
-    //--- lets configure a popup to fire when a user clicks on CKT-BIG-A-Z
-    if (0) {
-      //--- this seems to mess with events destined to the lower z indexes even when opacity is 0
-      d3.select('div.tooltip')
-        .style('opacity', 0)
-        .style('position', 'absolute')
-        .style('width', '100px')
-        .style('height', '50px')
-        .style('background-color', '#eee')
-        .style('border', 'solid')
-        .style('border-width', '1px')
-        .style('border-radius', '5px')
-        .style('padding', '10px')
-        .style('z-index', 100);
+    // //--- lets configure a popup to fire when a user clicks on CKT-BIG-A-Z
+    // if (0) {
+    //   //--- this seems to mess with events destined to the lower z indexes even when opacity is 0
+    //   d3.select('div.tooltip')
+    //     .style('opacity', 0)
+    //     .style('position', 'absolute')
+    //     .style('width', '100px')
+    //     .style('height', '50px')
+    //     .style('background-color', '#eee')
+    //     .style('border', 'solid')
+    //     .style('border-width', '1px')
+    //     .style('border-radius', '5px')
+    //     .style('padding', '10px')
+    //     .style('z-index', 100);
 
-      function me(e, d) {
-        var tooltip = d3.select('div.tooltip');
-        tooltip
-          .html('this is a tool tip')
-          .style('opacity', 1)
-          .style('left', e.clientX + 'px')
-          .style('top', e.clientY + 'px');
-      }
-      function ml(e, d) {
-        var tooltip = d3.select('div.tooltip');
-        tooltip.style('opacity', 0);
-      }
+    //   function me(e, d) {
+    //     var tooltip = d3.select('div.tooltip');
+    //     tooltip
+    //       .html('this is a tool tip')
+    //       .style('opacity', 1)
+    //       .style('left', e.clientX + 'px')
+    //       .style('top', e.clientY + 'px');
+    //   }
+    //   function ml(e, d) {
+    //     var tooltip = d3.select('div.tooltip');
+    //     tooltip.style('opacity', 0);
+    //   }
 
-      //--- show the popup when mouse is over the circuit, not great for touch pads
-      //--- but shows what can be done
-      g.select('path.edge-az-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
-      g.select('path.edge-za-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
-    }
-
-    //--- test 2 loads data from web svc
-    // var map2 = d3.json(esnetjson).then(function (data) {
-    //   console.log('test2');
-    //   console.log(data);
-    //   var g = nm.addNetLayer('esnet', data);
-    //   twinkle(nm, g, 'esnet');
-    // });
+    //   //--- show the popup when mouse is over the circuit, not great for touch pads
+    //   //--- but shows what can be done
+    //   g.select('path.edge-az-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
+    //   g.select('path.edge-za-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
+    // }
 
     //----  helper
     function getRandomInt(min, max) {
