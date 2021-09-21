@@ -13,9 +13,8 @@ svg circle.node {
 svg path.edge {
         stroke-linecap: butt;
         stroke-width: 3;
-        /* stroke: #aaa; */
-        fill:  transparent;
-        pointer-events: all;
+        fill:  none;
+        pointer-events: visiblePainted !important;
 }
 
 svg path.animated-edge {

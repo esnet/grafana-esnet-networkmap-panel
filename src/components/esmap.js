@@ -65,7 +65,7 @@ function renderEdges(g, data, ref) {
     .attr('text', function (d) {
       return d.AZname;
     })
-    .attr('pointer-events', 'visible')
+    .attr('pointer-events', 'visiblePainted')
     .on('mouseover', function (event, d) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
@@ -111,7 +111,7 @@ function renderEdges(g, data, ref) {
     .attr('text', function (d) {
       return d.ZAname;
     })
-    .attr('pointer-events', 'visible')
+    .attr('pointer-events', 'visiblePainted')
     .on('mouseover', function (event, d) {
       div
         .html(() => {
@@ -216,6 +216,7 @@ function renderEdgeControl(g, data, ref) {
     ref.update();
     //--- this is where we can update json????
     ref.updateMapJson(data);
+    // find a way to persist zoom and center lat/lng
   }
 
   data.edges.forEach(function (d) {
@@ -247,6 +248,7 @@ function renderEdgeControl(g, data, ref) {
 
     feature.exit().remove();
   });
+  // ref.updateMapJson(data); not here
 }
 
 function renderNodes(g, data, ref) {
@@ -456,7 +458,6 @@ export class EsMap {
 
     //---swap out edge list with the filtered list
     data.edges = newEdges;
-    // this.updateMapJson(data); this breaks it
   }
 
   //--- loop through data and map objects and refresh them
