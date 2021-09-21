@@ -1,4 +1,5 @@
 import * as d3 from './d3.min.js';
+import React from 'react';
 
 function createSvgMarker(svg) {
   //--- setup markers
@@ -211,13 +212,10 @@ function renderEdgeControl(g, data, ref) {
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     d[0] = ll.lat;
     d[1] = ll.lng;
-    //--- this is where we can update json????
-    // newjson = get current json
-    // find point to change
-    // change point to d[0], d[1]
-    // options.mapjson = JSON.stringify(newjson)
     //--- rerender stuff
     ref.update();
+    //--- this is where we can update json????
+    ref.updateMapJson(data);
   }
 
   data.edges.forEach(function (d) {
@@ -239,7 +237,7 @@ function renderEdgeControl(g, data, ref) {
         var pt = ref.leafletMap.latLngToLayerPoint(ll);
         return 'translate(' + pt.x + ',' + pt.y + ')';
       })
-      //--- when mouse is on the dot, make sure d3 gets the even and dont let map pan
+      //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
       .on('mouseenter', function () {
         ref.leafletMap.dragging.disable();
       })
@@ -367,7 +365,7 @@ function offsetPoints(origPoints, offset) {
 }
 
 export class EsMap {
-  constructor(leafletMap, svg, div, curve) {
+  constructor(leafletMap, svg, div, curve, options, updateMapJson) {
     this.leafletMap = leafletMap;
     this.svg = svg;
     this.data = {};
@@ -376,6 +374,8 @@ export class EsMap {
     this.lineGen = d3.line().curve(curve);
     this.edit = 0;
     this.div = div;
+    this.options = options;
+    this.updateMapJson = updateMapJson;
 
     createSvgMarker(this.svg);
 
@@ -456,6 +456,7 @@ export class EsMap {
 
     //---swap out edge list with the filtered list
     data.edges = newEdges;
+    // this.updateMapJson(data); this breaks it
   }
 
   //--- loop through data and map objects and refresh them
@@ -464,7 +465,6 @@ export class EsMap {
     for (const [name, data] of Object.entries(this.data)) {
       this.updateCoordinates(data);
     }
-
     for (const [name, g] of Object.entries(this.mapLayers)) {
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
@@ -478,15 +478,13 @@ export class EsMap {
         cp_g.selectAll('*').remove();
       }
       renderNodes(node_g, data, this);
-      console.log(data);
-
       renderEdges(edge_g, data, this);
     }
   }
 
   addNetLayer(name, data) {
     var ref = this;
-    ref.data[name] = data;
+    ref.data[name] = data; //maybe use this to serialize
     var map_g = this.svg.append('g').attr('class', 'esmap');
     ref.mapLayers[name] = map_g;
 

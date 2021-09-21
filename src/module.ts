@@ -7,6 +7,11 @@ const OptionsCategory = ['Choose Fields'];
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
 plugin.setPanelOptions((builder) => {
+  builder.addTextInput({
+    path: 'test',
+    name: 'test',
+    defaultValue: 'hi',
+  });
   builder.addColorPicker({
     path: 'color',
     name: 'Default color',

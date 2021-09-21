@@ -199,6 +199,9 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
     }
   });
 
+  //take this out later
+  mapJson.aTest = 0;
+
   // returns parsedData: pairs & their value, infIn: aggregated by first group by, infOut: appregated by 2nd group by
   return [parsedData, infIn, infOut, mapJson, srcKey, dstKey, valKey];
 }

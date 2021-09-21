@@ -4,19 +4,22 @@ import '../css/esmap.css';
 import '../css/leaflet.css';
 
 export const Canvas = (props) => {
-  useEffect(() => {
-    const id = props.panelId;
-    const map = new NetworkMap('Map_' + id);
+  // var print = props.options.mapjson;
+  const panelId = props.panelId;
+  const data = props.data;
+  const mapData = props.mapData;
+  const options = props.options;
+  const updateMapJson = props.updateMapJson;
+  // const json = props.json;
+  // const setJson = props.setJson;
 
-    var thisMap = map.renderMap(
-      props.data,
-      props.mapData,
-      props.options.startLat,
-      props.options.startLng,
-      props.options.startZoom
-    );
-    // SUPER IMPORTANT!!! this removes the old map before rerendering
+  useEffect(() => {
+    const map = new NetworkMap('Map_' + panelId);
+    var thisMap = map.renderMap(data, mapData, options, updateMapJson);
+
     return () => {
+      // updateMapJson();
+      // SUPER IMPORTANT!!! this removes the old map before rerendering
       if (thisMap) {
         thisMap.off();
         thisMap.remove();
