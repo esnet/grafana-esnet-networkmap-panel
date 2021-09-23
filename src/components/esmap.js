@@ -44,6 +44,7 @@ function createSvgMarker(svg) {
 
 function renderEdges(g, data, ref) {
   var div = ref.div;
+  const edgeWidth = ref.options.edgeWidth;
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
     .enter()
@@ -59,6 +60,7 @@ function renderEdges(g, data, ref) {
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
     })
+    .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
       return 'edge edge-az edge-az-' + d.name;
     })
@@ -105,6 +107,7 @@ function renderEdges(g, data, ref) {
     .attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
     })
+    .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
       return 'edge edge-za edge-za-' + d.name;
     })
@@ -258,7 +261,7 @@ function renderNodes(g, data, ref) {
   feature
     .enter()
     .append('circle')
-    .attr('r', 5)
+    .attr('r', ref.options.nodeWidth)
     .attr('class', 'node')
     .attr('text', function (d) {
       return d.name;
@@ -372,7 +375,7 @@ export class EsMap {
     this.svg = svg;
     this.data = {};
     this.mapLayers = {};
-    this.offset = 3;
+    this.offset = options.pathOffset;
     this.lineGen = d3.line().curve(curve);
     this.edit = 0;
     this.div = div;

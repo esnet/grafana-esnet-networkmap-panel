@@ -12,7 +12,6 @@ svg circle.node {
 
 svg path.edge {
         stroke-linecap: butt;
-        stroke-width: 3;
         fill:  none;
         pointer-events: visiblePainted !important;
 }

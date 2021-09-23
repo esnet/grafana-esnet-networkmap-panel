@@ -7,11 +7,6 @@ const OptionsCategory = ['Choose Fields'];
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
 plugin.setPanelOptions((builder) => {
-  builder.addTextInput({
-    path: 'test',
-    name: 'test',
-    defaultValue: 'hi',
-  });
   builder.addColorPicker({
     path: 'color',
     name: 'Default color',
@@ -35,6 +30,37 @@ plugin.setPanelOptions((builder) => {
     name: 'Node highlight color',
     description: 'The color to highlight nodes that match the query',
     defaultValue: 'red',
+  });
+  builder.addSliderInput({
+    path: 'nodeWidth',
+    name: 'Node Size',
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 1,
+    },
+  });
+  builder.addSliderInput({
+    path: 'edgeWidth',
+    name: 'Edge Width',
+    defaultValue: 3,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 1,
+    },
+  });
+  builder.addSliderInput({
+    path: 'pathOffset',
+    name: 'Edge Offset',
+    description: 'The offset between AZ path and ZA path',
+    defaultValue: 3,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 1,
+    },
   });
   builder.addNumberInput({
     path: 'startLat',

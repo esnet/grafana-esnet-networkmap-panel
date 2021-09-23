@@ -14,13 +14,13 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1632416155206,
+  "time": 1632420201888,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "2040d54dc018e5f6ed5da958494519e52515bd36cc22d05462219633d0d605bb",
+    "module.js.map": "d6819e393ef00593924910a5a132b8481017754ae1df8a41b75142b708e674e1",
     "plugin.json": "dba0660f9a5ddb6483c019bc0df4a56b9f9713aed7fb71e976bf2fecd496066a",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
@@ -28,16 +28,16 @@ Hash: SHA512
     "components/cr copy.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "f13b9c598213b13198de1486b4044e3c2ed2752a1060c9dd99400de2b7a9ba81",
-    "module.js": "b0a04b40094741b44f076d76995add8d2537d1cb62386b5048a47a9ad50a22b4"
+    "module.js": "b192951398e3befeb385e46ec22f1371790913f6fddbee24bafc04c92930195c"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqEEARMKAAYFAmFMsZsACgkQfk0ManCIZudQywIJAfZyAudcxJfOIsWOfUIk
-v9jibmx7U6483FUHENyWqhYaMdXOTLaQzlLaEsfxtQguy5bsKsz7QE3SBNTx
-m4fRshBTAgd2wmfl24x5b6UqLZFNvSIm6dph7KETlm4kFwri6UnLUj73n+p4
-VhCAaH8kU7+kuiGskNYbLIjArPb8BNNx0Or45g==
-=lSpX
+wqAEARMKAAYFAmFMwWoACgkQfk0ManCIZufpQAII3rftKYWlTXfd+ryXFGZ8
+3Q+MsICCnnvlUzCfupJnwJD5GvGAOQyYMA/XI6lk1RoMnH8YT4jAH/sPpX2g
+9MZodhwCBjukK8ZwHiRUUKFSCExi0W6hNd1ZadAX8eZMjyxBmlM9JoP4b5bj
+NcYTdInvWgGSD6HPS2EL4tqi4mlaRS59t37l
+=qWfI
 -----END PGP SIGNATURE-----

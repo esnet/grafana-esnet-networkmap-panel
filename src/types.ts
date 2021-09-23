@@ -9,5 +9,7 @@ export interface MapOptions {
   startLat: number;
   startLng: number;
   startZoom: number;
-  test: string;
+  nodeWidth: number;
+  edgeWidth: number;
+  pathOffset: number;
 }
