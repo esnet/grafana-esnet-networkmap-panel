@@ -10,6 +10,8 @@ export const Canvas = (props) => {
   const mapData = props.mapData;
   const options = props.options;
   const updateMapJson = props.updateMapJson;
+  const height = props.height;
+  const width = props.width;
   // const json = props.json;
   // const setJson = props.setJson;
 
@@ -25,7 +27,7 @@ export const Canvas = (props) => {
         thisMap.remove();
       }
     };
-  });
+  }, [width, height]);
   const mapHeight = props.height - 25;
 
   return (

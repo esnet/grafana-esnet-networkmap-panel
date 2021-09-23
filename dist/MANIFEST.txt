@@ -14,30 +14,30 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1632258795978,
+  "time": 1632416155206,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "cf6b061c26a3e798542a8792897935d2bab7b8dd40a2ed7f16fffca3e3262705",
-    "plugin.json": "3d5d6d9ee4ce75a1434025c463e2882a1f6a9318e938fd301f88d362bec52302",
+    "module.js.map": "2040d54dc018e5f6ed5da958494519e52515bd36cc22d05462219633d0d605bb",
+    "plugin.json": "dba0660f9a5ddb6483c019bc0df4a56b9f9713aed7fb71e976bf2fecd496066a",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "f13b9c598213b13198de1486b4044e3c2ed2752a1060c9dd99400de2b7a9ba81",
-    "module.js": "5d2b8ef5e192ca9f0356576794cc3414b5e3950f888c35c6479e13d677b359b2"
+    "module.js": "b0a04b40094741b44f076d76995add8d2537d1cb62386b5048a47a9ad50a22b4"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqIEARMKAAYFAmFKSuwACgkQfk0ManCIZueuzgIJAcFMT4qjkHEsTuIFWxtV
-zqTMh2vTxjanXUMjBYVcUMbcK0YnuQEcPnbf4r9WJpdDt1rKbaTz2ZLTBndf
-gvYLQTlpAgkB+F9D8UhGMZe0RrW7BKbwsVYNRSAEdU17ac7ooDOBw+g+AlMe
-kwzn8QMq/x/PYi9JGbO1g5eYCeKbi9AXOJJH1v8=
-=nvT7
+wqEEARMKAAYFAmFMsZsACgkQfk0ManCIZudQywIJAfZyAudcxJfOIsWOfUIk
+v9jibmx7U6483FUHENyWqhYaMdXOTLaQzlLaEsfxtQguy5bsKsz7QE3SBNTx
+m4fRshBTAgd2wmfl24x5b6UqLZFNvSIm6dph7KETlm4kFwri6UnLUj73n+p4
+VhCAaH8kU7+kuiGskNYbLIjArPb8BNNx0Or45g==
+=lSpX
 -----END PGP SIGNATURE-----
