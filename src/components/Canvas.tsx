@@ -27,7 +27,7 @@ export const Canvas = (props) => {
         thisMap.remove();
       }
     };
-  }, [width, height]);
+  }, [width, height, panelId, data]);
   const mapHeight = props.height - 25;
 
   return (
