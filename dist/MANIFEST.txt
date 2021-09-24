@@ -10,34 +10,35 @@ Hash: SHA512
   "rootUrls": [
     "https://dashboard.stardust.es.net/",
     "http://localhost:3000/",
-    "http://localhost:3002/"
+    "http://localhost:3002/",
+    "https://public.stardust.es.net/"
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1632420201888,
+  "time": 1632505622237,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "d6819e393ef00593924910a5a132b8481017754ae1df8a41b75142b708e674e1",
-    "plugin.json": "dba0660f9a5ddb6483c019bc0df4a56b9f9713aed7fb71e976bf2fecd496066a",
+    "module.js.map": "08826372e5877b81e3f4482a6281633d85cf45697ad06d9037dfdebe22934f45",
+    "plugin.json": "abf1b19e94478fc7a498e53ae390211b1285bec7eb702deb3a94b200eea03b84",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "f13b9c598213b13198de1486b4044e3c2ed2752a1060c9dd99400de2b7a9ba81",
-    "module.js": "b192951398e3befeb385e46ec22f1371790913f6fddbee24bafc04c92930195c"
+    "module.js": "30588456e99eaddf122ad014d4bd656b663ad32a111d3ef6afbad81ec35e90cf"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqAEARMKAAYFAmFMwWoACgkQfk0ManCIZufpQAII3rftKYWlTXfd+ryXFGZ8
-3Q+MsICCnnvlUzCfupJnwJD5GvGAOQyYMA/XI6lk1RoMnH8YT4jAH/sPpX2g
-9MZodhwCBjukK8ZwHiRUUKFSCExi0W6hNd1ZadAX8eZMjyxBmlM9JoP4b5bj
-NcYTdInvWgGSD6HPS2EL4tqi4mlaRS59t37l
-=qWfI
+wqIEARMKAAYFAmFODxYACgkQfk0ManCIZufxIgIJASv7IqXemCGStQGxpFXr
+izCR6ukOKaItxCNvLnnA8y4M2W9n9V2QZ0U6DQreL+t/9x32w9Ycj/G2CpyL
+NzEA27kwAgkBGmwGCeOm+Uq2v4JMjd+RIDQar9XXQNorR4ZhVuWha5CeDW1o
+in2bCgcqgYAEJ1GM5KC1Ckjr2jYOEAWY3qPfSRU=
+=2u77
 -----END PGP SIGNATURE-----
