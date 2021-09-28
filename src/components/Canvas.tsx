@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import NetworkMap from './RenderMap.js';
 import '../css/esmap.css';
 import '../css/leaflet.css';
+import { urlUtil } from '@grafana/data';
 
 export const Canvas = (props) => {
   // var print = props.options.mapjson;
@@ -12,12 +13,20 @@ export const Canvas = (props) => {
   const updateMapJson = props.updateMapJson;
   const height = props.height;
   const width = props.width;
-  // const json = props.json;
-  // const setJson = props.setJson;
+  const updateCenter = props.updateCenter;
+  var editMode = props.editMode;
+
+  var params = urlUtil.getUrlSearchParams();
+  if (params.editPanel != null) {
+    props.editMode = 1;
+    // call update map?
+  } else {
+    props.editMode = 0;
+  }
 
   useEffect(() => {
     const map = new NetworkMap('Map_' + panelId);
-    var thisMap = map.renderMap(data, mapData, options, updateMapJson);
+    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter);
 
     return () => {
       // updateMapJson();
@@ -27,7 +36,7 @@ export const Canvas = (props) => {
         thisMap.remove();
       }
     };
-  }, [width, height, panelId]);
+  }, [width, height, panelId, editMode]);
   const mapHeight = props.height - 25;
 
   return (

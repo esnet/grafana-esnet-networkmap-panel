@@ -17,7 +17,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData, options, updateMapJson) {
+  renderMap(parsedData, mapData, options, updateMapJson, updateCenter) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -64,19 +64,20 @@ export default class NetworkMap {
     //---  note:  1 map could have multiple esmap svg layers
     //---         this can be used to allow leaflet to turn on and off layers at
     //---         different zoom levels in the future(imagine a regional and national map)
-    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson);
+    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter);
 
     const params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
       nm.editMode(1);
+      // editMode = 1;
       d3.select('button#edit_mode').style('visibility', 'visible');
       // call update map?
     } else {
       nm.editMode(0);
+      // editMode = 0;
       d3.select('button#edit_mode').style('visibility', 'hidden');
     }
 
-    // nm.editMode(1);
 
     function toggleEdit(e) {
       var d = d3.select('button#edit_mode');
@@ -94,39 +95,6 @@ export default class NetworkMap {
     var g2 = nm.addNetLayer('esnet', mapData); // DO IT LIKE THISSSSS
     // twinkle(nm, g2, 'esnet');
 
-    // //--- lets configure a popup to fire when a user clicks on CKT-BIG-A-Z
-    // if (0) {
-    //   //--- this seems to mess with events destined to the lower z indexes even when opacity is 0
-    //   d3.select('div.tooltip')
-    //     .style('opacity', 0)
-    //     .style('position', 'absolute')
-    //     .style('width', '100px')
-    //     .style('height', '50px')
-    //     .style('background-color', '#eee')
-    //     .style('border', 'solid')
-    //     .style('border-width', '1px')
-    //     .style('border-radius', '5px')
-    //     .style('padding', '10px')
-    //     .style('z-index', 100);
-
-    //   function me(e, d) {
-    //     var tooltip = d3.select('div.tooltip');
-    //     tooltip
-    //       .html('this is a tool tip')
-    //       .style('opacity', 1)
-    //       .style('left', e.clientX + 'px')
-    //       .style('top', e.clientY + 'px');
-    //   }
-    //   function ml(e, d) {
-    //     var tooltip = d3.select('div.tooltip');
-    //     tooltip.style('opacity', 0);
-    //   }
-
-    //   //--- show the popup when mouse is over the circuit, not great for touch pads
-    //   //--- but shows what can be done
-    //   g.select('path.edge-az-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
-    //   g.select('path.edge-za-CKT-BIG-A-Z').on('mouseenter', me).on('mouseleave', ml);
-    // }
 
     //----  helper
     function getRandomInt(min, max) {

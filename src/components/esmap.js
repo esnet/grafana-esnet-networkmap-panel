@@ -218,7 +218,9 @@ function renderEdgeControl(g, data, ref) {
     //--- rerender stuff
     ref.update();
     //--- this is where we can update json????
-    ref.updateMapJson(data);
+    var zoom = ref.leafletMap.getZoom();
+    var center = L.latLng(ref.leafletMap.getCenter());
+    ref.updateMapJson(data, zoom, center);
     // find a way to persist zoom and center lat/lng
   }
 
@@ -370,7 +372,7 @@ function offsetPoints(origPoints, offset) {
 }
 
 export class EsMap {
-  constructor(leafletMap, svg, div, curve, options, updateMapJson) {
+  constructor(leafletMap, svg, div, curve, options, updateMapJson, updateCenter) {
     this.leafletMap = leafletMap;
     this.svg = svg;
     this.data = {};
@@ -381,6 +383,7 @@ export class EsMap {
     this.div = div;
     this.options = options;
     this.updateMapJson = updateMapJson;
+    this.updateCenter = updateCenter;
 
     createSvgMarker(this.svg);
 
@@ -404,6 +407,7 @@ export class EsMap {
     } else {
       this.edit = 0;
     }
+
     this.update();
     return this.edit;
   }
@@ -477,6 +481,9 @@ export class EsMap {
 
       if (this.edit == 1) {
         renderEdgeControl(cp_g, data, this);
+        var zoom = this.leafletMap.getZoom();
+        var center = L.latLng(this.leafletMap.getCenter());
+        this.updateCenter(zoom, center);
       } else {
         //  delete all the control point g children
         cp_g.selectAll('*').remove();

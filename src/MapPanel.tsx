@@ -12,12 +12,23 @@ export class MapPanel extends Component<Props> {
     super(props);
   }
 
-  updateMapJson = (newData) => {
+  updateMapJson = (newData, zoom, center) => {
     const { options } = this.props;
-    let { mapjson } = options;
-    // const { data } = this.props;
+    let { mapjson, startLat, startLng, startZoom } = options;
     mapjson = JSON.stringify(newData);
-    this.props.onOptionsChange({ ...options, mapjson });
+    startZoom = zoom;
+    startLat = center.lat;
+    startLng = center.lng;
+    this.props.onOptionsChange({ ...options, mapjson, startZoom, startLat, startLng });
+  };
+
+  updateCenter = (zoom, center) => {
+    const { options } = this.props;
+    let { startLat, startLng, startZoom } = options;
+    startZoom = zoom;
+    startLat = center.lat;
+    startLng = center.lng;
+    this.props.onOptionsChange({ ...options, startZoom, startLat, startLng });
   };
 
   render() {
@@ -50,8 +61,8 @@ export class MapPanel extends Component<Props> {
         data={parsedData}
         mapData={mapData}
         updateMapJson={this.updateMapJson}
-        // json={json}
-        // setJson={setJson}
+        updateCenter={this.updateCenter}
+        editMode={0}
       />
     );
   }
