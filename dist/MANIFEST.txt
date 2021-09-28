@@ -15,30 +15,30 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1632505622237,
+  "time": 1632813223904,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "08826372e5877b81e3f4482a6281633d85cf45697ad06d9037dfdebe22934f45",
-    "plugin.json": "abf1b19e94478fc7a498e53ae390211b1285bec7eb702deb3a94b200eea03b84",
+    "module.js.map": "08749754d772bb67ccf2d61b5e48f534919636d562120626d64af6fedb27da27",
+    "plugin.json": "fddd751663fde08afad823964d3a44cc0bab9bfade82155d63addeeb79314507",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "f13b9c598213b13198de1486b4044e3c2ed2752a1060c9dd99400de2b7a9ba81",
-    "module.js": "30588456e99eaddf122ad014d4bd656b663ad32a111d3ef6afbad81ec35e90cf"
+    "module.js": "aed21e045831750fd339ef613367f2f664e8733e16a8b5be5df86b7d92992065"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqIEARMKAAYFAmFODxYACgkQfk0ManCIZufxIgIJASv7IqXemCGStQGxpFXr
-izCR6ukOKaItxCNvLnnA8y4M2W9n9V2QZ0U6DQreL+t/9x32w9Ycj/G2CpyL
-NzEA27kwAgkBGmwGCeOm+Uq2v4JMjd+RIDQar9XXQNorR4ZhVuWha5CeDW1o
-in2bCgcqgYAEJ1GM5KC1Ckjr2jYOEAWY3qPfSRU=
-=2u77
+wqIEARMKAAYFAmFSwKgACgkQfk0ManCIZufOpQIJAUecK1752dik4zGpB4N4
+LVNxTyCooCb9PKxJKVUhOPcFNgIIUaqbMkETPNBcNh3QWyGcJluIL+zrdFvQ
+SmGHKay3AgkBf+1ynKCiy4y3ya//cyBcReQUkCGdgd6uwE71Ox09mxIvtRiM
+e4DIkrT22eiQ4l4wFf+zc1fH+ZeI1Fk+qeRABJQ=
+=bx2W
 -----END PGP SIGNATURE-----
