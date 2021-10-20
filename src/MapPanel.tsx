@@ -12,14 +12,15 @@ export class MapPanel extends Component<Props> {
     super(props);
   }
 
-  updateMapJson = (newData, zoom, center) => {
+  updateMapJson = (newDataL1, newDataL2, zoom, center) => {
     const { options } = this.props;
-    let { mapjsonL1, startLat, startLng, startZoom } = options;
-    mapjsonL1 = JSON.stringify(newData);
+    let { mapjsonL1, mapjsonL2, startLat, startLng, startZoom } = options;
+    mapjsonL1 = JSON.stringify(newDataL1);
+    mapjsonL2 = JSON.stringify(newDataL2);
     startZoom = zoom;
     startLat = center.lat;
     startLng = center.lng;
-    this.props.onOptionsChange({ ...options, mapjsonL1, startZoom, startLat, startLng });
+    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, startZoom, startLat, startLng });
   };
 
   updateCenter = (zoom, center) => {
@@ -33,22 +34,38 @@ export class MapPanel extends Component<Props> {
 
   render() {
     const { options, data, width, height, id } = this.props;
-    var colors = {
+    var colorsL1 = {
       defaultColor: options.color,
       nodeHighlight: options.nodeHighlightL1,
     };
-    var fields = {
+    var colorsL2 = {
+      defaultColor: options.color,
+      nodeHighlight: options.nodeHighlightL2,
+    };
+    var fieldsL1 = {
       srcField: options.srcFieldL1,
       dstField: options.dstFieldL1,
       valField: options.valFieldL1,
       endpointId: options.endpointIdL1,
     };
-    var parsedData = {};
-    var mapData;
+    var fieldsL2 = {
+      srcField: options.srcFieldL2,
+      dstField: options.dstFieldL2,
+      valField: options.valFieldL2,
+      endpointId: options.endpointIdL2,
+    };
+    var parsedDataL1 = {};
+    var parsedDataL2 = {};
+    var mapDataL1;
+    var mapDataL2;
 
     try {
-      parsedData = parseData(data, options.mapjsonL1, colors, fields);
-      mapData = parsedData[3];
+      parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1);
+      mapDataL1 = parsedDataL1[3];
+      if (options.mapjsonL2) {
+        parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2);
+        mapDataL2 = parsedDataL2[3];
+      }
     } catch (error) {
       console.error('Parsing error : ', error);
     }
@@ -58,8 +75,10 @@ export class MapPanel extends Component<Props> {
         width={width}
         panelId={id}
         options={options}
-        data={parsedData}
-        mapData={mapData}
+        dataL1={parsedDataL1}
+        dataL2={parsedDataL2}
+        mapDataL1={mapDataL1}
+        mapDataL2={mapDataL2}
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
         editMode={0}

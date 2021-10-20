@@ -7,8 +7,8 @@ import { urlUtil } from '@grafana/data';
 export const Canvas = (props) => {
   // var print = props.options.mapjson;
   const panelId = props.panelId;
-  const data = props.data;
-  const mapData = props.mapData;
+  const data = { layer1: props.dataL1, layer2: props.dataL2 };
+  const mapData = { layer1: props.mapDataL1, layer2: props.mapDataL2 };
   const options = props.options;
   const updateMapJson = props.updateMapJson;
   const height = props.height;

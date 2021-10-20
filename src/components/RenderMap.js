@@ -12,7 +12,7 @@ export default class NetworkMap {
   /**
    * Renders the Network Map in the panel.
    *
-   * @param parseData - the paresed data from parseData.js
+   * @param parsedData - the parsed data from parseData.js
    * @param header1, @param header2 - headers for the two x-axis labels, set in options panel
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
@@ -33,9 +33,6 @@ export default class NetworkMap {
     // ----------------------------------------------------------
 
     // set variables
-    const dataPairs = parsedData[0];
-    const dataEnd1 = parsedData[1];
-    const dataEnd2 = parsedData[2];
     const startLat = options.startLat;
     const startLng = options.startLng;
     const startZoom = options.startZoom;
@@ -95,7 +92,10 @@ export default class NetworkMap {
 
     var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
 
-    var g2 = nm.addNetLayer('esnet', mapData); // DO IT LIKE THISSSSS
+    var g1 = nm.addNetLayer('esnet', mapData.layer1); // DO IT LIKE THISSSSS
+    if (options.layer2) {
+      var g2 = nm.addNetLayer('esnet', mapData.layer2);
+    }
     // twinkle(nm, g2, 'esnet');
 
     //----  helper
