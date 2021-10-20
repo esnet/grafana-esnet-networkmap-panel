@@ -14,12 +14,12 @@ export class MapPanel extends Component<Props> {
 
   updateMapJson = (newData, zoom, center) => {
     const { options } = this.props;
-    let { mapjson, startLat, startLng, startZoom } = options;
-    mapjson = JSON.stringify(newData);
+    let { mapjsonL1, startLat, startLng, startZoom } = options;
+    mapjsonL1 = JSON.stringify(newData);
     startZoom = zoom;
     startLat = center.lat;
     startLng = center.lng;
-    this.props.onOptionsChange({ ...options, mapjson, startZoom, startLat, startLng });
+    this.props.onOptionsChange({ ...options, mapjsonL1, startZoom, startLat, startLng });
   };
 
   updateCenter = (zoom, center) => {
@@ -35,19 +35,19 @@ export class MapPanel extends Component<Props> {
     const { options, data, width, height, id } = this.props;
     var colors = {
       defaultColor: options.color,
-      nodeHighlight: options.nodeHighlight,
+      nodeHighlight: options.nodeHighlightL1,
     };
     var fields = {
-      srcField: options.srcField,
-      dstField: options.dstField,
-      valField: options.valField,
-      endpointId: options.endpointId,
+      srcField: options.srcFieldL1,
+      dstField: options.dstFieldL1,
+      valField: options.valFieldL1,
+      endpointId: options.endpointIdL1,
     };
     var parsedData = {};
     var mapData;
 
     try {
-      parsedData = parseData(data, options.mapjson, colors, fields);
+      parsedData = parseData(data, options.mapjsonL1, colors, fields);
       mapData = parsedData[3];
     } catch (error) {
       console.error('Parsing error : ', error);

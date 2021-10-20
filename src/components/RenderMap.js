@@ -45,12 +45,16 @@ export default class NetworkMap {
     var map = L.map(this.containerID, {
       zoomAnimation: false,
       fadeAnimation: false,
+      zoomSnap: 0.25,
+      zoomDelta: 0.5,
+      scrollWheelZoom: false,
     }).setView([startLat, startLng], startZoom);
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
       {
         attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-        maxZoom: 18,
+        minZoom: 2,
+        maxZoom: 10,
         ext: 'png',
       }
     ).addTo(map);
@@ -78,7 +82,6 @@ export default class NetworkMap {
       d3.select('button#edit_mode').style('visibility', 'hidden');
     }
 
-
     function toggleEdit(e) {
       var d = d3.select('button#edit_mode');
       if (nm.edit == 1) {
@@ -94,7 +97,6 @@ export default class NetworkMap {
 
     var g2 = nm.addNetLayer('esnet', mapData); // DO IT LIKE THISSSSS
     // twinkle(nm, g2, 'esnet');
-
 
     //----  helper
     function getRandomInt(min, max) {
