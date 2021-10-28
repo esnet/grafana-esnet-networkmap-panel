@@ -218,10 +218,16 @@ function renderEdgeControl(g, data, ref) {
     //--- rerender stuff
     ref.update();
     //--- this is where we can update json????
+    // var zoom = ref.leafletMap.getZoom();
+    // var center = L.latLng(ref.leafletMap.getCenter());
+    // ref.updateMapJson(data, zoom, center);
+    // find a way to persist zoom and center lat/lng
+  }
+
+  function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    ref.updateMapJson(data, zoom, center);
-    // find a way to persist zoom and center lat/lng
+    ref.updateMapJson(data['layer1'], data['layer2'], zoom, center);
   }
 
   data.edges.forEach(function (d) {
@@ -234,7 +240,7 @@ function renderEdgeControl(g, data, ref) {
       .attr('r', 4)
       .attr('class', 'control controlPoint')
       .merge(feature)
-      .call(d3.drag().on('drag', dragged));
+      .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
     my_g
       .selectAll('circle')

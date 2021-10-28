@@ -14,7 +14,9 @@ export const Canvas = (props) => {
   const height = props.height;
   const width = props.width;
   const updateCenter = props.updateCenter;
-  var editMode = props.editMode;
+  const editMode = props.editMode;
+  const layer2 = props.options.layer2;
+  const layer1 = props.options.layer1;
 
   var params = urlUtil.getUrlSearchParams();
   if (params.editPanel != null) {
@@ -36,7 +38,7 @@ export const Canvas = (props) => {
         thisMap.remove();
       }
     };
-  }, [width, height, panelId, editMode]); // adding options var here breaks it
+  }, [width, height, panelId, editMode, layer2, layer1]); // adding options var here breaks it
   const mapHeight = props.height - 25;
 
   return (

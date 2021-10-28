@@ -15,8 +15,12 @@ export class MapPanel extends Component<Props> {
   updateMapJson = (newDataL1, newDataL2, zoom, center) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, startLat, startLng, startZoom } = options;
-    mapjsonL1 = JSON.stringify(newDataL1);
-    mapjsonL2 = JSON.stringify(newDataL2);
+    if (newDataL1 != null) {
+      mapjsonL1 = JSON.stringify(newDataL1);
+    }
+    if (newDataL2 != null) {
+      mapjsonL2 = JSON.stringify(newDataL2);
+    }
     startZoom = zoom;
     startLat = center.lat;
     startLng = center.lng;

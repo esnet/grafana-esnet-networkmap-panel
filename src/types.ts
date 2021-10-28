@@ -1,5 +1,6 @@
 export interface MapOptions {
   color: string;
+  layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;
   srcFieldL1: string;
