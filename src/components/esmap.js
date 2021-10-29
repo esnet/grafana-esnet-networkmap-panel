@@ -227,7 +227,9 @@ function renderEdgeControl(g, data, ref) {
   function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    ref.updateMapJson(data['layer1'], data['layer2'], zoom, center);
+    console.log(ref.data);
+    console.log(data);
+    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], zoom, center);
   }
 
   data.edges.forEach(function (d) {

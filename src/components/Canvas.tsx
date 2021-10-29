@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import NetworkMap from './RenderMap.js';
 import '../css/esmap.css';
 import '../css/leaflet.css';
-import { urlUtil } from '@grafana/data';
+// import { urlUtil } from '@grafana/data';
 
 export const Canvas = (props) => {
   // var print = props.options.mapjson;
@@ -18,13 +18,13 @@ export const Canvas = (props) => {
   const layer2 = props.options.layer2;
   const layer1 = props.options.layer1;
 
-  var params = urlUtil.getUrlSearchParams();
-  if (params.editPanel != null) {
-    props.editMode = 1;
-    // call update map?
-  } else {
-    props.editMode = 0;
-  }
+  // var params = urlUtil.getUrlSearchParams();
+  // if (params.editPanel != null) {
+  //   props.editMode = 1;
+  //   // call update map?
+  // } else {
+  //   props.editMode = 0;
+  // }
 
   useEffect(() => {
     const map = new NetworkMap('Map_' + panelId);

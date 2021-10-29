@@ -10,12 +10,6 @@ const layer2Bool = (layer2: boolean) => (config: MapOptions) => config.layer2 ==
 const layer1Bool = (layer1: boolean) => (config: MapOptions) => config.layer1 === layer1;
 
 plugin.setPanelOptions((builder) => {
-  builder.addColorPicker({
-    path: 'color',
-    name: 'Default color',
-    description: 'The default color for nodes and links',
-    defaultValue: 'grey',
-  });
   builder.addNumberInput({
     path: 'startLat',
     name: 'Starting Latitude of map',
@@ -52,6 +46,14 @@ plugin.setPanelOptions((builder) => {
     showIf: layer1Bool(true),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '',
+  });
+  builder.addColorPicker({
+    path: 'color1',
+    name: 'Layer 1 Default color',
+    category: LayersCategory,
+    showIf: layer1Bool(true),
+    description: 'The default color for nodes and links on Layer 1',
+    defaultValue: 'grey',
   });
   builder.addTextInput({
     path: 'endpointIdL1',
@@ -120,6 +122,14 @@ plugin.setPanelOptions((builder) => {
     description: 'JSON with edges and nodes of network map',
     showIf: layer2Bool(true),
     defaultValue: '',
+  });
+  builder.addColorPicker({
+    path: 'color2',
+    name: 'Layer 2 Default color',
+    category: LayersCategory,
+    showIf: layer2Bool(true),
+    description: 'The default color for nodes and links on Layer 2',
+    defaultValue: 'grey',
   });
   builder.addTextInput({
     path: 'endpointIdL2',

@@ -1,5 +1,6 @@
 export interface MapOptions {
-  color: string;
+  color1: string;
+  color2: string;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;
@@ -23,4 +24,5 @@ export interface MapOptions {
   startLat: number;
   startLng: number;
   startZoom: number;
+  editMode: boolean;
 }
