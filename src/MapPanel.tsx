@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps } from '@grafana/data';
+import { PanelProps, urlUtil } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
 import { Canvas } from 'components/Canvas';
@@ -15,8 +15,12 @@ export class MapPanel extends Component<Props> {
   updateMapJson = (newDataL1, newDataL2, zoom, center) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, startLat, startLng, startZoom } = options;
-    mapjsonL1 = JSON.stringify(newDataL1);
-    mapjsonL2 = JSON.stringify(newDataL2);
+    if (newDataL1 != null) {
+      mapjsonL1 = JSON.stringify(newDataL1);
+    }
+    if (newDataL2 != null) {
+      mapjsonL2 = JSON.stringify(newDataL2);
+    }
     startZoom = zoom;
     startLat = center.lat;
     startLng = center.lng;
@@ -34,12 +38,19 @@ export class MapPanel extends Component<Props> {
 
   render() {
     const { options, data, width, height, id } = this.props;
+    var params = urlUtil.getUrlSearchParams();
+    if (params.editPanel != null) {
+      options.editMode = true;
+      // call update map?
+    } else {
+      options.editMode = false;
+    }
     var colorsL1 = {
-      defaultColor: options.color,
+      defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
     };
     var colorsL2 = {
-      defaultColor: options.color,
+      defaultColor: options.color2,
       nodeHighlight: options.nodeHighlightL2,
     };
     var fieldsL1 = {
@@ -81,7 +92,7 @@ export class MapPanel extends Component<Props> {
         mapDataL2={mapDataL2}
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
-        editMode={0}
+        editMode={options.editMode}
       />
     );
   }
