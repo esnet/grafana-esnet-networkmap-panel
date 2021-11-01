@@ -16,30 +16,30 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1635782903822,
+  "time": 1635782987542,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "5acdcde15e8ff9fa2fc2d8ad2038a6d500275363b33e501e907675937b772fe1",
-    "plugin.json": "44ab3f3953c66c40faed7bad9fd5e5deb0a57768acec4a9a7162ffecf7f96503",
+    "module.js.map": "b249271f5f64c04c6539c56b981f44553fc752ff26c9d9dce3b14760b4872005",
+    "plugin.json": "3c54285acb8456c4a76ac73e4d6f2e58f2adda9c3d509ada2fae8c31a7e7c1ec",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "b3e3e9dc59d215c78a5f6ab26ebbad883256b76467276be9d357c54fbe2e69a5",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
-    "module.js": "7c09313b8aa44658e6b9a198b65b317d5dba6d730c269d45aea90935a0db820c"
+    "module.js": "1c132a853b7e84dd336f28a460f0cd0fb677b95e3e6dce03b3b26ca1a1fecc99"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqIEARMKAAYFAmGAEPgACgkQfk0ManCIZuccqwIJAZRD/osfHK1kQO+Nq1Mq
-AAL7xLYvCiRNWlGFCoWiu/t9+DA3U5Ly5VI7BIAcmwiZ9JfPLS2Ny38C4unn
-V6zT2dgXAgkBXmcwZNWFVNeGo0GYqaXJRKzGu9hrlKuGBRQsHM4038QWzWcD
-zFq3qQggCQWIQSxvKLvR5tY98wtw/lFPiGf3vlQ=
-=QLUT
+wqEEARMKAAYFAmGAEUsACgkQfk0ManCIZuexEgIJAX79G9fSDtS1idZWUrUb
+kXt2uuZ0moenwXQOZ+eUtsXRnEEZ5PeSEEJPXQgjDdXF5VcKulYTgVjZ1W2q
+ZTLvw9IHAgiLLxV2Zv4pGPGmL06YFZR0Tiy7UW7uEX5bb3geKGeds85hLqV3
+Jrwm0vt6o/ScF2ZHH48W8Yry9G8lNFMKfgTVAQ==
+=2VRz
 -----END PGP SIGNATURE-----
