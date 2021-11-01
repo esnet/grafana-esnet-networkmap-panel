@@ -43,8 +43,9 @@ export default class NetworkMap {
       zoomAnimation: false,
       fadeAnimation: false,
       zoomSnap: 0.25,
-      zoomDelta: 0.5,
+      zoomDelta: 0.25,
       scrollWheelZoom: false,
+      doubleClickZoom: false,
     }).setView([startLat, startLng], startZoom);
     L.tileLayer(
       'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
@@ -92,9 +93,12 @@ export default class NetworkMap {
 
     var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
 
-    var g1 = nm.addNetLayer('esnet', mapData.layer1); // DO IT LIKE THISSSSS
+    // Draw the map json data!!!
+    if (options.layer1) {
+      var g1 = nm.addNetLayer('layer1', mapData.layer1); 
+    }
     if (options.layer2) {
-      var g2 = nm.addNetLayer('esnet', mapData.layer2);
+      var g2 = nm.addNetLayer('layer2', mapData.layer2);
     }
     // twinkle(nm, g2, 'esnet');
 
