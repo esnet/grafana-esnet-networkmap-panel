@@ -41,11 +41,14 @@ export const Canvas = (props) => {
     };
   }, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
   const mapHeight = props.height - 25;
+  const tooltipWidth = 100;
+  const mapWidth = width - tooltipWidth;
 
   return (
     <div>
       <div className={'tooltip'}></div>
-      <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: props.width }}></div>
+      <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
+      <div style={{ height: mapHeight, width: tooltipWidth, background: 'black', float: 'left' }}></div>
       <button type="button" id="edit_mode">
         Turn Edit Mode Off
       </button>
