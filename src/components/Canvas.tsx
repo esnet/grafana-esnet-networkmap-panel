@@ -7,8 +7,8 @@ import '../css/leaflet.css';
 export const Canvas = (props) => {
   // var print = props.options.mapjson;
   const panelId = props.panelId;
-  const data = { layer1: props.dataL1, layer2: props.dataL2 };
-  const mapData = { layer1: props.mapDataL1, layer2: props.mapDataL2 };
+  const data = { layer1: props.dataL1, layer2: props.dataL2, layer3: props.dataL3 };
+  const mapData = { layer1: props.mapDataL1, layer2: props.mapDataL2, layer3: props.mapDataL3 };
   const options = props.options;
   const updateMapJson = props.updateMapJson;
   const height = props.height;
@@ -17,6 +17,7 @@ export const Canvas = (props) => {
   const editMode = props.editMode;
   const layer2 = props.options.layer2;
   const layer1 = props.options.layer1;
+  const layer3 = props.options.layer3;
 
   // var params = urlUtil.getUrlSearchParams();
   // if (params.editPanel != null) {
@@ -38,7 +39,7 @@ export const Canvas = (props) => {
         thisMap.remove();
       }
     };
-  }, [width, height, panelId, editMode, layer2, layer1]); // adding options var here breaks it
+  }, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
   const mapHeight = props.height - 25;
 
   return (

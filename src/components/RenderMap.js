@@ -94,11 +94,14 @@ export default class NetworkMap {
     var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
 
     // Draw the map json data!!!
-    if (options.layer1) {
-      var g1 = nm.addNetLayer('layer1', mapData.layer1); 
+    if (options.layer1 && mapData.layer1) {
+      var g1 = nm.addNetLayer('layer1', mapData.layer1);
     }
-    if (options.layer2) {
+    if (options.layer2 && mapData.layer2) {
       var g2 = nm.addNetLayer('layer2', mapData.layer2);
+    }
+    if (options.layer3 && mapData.layer3) {
+      var g3 = nm.addNetLayer('layer3', mapData.layer3);
     }
     // twinkle(nm, g2, 'esnet');
 

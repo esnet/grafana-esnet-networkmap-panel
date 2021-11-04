@@ -229,7 +229,7 @@ function renderEdgeControl(g, data, ref) {
     var center = L.latLng(ref.leafletMap.getCenter());
     console.log(ref.data);
     console.log(data);
-    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], zoom, center);
+    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3'], zoom, center);
   }
 
   data.edges.forEach(function (d) {
@@ -478,7 +478,10 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.leafletMap.dragging.enable();
+    // console.log(this.data);
     for (const [name, data] of Object.entries(this.data)) {
+      // console.log(name);
+      // console.log(data);
       this.updateCoordinates(data);
     }
     for (const [name, g] of Object.entries(this.mapLayers)) {
@@ -504,6 +507,7 @@ export class EsMap {
   addNetLayer(name, data) {
     var ref = this;
     ref.data[name] = data; //maybe use this to serialize
+    console.log(data);
     var map_g = this.svg.append('g').attr('class', 'esmap');
     ref.mapLayers[name] = map_g;
 

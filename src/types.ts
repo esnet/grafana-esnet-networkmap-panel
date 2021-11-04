@@ -1,6 +1,7 @@
 export interface MapOptions {
   color1: string;
   color2: string;
+  color3: string;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;
@@ -21,6 +22,16 @@ export interface MapOptions {
   nodeWidthL2: number;
   edgeWidthL2: number;
   pathOffsetL2: number;
+  layer3: boolean;
+  mapjsonL3: string;
+  nodeHighlightL3: string;
+  srcFieldL3: string;
+  dstFieldL3: string;
+  valFieldL3: string;
+  endpointIdL3: string;
+  nodeWidthL3: number;
+  edgeWidthL3: number;
+  pathOffsetL3: number;
   startLat: number;
   startLng: number;
   startZoom: number;
