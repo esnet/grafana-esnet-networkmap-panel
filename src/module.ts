@@ -4,12 +4,14 @@ import { MapPanel } from './MapPanel';
 
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
+const LegendCategory = ['Legend options'];
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 const layer1Bool = (layer1: boolean) => (config: MapOptions) => config.layer1 === layer1;
 const layer2Bool = (layer2: boolean) => (config: MapOptions) => config.layer2 === layer2;
 const layer3Bool = (layer3: boolean) => (config: MapOptions) => config.layer3 === layer3;
 
+// -------------------- Network Map Panel Options --------------------
 plugin.setPanelOptions((builder) => {
   builder.addNumberInput({
     path: 'startLat',
@@ -34,6 +36,7 @@ plugin.setPanelOptions((builder) => {
     },
   });
 
+  // -------------------- Layer Options -------------------
   builder.addBooleanSwitch({
     path: 'layer1',
     name: 'Layer 1 on',
@@ -262,79 +265,8 @@ plugin.setPanelOptions((builder) => {
       step: 0.5,
     },
   });
-  builder.addSelect({
-    path: 'srcFieldL3',
-    name: 'Layer 3 Source Field',
-    description: 'Select the field to match source nodes',
-    category: FieldsCategory,
-    showIf: layer3Bool(true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
-    },
-  });
-  builder.addSelect({
-    path: 'dstFieldL3',
-    name: 'Layer 3 Destination Field',
-    description: 'Select the field to match destination nodes',
-    category: FieldsCategory,
-    showIf: layer3Bool(true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
-    },
-  });
-  builder.addSelect({
-    path: 'valFieldL3',
-    name: 'Layer 3 Value Field',
-    description: 'Select the field to use for data values',
-    category: FieldsCategory,
-    showIf: layer3Bool(true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
-    },
-  });
 
+  // -------------------- Choose Fields --------------------
   builder.addSelect({
     path: 'srcFieldL1',
     name: 'Layer 1 Source Field',
@@ -478,6 +410,116 @@ plugin.setPanelOptions((builder) => {
         return Promise.resolve(options);
       },
     },
+  });
+  builder.addSelect({
+    path: 'srcFieldL3',
+    name: 'Layer 3 Source Field',
+    description: 'Select the field to match source nodes',
+    category: FieldsCategory,
+    showIf: layer3Bool(true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'dstFieldL3',
+    name: 'Layer 3 Destination Field',
+    description: 'Select the field to match destination nodes',
+    category: FieldsCategory,
+    showIf: layer3Bool(true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'valFieldL3',
+    name: 'Layer 3 Value Field',
+    description: 'Select the field to use for data values',
+    category: FieldsCategory,
+    showIf: layer3Bool(true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+
+  // -------------------- Legend Options --------------------
+  builder.addBooleanSwitch({
+    path: 'legendL1',
+    name: 'Show Layer 1 toggle',
+    category: LegendCategory,
+    defaultValue: true,
+  });
+  builder.addTextInput({
+    path: 'layerName1',
+    name: 'Layer 1 Display Name',
+    category: LegendCategory,
+    defaultValue: 'layer 1',
+  });
+  builder.addBooleanSwitch({
+    path: 'legendL2',
+    name: 'Show Layer 2 toggle',
+    category: LegendCategory,
+    defaultValue: true,
+  });
+  builder.addTextInput({
+    path: 'layerName2',
+    name: 'Layer 2 Display Name',
+    category: LegendCategory,
+    defaultValue: 'layer 2',
+  });
+  builder.addBooleanSwitch({
+    path: 'legendL3',
+    name: 'Show Layer 3 toggle',
+    category: LegendCategory,
+    defaultValue: true,
+  });
+  builder.addTextInput({
+    path: 'layerName3',
+    name: 'Layer 3 Display Name',
+    category: LegendCategory,
+    defaultValue: 'layer 3',
   });
 });
 

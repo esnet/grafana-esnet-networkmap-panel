@@ -72,13 +72,21 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
       });
-      div
+      // div
+      //   .html(() => {
+      //     var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
+      //     return text;
+      //   })
+      //   .style('left', ref.width + 'px')
+      //   .style('top', ref.height + 100 + 'px')
+      //   .transition()
+      //   .duration(500)
+      //   .style('opacity', 0.8);
+      d3.selectAll('#tooltip')
         .html(() => {
           var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
           return text;
         })
-        .style('left', event.pageX + 10 + 'px')
-        .style('top', event.pageY - 28 + 'px')
         .transition()
         .duration(500)
         .style('opacity', 0.8);
@@ -116,20 +124,28 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('mouseover', function (event, d) {
-      div
+      // div
+      //   .html(() => {
+      //     var text = '<p><b>' + d.ZAname + '</b></p><p><b>Volume: </b> ' + d.ZAdisplayValue + '</p>';
+      //     return text;
+      //   })
+      //   // .attr('class', 'tooltip')
+      //   .style('left', ref.width + 'px')
+      //   .style('top', ref.height + 100 + 'px')
+      //   .transition()
+      //   .duration(500)
+      //   .style('opacity', 0.8);
+      d3.select(this).attr('class', function (d) {
+        return 'animated-edge edge-za edge-za-' + d.name;
+      });
+      d3.selectAll('#tooltip')
         .html(() => {
           var text = '<p><b>' + d.ZAname + '</b></p><p><b>Volume: </b> ' + d.ZAdisplayValue + '</p>';
           return text;
         })
-        // .attr('class', 'tooltip')
-        .style('left', event.pageX + 'px')
-        .style('top', event.pageY - 28 + 'px')
         .transition()
         .duration(500)
         .style('opacity', 0.8);
-      d3.select(this).attr('class', function (d) {
-        return 'animated-edge edge-za edge-za-' + d.name;
-      });
     })
     .on('mouseout', function (d, i) {
       d3.select(this).attr('class', function (d) {
@@ -287,8 +303,8 @@ function renderNodes(g, data, ref) {
             <p><b>Out Volume: </b> ${d.outValue}</p>`;
           return text;
         })
-        .style('left', event.pageX + 'px')
-        .style('top', event.pageY - 28 + 'px')
+        .style('left', ref.width + 'px')
+        .style('top', ref.height + 100 + 'px')
         .transition()
         .duration(500)
         .style('opacity', 0.8);

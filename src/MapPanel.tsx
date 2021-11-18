@@ -30,6 +30,21 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3, startZoom, startLat, startLng });
   };
 
+  toggleLayer = (layer, value) => {
+    const { options } = this.props;
+    let { layer1, layer2, layer3 } = options;
+    if (layer === 'layer1') {
+      layer1 = value;
+    }
+    if (layer === 'layer2') {
+      layer2 = value;
+    }
+    if (layer === 'layer3') {
+      layer3 = value;
+    }
+    this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
+  };
+
   updateCenter = (zoom, center) => {
     const { options } = this.props;
     let { startLat, startLng, startZoom } = options;
@@ -118,6 +133,7 @@ export class MapPanel extends Component<Props> {
         mapDataL3={mapDataL3}
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
+        toggleLayer={this.toggleLayer}
         editMode={options.editMode}
       />
     );

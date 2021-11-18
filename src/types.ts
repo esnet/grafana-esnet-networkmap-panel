@@ -36,4 +36,10 @@ export interface MapOptions {
   startLng: number;
   startZoom: number;
   editMode: boolean;
+  legendL1: boolean;
+  legendL2: boolean;
+  legendL3: boolean;
+  layerName1: string;
+  layerName2: string;
+  layerName3: string;
 }
