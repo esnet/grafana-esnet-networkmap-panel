@@ -16,14 +16,14 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1637182617187,
+  "time": 1637341640122,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "df725d7aa30fca1ee8339c35c9c64ec5abe352ce5f569c754120d9f073bdeb78",
-    "plugin.json": "8b79888cb124380e837b24a53f75bf76ada112e1e4ce99ef110cdc8cfb5ece9e",
+    "module.js.map": "56dd064f73dd9b10dc2db4066ed58a7f10be922d72a694ca29b82e51da778bf1",
+    "plugin.json": "ac6d00e605fd42ebf76f354930c7554022eaddfc079b9710ebf24dffb00e3155",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
@@ -37,9 +37,9 @@ Hash: SHA512
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqAEARMKAAYFAmGVbJkACgkQfk0ManCIZucj8wIIm4LlNgh6UwAnhR4Rgr/f
-MxbwehJv6UMQJog28im2971KZ+StMkPRRVgWJzysCRC+WJoZt7kPItaRZNQe
-obymr44CBiTrZQyk2/i/n5a6WDVllwUoG5LO0Tr8uWPHGKIi46aRhcKL4y/9
-kIfU5BFuQfcA59zUYrej6lkdirp/G55HrEXw
-=AmVn
+wqEEARMKAAYFAmGX2cgACgkQfk0ManCIZufMUgIIzMGVML+vHlQNrOVGUDPq
+7qEFVi5bFLu8cKYRiDwdc3UMesBJW6Z3RqDNu/mJo2IuMoi5tddLfy3Ot3C4
+zZwPFEoCCQFAkphRmwk6txzJygZdElX7NF99mCA9NMgGwRVDrDkyNEds3Kfl
+MlOTbwwDy7tzDAoX97Uoo1V3/+FO7ppjTRSlVQ==
+=ijWi
 -----END PGP SIGNATURE-----
