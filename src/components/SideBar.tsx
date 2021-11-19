@@ -1,7 +1,7 @@
 import React from 'react';
 import '../css/esmap.css';
 import '../css/leaflet.css';
-// import { urlUtil } from '@grafana/data';
+// import { useTheme2 } from '@grafana/ui';
 
 export const SideBar = (props) => {
   const layer2 = props.options.layer2;
