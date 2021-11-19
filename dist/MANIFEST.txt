@@ -16,30 +16,30 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1636133476909,
+  "time": 1637182617187,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "c71d239df91726fc519c6eb72d318ec65820627232b2f796219e87dcf35d0ab4",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "e68cc4291e057f6098c3d5cd0b3cf642d252ff9ac1751db360770a65314a4d81",
-    "module.js.map": "5c9d46e0f9988d3406ab663215c34e95f15605fe5321a149abaf1abe1b5a077a",
-    "plugin.json": "ca4318dada46d706ff31b2541b82fc7fe68efc43ed87bea803e8d217819b2430",
+    "module.js.map": "df725d7aa30fca1ee8339c35c9c64ec5abe352ce5f569c754120d9f073bdeb78",
+    "plugin.json": "8b79888cb124380e837b24a53f75bf76ada112e1e4ce99ef110cdc8cfb5ece9e",
     "README.md": "3c5b18e53d2dbde492fe9c3c962895851aac4ac0dcb7bada0755e85a0ede2658",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
-    "module.js": "295e7ad8395a0ca5fd49258f382596255e8af5cee67170ddd9cef64d00b0e15c"
+    "module.js": "d78bff0f5aa4b9f5970ccae66ee689422d31577ae8ef4820a8a7c50a8a56108a"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.1
 Comment: https://openpgpjs.org
 
-wqIEARMKAAYFAmGFamUACgkQfk0ManCIZudZYQIJAe8cKQx6R5UAjaafdn7m
-SJRYr2ITLuT2EwJz7LvZJlJDBto3kHNVRPmNlE1O4eqzHLE7R+HCc3VYltIk
-xmVBvRvVAgkB77P0EfgaWUfV2Zh897cJxe53HN1ywYaAljGY8/abaF/IzdmG
-KMIGMHG6nG8R54BH5HSWbV/AI5EkdTNPuGxZhqg=
-=aT6R
+wqAEARMKAAYFAmGVbJkACgkQfk0ManCIZucj8wIIm4LlNgh6UwAnhR4Rgr/f
+MxbwehJv6UMQJog28im2971KZ+StMkPRRVgWJzysCRC+WJoZt7kPItaRZNQe
+obymr44CBiTrZQyk2/i/n5a6WDVllwUoG5LO0Tr8uWPHGKIi46aRhcKL4y/9
+kIfU5BFuQfcA59zUYrej6lkdirp/G55HrEXw
+=AmVn
 -----END PGP SIGNATURE-----

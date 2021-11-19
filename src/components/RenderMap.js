@@ -17,7 +17,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData, options, updateMapJson, updateCenter) {
+  renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -66,7 +66,7 @@ export default class NetworkMap {
     //---  note:  1 map could have multiple esmap svg layers
     //---         this can be used to allow leaflet to turn on and off layers at
     //---         different zoom levels in the future(imagine a regional and national map)
-    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter);
+    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
 
     const params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
@@ -103,7 +103,6 @@ export default class NetworkMap {
     if (options.layer3 && mapData.layer3) {
       var g3 = nm.addNetLayer('layer3', mapData.layer3);
     }
-    // twinkle(nm, g2, 'esnet');
 
     //----  helper
     function getRandomInt(min, max) {

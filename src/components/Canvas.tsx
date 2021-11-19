@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import NetworkMap from './RenderMap.js';
+import { SideBar } from 'components/SideBar';
 import '../css/esmap.css';
 import '../css/leaflet.css';
 // import { urlUtil } from '@grafana/data';
@@ -26,10 +27,12 @@ export const Canvas = (props) => {
   // } else {
   //   props.editMode = 0;
   // }
-
+  const mapHeight = props.height - 25;
+  const tooltipWidth = 150;
+  const mapWidth = width - tooltipWidth;
   useEffect(() => {
     const map = new NetworkMap('Map_' + panelId);
-    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter);
+    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height);
 
     return () => {
       // updateMapJson();
@@ -40,13 +43,20 @@ export const Canvas = (props) => {
       }
     };
   }, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
-  const mapHeight = props.height - 25;
 
   return (
     <div>
-      <div className={'tooltip'}></div>
-      <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: props.width }}></div>
-      <button type="button" id="edit_mode">
+      {/* <div className={'tooltip'}></div> */}
+      <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
+      <SideBar
+        height={height}
+        width={tooltipWidth}
+        panelId={panelId}
+        options={options}
+        editMode={options.editMode}
+        toggleLayer={props.toggleLayer}
+      />
+      <button type={'button'} id={'edit_mode'}>
         Turn Edit Mode Off
       </button>
     </div>
