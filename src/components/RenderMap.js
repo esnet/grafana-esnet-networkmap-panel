@@ -17,7 +17,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height) {
+  renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height, editMode) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -69,15 +69,15 @@ export default class NetworkMap {
     var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
 
     const params = urlUtil.getUrlSearchParams();
+    console.log(params.editPanel);
     if (params.editPanel != null) {
       nm.editMode(1);
-      // editMode = 1;
-      d3.select('button#edit_mode').style('visibility', 'visible');
-      // call update map?
+      editMode = true;
+      // d3.select('button#edit_mode').style('visibility', 'visible');
     } else {
       nm.editMode(0);
-      // editMode = 0;
-      d3.select('button#edit_mode').style('visibility', 'hidden');
+      editMode = false;
+      // d3.select('button#edit_mode').style('visibility', 'hidden');
     }
 
     function toggleEdit(e) {

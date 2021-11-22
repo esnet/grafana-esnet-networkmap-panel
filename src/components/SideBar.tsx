@@ -1,7 +1,8 @@
 import React from 'react';
 import '../css/esmap.css';
 import '../css/leaflet.css';
-// import { useTheme2 } from '@grafana/ui';
+import { useTheme2 } from '@grafana/ui';
+import { urlUtil } from '@grafana/data';
 
 export const SideBar = (props) => {
   const layer2 = props.options.layer2;
@@ -9,52 +10,77 @@ export const SideBar = (props) => {
   const layer3 = props.options.layer3;
   const toggleLayer = props.toggleLayer;
   const mapHeight = props.height - 25;
-  const tooltipWidth = 150;
+  const tooltipWidth = props.width;
+
+  const theme = useTheme2();
+  const fontSize = theme.typography.fontSize;
+  const headerFont = theme.typography.h5;
+  const textColor = theme.colors.text.primary;
+
+  var params = urlUtil.getUrlSearchParams();
 
   return (
-    <div style={{ height: mapHeight, width: tooltipWidth, background: '#B5B7BD', float: 'left', padding: '2px' }}>
-      <br />
-      <h3>Map Layers</h3>
+    <div
+      style={{
+        height: mapHeight,
+        width: tooltipWidth,
+        background: theme.colors.background.primary,
+        float: 'left',
+        padding: '10px 5px',
+      }}
+    >
       <div style={{ padding: '5px' }}>
-        <label className="switch" id="layer1Switch">
-          <input
-            type="checkbox"
-            name="layer1"
-            checked={layer1}
-            onChange={(e) => toggleLayer('layer1', e.target.checked)}
-          />
-          <span className="slider"></span>
-        </label>
-        {props.options.layerName1}
+        <p style={{ fontSize: headerFont.fontSize }}>Map Layers</p>
+        <div style={{ padding: '5px' }} hidden={!props.options.legendL1}>
+          <label className="switch">
+            <input
+              type="checkbox"
+              name="layer1"
+              checked={layer1}
+              onChange={(e) => toggleLayer('layer1', e.target.checked)}
+            />
+            <span className="slider"></span>
+          </label>
+          <text className="legend-text">{props.options.layerName1}</text>
+        </div>
+        <div style={{ padding: '5px' }} hidden={!props.options.legendL2}>
+          <label className="switch">
+            <input
+              type="checkbox"
+              name="layer2"
+              checked={layer2}
+              onChange={(e) => toggleLayer('layer2', e.target.checked)}
+            />
+            <span className="slider"></span>
+          </label>
+          <text className="legend-text">{props.options.layerName2}</text>
+        </div>
+        <div style={{ padding: '5px' }} hidden={!props.options.legendL3}>
+          <label className="switch">
+            <input
+              type="checkbox"
+              name="layer3"
+              checked={layer3}
+              onChange={(e) => toggleLayer('layer3', e.target.checked)}
+            />
+            <span className="slider"></span>
+          </label>
+          <text className="legend-text">{props.options.layerName3}</text>
+        </div>
       </div>
-      <div style={{ padding: '5px' }}>
-        <label className="switch">
-          <input
-            type="checkbox"
-            name="layer2"
-            checked={layer2}
-            onChange={(e) => toggleLayer('layer2', e.target.checked)}
-          />
-          <span className="slider"></span>
-        </label>
-        {props.options.layerName2}
+      <div style={{ padding: '10px 5px 5px 5px' }}>
+        <p style={{ fontSize: headerFont.fontSize }}>Tooltip</p>
+        <div
+          className="tooltip"
+          id="tooltip"
+          style={{
+            fill: textColor,
+            fontSize: fontSize,
+            paddingLeft: '10px',
+          }}
+        ></div>
       </div>
-      <div style={{ padding: '5px' }}>
-        <label className="switch">
-          <input
-            type="checkbox"
-            name="layer3"
-            checked={layer3}
-            onChange={(e) => toggleLayer('layer3', e.target.checked)}
-          />
-          <span className="slider"></span>
-        </label>
-        {props.options.layerName3}
-      </div>
-      <div style={{ paddingTop: '10px' }}>
-        <h3>Tooltip</h3>
-        <div className={'tooltip'} id="tooltip"></div>
-      </div>
+      {params.editPanel}
     </div>
   );
 };

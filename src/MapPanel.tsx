@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { PanelProps, urlUtil } from '@grafana/data';
+// import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
 import { Canvas } from 'components/Canvas';
@@ -59,7 +60,6 @@ export class MapPanel extends Component<Props> {
     var params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
       options.editMode = true;
-      // call update map?
     } else {
       options.editMode = false;
     }

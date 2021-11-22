@@ -72,16 +72,6 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
       });
-      // div
-      //   .html(() => {
-      //     var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
-      //     return text;
-      //   })
-      //   .style('left', ref.width + 'px')
-      //   .style('top', ref.height + 100 + 'px')
-      //   .transition()
-      //   .duration(500)
-      //   .style('opacity', 0.8);
       d3.selectAll('#tooltip')
         .html(() => {
           var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';

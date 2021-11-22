@@ -60,18 +60,15 @@ svg circle.controlPoint {
 div.tooltip {	
     position: absolute;			
     text-align: left;
-    /* color: #f4f5f5;			 */
-    /* width: auto;					 */
     height: auto;					
-    padding: 8px 8px 0px 8px;				
     font: sans-serif;
-    font-size: 1rem;	
-    font-weight: 400;	
-    /* background: #24292e;	 */
-    border: none;		
-    border-radius: 2px;			
     pointer-events: none;	
     line-height: 0.9;
+}
+
+.legend-text {
+  padding-left: 5px;
+  vertical-align: middle;
 }
 
 /* The switch - the box around the slider */

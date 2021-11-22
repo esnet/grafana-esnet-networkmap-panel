@@ -3,7 +3,6 @@ import NetworkMap from './RenderMap.js';
 import { SideBar } from 'components/SideBar';
 import '../css/esmap.css';
 import '../css/leaflet.css';
-// import { urlUtil } from '@grafana/data';
 
 export const Canvas = (props) => {
   // var print = props.options.mapjson;
@@ -19,20 +18,14 @@ export const Canvas = (props) => {
   const layer2 = props.options.layer2;
   const layer1 = props.options.layer1;
   const layer3 = props.options.layer3;
-
-  // var params = urlUtil.getUrlSearchParams();
-  // if (params.editPanel != null) {
-  //   props.editMode = 1;
-  //   // call update map?
-  // } else {
-  //   props.editMode = 0;
-  // }
   const mapHeight = props.height - 25;
-  const tooltipWidth = 150;
-  const mapWidth = width - tooltipWidth;
+  const tooltipWidth = '15%';
+  const mapWidth = '85%';
+  // const mapWidth = width - tooltipWidth;
+
   useEffect(() => {
     const map = new NetworkMap('Map_' + panelId);
-    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height);
+    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode);
 
     return () => {
       // updateMapJson();
@@ -53,10 +46,9 @@ export const Canvas = (props) => {
         width={tooltipWidth}
         panelId={panelId}
         options={options}
-        editMode={options.editMode}
         toggleLayer={props.toggleLayer}
       />
-      <button type={'button'} id={'edit_mode'}>
+      <button type={'button'} id={'edit_mode'} hidden={!editMode}>
         Turn Edit Mode Off
       </button>
     </div>
