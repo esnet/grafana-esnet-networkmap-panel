@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { urlUtil } from '@grafana/data';
 import NetworkMap from './RenderMap.js';
 import { SideBar } from 'components/SideBar';
 import '../css/esmap.css';
@@ -14,7 +15,7 @@ export const Canvas = (props) => {
   const height = props.height;
   const width = props.width;
   const updateCenter = props.updateCenter;
-  const editMode = props.editMode;
+  const editMode = props.options.editMode;
   const layer2 = props.options.layer2;
   const layer1 = props.options.layer1;
   const layer3 = props.options.layer3;
@@ -22,6 +23,12 @@ export const Canvas = (props) => {
   const tooltipWidth = '15%';
   const mapWidth = '85%';
   // const mapWidth = width - tooltipWidth;
+  var params = urlUtil.getUrlSearchParams();
+  if (params.editPanel != null) {
+    options.editMode = true;
+  } else {
+    options.editMode = false;
+  }
 
   useEffect(() => {
     const map = new NetworkMap('Map_' + panelId);

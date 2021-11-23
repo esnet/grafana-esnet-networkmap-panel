@@ -2,7 +2,7 @@ import React from 'react';
 import '../css/esmap.css';
 import '../css/leaflet.css';
 import { useTheme2 } from '@grafana/ui';
-import { urlUtil } from '@grafana/data';
+// import { urlUtil } from '@grafana/data';
 
 export const SideBar = (props) => {
   const layer2 = props.options.layer2;
@@ -16,8 +16,6 @@ export const SideBar = (props) => {
   const fontSize = theme.typography.fontSize;
   const headerFont = theme.typography.h5;
   const textColor = theme.colors.text.primary;
-
-  var params = urlUtil.getUrlSearchParams();
 
   return (
     <div
@@ -80,7 +78,6 @@ export const SideBar = (props) => {
           }}
         ></div>
       </div>
-      {params.editPanel}
     </div>
   );
 };

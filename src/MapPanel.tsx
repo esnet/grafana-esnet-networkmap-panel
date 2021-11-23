@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
-import { PanelProps, urlUtil } from '@grafana/data';
-// import { PanelProps } from '@grafana/data';
+// import { PanelProps, urlUtil } from '@grafana/data';
+import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
 import { Canvas } from 'components/Canvas';
@@ -57,12 +57,12 @@ export class MapPanel extends Component<Props> {
 
   render() {
     const { options, data, width, height, id } = this.props;
-    var params = urlUtil.getUrlSearchParams();
-    if (params.editPanel != null) {
-      options.editMode = true;
-    } else {
-      options.editMode = false;
-    }
+    // var params = urlUtil.getUrlSearchParams();
+    // if (params.editPanel != null) {
+    //   options.editMode = true;
+    // } else {
+    //   options.editMode = false;
+    // }
     var colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
@@ -134,7 +134,6 @@ export class MapPanel extends Component<Props> {
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
         toggleLayer={this.toggleLayer}
-        editMode={options.editMode}
       />
     );
   }

@@ -152,7 +152,9 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
     // Find A and Z node
     let nodeA = edge.meta.endpoint_identifiers[endpointId][0];
     let nodeZ = edge.meta.endpoint_identifiers[endpointId][1];
-    // create za name
+    // create names
+    edge.nodeA = nodeA;
+    edge.nodeZ = nodeZ;
     edge.AZname = `${nodeA}---${nodeZ}`;
     edge.ZAname = `${nodeZ}---${nodeA}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.AZname);

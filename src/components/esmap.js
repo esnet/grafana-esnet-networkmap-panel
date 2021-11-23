@@ -74,7 +74,14 @@ function renderEdges(g, data, ref) {
       });
       d3.selectAll('#tooltip')
         .html(() => {
-          var text = '<p><b>' + d.AZname + '</b></p><p><b>Volume: </b> ' + d.AZdisplayValue + '</p>';
+          var text =
+            '<p><b>From: ' +
+            d.nodeA +
+            '</b></p><p><b>To: </b> ' +
+            d.nodeZ +
+            '</b></p><p><b>Volume: </b> ' +
+            d.AZdisplayValue +
+            '</p>';
           return text;
         })
         .transition()
@@ -114,23 +121,19 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('mouseover', function (event, d) {
-      // div
-      //   .html(() => {
-      //     var text = '<p><b>' + d.ZAname + '</b></p><p><b>Volume: </b> ' + d.ZAdisplayValue + '</p>';
-      //     return text;
-      //   })
-      //   // .attr('class', 'tooltip')
-      //   .style('left', ref.width + 'px')
-      //   .style('top', ref.height + 100 + 'px')
-      //   .transition()
-      //   .duration(500)
-      //   .style('opacity', 0.8);
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-za edge-za-' + d.name;
       });
       d3.selectAll('#tooltip')
         .html(() => {
-          var text = '<p><b>' + d.ZAname + '</b></p><p><b>Volume: </b> ' + d.ZAdisplayValue + '</p>';
+          var text =
+            '<p><b>From:</b> ' +
+            d.nodeZ +
+            '</p><p><b>To:</b> ' +
+            d.nodeA +
+            '</p><p><b>Volume: </b> ' +
+            d.AZdisplayValue +
+            '</p>';
           return text;
         })
         .transition()
