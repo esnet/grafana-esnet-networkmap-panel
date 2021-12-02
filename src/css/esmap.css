@@ -127,3 +127,8 @@ input:checked + .slider:before {
   -ms-transform: translateX(18px);
   transform: translateX(18px);
 }
+
+/* this is to bring grafana panel header on top leaflet layers */
+.panel-header:hover {
+  z-index: 1000;
+}
