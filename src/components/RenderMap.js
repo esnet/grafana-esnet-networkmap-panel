@@ -71,7 +71,7 @@ export default class NetworkMap {
     }
 
     function toggleEdit() {
-      var d = d3.select('#edit_mode');
+      var d = d3.selectAll('#edit_mode');
       if (nm.edit == 1) {
         nm.editMode(0);
         d.html('Turn Edit Mode On');
@@ -81,7 +81,7 @@ export default class NetworkMap {
       }
     }
 
-    var edit_mode = d3.select('#edit_mode').on('click', toggleEdit);
+    var edit_mode = d3.selectAll('#edit_mode').on('click', toggleEdit);
 
     // Draw the map json data!!!
     if (options.layer1 && mapData.layer1) {

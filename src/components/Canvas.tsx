@@ -53,9 +53,9 @@ export const Canvas = (props) => {
         options={options}
         toggleLayer={props.toggleLayer}
       />
-      {/* <button type={'button'} id={'edit_mode'} hidden={!editMode}>
+      <button type={'button'} id={'edit_mode'} hidden={!editMode}>
         Turn Edit Mode Off
-      </button> */}
+      </button>
     </div>
   );
 };

@@ -1049,7 +1049,11 @@ var Canvas = function Canvas(props) {
     panelId: panelId,
     options: options,
     toggleLayer: props.toggleLayer
-  }));
+  }), react__WEBPACK_IMPORTED_MODULE_0___default.a.createElement("button", {
+    type: 'button',
+    id: 'edit_mode',
+    hidden: !editMode
+  }, "Turn Edit Mode Off"));
 };
 
 /***/ }),
@@ -1155,7 +1159,7 @@ var NetworkMap = /*#__PURE__*/function () {
       }
 
       function toggleEdit() {
-        var d = _d3_min_js__WEBPACK_IMPORTED_MODULE_0__["select"]('#edit_mode');
+        var d = _d3_min_js__WEBPACK_IMPORTED_MODULE_0__["selectAll"]('#edit_mode');
 
         if (nm.edit == 1) {
           nm.editMode(0);
@@ -1166,7 +1170,7 @@ var NetworkMap = /*#__PURE__*/function () {
         }
       }
 
-      var edit_mode = _d3_min_js__WEBPACK_IMPORTED_MODULE_0__["select"]('#edit_mode').on('click', toggleEdit); // Draw the map json data!!!
+      var edit_mode = _d3_min_js__WEBPACK_IMPORTED_MODULE_0__["selectAll"]('#edit_mode').on('click', toggleEdit); // Draw the map json data!!!
 
       if (options.layer1 && mapData.layer1) {
         var g1 = nm.addNetLayer('layer1', mapData.layer1);
