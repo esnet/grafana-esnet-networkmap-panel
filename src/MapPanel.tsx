@@ -13,6 +13,7 @@ export class MapPanel extends Component<Props> {
     super(props);
   }
 
+  // A function to update the map jsons in the Edit panel based on the current map state
   updateMapJson = (newDataL1, newDataL2, newDataL3, zoom, center) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, mapjsonL3, startLat, startLng, startZoom } = options;
@@ -31,6 +32,7 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3, startZoom, startLat, startLng });
   };
 
+  // A function to turn layers on or off. Takes in the layer and boolean value
   toggleLayer = (layer, value) => {
     const { options } = this.props;
     let { layer1, layer2, layer3 } = options;

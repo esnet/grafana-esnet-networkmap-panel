@@ -22,22 +22,13 @@ export default class NetworkMap {
       return;
     }
 
-    // SUPER IMPORTANT! This clears old chart before drawing new one...
-    // d3.select('#' + this.containerID)
-    //   .selectAll('svg')
-    //   .remove();
-
-    d3.select('#' + this.containerID)
-      .select('.tooltip')
-      .remove();
-    // ----------------------------------------------------------
-
     // set variables
     const startLat = options.startLat;
     const startLng = options.startLng;
     const startZoom = options.startZoom;
 
-    var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+    // var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
+    var div = d3.selectAll('#sidebar-tooltip');
     //--- Create Leaflet Map with custom tile layer
     var map = L.map(this.containerID, {
       zoomAnimation: false,
@@ -69,7 +60,6 @@ export default class NetworkMap {
     var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
 
     const params = urlUtil.getUrlSearchParams();
-    console.log(params.editPanel);
     if (params.editPanel != null) {
       nm.editMode(1);
       editMode = true;
@@ -80,8 +70,8 @@ export default class NetworkMap {
       // d3.select('button#edit_mode').style('visibility', 'hidden');
     }
 
-    function toggleEdit(e) {
-      var d = d3.select('button#edit_mode');
+    function toggleEdit() {
+      var d = d3.select('#edit_mode');
       if (nm.edit == 1) {
         nm.editMode(0);
         d.html('Turn Edit Mode On');
@@ -91,7 +81,7 @@ export default class NetworkMap {
       }
     }
 
-    var edit_mode = d3.select('button#edit_mode').on('click', toggleEdit);
+    var edit_mode = d3.select('#edit_mode').on('click', toggleEdit);
 
     // Draw the map json data!!!
     if (options.layer1 && mapData.layer1) {

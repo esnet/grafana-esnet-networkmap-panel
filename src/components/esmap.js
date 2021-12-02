@@ -72,7 +72,8 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
       });
-      d3.selectAll('#tooltip')
+      // d3.selectAll('#tooltip')
+      div
         .html(() => {
           var text =
             '<p><b>From: ' +
@@ -95,6 +96,7 @@ function renderEdges(g, data, ref) {
       div.transition().duration(500).style('opacity', 0);
     });
 
+  // azLines.exit();
   azLines.exit().remove();
 
   var zaLines = g.selectAll('path.edge-za').data(data.edges);
@@ -124,7 +126,8 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-za edge-za-' + d.name;
       });
-      d3.selectAll('#tooltip')
+      // d3.selectAll('#tooltip')
+      div
         .html(() => {
           var text =
             '<p><b>From:</b> ' +
@@ -147,6 +150,7 @@ function renderEdges(g, data, ref) {
       div.transition().duration(500).style('opacity', 0);
     });
 
+  // zaLines.exit();
   zaLines.exit().remove();
 }
 
@@ -270,7 +274,6 @@ function renderEdgeControl(g, data, ref) {
 
     feature.exit().remove();
   });
-  // ref.updateMapJson(data); not here
 }
 
 function renderNodes(g, data, ref) {

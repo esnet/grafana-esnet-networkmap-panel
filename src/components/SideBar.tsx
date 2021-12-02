@@ -69,8 +69,8 @@ export const SideBar = (props) => {
       <div style={{ padding: '10px 5px 5px 5px' }}>
         <p style={{ fontSize: headerFont.fontSize }}>Tooltip</p>
         <div
-          className="tooltip"
-          id="tooltip"
+          className="sidebar-tooltip"
+          id="sidebar-tooltip"
           style={{
             fill: textColor,
             fontSize: fontSize,

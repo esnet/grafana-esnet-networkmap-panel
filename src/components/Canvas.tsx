@@ -35,7 +35,6 @@ export const Canvas = (props) => {
     var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode);
 
     return () => {
-      // updateMapJson();
       // SUPER IMPORTANT!!! this removes the old map before rerendering
       if (thisMap) {
         thisMap.off();
@@ -46,7 +45,6 @@ export const Canvas = (props) => {
 
   return (
     <div>
-      {/* <div className={'tooltip'}></div> */}
       <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       <SideBar
         height={height}
@@ -55,9 +53,9 @@ export const Canvas = (props) => {
         options={options}
         toggleLayer={props.toggleLayer}
       />
-      <button type={'button'} id={'edit_mode'} hidden={!editMode}>
+      {/* <button type={'button'} id={'edit_mode'} hidden={!editMode}>
         Turn Edit Mode Off
-      </button>
+      </button> */}
     </div>
   );
 };

@@ -57,7 +57,7 @@ svg circle.controlPoint {
         cursor: move;
 }
 
-div.tooltip {	
+div.sidebar-tooltip {	
     position: absolute;			
     text-align: left;
     height: auto;					
