@@ -17,7 +17,7 @@ export default class NetworkMap {
    * @param hoverColor - the color the lines will change to when hovering, set in options panel
    */
 
-  renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height, editMode) {
+  renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height, editMode, mapContainer) {
     if (!parsedData || !mapData) {
       return;
     }
@@ -30,7 +30,7 @@ export default class NetworkMap {
     // var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
     var div = d3.selectAll('#sidebar-tooltip');
     //--- Create Leaflet Map with custom tile layer
-    var map = L.map(this.containerID, {
+    var map = L.map(mapContainer, {
       zoomAnimation: false,
       fadeAnimation: false,
       zoomSnap: 0.25,
