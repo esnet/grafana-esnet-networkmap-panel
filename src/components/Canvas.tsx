@@ -29,10 +29,21 @@ export const Canvas = (props) => {
   } else {
     options.editMode = false;
   }
+  const mapContainer = 'Map_' + panelId + options.editMode.toString();
 
   useEffect(() => {
-    const map = new NetworkMap('Map_' + panelId);
-    var thisMap = map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode);
+    const map = new NetworkMap(mapContainer);
+    var thisMap = map.renderMap(
+      data,
+      mapData,
+      options,
+      updateMapJson,
+      updateCenter,
+      mapWidth,
+      height,
+      editMode,
+      mapContainer
+    );
 
     return () => {
       // SUPER IMPORTANT!!! this removes the old map before rerendering
@@ -45,7 +56,7 @@ export const Canvas = (props) => {
 
   return (
     <div>
-      <div id={'Map_' + props.panelId} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
+      <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       <SideBar
         height={height}
         width={tooltipWidth}
