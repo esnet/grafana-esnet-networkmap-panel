@@ -9,9 +9,6 @@ export interface MapOptions {
   dstFieldL1: string;
   valFieldL1: string;
   endpointIdL1: string;
-  nodeWidthL1: number;
-  edgeWidthL1: number;
-  pathOffsetL1: number;
   layer2: boolean;
   mapjsonL2: string;
   nodeHighlightL2: string;
@@ -19,9 +16,6 @@ export interface MapOptions {
   dstFieldL2: string;
   valFieldL2: string;
   endpointIdL2: string;
-  nodeWidthL2: number;
-  edgeWidthL2: number;
-  pathOffsetL2: number;
   layer3: boolean;
   mapjsonL3: string;
   nodeHighlightL3: string;
@@ -29,9 +23,6 @@ export interface MapOptions {
   dstFieldL3: string;
   valFieldL3: string;
   endpointIdL3: string;
-  nodeWidthL3: number;
-  edgeWidthL3: number;
-  pathOffsetL3: number;
   startLat: number;
   startLng: number;
   startZoom: number;
@@ -42,4 +33,16 @@ export interface MapOptions {
   layerName1: string;
   layerName2: string;
   layerName3: string;
+  nodeWidth: number;
+  edgeWidth: number;
+  pathOffset: number;
+  // nodeWidthL1: number;
+  // edgeWidthL1: number;
+  // pathOffsetL1: number;
+  // nodeWidthL2: number;
+  // edgeWidthL2: number;
+  // pathOffsetL2: number;
+  // nodeWidthL3: number;
+  // edgeWidthL3: number;
+  // pathOffsetL3: number;
 }
