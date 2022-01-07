@@ -74,6 +74,26 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: true,
   });
+  builder.addRadio({
+    path: 'inputL1',
+    name: 'Layer 1 Topology Data type',
+    category: LayersCategory,
+    showIf: layer1Bool(true),
+    description: 'URL that points to json or raw json text',
+    settings: {
+      options: [
+        {
+          value: 'json',
+          label: 'JSON',
+        },
+        {
+          value: 'url',
+          label: 'URL',
+        },
+      ],
+    },
+    defaultValue: 'url',
+  });
   builder.addTextInput({
     path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
@@ -149,6 +169,26 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 on',
     category: LayersCategory,
     defaultValue: false,
+  });
+  builder.addRadio({
+    path: 'inputL2',
+    name: 'Layer 2 Topology Data type',
+    category: LayersCategory,
+    showIf: layer2Bool(true),
+    description: 'URL that points to json or raw json text',
+    settings: {
+      options: [
+        {
+          value: 'json',
+          label: 'JSON',
+        },
+        {
+          value: 'url',
+          label: 'URL',
+        },
+      ],
+    },
+    defaultValue: 'url',
   });
   builder.addTextInput({
     path: 'mapjsonL2',
@@ -226,6 +266,26 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 on',
     category: LayersCategory,
     defaultValue: false,
+  });
+  builder.addRadio({
+    path: 'inputL3',
+    name: 'Layer 3 Topology Data type',
+    category: LayersCategory,
+    showIf: layer3Bool(true),
+    description: 'URL that points to json or raw json text',
+    settings: {
+      options: [
+        {
+          value: 'json',
+          label: 'JSON',
+        },
+        {
+          value: 'url',
+          label: 'URL',
+        },
+      ],
+    },
+    defaultValue: 'url',
   });
   builder.addTextInput({
     path: 'mapjsonL3',

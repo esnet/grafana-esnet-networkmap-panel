@@ -1,3 +1,5 @@
+type inputTypes = 'json' | 'url';
+
 export interface MapOptions {
   color1: string;
   color2: string;
@@ -36,6 +38,10 @@ export interface MapOptions {
   nodeWidth: number;
   edgeWidth: number;
   pathOffset: number;
+  inputL1: inputTypes;
+  inputL2: inputTypes;
+  inputL3: inputTypes;
+
   // nodeWidthL1: number;
   // edgeWidthL1: number;
   // pathOffsetL1: number;
