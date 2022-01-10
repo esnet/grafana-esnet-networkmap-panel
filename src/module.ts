@@ -205,7 +205,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 Map data (json)',
     category: LayersCategory,
     description: 'JSON with edges and nodes of network map',
-    showIf: layer2Bool(true) && ((config) => config.inputL2 === 'url'),
+    showIf: layer2Bool(true) && ((config) => config.inputL2 === 'json'),
     defaultValue: '',
   });
   builder.addTextInput({
@@ -310,16 +310,8 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Map data (json)',
     category: LayersCategory,
     description: 'JSON with edges and nodes of network map',
-    showIf: layer3Bool(true),
+    showIf: layer3Bool(true) && ((config) => config.inputL3 === 'json'),
     defaultValue: '',
-  });
-  builder.addColorPicker({
-    path: 'color3',
-    name: 'Layer 3 Default color',
-    category: LayersCategory,
-    showIf: layer3Bool(true) && ((config) => config.inputL3 === 'url'),
-    description: 'The default color for nodes and links on Layer 3',
-    defaultValue: 'grey',
   });
   builder.addTextInput({
     path: 'urlL3',
@@ -328,6 +320,14 @@ plugin.setPanelOptions((builder) => {
     showIf: layer3Bool(true) && ((config) => config.inputL3 === 'url'),
     description: 'URL that points to JSON with edges and nodes of network map',
     defaultValue: '',
+  });
+  builder.addColorPicker({
+    path: 'color3',
+    name: 'Layer 3 Default color',
+    category: LayersCategory,
+    showIf: layer3Bool(true),
+    description: 'The default color for nodes and links on Layer 3',
+    defaultValue: 'grey',
   });
   builder.addTextInput({
     path: 'endpointIdL3',
