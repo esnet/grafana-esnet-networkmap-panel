@@ -68,6 +68,7 @@ plugin.setPanelOptions((builder) => {
   });
 
   // -------------------- Layer Options -------------------
+  // Layer 1
   builder.addBooleanSwitch({
     path: 'layer1',
     name: 'Layer 1 on',
@@ -94,12 +95,21 @@ plugin.setPanelOptions((builder) => {
     },
     defaultValue: 'url',
   });
+
   builder.addTextInput({
     path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: layer1Bool(true) && ((config) => config.inputL1 === 'json'),
     description: 'JSON with edges and nodes of network map',
+    defaultValue: '',
+  });
+  builder.addTextInput({
+    path: 'urlL1',
+    name: 'Layer 1 Map data (url)',
+    category: LayersCategory,
+    showIf: layer1Bool(true) && ((config) => config.inputL1 === 'url'),
+    description: 'URL that points to JSON with edges and nodes of network map',
     defaultValue: '',
   });
   builder.addColorPicker({
@@ -195,7 +205,15 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 Map data (json)',
     category: LayersCategory,
     description: 'JSON with edges and nodes of network map',
-    showIf: layer2Bool(true),
+    showIf: layer2Bool(true) && ((config) => config.inputL2 === 'url'),
+    defaultValue: '',
+  });
+  builder.addTextInput({
+    path: 'urlL2',
+    name: 'Layer 2 Map data (url)',
+    category: LayersCategory,
+    showIf: layer2Bool(true) && ((config) => config.inputL2 === 'url'),
+    description: 'URL that points to JSON with edges and nodes of network map',
     defaultValue: '',
   });
   builder.addColorPicker({
@@ -299,9 +317,17 @@ plugin.setPanelOptions((builder) => {
     path: 'color3',
     name: 'Layer 3 Default color',
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: layer3Bool(true) && ((config) => config.inputL3 === 'url'),
     description: 'The default color for nodes and links on Layer 3',
     defaultValue: 'grey',
+  });
+  builder.addTextInput({
+    path: 'urlL3',
+    name: 'Layer 3 Map data (url)',
+    category: LayersCategory,
+    showIf: layer3Bool(true) && ((config) => config.inputL3 === 'url'),
+    description: 'URL that points to JSON with edges and nodes of network map',
+    defaultValue: '',
   });
   builder.addTextInput({
     path: 'endpointIdL3',

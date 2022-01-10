@@ -41,6 +41,9 @@ export interface MapOptions {
   inputL1: inputTypes;
   inputL2: inputTypes;
   inputL3: inputTypes;
+  urlL1: string;
+  urlL2: string;
+  urlL3: string;
 
   // nodeWidthL1: number;
   // edgeWidthL1: number;
