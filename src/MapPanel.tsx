@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-// import { PanelProps, urlUtil } from '@grafana/data';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
@@ -8,12 +7,12 @@ import { Canvas } from 'components/Canvas';
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {
-  //= ({ options, data, width, height, id }) =>
   constructor(props: Props) {
     super(props);
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
+  // Used in esmap.js
   updateMapJson = (newDataL1, newDataL2, newDataL3, zoom, center) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, mapjsonL3, startLat, startLng, startZoom } = options;
@@ -32,7 +31,19 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3, startZoom, startLat, startLng });
   };
 
+  // A function to update the map jsons in the Edit panel based on the current map state
+  // Used in esmap.js
+  updateCenter = (zoom, center) => {
+    const { options } = this.props;
+    let { startLat, startLng, startZoom } = options;
+    startZoom = zoom;
+    startLat = center.lat;
+    startLng = center.lng;
+    this.props.onOptionsChange({ ...options, startZoom, startLat, startLng });
+  };
+
   // A function to turn layers on or off. Takes in the layer and boolean value
+  // Used in SideBar.tsx
   toggleLayer = (layer, value) => {
     const { options } = this.props;
     let { layer1, layer2, layer3 } = options;
@@ -48,23 +59,8 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
   };
 
-  updateCenter = (zoom, center) => {
-    const { options } = this.props;
-    let { startLat, startLng, startZoom } = options;
-    startZoom = zoom;
-    startLat = center.lat;
-    startLng = center.lng;
-    this.props.onOptionsChange({ ...options, startZoom, startLat, startLng });
-  };
-
   render() {
     const { options, data, width, height, id } = this.props;
-    // var params = urlUtil.getUrlSearchParams();
-    // if (params.editPanel != null) {
-    //   options.editMode = true;
-    // } else {
-    //   options.editMode = false;
-    // }
     var colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
