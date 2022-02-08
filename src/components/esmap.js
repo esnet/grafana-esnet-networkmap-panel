@@ -135,7 +135,7 @@ function renderEdges(g, data, ref) {
             '</p><p><b>To:</b> ' +
             d.nodeA +
             '</p><p><b>Volume: </b> ' +
-            d.AZdisplayValue +
+            d.ZAdisplayValue +
             '</p>';
           return text;
         })
