@@ -81,6 +81,7 @@ plugin.setPanelOptions((builder) => {
     showIf: layer1Bool(true),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '',
+    settings: { useTextarea: true, rows: 10 },
   });
   builder.addColorPicker({
     path: 'color1',
@@ -157,6 +158,7 @@ plugin.setPanelOptions((builder) => {
     description: 'JSON with edges and nodes of network map',
     showIf: layer2Bool(true),
     defaultValue: '',
+    settings: { useTextarea: true, rows: 10 },
   });
   builder.addColorPicker({
     path: 'color2',
@@ -234,6 +236,7 @@ plugin.setPanelOptions((builder) => {
     description: 'JSON with edges and nodes of network map',
     showIf: layer3Bool(true),
     defaultValue: '',
+    settings: { useTextarea: true, rows: 10 },
   });
   builder.addColorPicker({
     path: 'color3',

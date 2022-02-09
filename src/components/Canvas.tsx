@@ -6,7 +6,6 @@ import '../css/esmap.css';
 import '../css/leaflet.css';
 
 export const Canvas = (props) => {
-  // var print = props.options.mapjson;
   const panelId = props.panelId;
   const data = { layer1: props.dataL1, layer2: props.dataL2, layer3: props.dataL3 };
   const mapData = { layer1: props.mapDataL1, layer2: props.mapDataL2, layer3: props.mapDataL3 };
@@ -22,7 +21,6 @@ export const Canvas = (props) => {
   const mapHeight = props.height - 25;
   const tooltipWidth = '15%';
   const mapWidth = '85%';
-  // const mapWidth = width - tooltipWidth;
   var params = urlUtil.getUrlSearchParams();
   if (params.editPanel != null) {
     options.editMode = true;
@@ -53,6 +51,7 @@ export const Canvas = (props) => {
       }
     };
   }, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
+  // above return statement throws a warning that we're not using all the variables, but that's ok.
 
   return (
     <div>

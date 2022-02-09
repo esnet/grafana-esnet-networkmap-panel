@@ -13,8 +13,12 @@ export default class NetworkMap {
    * Renders the Network Map in the panel.
    *
    * @param parsedData - the parsed data from parseData.js
-   * @param header1, @param header2 - headers for the two x-axis labels, set in options panel
-   * @param hoverColor - the color the lines will change to when hovering, set in options panel
+   * @param mapData - the topology data from the json input
+   * @param options - 
+   * @param updateMapJson, @param updateCenter - functions from MapPanel.tsx to update the mapJson & center in the editor
+   * @param width, @param height - determined by Grafana panel size
+   * @param editMode - whether the panel is in editMode or not
+   * @param mapContainer - the container the map is drawn in.
    */
 
   renderMap(parsedData, mapData, options, updateMapJson, updateCenter, width, height, editMode, mapContainer) {
@@ -26,9 +30,8 @@ export default class NetworkMap {
     const startLat = options.startLat;
     const startLng = options.startLng;
     const startZoom = options.startZoom;
-
-    // var div = d3.select('body').append('div').attr('class', 'tooltip').style('opacity', 0);
     var div = d3.selectAll('#sidebar-tooltip');
+
     //--- Create Leaflet Map with custom tile layer
     var map = L.map(mapContainer, {
       zoomAnimation: false,
@@ -55,19 +58,15 @@ export default class NetworkMap {
 
     //--- create network map within leaflet
     //---  note:  1 map could have multiple esmap svg layers
-    //---         this can be used to allow leaflet to turn on and off layers at
-    //---         different zoom levels in the future(imagine a regional and national map)
     var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
 
     const params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
       nm.editMode(1);
       editMode = true;
-      // d3.select('button#edit_mode').style('visibility', 'visible');
     } else {
       nm.editMode(0);
       editMode = false;
-      // d3.select('button#edit_mode').style('visibility', 'hidden');
     }
 
     function toggleEdit() {
@@ -83,7 +82,7 @@ export default class NetworkMap {
 
     var edit_mode = d3.selectAll('#edit_mode').on('click', toggleEdit);
 
-    // Draw the map json data!!!
+    // Draw the map json topology data!!! Currently supports up to 3 layers
     if (options.layer1 && mapData.layer1) {
       var g1 = nm.addNetLayer('layer1', mapData.layer1);
     }

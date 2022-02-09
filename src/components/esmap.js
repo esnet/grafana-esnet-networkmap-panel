@@ -72,7 +72,6 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-az edge-az-' + d.name;
       });
-      // d3.selectAll('#tooltip')
       div
         .html(() => {
           var text =
@@ -95,8 +94,6 @@ function renderEdges(g, data, ref) {
       });
       div.transition().duration(500).style('opacity', 0);
     });
-
-  // azLines.exit();
   azLines.exit().remove();
 
   var zaLines = g.selectAll('path.edge-za').data(data.edges);
@@ -126,7 +123,6 @@ function renderEdges(g, data, ref) {
       d3.select(this).attr('class', function (d) {
         return 'animated-edge edge-za edge-za-' + d.name;
       });
-      // d3.selectAll('#tooltip')
       div
         .html(() => {
           var text =
@@ -149,13 +145,10 @@ function renderEdges(g, data, ref) {
       });
       div.transition().duration(500).style('opacity', 0);
     });
-
-  // zaLines.exit();
   zaLines.exit().remove();
 }
 
 function addControlPoint(evt, obj, ref) {
-  console.log('add control point');
 
   var mapDiv = ref.leafletMap.getContainer();
   var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -178,7 +171,6 @@ function addControlPoint(evt, obj, ref) {
     var delta = Math.abs(angleA - angleB);
     if (delta < 0.1 && delta < minDelta) {
       // with slop click point lays on the line between current and next point
-      console.log('split between: ' + idx + ' and ' + (idx + 1));
       minDelta = delta;
       splicePoint = idx + 1;
       found = 1;
@@ -230,18 +222,11 @@ function renderEdgeControl(g, data, ref) {
     d[1] = ll.lng;
     //--- rerender stuff
     ref.update();
-    //--- this is where we can update json????
-    // var zoom = ref.leafletMap.getZoom();
-    // var center = L.latLng(ref.leafletMap.getCenter());
-    // ref.updateMapJson(data, zoom, center);
-    // find a way to persist zoom and center lat/lng
   }
 
   function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    console.log(ref.data);
-    console.log(data);
     ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3'], zoom, center);
   }
 
@@ -338,7 +323,6 @@ function getBisectAngle(pointA, pointB, pointC) {
   var relativeAngle = angle1 - angle2;
   let bisectAngle = angle1 - relativeAngle * 0.5;
 
-  //console.log(angle1 +" "+angle2+ "--> " + bisectAngle);
 
   if (angle1 > angle2) {
     bisectAngle += 180;
@@ -466,12 +450,10 @@ export class EsMap {
       if (reject) {
         //--- issue found we should remove this from the list
         idx = data.edges.indexOf(d);
-        console.log('marking as rejected: ' + d.name);
         d.rejected = 1;
         return;
       }
       newEdges.push(d);
-      //console.log("sddetup the paths for " + d.name +" reject? "+reject);
 
       //--- setup the controlPoint path
       d.controlPointPath = d3.line()(d.points);
@@ -490,10 +472,7 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.leafletMap.dragging.enable();
-    // console.log(this.data);
     for (const [name, data] of Object.entries(this.data)) {
-      // console.log(name);
-      // console.log(data);
       this.updateCoordinates(data);
     }
     for (const [name, g] of Object.entries(this.mapLayers)) {
@@ -519,7 +498,6 @@ export class EsMap {
   addNetLayer(name, data) {
     var ref = this;
     ref.data[name] = data; //maybe use this to serialize
-    console.log(data);
     var map_g = this.svg.append('g').attr('class', 'esmap');
     ref.mapLayers[name] = map_g;
 
