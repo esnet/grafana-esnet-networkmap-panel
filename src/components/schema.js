@@ -1,49 +1,48 @@
-const Ajv = require("ajv")
-const ajv = new Ajv({allErrors: true
-})
+const Ajv = require('ajv');
+const ajv = new Ajv({ allErrors: true });
 
 const schema = {
-  type: "object",
+  type: 'object',
   properties: {
-    name: {type: "string"
-    },
+    name: { type: 'string' },
     nodes: {
-        type: "object", 
-        properties: {}
+      type: 'object',
+      properties: {},
     },
     edges: {
-        type: "object", 
-        properties: {
-            name: {type: "string"
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        latLngs: { type: 'array', items: { type: 'number' } },
+        meta: {
+          type: 'object',
+          properties: { endpoint_identifiers: { type: 'object' } },
         },
-            latLngs: {type: "array", items: {type: "number"
-          }
-        },
-            meta: {
-                type: "object", 
-                properties: {endpoint_identifiers: {type: "object"
-            }
-          }
-        }
-      }
-    }
+      },
+      required: ['name', 'latLngs', 'meta'],
+    },
+    nodes: {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+        latLngs: { type: 'array', items: { type: 'number' } },
+      },
+      required: ['name', 'latLngs'],
+    },
   },
-  required: [
-    "edges",
-    "nodes"
-  ],
+  required: ['edges', 'nodes'],
   additionalProperties: false,
-}
+};
 
-const validate = ajv.compile(schema)
+const validate = ajv.compile(schema);
 
-test({foo: "abc", bar: 2
-})
-test({foo: 2, bar: 4
-})
-
-function test(data) {
-  const valid = validate(data)
-  if (valid) console.log("Valid!")
-  else console.log("Invalid: " + ajv.errorsText(validate.errors))
+export function testJsonSchema(data) {
+  const valid = validate(data);
+  if (valid) {
+    console.log('Valid!');
+    return [true, 'valid'];
+  } else {
+    console.log('Invalid: ' + ajv.errorsText(validate.errors));
+    return [false, ajv.errorsText(validate.errors)];
+  }
 }
