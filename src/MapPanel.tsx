@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
+import { testJsonSchema } from 'components/schema';
 import { Canvas } from 'components/Canvas';
 
 interface Props extends PanelProps<MapOptions> {}
@@ -97,18 +98,24 @@ export class MapPanel extends Component<Props> {
     var mapDataL1;
     var mapDataL2;
     var mapDataL3;
+    var resultL1;
+    var resultL2;
+    var resultL3;
 
     try {
       if (data) {
         if (options.mapjsonL1) {
+          resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
           parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1);
           mapDataL1 = parsedDataL1[3];
         }
         if (options.mapjsonL2) {
+          resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
           parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2);
           mapDataL2 = parsedDataL2[3];
         }
         if (options.mapjsonL3) {
+          resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
           parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3);
           mapDataL3 = parsedDataL3[3];
         }
@@ -132,6 +139,9 @@ export class MapPanel extends Component<Props> {
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
         toggleLayer={this.toggleLayer}
+        jsonSchemaL1={resultL1}
+        jsonSchemaL2={resultL2}
+        jsonSchemaL3={resultL3}
       />
     );
   }

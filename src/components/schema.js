@@ -10,28 +10,34 @@ const schema = {
       properties: {},
     },
     edges: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        latLngs: { type: 'array', items: { type: 'number' } },
-        meta: {
-          type: 'object',
-          properties: { endpoint_identifiers: { type: 'object' } },
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          latLngs: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
+          meta: {
+            type: 'object',
+            properties: { endpoint_identifiers: { type: 'object' } },
+          },
         },
+        required: ['name', 'latLngs', 'meta'],
       },
-      required: ['name', 'latLngs', 'meta'],
     },
     nodes: {
-      type: 'object',
-      properties: {
-        name: { type: 'string' },
-        latLngs: { type: 'array', items: { type: 'number' } },
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          latLng: { type: 'array', items: { type: 'number' } },
+        },
+        required: ['name', 'latLng'],
       },
-      required: ['name', 'latLngs'],
     },
   },
   required: ['edges', 'nodes'],
-  additionalProperties: false,
+  additionalProperties: true,
 };
 
 const validate = ajv.compile(schema);
