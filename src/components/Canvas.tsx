@@ -55,6 +55,11 @@ export const Canvas = (props) => {
 
   return (
     <div>
+      <div hidden={!editMode}>
+        {options.layerName1}: {props.jsonSchemaL1[1]}
+        {options.layerName2}: {props.jsonSchemaL2[1]}
+        {options.layerName3}: {props.jsonSchemaL3[1]}
+      </div>
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       <SideBar
         height={height}
