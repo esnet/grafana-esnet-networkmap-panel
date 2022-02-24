@@ -98,9 +98,9 @@ export class MapPanel extends Component<Props> {
     var mapDataL1;
     var mapDataL2;
     var mapDataL3;
-    var resultL1;
-    var resultL2;
-    var resultL3;
+    var resultL1 = [false, ''];
+    var resultL2 = [false, ''];
+    var resultL3 = [false, ''];
 
     try {
       if (data) {
