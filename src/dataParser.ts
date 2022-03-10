@@ -86,14 +86,25 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   colors.defaultColor = fixColor(colors.defaultColor);
   colors.nodeHighlight = fixColor(colors.nodeHighlight);
 
-  const series = data.series[0];
-  const frame = new DataFrameView(series);
+  let dataFrames: DataFrameView[] = [];
+
+  data.series.forEach(function (series) {
+    dataFrames.push(new DataFrameView(series));
+  });
   var srcKey = fields.srcField;
   var dstKey = fields.dstField;
-  var valKey = fields.valField;
+  var inboundKey = fields.inboundValueField;
+  var outboundKey = fields.outboundValueField;
 
   // initialize arrays
-  let parsedData: Array<{ in: any; out: any; azName: string; zaName: string; value: number }> = [];
+  let parsedData: Array<{
+    in: any;
+    out: any;
+    azName: string;
+    //zaName: string;
+    inboundValue: number;
+    outboundValue: number;
+  }> = [];
   let infIn: Array<{ name: any; value: number }> = [];
   let infOut: Array<{ name: any; value: number }> = [];
 
@@ -121,28 +132,32 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   // }
 
   // Retrieve panel data from panel
-  frame.forEach((row) => {
-    parsedData.push({
-      in: row[srcKey],
-      out: row[dstKey],
-      azName: `${row[srcKey]}---${row[dstKey]}`,
-      zaName: `${row[dstKey]}---${row[srcKey]}`,
-      value: row[2],
+  dataFrames.forEach((frame) => {
+    frame.forEach((row) => {
+      parsedData.push({
+        in: row[srcKey],
+        out: row[dstKey],
+        azName: `${row[srcKey]}---${row[dstKey]}`,
+        // do not assemble z-a edge. Match on azName only.
+        //zaName: `${row[dstKey]}---${row[srcKey]}`,
+        inboundValue: row[inboundKey],
+        outboundValue: row[outboundKey],
+      });
+
+      let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
+      if (indexIn >= 0) {
+        infIn[indexIn].value += row[inboundKey];
+      } else {
+        infIn.push({ name: row[srcKey], value: row[inboundKey] });
+      }
+
+      let indexOut = infOut.findIndex((e) => e.name === row[dstKey]);
+      if (indexOut >= 0) {
+        infOut[indexOut].value += row[outboundKey];
+      } else {
+        infOut.push({ name: row[dstKey], value: row[outboundKey] });
+      }
     });
-
-    let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
-    if (indexIn >= 0) {
-      infIn[indexIn].value += row[2];
-    } else {
-      infIn.push({ name: row[srcKey], value: row[2] });
-    }
-
-    let indexOut = infOut.findIndex((e) => e.name === row[dstKey]);
-    if (indexOut >= 0) {
-      infOut[indexOut].value += row[2];
-    } else {
-      infOut.push({ name: row[dstKey], value: row[2] });
-    }
   });
 
   const mapJson = JSON.parse(mapData);
@@ -161,25 +176,35 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
     let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
 
     if (matchAZ) {
-      edge.AZvalue = matchAZ.value;
+      // if we get an a-z match, assign inbound and outbound "normally"
+      edge.AZvalue = matchAZ.inboundValue;
+      edge.ZAvalue = matchAZ.outboundValue;
       edge.azColor = valueField[0].display(edge.AZvalue).color;
-      let display = valueField[0].display(edge.AZvalue);
-      edge.AZdisplayValue = `${display.text} ${display.suffix}`;
-    } else {
-      edge.azColor = colors.defaultColor;
-      edge.AZdisplayValue = 'N/A';
-      edge.AZvalue += null;
-    }
-
-    if (matchZA) {
-      edge.ZAvalue = matchZA.value;
       edge.zaColor = valueField[0].display(edge.ZAvalue).color;
-      let display = valueField[0].display(edge.ZAvalue);
-      edge.ZAdisplayValue = `${display.text} ${display.suffix}`;
-    } else {
+      let AZdisplay = valueField[0].display(edge.AZvalue);
+      edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
+      let ZAdisplay = valueField[0].display(edge.ZAvalue);
+      edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+    }
+    if (matchZA) {
+      // if we get a z-a match, flip-flop inbound and outbound
+      edge.AZvalue = matchZA.outboundValue;
+      edge.ZAvalue = matchZA.inboundValue;
+      edge.azColor = valueField[0].display(edge.AZvalue).color;
+      edge.zaColor = valueField[0].display(edge.ZAvalue).color;
+      let AZdisplay = valueField[0].display(edge.AZvalue);
+      edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
+      let ZAdisplay = valueField[0].display(edge.ZAvalue);
+      edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+    }
+    if (!matchAZ && !matchZA) {
+      // if neither matches, do the "dead link" thing
+      edge.azColor = colors.defaultColor;
       edge.zaColor = colors.defaultColor;
+      edge.AZdisplayValue = 'N/A';
       edge.ZAdisplayValue = 'N/A';
-      edge.ZAvalue = null;
+      edge.AZvalue += null;
+      edge.ZAvalue += null;
     }
   });
 
@@ -205,5 +230,5 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   mapJson.aTest = 0;
 
   // returns parsedData: pairs & their value, infIn: aggregated by first group by, infOut: appregated by 2nd group by
-  return [parsedData, infIn, infOut, mapJson, srcKey, dstKey, valKey];
+  return [parsedData, infIn, infOut, mapJson, srcKey, dstKey, inboundKey, outboundKey];
 }
