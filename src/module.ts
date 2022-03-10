@@ -338,10 +338,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -350,11 +351,11 @@ plugin.setPanelOptions((builder) => {
     },
   });
   builder.addSelect({
-    path: 'valFieldL1',
-    name: 'Layer 1 Value Field',
-    description: 'Select the field to use for data values',
-    category: FieldsCategory,
+    path: 'inboundValueFieldL1',
+    name: 'Layer 1 Inbound Value Field',
+    description: 'Select the field to use for A-Z traffic values',
     showIf: layer1Bool(true),
+    category: FieldsCategory,
     settings: {
       allowCustomValue: false,
       options: [],
@@ -362,10 +363,36 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'outboundValueFieldL1',
+    name: 'Layer 1 Outbound Value Field',
+    description: 'Select the field to use for Z-A traffic values',
+    showIf: layer1Bool(true),
+    category: FieldsCategory,
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            const frameName = frame.refId;
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -386,10 +413,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -410,10 +438,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -422,9 +451,9 @@ plugin.setPanelOptions((builder) => {
     },
   });
   builder.addSelect({
-    path: 'valFieldL2',
-    name: 'Layer 2 Value Field',
-    description: 'Select the field to use for data values',
+    path: 'inboundValueFieldL2',
+    name: 'Layer 2 Inbound Value Field',
+    description: 'Select the field to use for A-Z traffic values',
     showIf: layer2Bool(true),
     category: FieldsCategory,
     settings: {
@@ -434,10 +463,36 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'outboundValueFieldL2',
+    name: 'Layer 2 Outbound Value Field',
+    description: 'Select the field to use for Z-A traffic values',
+    showIf: layer2Bool(true),
+    category: FieldsCategory,
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            const frameName = frame.refId;
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -458,10 +513,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -482,10 +538,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
@@ -494,11 +551,11 @@ plugin.setPanelOptions((builder) => {
     },
   });
   builder.addSelect({
-    path: 'valFieldL3',
-    name: 'Layer 3 Value Field',
-    description: 'Select the field to use for data values',
-    category: FieldsCategory,
+    path: 'inboundValueFieldL3',
+    name: 'Layer 3 Inbound Value Field',
+    description: 'Select the field to use for A-Z traffic values',
     showIf: layer3Bool(true),
+    category: FieldsCategory,
     settings: {
       allowCustomValue: false,
       options: [],
@@ -506,10 +563,36 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'outboundValueFieldL3',
+    name: 'Layer 3 Outbound Value Field',
+    description: 'Select the field to use for Z-A traffic values',
+    showIf: layer3Bool(true),
+    category: FieldsCategory,
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context && context.data) {
+          for (const frame of context.data) {
+            const frameName = frame.refId;
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }

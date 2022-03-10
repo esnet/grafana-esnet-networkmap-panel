@@ -69,7 +69,8 @@ export class MapPanel extends Component<Props> {
     var fieldsL1 = {
       srcField: options.srcFieldL1,
       dstField: options.dstFieldL1,
-      valField: options.valFieldL1,
+      inboundValueField: options.inboundValueFieldL1,
+      outboundValueField: options.outboundValueFieldL1,
       endpointId: options.endpointIdL1,
     };
     var colorsL2 = {
@@ -79,7 +80,8 @@ export class MapPanel extends Component<Props> {
     var fieldsL2 = {
       srcField: options.srcFieldL2,
       dstField: options.dstFieldL2,
-      valField: options.valFieldL2,
+      inboundValueField: options.inboundValueFieldL2,
+      outboundValueField: options.outboundValueFieldL2,
       endpointId: options.endpointIdL2,
     };
     var colorsL3 = {
@@ -89,7 +91,8 @@ export class MapPanel extends Component<Props> {
     var fieldsL3 = {
       srcField: options.srcFieldL3,
       dstField: options.dstFieldL3,
-      valField: options.valFieldL3,
+      inboundValueField: options.inboundValueFieldL3,
+      outboundValueField: options.outboundValueFieldL3,
       endpointId: options.endpointIdL3,
     };
     var parsedDataL1 = {};
