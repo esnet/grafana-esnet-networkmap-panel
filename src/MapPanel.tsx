@@ -109,17 +109,17 @@ export class MapPanel extends Component<Props> {
       if (data) {
         if (options.mapjsonL1) {
           resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
-          parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1);
+          parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1, 1);
           mapDataL1 = parsedDataL1[3];
         }
         if (options.mapjsonL2) {
           resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
-          parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2);
+          parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2, 2);
           mapDataL2 = parsedDataL2[3];
         }
         if (options.mapjsonL3) {
           resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
-          parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3);
+          parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3, 3);
           mapDataL3 = parsedDataL3[3];
         }
       }
