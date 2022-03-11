@@ -40,6 +40,9 @@ export const SideBar = (props) => {
             <span className="slider"></span>
           </label>
           <text className="legend-text">{props.options.layerName1}</text>
+          <div className="legend-text" style={{ fontSize: '12px', color: '#888' }} hidden={!props.options.editMode}>
+            JSON Schema: {props.options.layerValid1}
+          </div>
         </div>
         <div style={{ padding: '5px' }} hidden={!props.options.legendL2}>
           <label className="switch">
@@ -52,6 +55,9 @@ export const SideBar = (props) => {
             <span className="slider"></span>
           </label>
           <text className="legend-text">{props.options.layerName2}</text>
+          <div className="legend-text" style={{ fontSize: '12px', color: '#888' }} hidden={!props.options.editMode}>
+            JSON Schema: {props.options.layerValid2}
+          </div>
         </div>
         <div style={{ padding: '5px' }} hidden={!props.options.legendL3}>
           <label className="switch">
@@ -64,6 +70,9 @@ export const SideBar = (props) => {
             <span className="slider"></span>
           </label>
           <text className="legend-text">{props.options.layerName3}</text>
+          <div className="legend-text" style={{ fontSize: '12px', color: '#888' }} hidden={!props.options.editMode}>
+            JSON Schema: {props.options.layerValid3}
+          </div>
         </div>
       </div>
       <div style={{ padding: '10px 5px 5px 5px' }}>

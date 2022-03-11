@@ -27,6 +27,9 @@ export const Canvas = (props) => {
   } else {
     options.editMode = false;
   }
+  options.layerValid1 = props.jsonSchemaL1[1];
+  options.layerValid2 = props.jsonSchemaL2[1];
+  options.layerValid3 = props.jsonSchemaL3[1];
   const mapContainer = 'Map_' + panelId + options.editMode.toString();
 
   useEffect(() => {
@@ -55,11 +58,6 @@ export const Canvas = (props) => {
 
   return (
     <div>
-      <div hidden={!editMode}>
-        {options.layerName1}: {props.jsonSchemaL1[1]}
-        {options.layerName2}: {props.jsonSchemaL2[1]}
-        {options.layerName3}: {props.jsonSchemaL3[1]}
-      </div>
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       <SideBar
         height={height}
