@@ -1,5 +1,6 @@
 import * as d3 from './d3.min.js';
 import React from 'react';
+import * as pubsub from './pubsub.js';
 
 function createSvgMarker(svg) {
   //--- setup markers
@@ -52,6 +53,9 @@ function renderEdges(g, data, ref) {
     .append('path')
     .merge(azLines)
     .attr('d', function (d) {
+      if(d.zaPath.indexOf("NaN") > -1){
+        return null
+      }
       return d.azPath;
     })
     .attr('stroke', function (d) {
@@ -68,9 +72,25 @@ function renderEdges(g, data, ref) {
       return d.AZname;
     })
     .attr('pointer-events', 'visiblePainted')
+    .on('click', function(event, d){
+      window.__pubsub.publish("setVariables", d);
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-edge', false)
+        .classed('edge', true);
+      d3.select(".edge-za-"+d.name)
+        .classed('selected', true)
+        .classed('animated-edge', true);
+      d3.select(this)
+        .classed('selected', true)
+        .classed('edge', false)
+        .classed('animated-edge', true);
+    })
     .on('mouseover', function (event, d) {
+      var prefix = "";
+      if(d3.select(this).classed("selected")){ prefix = "selected " }
       d3.select(this).attr('class', function (d) {
-        return 'animated-edge edge-az edge-az-' + d.name;
+        return prefix+'animated-edge edge-az edge-az-' + d.name;
       });
       div
         .html(() => {
@@ -89,6 +109,7 @@ function renderEdges(g, data, ref) {
         .style('opacity', 0.8);
     })
     .on('mouseout', function (d, i) {
+      if(d3.select(this).classed("selected")){ return }
       d3.select(this).attr('class', function (d) {
         return 'edge edge-az edge-az-' + d.name;
       });
@@ -103,6 +124,9 @@ function renderEdges(g, data, ref) {
     .append('path')
     .merge(zaLines)
     .attr('d', function (d) {
+      if(d.zaPath.indexOf("NaN") > -1){
+        return null
+      }
       return d.zaPath;
     })
     .attr('stroke', function (d) {
@@ -119,9 +143,23 @@ function renderEdges(g, data, ref) {
       return d.ZAname;
     })
     .attr('pointer-events', 'visiblePainted')
+    .on('click', function(event, d){
+      window.__pubsub.publish("setVariables", d);
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-edge', false);
+      d3.select(".edge-az-"+d.name)
+        .classed('selected', true)
+        .classed('animated-edge', true);
+      d3.select(this)
+        .classed('selected', true)
+        .classed('animated-edge', true);
+    })
     .on('mouseover', function (event, d) {
+      var prefix = "";
+      if(d3.select(this).classed("selected")){ prefix = "selected " }
       d3.select(this).attr('class', function (d) {
-        return 'animated-edge edge-za edge-za-' + d.name;
+        return prefix+'animated-edge edge-za edge-za-' + d.name;
       });
       div
         .html(() => {
@@ -140,6 +178,8 @@ function renderEdges(g, data, ref) {
         .style('opacity', 0.8);
     })
     .on('mouseout', function (d, i) {
+      // don't stop animating if this component is selected
+      if(d3.select(this).classed("selected")){ return }
       d3.select(this).attr('class', function (d) {
         return 'edge edge-za edge-za-' + d.name;
       });

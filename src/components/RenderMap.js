@@ -1,8 +1,10 @@
 import * as d3 from './d3.min.js';
 import * as L from 'components/leaflet';
 import * as es from './esmap.js';
+import * as pubsub from './pubsub.js';
 import { urlUtil } from '@grafana/data';
 import React from 'react';
+import { locationService } from '@grafana/runtime';
 
 export default class NetworkMap {
   constructor(id) {
@@ -25,6 +27,27 @@ export default class NetworkMap {
     if (!parsedData || !mapData) {
       return;
     }
+
+    const setDashboardVariables = function(event){
+      const l1var = "var-"+options["dashboardVarL1"];
+      const l2var = "var-"+options["dashboardVarL2"];
+      const l3var = "var-"+options["dashboardVarL3"];
+      const dashboardVariable = "var-"+options["dashboardVarL" + event.layer];
+      const srcVariable = options["srcVarL" + event.layer];
+      const dstVariable = options["dstVarL" + event.layer];
+      var setLocation = { }
+      setLocation[l1var] = null;
+      setLocation[l2var] = null;
+      setLocation[l3var] = null;
+      setLocation[dashboardVariable] = [
+          srcVariable + "|=|" + event.nodeA,
+          dstVariable + "|=|" + event.nodeZ
+      ]
+      console.log(setLocation);
+      locationService.partial(setLocation, false)
+    }
+    // setup our pubsub callback to allow interoperation with d3
+    window.__pubsub.subscribe("setVariables", setDashboardVariables)
 
     // set variables
     const startLat = options.startLat;
