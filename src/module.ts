@@ -314,10 +314,11 @@ plugin.setPanelOptions((builder) => {
         const options: any[] = [];
         if (context && context.data) {
           for (const frame of context.data) {
+            const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
               const value = name;
-              options.push({ value, label: name });
+              options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }
         }
