@@ -1,6 +1,6 @@
 import { DataFrameView } from '@grafana/data';
 
-export function parseData(data: { series: any[] }, mapData, colors, fields) {
+export function parseData(data: { series: any[] }, mapData, colors, fields, layer) {
   // helper function to parse grafana colors
   function fixColor(color: string) {
     switch (color) {
@@ -164,6 +164,8 @@ export function parseData(data: { series: any[] }, mapData, colors, fields) {
   const endpointId = fields.endpointId;
 
   mapJson.edges.forEach((edge) => {
+    // set up the layer number so the edge "knows" which layer it's in.
+    edge.layer = layer;
     // Find A and Z node
     let nodeA = edge.meta.endpoint_identifiers[endpointId][0];
     let nodeZ = edge.meta.endpoint_identifiers[endpointId][1];
