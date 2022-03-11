@@ -5,6 +5,7 @@ import { MapPanel } from './MapPanel';
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
 const LegendCategory = ['Legend options'];
+const QueryCategory = ['Ad-hoc Query Variable Bindings'];
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 const layer1Bool = (layer1: boolean) => (config: MapOptions) => config.layer1 === layer1;
@@ -600,6 +601,70 @@ plugin.setPanelOptions((builder) => {
         return Promise.resolve(options);
       },
     },
+  });
+  // -------------------- Ad-Hoc Query Variable Bindings --------------------
+  builder.addTextInput({
+    path: 'dashboardVarL1',
+    name: 'Layer 1 Dashboard Variable',
+    showIf: layer1Bool(true),
+    category: QueryCategory,
+    defaultValue: 'l1edge',
+  });
+  builder.addTextInput({
+    path: 'srcVarL1',
+    name: 'Binding: Edge "Source" Layer 1',
+    showIf: layer1Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.device_info.loc_name',
+  });
+  builder.addTextInput({
+    path: 'dstVarL1',
+    name: 'Binding: Edge "Destination" Layer 1',
+    showIf: layer1Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.remote.loc_name',
+  });
+  builder.addTextInput({
+    path: 'dashboardVarL2',
+    name: 'Layer 2 Dashboard Variable',
+    showIf: layer2Bool(true),
+    category: QueryCategory,
+    defaultValue: 'l2edge',
+  });
+  builder.addTextInput({
+    path: 'srcVarL2',
+    name: 'Binding: Edge "Source" Layer 2',
+    showIf: layer2Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.device',
+  });
+  builder.addTextInput({
+    path: 'dstVarL2',
+    name: 'Binding: Edge "Destination" Layer 2',
+    showIf: layer2Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.org.short_name',
+  });
+  builder.addTextInput({
+    path: 'dashboardVarL3',
+    name: 'Layer 3 Dashboard Variable',
+    showIf: layer3Bool(true),
+    category: QueryCategory,
+    defaultValue: 'l3edge',
+  });
+  builder.addTextInput({
+    path: 'srcVarL3',
+    name: 'Binding: Edge "Source" Layer 3',
+    showIf: layer3Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.device_info.loc_name',
+  });
+  builder.addTextInput({
+    path: 'dstVarL3',
+    name: 'Binding: Edge "Destination" Layer 3',
+    showIf: layer3Bool(true),
+    category: QueryCategory,
+    defaultValue: 'meta.remote.loc_name',
   });
 
   // -------------------- Legend Options --------------------
