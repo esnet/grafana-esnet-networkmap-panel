@@ -147,7 +147,8 @@ function renderEdges(g, data, ref) {
       window.__pubsub.publish("setVariables", d);
       d3.selectAll(".selected")
         .classed('selected', false)
-        .classed('animated-edge', false);
+        .classed('animated-edge', false)
+        .classed('edge', true);
       d3.select(".edge-az-"+d.name)
         .classed('selected', true)
         .classed('animated-edge', true);
