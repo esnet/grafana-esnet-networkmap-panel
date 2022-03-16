@@ -5,6 +5,41 @@ import * as pubsub from './pubsub.js';
 import { urlUtil } from '@grafana/data';
 import React from 'react';
 import { locationService } from '@grafana/runtime';
+import { PubSub } from 'components/pubsub.js';
+
+var leafletMap = null;
+export const getCurrentLeafletMap = function getCurrentLeafletMap(mapContainer, startLat, startLng, startZoom) {
+  if(!leafletMap){
+    leafletMap = L.map(mapContainer, {
+        zoomAnimation: false,
+        fadeAnimation: false,
+        zoomSnap: 0.25,
+        zoomDelta: 0.25,
+        scrollWheelZoom: false,
+        doubleClickZoom: false,
+      }).setView([startLat, startLng], startZoom);
+      L.tileLayer(
+        'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+        {
+          attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+          minZoom: 2,
+          maxZoom: 10,
+          ext: 'png',
+        }
+      ).addTo(leafletMap);
+      L.svg({ clickable: true }).addTo(leafletMap); // we have to make the svg layer clickable
+  }
+  return leafletMap;
+}
+
+export const destroyCurrentLeafletMap = function destroyCurrentLeafletMap() {
+  if(leafletMap){
+    leafletMap.off();
+    leafletMap.remove();
+    leafletMap = null;
+  }
+}
+PubSub.subscribe('destroyMap', destroyCurrentLeafletMap);
 
 export default class NetworkMap {
   constructor(id) {
@@ -32,22 +67,23 @@ export default class NetworkMap {
       const l1var = "var-"+options["dashboardVarL1"];
       const l2var = "var-"+options["dashboardVarL2"];
       const l3var = "var-"+options["dashboardVarL3"];
-      const dashboardVariable = "var-"+options["dashboardVarL" + event.layer];
-      const srcVariable = options["srcVarL" + event.layer];
-      const dstVariable = options["dstVarL" + event.layer];
       var setLocation = { }
       setLocation[l1var] = null;
       setLocation[l2var] = null;
       setLocation[l3var] = null;
-      setLocation[dashboardVariable] = [
-          srcVariable + "|=|" + event.nodeA,
-          dstVariable + "|=|" + event.nodeZ
-      ]
-      console.log(setLocation);
+      if(event && event.nodeA && event.nodeZ){
+        const dashboardVariable = "var-"+options["dashboardVarL" + event.layer];
+        const srcVariable = options["srcVarL" + event.layer];
+        const dstVariable = options["dstVarL" + event.layer];
+        setLocation[dashboardVariable] = [
+            srcVariable + "|=|" + event.nodeA,
+            dstVariable + "|=|" + event.nodeZ
+        ]        
+      }
       locationService.partial(setLocation, false)
     }
     // setup our pubsub callback to allow interoperation with d3
-    window.__pubsub.subscribe("setVariables", setDashboardVariables)
+    pubsub.PubSub.subscribe("setVariables", setDashboardVariables)
 
     // set variables
     const startLat = options.startLat;
@@ -55,65 +91,70 @@ export default class NetworkMap {
     const startZoom = options.startZoom;
     var div = d3.selectAll('#sidebar-tooltip');
 
-    //--- Create Leaflet Map with custom tile layer
-    var map = L.map(mapContainer, {
-      zoomAnimation: false,
-      fadeAnimation: false,
-      zoomSnap: 0.25,
-      zoomDelta: 0.25,
-      scrollWheelZoom: false,
-      doubleClickZoom: false,
-    }).setView([startLat, startLng], startZoom);
-    L.tileLayer(
-      'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}',
-      {
-        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-        minZoom: 2,
-        maxZoom: 10,
-        ext: 'png',
-      }
-    ).addTo(map);
+    //--- grab copy or instantiate the current leaflet map singleton
+    var map = getCurrentLeafletMap(mapContainer, startLat, startLng, startZoom);
 
     //--- Initialize the SVG layer
-    L.svg({ clickable: true }).addTo(map); // we have to make the svg layer clickable
     const overlay = d3.select(map.getPanes().overlayPane);
     const svg = overlay.select('svg').attr('pointer-events', 'all');
 
     //--- create network map within leaflet
     //---  note:  1 map could have multiple esmap svg layers
-    var nm = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
+    var esmap = new es.EsMap(map, svg, div, d3.curveNatural, options, updateMapJson, updateCenter, width, height);
 
     const params = urlUtil.getUrlSearchParams();
     if (params.editPanel != null) {
-      nm.editMode(1);
+      esmap.editEdgeMode(1);
       editMode = true;
     } else {
-      nm.editMode(0);
+      esmap.editEdgeMode(0);
+      esmap.editNodeMode(0);
       editMode = false;
     }
 
-    function toggleEdit() {
-      var d = d3.selectAll('#edit_mode');
-      if (nm.edit == 1) {
-        nm.editMode(0);
-        d.html('Turn Edit Mode On');
+    function toggleEdgeEdit() {
+      var edge_button = d3.selectAll('#edge_edit_mode');
+      var node_button = d3.selectAll('#node_edit_mode');
+      if (esmap.editEdges == 1) {
+        esmap.editNodeMode(0);
+        esmap.editEdgeMode(0);
+        edge_button.html('Edit Edges: Off');
+        node_button.html('Edit Nodes: Off');
       } else {
-        nm.editMode(1);
-        d.html('Turn Edit Mode Off');
+        esmap.editNodeMode(0);
+        esmap.editEdgeMode(1);
+        edge_button.html('Edit Edges: On');
+        node_button.html('Edit Nodes: Off');
       }
     }
+    var edit_mode = d3.selectAll('#edge_edit_mode').on('click', toggleEdgeEdit);
 
-    var edit_mode = d3.selectAll('#edit_mode').on('click', toggleEdit);
+    function toggleNodeEdit() {
+      var node_button = d3.selectAll('#node_edit_mode');
+      var edge_button = d3.selectAll('#edge_edit_mode');
+      if (esmap.editNodes == 1) {
+        esmap.editEdgeMode(0);
+        esmap.editNodeMode(0);
+        node_button.html('Edit Nodes: Off');
+        edge_button.html('Edit Edges: Off');
+      } else {
+        esmap.editEdgeMode(0);
+        esmap.editNodeMode(1);
+        node_button.html('Edit Nodes: On');
+        edge_button.html('Edit Edges: Off');
+      }
+    }
+    var edit_mode = d3.selectAll('#node_edit_mode').on('click', toggleNodeEdit);
 
     // Draw the map json topology data!!! Currently supports up to 3 layers
     if (options.layer1 && mapData.layer1) {
-      var g1 = nm.addNetLayer('layer1', mapData.layer1);
+      var g1 = esmap.addNetLayer('layer1', mapData.layer1);
     }
     if (options.layer2 && mapData.layer2) {
-      var g2 = nm.addNetLayer('layer2', mapData.layer2);
+      var g2 = esmap.addNetLayer('layer2', mapData.layer2);
     }
     if (options.layer3 && mapData.layer3) {
-      var g3 = nm.addNetLayer('layer3', mapData.layer3);
+      var g3 = esmap.addNetLayer('layer3', mapData.layer3);
     }
 
     //----  helper
@@ -129,7 +170,7 @@ export default class NetworkMap {
 
     //--- function that changes circuit style, showing how to do so directly using dom.
     async function twinkle(map, g, name) {
-      var edges = nm.data[name]['edges'];
+      var edges = esmap.data[name]['edges'];
       for (let x = 0; x < 1000; x++) {
         //-- pick random ckt and assign rand colors every 10ms
         var target = edges[getRandomInt(0, edges.length)].name;
