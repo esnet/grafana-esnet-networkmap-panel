@@ -14,9 +14,9 @@ export class MapPanel extends Component<Props> {
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
-  updateMapJson = (newDataL1, newDataL2, newDataL3, zoom, center) => {
+  updateMapJson = (newDataL1, newDataL2, newDataL3) => {
     const { options } = this.props;
-    let { mapjsonL1, mapjsonL2, mapjsonL3, startLat, startLng, startZoom } = options;
+    let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
     if (newDataL1 != null) {
       mapjsonL1 = JSON.stringify(newDataL1);
     }
@@ -26,10 +26,7 @@ export class MapPanel extends Component<Props> {
     if (newDataL3 != null) {
       mapjsonL3 = JSON.stringify(newDataL3);
     }
-    startZoom = zoom;
-    startLat = center.lat;
-    startLng = center.lng;
-    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3, startZoom, startLat, startLng });
+    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
 
   // A function to update the map jsons in the Edit panel based on the current map state
