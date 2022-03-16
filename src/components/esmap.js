@@ -43,6 +43,14 @@ function createSvgMarker(svg) {
   return marker;
 }
 
+function clearSelection(){
+  d3.selectAll(".selected")
+    .classed('selected', false)
+    .classed('animated-edge', false)
+    .classed('edge', true)
+}
+pubsub.PubSub.subscribe("clearSelection", clearSelection);
+
 function renderEdges(g, data, ref) {
   var div = ref.div;
   const edgeWidth = ref.options.edgeWidth;
@@ -73,7 +81,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      window.__pubsub.publish("setVariables", d);
+      pubsub.PubSub.publish("setVariables", d);
+      pubsub.PubSub.publish("repaint", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -144,7 +153,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      window.__pubsub.publish("setVariables", d);
+      pubsub.PubSub.publish("setVariables", d);
+      pubsub.PubSub.publish("repaint", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -228,6 +238,47 @@ function addControlPoint(evt, obj, ref) {
   }
 }
 
+function renderNodeControl(g, data, ref){
+  var feature = g.selectAll('circle').data(data.nodes);
+
+  function dragged(evt, d) {
+    var mapDiv = ref.leafletMap.getContainer();
+    //--- set the control points to the new Lat lng
+    var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
+    d['latLng'][0] = ll.lat;
+    d['latLng'][1] = ll.lng;
+    //--- rerender stuff
+    ref.update();
+  }
+
+  function endDrag(evt, d) {
+    var zoom = ref.leafletMap.getZoom();
+    var center = L.latLng(ref.leafletMap.getCenter());
+    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3']);
+  }
+
+  feature
+    .enter()
+    .append('circle')
+    .attr('r', 8)
+    .attr('class', 'control controlPoint')
+    .merge(feature)
+    .on('mouseenter', function () {
+      ref.leafletMap.dragging.disable();
+    })
+    .on('mouseout', function () {
+      ref.leafletMap.dragging.enable();
+    })
+    .call(d3.drag().on('drag', dragged).on('end', endDrag));
+
+  g.selectAll('circle').attr('transform', function (d) {
+    var ll = L.latLng(d.latLng);
+    var pt = ref.leafletMap.latLngToLayerPoint(ll);
+    return 'translate(' + pt.x + ',' + pt.y + ')';
+  });
+ feature.exit().remove();
+}
+
 function renderEdgeControl(g, data, ref) {
   var lines = g.selectAll('path').data(data.edges);
 
@@ -268,7 +319,7 @@ function renderEdgeControl(g, data, ref) {
   function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3'], zoom, center);
+    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3']);
   }
 
   data.edges.forEach(function (d) {
@@ -424,7 +475,8 @@ export class EsMap {
     this.mapLayers = {};
     this.offset = options.pathOffset;
     this.lineGen = d3.line().curve(curve);
-    this.edit = 0;
+    this.editEdges = 0;
+    this.editNodes = 0;
     this.div = div;
     this.options = options;
     this.updateMapJson = updateMapJson;
@@ -442,19 +494,36 @@ export class EsMap {
     });
   }
 
-  editMode(setting) {
+  editEdgeMode(setting) {
     if (setting === null || setting === undefined) {
-      return this.edit;
+      return this.editEdges;
     }
 
     if (setting > 0) {
-      this.edit = 1;
+      this.editEdges = 1;
+      this.editNodes = 0; // mutually exclusive
     } else {
-      this.edit = 0;
+      this.editEdges = 0;
     }
 
     this.update();
-    return this.edit;
+    return this.editEdges;
+  }
+
+  editNodeMode(setting){
+    if (setting === null || setting === undefined) {
+      return this.editNodes;
+    }
+
+    if (setting > 0) {
+      this.editNodes = 1;
+      this.editEdges = 0; // mutually exclusive
+    } else {
+      this.editNodes = 0;
+    }
+
+    this.update();
+    return this.editNodes;
   }
 
   updateCoordinates(data) {
@@ -522,12 +591,19 @@ export class EsMap {
       var cp_g = g.select('g.cp');
       var data = this.data[name];
 
-      if (this.edit == 1) {
+      if (this.editNodes == 1) {
+        renderNodeControl(cp_g, data, this);
+        var zoom = this.leafletMap.getZoom();
+        var center = L.latLng(this.leafletMap.getCenter());
+        this.updateCenter(zoom, center);        
+      }
+      if (this.editEdges == 1) {
         renderEdgeControl(cp_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
         this.updateCenter(zoom, center);
-      } else {
+      }
+      if (!this.editEdges && !this.editNodes) {
         //  delete all the control point g children
         cp_g.selectAll('*').remove();
       }
