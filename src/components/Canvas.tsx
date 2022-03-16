@@ -1,9 +1,10 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { urlUtil } from '@grafana/data';
-import NetworkMap from './RenderMap.js';
+import NetworkMap, { destroyCurrentLeafletMap } from './RenderMap.js';
 import { SideBar } from 'components/SideBar';
 import '../css/esmap.css';
 import '../css/leaflet.css';
+import { PubSub } from 'components/pubsub.js';
 
 export const Canvas = (props) => {
   const panelId = props.panelId;
@@ -32,32 +33,61 @@ export const Canvas = (props) => {
   options.layerValid3 = props.jsonSchemaL3[1];
   const mapContainer = 'Map_' + panelId + options.editMode.toString();
 
-  useEffect(() => {
-    const map = new NetworkMap(mapContainer);
-    var thisMap = map.renderMap(
-      data,
-      mapData,
-      options,
-      updateMapJson,
-      updateCenter,
-      mapWidth,
-      height,
-      editMode,
-      mapContainer
-    );
+  const [, triggerRefresh] = useState('');
 
-    return () => {
-      // SUPER IMPORTANT!!! this removes the old map before rerendering
-      if (thisMap) {
-        thisMap.off();
-        thisMap.remove();
-      }
-    };
-  }, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
+  var self = {
+    setButtonScope: (value) => {
+      triggerRefresh('');
+    },
+    clearSelection: () => {
+      PubSub.publish('setVariables', null);
+      PubSub.publish('clearSelection', null);
+    },
+    homeMap: () => {
+      PubSub.publish('destroyMap', null);
+      PubSub.publish('repaint', null);
+    },
+    renderButtons: function renderButtons() {
+      return (
+        <div className="button-overlay">
+          <div className="button" onClick={self.homeMap}>
+            🏠
+          </div>
+          <div
+            className={'button'}
+            id={'clear_selection'}
+            hidden={!PubSub.last('setVariables')}
+            onClick={self.clearSelection}
+          >
+            &times; Clear Selection
+          </div>
+          <div className={'button'} id={'edge_edit_mode'} hidden={!editMode}>
+            Edit Edges: On
+          </div>
+          <div className={'button'} id={'node_edit_mode'} hidden={!editMode}>
+            Edit Nodes: Off
+          </div>
+        </div>
+      );
+    },
+  };
+  // setup our pubsub callback to allow interoperation with d3
+  PubSub.subscribe('setVariables', self.setButtonScope);
+
+  const drawMap = () => {
+    const map = new NetworkMap(mapContainer);
+    map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode, mapContainer);
+
+    return destroyCurrentLeafletMap;
+  };
+  PubSub.subscribe('repaint', drawMap);
+
+  useEffect(drawMap, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
   // above return statement throws a warning that we're not using all the variables, but that's ok.
 
   return (
-    <div>
+    <div className="map-panel">
+      {self.renderButtons()}
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       <SideBar
         height={height}
@@ -66,9 +96,6 @@ export const Canvas = (props) => {
         options={options}
         toggleLayer={props.toggleLayer}
       />
-      <button type={'button'} id={'edit_mode'} hidden={!editMode}>
-        Turn Edit Mode Off
-      </button>
     </div>
   );
 };
