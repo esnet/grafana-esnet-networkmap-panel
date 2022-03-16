@@ -45,10 +45,8 @@ const validate = ajv.compile(schema);
 export function testJsonSchema(data) {
   const valid = validate(data);
   if (valid) {
-    console.log('Valid!');
     return [true, 'valid'];
   } else {
-    console.log('Invalid: ' + ajv.errorsText(validate.errors));
     return [false, ajv.errorsText(validate.errors)];
   }
 }
