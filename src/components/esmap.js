@@ -61,7 +61,7 @@ function renderEdges(g, data, ref) {
     .append('path')
     .merge(azLines)
     .attr('d', function (d) {
-      if(d.zaPath.indexOf("NaN") > -1){
+      if(d.azPath.indexOf("NaN") > -1){
         return null
       }
       return d.azPath;
@@ -74,7 +74,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      return 'edge edge-az edge-az-' + d.name;
+      var connections = " connects-to-"+d.name.split("--").join(" connects-to-");
+      return 'edge edge-az edge-az-' + d.name + connections;
     })
     .attr('text', function (d) {
       return d.AZname;
@@ -82,7 +83,6 @@ function renderEdges(g, data, ref) {
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
       pubsub.PubSub.publish("setVariables", d);
-      pubsub.PubSub.publish("repaint", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -96,11 +96,7 @@ function renderEdges(g, data, ref) {
         .classed('animated-edge', true);
     })
     .on('mouseover', function (event, d) {
-      var prefix = "";
-      if(d3.select(this).classed("selected")){ prefix = "selected " }
-      d3.select(this).attr('class', function (d) {
-        return prefix+'animated-edge edge-az edge-az-' + d.name;
-      });
+      d3.select(this).classed("animated-edge", true);
       div
         .html(() => {
           var text =
@@ -118,10 +114,9 @@ function renderEdges(g, data, ref) {
         .style('opacity', 0.8);
     })
     .on('mouseout', function (d, i) {
+      // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
-      d3.select(this).attr('class', function (d) {
-        return 'edge edge-az edge-az-' + d.name;
-      });
+      d3.select(this).classed("animated-edge", false);
       div.transition().duration(500).style('opacity', 0);
     });
   azLines.exit().remove();
@@ -146,7 +141,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      return 'edge edge-za edge-za-' + d.name;
+      var connections = " connects-to-"+d.name.split("--").join(" connects-to-");
+      return 'edge edge-za edge-za-' + d.name + connections;
     })
     .attr('text', function (d) {
       return d.ZAname;
@@ -154,7 +150,6 @@ function renderEdges(g, data, ref) {
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
       pubsub.PubSub.publish("setVariables", d);
-      pubsub.PubSub.publish("repaint", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -167,11 +162,7 @@ function renderEdges(g, data, ref) {
         .classed('animated-edge', true);
     })
     .on('mouseover', function (event, d) {
-      var prefix = "";
-      if(d3.select(this).classed("selected")){ prefix = "selected " }
-      d3.select(this).attr('class', function (d) {
-        return prefix+'animated-edge edge-za edge-za-' + d.name;
-      });
+      d3.select(this).classed("animated-edge", true);
       div
         .html(() => {
           var text =
@@ -191,9 +182,7 @@ function renderEdges(g, data, ref) {
     .on('mouseout', function (d, i) {
       // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
-      d3.select(this).attr('class', function (d) {
-        return 'edge edge-za edge-za-' + d.name;
-      });
+      d3.select(this).classed("animated-edge", false);
       div.transition().duration(500).style('opacity', 0);
     });
   zaLines.exit().remove();
@@ -241,12 +230,31 @@ function addControlPoint(evt, obj, ref) {
 function renderNodeControl(g, data, ref){
   var feature = g.selectAll('circle').data(data.nodes);
 
-  function dragged(evt, d) {
+  function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
+    pubsub.PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
-    d['latLng'][0] = ll.lat;
-    d['latLng'][1] = ll.lng;
+    pointData['latLng'][0] = ll.lat;
+    pointData['latLng'][1] = ll.lng;
+    // procedure for updating the edge:
+    // get all edges that have "d.name" as a node
+    d3.selectAll(".connects-to-"+pointData.name)
+        // for each edge that we select:
+        .attr('d', function (d) {
+          // if we are manipulating the "A" end
+          // the index of the point we want is 0
+          var idx = 0;
+          if(d.nodeZ == pointData.name){
+            // if we are manipulating the "Z" end
+            // the index of the point we want is the last one
+            idx = d.latLngs.length - 1;
+          } 
+          // manipulate the point
+          d.latLngs[idx][0] = ll.lat;
+          d.latLngs[idx][1] = ll.lng;
+        })
+    // 
     //--- rerender stuff
     ref.update();
   }
@@ -260,7 +268,7 @@ function renderNodeControl(g, data, ref){
   feature
     .enter()
     .append('circle')
-    .attr('r', 8)
+    .attr('r', 6)
     .attr('class', 'control controlPoint')
     .merge(feature)
     .on('mouseenter', function () {
@@ -268,6 +276,9 @@ function renderNodeControl(g, data, ref){
     })
     .on('mouseout', function () {
       ref.leafletMap.dragging.enable();
+    })
+    .on('mousedown', function(evt, pointData){
+      pubsub.PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
@@ -289,7 +300,9 @@ function renderEdgeControl(g, data, ref) {
     .attr('d', function (d) {
       return d.controlPointPath;
     })
-    .attr('class', 'control')
+    .attr('class', function(d){
+      return 'control'
+    })
     // still need to figure out how to not zoom when doubleclicking here
     .on('dblclick', function (d) {
       addControlPoint(d, this, ref);
@@ -306,7 +319,8 @@ function renderEdgeControl(g, data, ref) {
 
   g.selectAll('g').remove();
 
-  function dragged(evt, d) {
+  function dragged(evt, d, edgeData) {
+    pubsub.PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -316,15 +330,15 @@ function renderEdgeControl(g, data, ref) {
     ref.update();
   }
 
-  function endDrag(evt, d) {
+  function endDrag(evt, d, edgeData) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
     ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3']);
   }
 
-  data.edges.forEach(function (d) {
+  data.edges.forEach(function (edgeData) {
     var my_g = g.append('g');
-    var feature = my_g.selectAll('circle').data(d.latLngs);
+    var feature = my_g.selectAll('circle').data(edgeData.latLngs);
 
     feature
       .enter()
@@ -332,7 +346,9 @@ function renderEdgeControl(g, data, ref) {
       .attr('r', 4)
       .attr('class', 'control controlPoint')
       .merge(feature)
-      .call(d3.drag().on('drag', dragged).on('end', endDrag));
+      .call(d3.drag()
+        .on('drag', function(evt, d){ dragged(evt, d, edgeData); })
+        .on('end', function(evt, d){ endDrag(evt, d, edgeData); }));
 
     my_g
       .selectAll('circle')
@@ -347,6 +363,9 @@ function renderEdgeControl(g, data, ref) {
       })
       .on('mouseout', function () {
         ref.leafletMap.dragging.enable();
+      })
+      .on('mousedown', function(evt, d){
+        pubsub.PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
       });
 
     feature.exit().remove();
@@ -481,6 +500,9 @@ export class EsMap {
     this.options = options;
     this.updateMapJson = updateMapJson;
     this.updateCenter = updateCenter;
+    this.lastInteractedObject = null; // the last object that the user interacted with
+                                      // used for nudging and deletion via keyboard
+    this.lastInteractedType = null; // "nodes" or "edges"
 
     createSvgMarker(this.svg);
 
@@ -492,7 +514,77 @@ export class EsMap {
     this.leafletMap.on('viewreset', function () {
       ref.update();
     });
+
+    var self = this;
+    function updateLastInteractedObject(event){
+      self.lastInteractedObject = event.object;
+      self.lastInteractedType = event.type;
+    }
+    pubsub.PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject);
+
+    function deleteObject(object, type){
+      for(var i=1; i<=3; i++){ 
+        if(!self.data["layer"+i]){
+          continue;
+        }
+        var idx = self.data["layer"+i][type].indexOf(object)
+        if(idx > -1){
+          self.data["layer"+i][type].splice(idx, 1);
+          self.update()
+          return;
+        }
+      }
+    }
+    function nudge(latOrLng, amount){
+      if (self.lastInteractedType == "nodes"){
+        var idx = 0;
+        if(latOrLng == "longitude"){
+          idx = 1;
+        }
+        self.lastInteractedObject.latLng[idx] += amount;
+        var ll = self.lastInteractedObject.latLng;
+        d3.selectAll(".connects-to-"+self.lastInteractedObject.name)
+            // for each edge that we select:
+            .attr('d', function (d) {
+              // if we are manipulating the "A" end
+              // the index of the point we want is 0
+              var idx = 0;
+              if(d.nodeZ == self.lastInteractedObject.name){
+                // if we are manipulating the "Z" end
+                // the index of the point we want is the last one
+                idx = d.latLngs.length - 1;
+              } 
+              // manipulate the point
+              d.latLngs[idx] = ll;
+            })
+        self.update();
+      }
+    }
+
+    d3.select("body").on("keydown", function(event, d){
+      switch(event.key){
+        case 'Backspace':
+        case 'Delete':
+          deleteObject(self.lastInteractedObject, self.lastInteractedType);
+          break;
+        case 'ArrowLeft':
+          nudge("longitude", -0.05)
+          break;
+        case 'ArrowRight':
+          nudge("longitude", 0.05)
+          break;
+        case 'ArrowUp':
+          nudge("latitude", 0.05)
+          break;
+        case 'ArrowDown':
+          nudge("latitude", -0.05)
+          break;
+        default:
+          break;
+      }
+    })
   }
+
 
   editEdgeMode(setting) {
     if (setting === null || setting === undefined) {
@@ -588,24 +680,24 @@ export class EsMap {
     for (const [name, g] of Object.entries(this.mapLayers)) {
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
-      var cp_g = g.select('g.cp');
+      var controlpoint_g = g.select('g.cp');
       var data = this.data[name];
 
       if (this.editNodes == 1) {
-        renderNodeControl(cp_g, data, this);
+        renderNodeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
         this.updateCenter(zoom, center);        
       }
       if (this.editEdges == 1) {
-        renderEdgeControl(cp_g, data, this);
+        renderEdgeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
         this.updateCenter(zoom, center);
       }
       if (!this.editEdges && !this.editNodes) {
         //  delete all the control point g children
-        cp_g.selectAll('*').remove();
+        controlpoint_g.selectAll('*').remove();
       }
       renderNodes(node_g, data, this);
       renderEdges(edge_g, data, this);
