@@ -12,19 +12,49 @@ export class MapPanel extends Component<Props> {
     super(props);
   }
 
+  sanitizeNode = (node) => {
+    return {
+      name: node.name,
+      meta: node.meta,
+      latLng: node.latLng,
+    };
+  };
+  sanitizeEdge = (edge) => {
+    return {
+      name: edge.name,
+      meta: edge.meta,
+      latLngs: edge.latLngs,
+      children: edge.children,
+    };
+  };
+  sanitizeMapJsonLayer = (layerData) => {
+    return {
+      name: layerData.name,
+      layer: layerData.layer,
+      pathLayout: layerData.pathLayout,
+      edges: layerData.edges.reduce((output, edge) => {
+        output.push(this.sanitizeEdge(edge));
+        return output;
+      }, []),
+      nodes: layerData.nodes.reduce((output, node) => {
+        output.push(this.sanitizeNode(node));
+        return output;
+      }, []),
+    };
+  };
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
   updateMapJson = (newDataL1, newDataL2, newDataL3) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
     if (newDataL1 != null) {
-      mapjsonL1 = JSON.stringify(newDataL1);
+      mapjsonL1 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL1));
     }
     if (newDataL2 != null) {
-      mapjsonL2 = JSON.stringify(newDataL2);
+      mapjsonL2 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL2));
     }
     if (newDataL3 != null) {
-      mapjsonL3 = JSON.stringify(newDataL3);
+      mapjsonL3 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL3));
     }
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
