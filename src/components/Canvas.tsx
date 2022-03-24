@@ -35,46 +35,41 @@ export const Canvas = (props) => {
 
   const [, triggerRefresh] = useState('');
 
-  var self = {
-    setButtonScope: (value) => {
-      triggerRefresh('');
-    },
-    clearSelection: () => {
-      PubSub.publish('setVariables', null);
-      PubSub.publish('clearSelection', null);
-    },
-    homeMap: () => {
-      PubSub.publish('destroyMap', null);
-      PubSub.publish('repaint', null);
-    },
-    renderButtons: function renderButtons() {
-      return (
-        <div className="button-overlay">
-          <div className="button" onClick={self.homeMap}>
-            🏠
-          </div>
-          <div
-            className={'button'}
-            id={'clear_selection'}
-            hidden={!PubSub.last('setVariables')}
-            onClick={self.clearSelection}
-          >
-            &times; Clear Selection
-          </div>
-          <div className={'button'} id={'edge_edit_mode'} hidden={!editMode}>
-            Edit Edges: On
-          </div>
-          <div className={'button'} id={'node_edit_mode'} hidden={!editMode}>
-            Edit Nodes: Off
-          </div>
-        </div>
-      );
-    },
+  const setButtonScope = (value) => {
+    triggerRefresh('');
   };
+  const clearSelection = () => {
+    PubSub.publish('setVariables', null);
+    PubSub.publish('clearSelection', null);
+  };
+  const homeMap = () => {
+    PubSub.publish('destroyMap', null);
+    PubSub.publish('repaint', null);
+  };
+  const renderButtons = () => {
+    return (
+      <div className="button-overlay">
+        <div className="button" onClick={homeMap}>
+          🏠
+        </div>
+        <div className={'button'} id={'clear_selection'} hidden={!PubSub.last('setVariables')} onClick={clearSelection}>
+          &times; Clear Selection
+        </div>
+        <div className={'button'} id={'edge_edit_mode'} hidden={!params.editPanel}>
+          Edit Edges: On
+        </div>
+        <div className={'button'} id={'node_edit_mode'} hidden={!params.editPanel}>
+          Edit Nodes: Off
+        </div>
+      </div>
+    );
+  };
+
   // setup our pubsub callback to allow interoperation with d3
-  PubSub.subscribe('setVariables', self.setButtonScope);
+  PubSub.subscribe('setVariables', setButtonScope);
 
   const drawMap = () => {
+    destroyCurrentLeafletMap();
     const map = new NetworkMap(mapContainer);
     map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode, mapContainer);
 
@@ -87,8 +82,8 @@ export const Canvas = (props) => {
 
   return (
     <div className="map-panel">
-      {self.renderButtons()}
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
+      {renderButtons()}
       <SideBar
         height={height}
         width={tooltipWidth}
