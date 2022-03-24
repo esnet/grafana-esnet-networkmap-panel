@@ -1,0 +1,43 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "private",
+  "signedByOrg": "jkafaderesnet",
+  "signedByOrgName": "jkafaderesnet",
+  "rootUrls": [
+    "https://dashboard.stardust.es.net/",
+    "https://gf.gc1.dev-stage.stardust.es.net/"
+  ],
+  "plugin": "esnet-networkmap-panel",
+  "version": "1.0.0",
+  "time": 1648150522187,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
+    "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
+    "module.js.LICENSE.txt": "1f3f51aa9ff8b99696b5609fb962c10ffb6082816b5d250692589ef41c082878",
+    "module.js.map": "24a849810e9fc824b234ab6f4066fc95a380a0795a4c3f14c2b92c7b5cf7b6c4",
+    "plugin.json": "d1008797ee99fc82aa7a5a13fa4e88bdcbf7d43f737a74c6149488c8189183e7",
+    "README.md": "9ab41adee180f8249029a8707fb4d0341d7b9e04f12dcb74b1b374c964022afd",
+    "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
+    "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
+    "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
+    "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
+    "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
+    "module.js": "40c260aad585fd854c1fed37f83e2773163ee11c09198648469a12eae8719816"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.10
+Comment: https://openpgpjs.org
+
+wrgEARMKAAYFAmI8x/oAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5wMqAgiNqpTsZOuWabZK06DOachhdOMB/+VuF64JSw/XGWO0Q6g7WKvq
+QRLAfTCjCE5Y0Jvvb8e6Bi3FZZW50oeF3lXimAIJAf6M390P3PtCPVe0TPPd
+X+OZo0b6JO2XrzuRktPIFQO+dYRUaMYvwJEMm1VPjQq/HuFaW6VUpL5k13VK
+NQ0F1nE7
+=DDBO
+-----END PGP SIGNATURE-----
