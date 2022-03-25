@@ -88,7 +88,7 @@ export const Canvas = (props) => {
       );
     }
   };
-  useEffect(renderLayers, [mapData, params.editPanel]);
+  useEffect(renderLayers, [mapData]);
 
   return (
     <div className="map-panel">
