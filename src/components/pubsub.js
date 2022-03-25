@@ -17,7 +17,7 @@ PrivateMessageBus.prototype.subscribe = function(topic, callback){
 }
 
 PrivateMessageBus.prototype.publish = function(topic, eventData){
-    console.log("publishing event", eventData, "on topic", topic);
+    console.log("publishing event on topic", topic);
     this.lastEvents[topic] = eventData;
     var subscriberData = this.topics[topic];
     if (!subscriberData) return;
