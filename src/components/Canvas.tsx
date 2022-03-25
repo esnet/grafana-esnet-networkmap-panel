@@ -92,7 +92,7 @@ export const Canvas = (props) => {
 
   const updateMapWithOptions = () => {
     if (!!params.editPanel) {
-      PubSub.psublish('updateOptions', options);
+      PubSub.publish('updateOptions', options);
       PubSub.publish(
         'renderMap', // the renderMap signal triggers a re-render of json layers
         mapData
