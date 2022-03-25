@@ -36,16 +36,13 @@ export interface MapOptions {
   layerName1: string;
   layerName2: string;
   layerName3: string;
-  nodeWidth: number;
-  edgeWidth: number;
-  pathOffset: number;
-  // nodeWidthL1: number;
-  // edgeWidthL1: number;
-  // pathOffsetL1: number;
-  // nodeWidthL2: number;
-  // edgeWidthL2: number;
-  // pathOffsetL2: number;
-  // nodeWidthL3: number;
-  // edgeWidthL3: number;
-  // pathOffsetL3: number;
+  nodeWidthL1: number;
+  nodeWidthL2: number;
+  nodeWidthL3: number;
+  edgeWidthL1: number;
+  edgeWidthL2: number;
+  edgeWidthL3: number;
+  pathOffsetL1: number;
+  pathOffsetL2: number;
+  pathOffsetL3: number;
 }

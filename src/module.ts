@@ -36,37 +36,6 @@ plugin.setPanelOptions((builder) => {
       step: 0.5,
     },
   });
-  builder.addSliderInput({
-    path: 'nodeWidth',
-    name: 'Node Size',
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  });
-  builder.addSliderInput({
-    path: 'edgeWidth',
-    name: 'Edge Width',
-    defaultValue: 3,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  });
-  builder.addSliderInput({
-    path: 'pathOffset',
-    name: 'Edge Offset',
-    description: 'The offset between AZ path and ZA path',
-    defaultValue: 3,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  });
 
   // -------------------- Layer Options -------------------
   builder.addBooleanSwitch({
@@ -108,43 +77,43 @@ plugin.setPanelOptions((builder) => {
     description: 'The color to highlight nodes that match the query',
     defaultValue: 'red',
   });
-  // builder.addSliderInput({
-  //   path: 'nodeWidthL1',
-  //   name: 'Layer 1 Node Size',
-  //   category: LayersCategory,
-  //   showIf: layer1Bool(true),
-  //   defaultValue: 5,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'edgeWidthL1',
-  //   name: 'Layer 1 Edge Width',
-  //   category: LayersCategory,
-  //   showIf: layer1Bool(true),
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'pathOffsetL1',
-  //   name: 'Layer 1 Edge Offset',
-  //   category: LayersCategory,
-  //   showIf: layer1Bool(true),
-  //   description: 'The offset between AZ path and ZA path',
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
+  builder.addSliderInput({
+    path: 'nodeWidthL1',
+    name: 'Layer 1 Node Size',
+    category: LayersCategory,
+    showIf: layer1Bool(true),
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'edgeWidthL1',
+    name: 'Layer 1 Edge Width',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer1Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'pathOffsetL1',
+    name: 'Layer 1 Edge Offset',
+    description: 'The offset between AZ path and ZA path',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer1Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
 
   builder.addBooleanSwitch({
     path: 'layer2',
@@ -185,43 +154,43 @@ plugin.setPanelOptions((builder) => {
     showIf: layer2Bool(true),
     defaultValue: 'red',
   });
-  // builder.addSliderInput({
-  //   path: 'nodeWidthL2',
-  //   name: 'Layer 2 Node Size',
-  //   category: LayersCategory,
-  //   showIf: layer2Bool(true),
-  //   defaultValue: 5,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'edgeWidthL2',
-  //   name: 'Layer 2 Edge Width',
-  //   category: LayersCategory,
-  //   showIf: layer2Bool(true),
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'pathOffsetL2',
-  //   name: 'Layer 2 Edge Offset',
-  //   description: 'The offset between AZ path and ZA path',
-  //   category: LayersCategory,
-  //   showIf: layer2Bool(true),
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
+  builder.addSliderInput({
+    path: 'nodeWidthL2',
+    name: 'Layer 2 Node Size',
+    category: LayersCategory,
+    showIf: layer2Bool(true),
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'edgeWidthL2',
+    name: 'Layer 2 Edge Width',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer2Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'pathOffsetL2',
+    name: 'Layer 2 Edge Offset',
+    description: 'The offset between AZ path and ZA path',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer2Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
 
   // Layer 3
   builder.addBooleanSwitch({
@@ -263,43 +232,43 @@ plugin.setPanelOptions((builder) => {
     showIf: layer3Bool(true),
     defaultValue: 'red',
   });
-  // builder.addSliderInput({
-  //   path: 'nodeWidthL3',
-  //   name: 'Layer 3 Node Size',
-  //   category: LayersCategory,
-  //   showIf: layer3Bool(true),
-  //   defaultValue: 5,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'edgeWidthL3',
-  //   name: 'Layer 3 Edge Width',
-  //   category: LayersCategory,
-  //   showIf: layer3Bool(true),
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
-  // builder.addSliderInput({
-  //   path: 'pathOffsetL3',
-  //   name: 'Layer 3 Edge Offset',
-  //   description: 'The offset between AZ path and ZA path',
-  //   category: LayersCategory,
-  //   showIf: layer2Bool(true),
-  //   defaultValue: 3,
-  //   settings: {
-  //     min: 1,
-  //     max: 15,
-  //     step: 0.5,
-  //   },
-  // });
+  builder.addSliderInput({
+    path: 'nodeWidthL3',
+    name: 'Layer 3 Node Size',
+    category: LayersCategory,
+    showIf: layer3Bool(true),
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'edgeWidthL3',
+    name: 'Layer 3 Edge Width',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer3Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
+  builder.addSliderInput({
+    path: 'pathOffsetL3',
+    name: 'Layer 3 Edge Offset',
+    description: 'The offset between AZ path and ZA path',
+    defaultValue: 3,
+    category: LayersCategory,
+    showIf: layer3Bool(true),
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  });
 
   // -------------------- Choose Fields --------------------
   builder.addSelect({
