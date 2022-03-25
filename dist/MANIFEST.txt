@@ -13,13 +13,13 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1648172586214,
+  "time": 1648243924262,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "1f3f51aa9ff8b99696b5609fb962c10ffb6082816b5d250692589ef41c082878",
-    "module.js.map": "367de1fc6acda9213f49caf4e1a8cb7d4ded0067cf4d1d4bbd7148657935c20e",
+    "module.js.map": "e5dfe2e61f7a9ac8a6a8a7111b26fd9a8eac940470cbc085796a403df309ad98",
     "plugin.json": "bef4cd22801220be81e17c3d44593432926c9f8452262ae5167d842504ce8e1c",
     "README.md": "9ab41adee180f8249029a8707fb4d0341d7b9e04f12dcb74b1b374c964022afd",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
@@ -27,17 +27,17 @@ Hash: SHA512
     "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
-    "module.js": "3620cc58e8f4689e4729e6574eeaec6f3537bd09e1ffc9f778fc50befd289104"
+    "module.js": "b69c8ceb636dfef098c8a19c4c8d364a5a2a9fbd1cec3bb9097eea202970121d"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.10
 Comment: https://openpgpjs.org
 
-wrkEARMKAAYFAmI9HioAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
-cIhm55BaAgkBzFn6Myhw1qfoUM+h+vYzeM3ikWAw+ZVP9JCuyWcwIYEpEMfb
-WDGLcpI1CJdk13O8B2kkw0bBc6KQ+kkbqzewBt0CCQFnacC1av1Ov2mmKA/K
-FDY24Mvok0lp9Gha0MKMjveJF5UBPInyFAaWWzG+ImiIACsLB1EiqTLe6dCv
-WpUv57OVgw==
-=0uj4
+wrkEARMKAAYFAmI+NNQAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5+tYAgkBIQmdxRtaqw+EYvwGl/CnTjUn/RHaXbfCgd2W5jaBli9fnbyh
+5SQfQeO+GLy2iWUSiqCfQqEaT8OGjPxQ/ExBguoCCQE9pAaeBY3oE3xOdwBz
+3rKneUCyxW9Gsg+r1oh2aoWl0LlMSAdTXOawJSQ3CkAS7yHqrgnS0Ns+OV0H
+XIWu2bJxKw==
+=8X0m
 -----END PGP SIGNATURE-----
