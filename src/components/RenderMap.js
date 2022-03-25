@@ -146,17 +146,30 @@ export default class NetworkMap {
       }
     }
     var edit_mode = d3.selectAll('#node_edit_mode').on('click', toggleNodeEdit);
-
-    // Draw the map json topology data!!! Currently supports up to 3 layers
-    if (options.layer1 && mapData.layer1) {
-      var g1 = esmap.addNetLayer('layer1', mapData.layer1);
+    var g1 = null;
+    var g2 = null;
+    var g3 = null;
+    var prevMapData = null;
+    function renderMapLayers(mapData){
+      if(JSON.stringify(mapData) == prevMapData){ console.log('same'); return; }
+      console.log("different");
+      prevMapData = JSON.stringify(mapData);
+      if(g1) g1.remove();
+      if(g2) g2.remove();
+      if(g3) g3.remove();
+      // Draw the map json topology data!!! Currently supports up to 3 layers
+      if (options.layer1 && mapData.layer1) {
+        g1 = esmap.addNetLayer('layer1', mapData.layer1);
+      }
+      if (options.layer2 && mapData.layer2) {
+        g2 = esmap.addNetLayer('layer2', mapData.layer2);
+      }
+      if (options.layer3 && mapData.layer3) {
+        g3 = esmap.addNetLayer('layer3', mapData.layer3);
+      }
     }
-    if (options.layer2 && mapData.layer2) {
-      var g2 = esmap.addNetLayer('layer2', mapData.layer2);
-    }
-    if (options.layer3 && mapData.layer3) {
-      var g3 = esmap.addNetLayer('layer3', mapData.layer3);
-    }
+    renderMapLayers(mapData);
+    pubsub.PubSub.subscribe("renderMap", renderMapLayers);
 
     //----  helper
     function getRandomInt(min, max) {
