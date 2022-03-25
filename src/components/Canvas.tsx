@@ -80,6 +80,16 @@ export const Canvas = (props) => {
   useEffect(drawMap, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
   // above return statement throws a warning that we're not using all the variables, but that's ok.
 
+  const renderLayers = () => {
+    if (!params.editPanel) {
+      PubSub.publish(
+        'renderMap', // the renderMap signal triggers a re-render of json layers
+        mapData
+      );
+    }
+  };
+  useEffect(renderLayers, [mapData]);
+
   return (
     <div className="map-panel">
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
