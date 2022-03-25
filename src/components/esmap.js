@@ -51,9 +51,9 @@ function clearSelection(){
 }
 pubsub.PubSub.subscribe("clearSelection", clearSelection);
 
-function renderEdges(g, data, ref) {
+function renderEdges(g, layerId, data, ref) {
   var div = ref.div;
-  const edgeWidth = ref.options.edgeWidth;
+  const edgeWidth = ref.options["edgeWidthL"+layerId];
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
     .enter()
@@ -372,14 +372,14 @@ function renderEdgeControl(g, data, ref) {
   });
 }
 
-function renderNodes(g, data, ref) {
+function renderNodes(g, layerId, data, ref) {
   var feature = g.selectAll('circle').data(data.nodes);
   var div = ref.div;
 
   feature
     .enter()
     .append('circle')
-    .attr('r', ref.options.nodeWidth)
+    .attr('r', ref.options["nodeWidthL"+layerId])
     .attr('class', 'node')
     .attr('text', function (d) {
       return d.name;
@@ -492,7 +492,9 @@ export class EsMap {
     this.svg = svg;
     this.data = {};
     this.mapLayers = {};
-    this.offset = options.pathOffset;
+    this.offsetL1 = options.pathOffsetL1;
+    this.offsetL2 = options.pathOffsetL2;
+    this.offsetL3 = options.pathOffsetL3;
     this.lineGen = d3.line().curve(curve);
     this.editEdges = 0;
     this.editNodes = 0;
@@ -516,6 +518,15 @@ export class EsMap {
     });
 
     var self = this;
+
+    function updateOptions(options){
+      self.options = options;
+      self.offsetL1 = options.pathOffsetL1;
+      self.offsetL2 = options.pathOffsetL2;
+      self.offsetL3 = options.pathOffsetL3;
+    }
+    pubsub.PubSub.subscribe("updateOptions", updateOptions);
+
     function updateLastInteractedObject(event){
       self.lastInteractedObject = event.object;
       self.lastInteractedType = event.type;
@@ -618,7 +629,7 @@ export class EsMap {
     return this.editNodes;
   }
 
-  updateCoordinates(data) {
+  updateCoordinates(data, layerId) {
     var ref = this;
 
     var idx = 0;
@@ -661,10 +672,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.lineGen(offsetPoints(d.points, ref.offset));
+      d.azPath = ref.lineGen(offsetPoints(d.points, ref["offsetL"+layerId]));
 
       //--- setup the zaPath
-      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref.offset));
+      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref["offsetL"+layerId]));
     });
 
     //---swap out edge list with the filtered list
@@ -674,10 +685,14 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.leafletMap.dragging.enable();
+    var layerId=0;
     for (const [name, data] of Object.entries(this.data)) {
-      this.updateCoordinates(data);
+      layerId++;
+      this.updateCoordinates(data, layerId);
     }
+    var layerId=0;
     for (const [name, g] of Object.entries(this.mapLayers)) {
+      layerId++;
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
       var controlpoint_g = g.select('g.cp');
@@ -699,8 +714,8 @@ export class EsMap {
         //  delete all the control point g children
         controlpoint_g.selectAll('*').remove();
       }
-      renderNodes(node_g, data, this);
-      renderEdges(edge_g, data, this);
+      renderNodes(node_g, layerId, data, this);
+      renderEdges(edge_g, layerId, data, this);
     }
   }
 
