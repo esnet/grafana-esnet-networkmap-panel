@@ -90,6 +90,46 @@ export const Canvas = (props) => {
   };
   useEffect(renderLayers, [mapData]);
 
+  const updateMapWithOptions = () => {
+    if (!!params.editPanel) {
+      PubSub.psublish('updateOptions', options);
+      PubSub.publish(
+        'renderMap', // the renderMap signal triggers a re-render of json layers
+        mapData
+      );
+    }
+  };
+  const optionsToWatchInEditMode = [
+    options.layer1,
+    options.color1,
+    options.endpointIdL1,
+    options.nodeHighlightL1,
+    options.nodeWidthL1,
+    options.edgeWidthL1,
+    options.pathOffsetL1,
+    options.nodeWidthL1,
+    options.edgeWidthL1,
+    options.pathOffsetL1,
+    options.layer2,
+    options.color2,
+    options.endpointIdL2,
+    options.nodeHighlightL2,
+    options.nodeWidthL2,
+    options.edgeWidthL2,
+    options.pathOffsetL2,
+    options.nodeWidthL2,
+    options.edgeWidthL2,
+    options.pathOffsetL2,
+    options.layer3,
+    options.color3,
+    options.endpointIdL3,
+    options.nodeHighlightL3,
+    options.nodeWidthL3,
+    options.edgeWidthL3,
+    options.pathOffsetL3,
+  ];
+  useEffect(updateMapWithOptions, optionsToWatchInEditMode);
+
   return (
     <div className="map-panel">
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
