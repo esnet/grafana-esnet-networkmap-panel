@@ -51,8 +51,12 @@ function clearSelection(){
 }
 pubsub.PubSub.subscribe("clearSelection", clearSelection);
 
-function renderEdges(g, layerId, data, ref) {
+function renderEdges(g, data, ref) {
   var div = ref.div;
+  var layerId = 1;
+  if(data.edges.length >= 1){
+     layerId = data.edges[0].layer;
+  }
   const edgeWidth = ref.options["edgeWidthL"+layerId];
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
@@ -372,10 +376,13 @@ function renderEdgeControl(g, data, ref) {
   });
 }
 
-function renderNodes(g, layerId, data, ref) {
+function renderNodes(g, data, ref) {
   var feature = g.selectAll('circle').data(data.nodes);
   var div = ref.div;
-
+  var layerId = 1;
+  if(data.edges.length > 1){
+    layerId = data.edges[0].layer;
+  }
   feature
     .enter()
     .append('circle')
@@ -629,7 +636,7 @@ export class EsMap {
     return this.editNodes;
   }
 
-  updateCoordinates(data, layerId) {
+  updateCoordinates(data) {
     var ref = this;
 
     var idx = 0;
@@ -672,10 +679,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.lineGen(offsetPoints(d.points, ref["offsetL"+layerId]));
+      d.azPath = ref.lineGen(offsetPoints(d.points, ref["offsetL"+d.layer]));
 
       //--- setup the zaPath
-      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref["offsetL"+layerId]));
+      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref["offsetL"+d.layer]));
     });
 
     //---swap out edge list with the filtered list
@@ -685,14 +692,10 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.leafletMap.dragging.enable();
-    var layerId=0;
     for (const [name, data] of Object.entries(this.data)) {
-      layerId++;
-      this.updateCoordinates(data, layerId);
+      this.updateCoordinates(data);
     }
-    var layerId=0;
     for (const [name, g] of Object.entries(this.mapLayers)) {
-      layerId++;
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
       var controlpoint_g = g.select('g.cp');
@@ -714,8 +717,8 @@ export class EsMap {
         //  delete all the control point g children
         controlpoint_g.selectAll('*').remove();
       }
-      renderNodes(node_g, layerId, data, this);
-      renderEdges(edge_g, layerId, data, this);
+      renderNodes(node_g, data, this);
+      renderEdges(edge_g, data, this);
     }
   }
 

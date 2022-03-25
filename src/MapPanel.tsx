@@ -4,12 +4,14 @@ import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
 import { testJsonSchema } from 'components/schema';
 import { Canvas } from 'components/Canvas';
+import { PubSub } from 'components/pubsub.js';
 
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {
   constructor(props: Props) {
     super(props);
+    PubSub.subscribe('recalcPaths', this.recalcEdges);
   }
 
   sanitizeNode = (node) => {
@@ -57,6 +59,32 @@ export class MapPanel extends Component<Props> {
       mapjsonL3 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL3));
     }
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
+  };
+
+  straightenEdges = (mapJson) => {
+    console.log('straighten edges');
+    mapJson = JSON.parse(mapJson);
+    for (let i = 0; i < mapJson.edges.length; i++) {
+      let edge = mapJson.edges[i];
+      let zIdx = edge.latLngs.length - 1;
+      let a = edge.latLngs[0];
+      let z = edge.latLngs[zIdx];
+      let midpoint = [(a[0] + z[0]) / 2, (a[1] + z[1]) / 2];
+      mapJson.edges[i].latLngs = [a, midpoint, z];
+    }
+    return JSON.stringify(mapJson);
+  };
+
+  recalcEdges = () => {
+    const { options } = this.props;
+    let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
+    mapjsonL1 = this.straightenEdges(mapjsonL1);
+    mapjsonL2 = this.straightenEdges(mapjsonL2);
+    mapjsonL3 = this.straightenEdges(mapjsonL3);
+    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
+    setTimeout(function () {
+      PubSub.publish('repaint', null);
+    }, 10);
   };
 
   // A function to update the map jsons in the Edit panel based on the current map state

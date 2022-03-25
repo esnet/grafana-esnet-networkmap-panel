@@ -46,6 +46,9 @@ export const Canvas = (props) => {
     PubSub.publish('destroyMap', null);
     PubSub.publish('repaint', null);
   };
+  const recalcPaths = () => {
+    PubSub.publish('recalcPaths', null);
+  };
   const renderButtons = () => {
     return (
       <div className="button-overlay">
@@ -60,6 +63,9 @@ export const Canvas = (props) => {
         </div>
         <div className={'button'} id={'node_edit_mode'} hidden={!params.editPanel}>
           Edit Nodes: Off
+        </div>
+        <div className={'button'} id={'recalc_paths'} hidden={!params.editPanel} onClick={recalcPaths}>
+          Straighten All Edges
         </div>
       </div>
     );
