@@ -75,9 +75,14 @@ export const Canvas = (props) => {
   PubSub.subscribe('setVariables', setButtonScope);
 
   const drawMap = () => {
+    // destroys the in-RAM map, and unsubscribes all signals
     destroyCurrentLeafletMap();
     const map = new NetworkMap(mapContainer);
     map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode, mapContainer);
+    console.log('resubscribing to recalcPaths');
+    // resubscribe to the callback for home and "straighten edges" buttons
+    PubSub.subscribe('recalcPaths', props.recalcEdges);
+    PubSub.subscribe('repaint', drawMap);
 
     return destroyCurrentLeafletMap;
   };
