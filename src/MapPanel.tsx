@@ -11,7 +11,6 @@ interface Props extends PanelProps<MapOptions> {}
 export class MapPanel extends Component<Props> {
   constructor(props: Props) {
     super(props);
-    PubSub.subscribe('recalcPaths', this.recalcEdges);
   }
 
   sanitizeNode = (node) => {
@@ -197,6 +196,7 @@ export class MapPanel extends Component<Props> {
         updateMapJson={this.updateMapJson}
         updateCenter={this.updateCenter}
         toggleLayer={this.toggleLayer}
+        recalcEdges={this.recalcEdges}
         jsonSchemaL1={resultL1}
         jsonSchemaL2={resultL2}
         jsonSchemaL3={resultL3}
