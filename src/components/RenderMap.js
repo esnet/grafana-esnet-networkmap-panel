@@ -39,6 +39,7 @@ export const destroyCurrentLeafletMap = function destroyCurrentLeafletMap() {
     leafletMap.remove();
     leafletMap = null;
   }
+  PubSub.clearAllCallbacks();
 }
 PubSub.subscribe('destroyMap', destroyCurrentLeafletMap);
 
