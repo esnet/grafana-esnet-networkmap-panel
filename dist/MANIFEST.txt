@@ -13,13 +13,13 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1648492930813,
+  "time": 1648497954615,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "1f3f51aa9ff8b99696b5609fb962c10ffb6082816b5d250692589ef41c082878",
-    "module.js.map": "b76a059e4be751ae9f5d9a3e7e45711b40edeadfe33334ba81663d7dae8ffdce",
+    "module.js.map": "e1f58dc89956105cef0b854b424901c425f75c334c46bcddc95a12aac39c1ac7",
     "plugin.json": "652f4f69b562af72844d5d215f0ff8dba2c4ca58ad9ff164c09beb293500ea41",
     "README.md": "9ab41adee180f8249029a8707fb4d0341d7b9e04f12dcb74b1b374c964022afd",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
@@ -27,17 +27,17 @@ Hash: SHA512
     "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
-    "module.js": "8d61d6abb00f0bb4ed997643bf6ed752e513dfaf93505ad4cd8bd0c38a8bea3e"
+    "module.js": "12167a601ec63b24f42c03b959b718322f89601c5582e1102667d84793c34dfe"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.10
 Comment: https://openpgpjs.org
 
-wrgEARMKAAYFAmJCAYMAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
-cIhm5xVJAgkBm/cij5aEfcQsT4JUOY8QBrpxi0nlu2F0crRR8esf+w5/2c91
-jQrzH2+Q5vmw0I6unKNxzekJKRlamipvbkkg8wACB1x5Kvn4NE/mxL24Ya+c
-WH+zn9YddB1Xwu56FNQ4fOnP1B/MTYXYslKL4KRPydEG3MZo407x64WdWBDl
-JBIQ0olv
-=WfaN
+wrgEARMKAAYFAmJCFSIAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5wTyAgUeiM9HS0R/aJtDL3uJ33NgoaXWfzX15XhVurpQJ20X0qR9eae8
+/U36ftrzTTBS1F13JeQSWny7jisGsqXIGXr8bwIJAb5v1rQjWAyCnyTXnVs1
+liEfrYwyTxkz88UPv8QaEiwBrDobonIlu+Gpk7JvniAIqyPldgVhJ2Qp1ltR
+U38sbdKG
+=Zcg3
 -----END PGP SIGNATURE-----
