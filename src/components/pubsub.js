@@ -27,6 +27,14 @@ PrivateMessageBus.prototype.publish = function(topic, eventData){
     }
 }
 
+PrivateMessageBus.prototype.clearAllCallbacks = function() {
+    console.log("destroying all callbacks");
+    var keys = Object.keys(this.topics);
+    for(var i=0; i<keys.length; i++){
+        this.topics[keys[i]] = {};
+    }
+};
+
 // returns the last eventData value for a particular topic
 PrivateMessageBus.prototype.last = function(topic){
     return this.lastEvents[topic];
