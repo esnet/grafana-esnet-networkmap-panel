@@ -331,7 +331,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;
@@ -356,7 +356,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;
@@ -431,7 +431,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;
@@ -456,7 +456,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;
@@ -531,7 +531,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;
@@ -556,7 +556,7 @@ plugin.setPanelOptions((builder) => {
       allowCustomValue: false,
       options: [],
       getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
+        const options: any[] = [{ value: null, label: '- No Mapping -' }];
         if (context && context.data) {
           for (const frame of context.data) {
             const frameName = frame.refId;

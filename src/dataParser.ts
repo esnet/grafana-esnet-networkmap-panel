@@ -100,10 +100,9 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   let parsedData: Array<{
     in: any;
     out: any;
-    azName: string;
-    //zaName: string;
-    inboundValue: number;
-    outboundValue: number;
+    azName: any;
+    inboundValue: any;
+    outboundValue: any;
   }> = [];
   let infIn: Array<{ name: any; value: number }> = [];
   let infOut: Array<{ name: any; value: number }> = [];
@@ -134,15 +133,35 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   // Retrieve panel data from panel
   dataFrames.forEach((frame) => {
     frame.forEach((row) => {
-      parsedData.push({
-        in: row[srcKey],
-        out: row[dstKey],
-        azName: `${row[srcKey]}---${row[dstKey]}`,
-        // do not assemble z-a edge. Match on azName only.
-        //zaName: `${row[dstKey]}---${row[srcKey]}`,
-        inboundValue: row[inboundKey],
-        outboundValue: row[outboundKey],
-      });
+      // if we have both inbound and outbound values defined
+      if (inboundKey !== null && outboundKey !== null) {
+        parsedData.push({
+          in: row[srcKey],
+          out: row[dstKey],
+          azName: `${row[srcKey]}---${row[dstKey]}`,
+          inboundValue: row[inboundKey],
+          outboundValue: row[outboundKey],
+        });
+        // if we only have an outbound value defined
+      } else if (inboundKey === null && outboundKey !== null) {
+        parsedData.push({
+          in: row[srcKey],
+          out: row[dstKey],
+          azName: `${row[dstKey]}---${row[srcKey]}`, // assemble the edge name backwards
+          // this will cause us to have a situation where we match on the reverse of the
+          // normal edge. our outbound key becomes the inbound value for the z-a edge
+          inboundValue: row[outboundKey],
+          outboundValue: null,
+        });
+      } else if (inboundKey !== null && outboundKey === null) {
+        parsedData.push({
+          in: row[srcKey],
+          out: row[dstKey],
+          azName: `${row[srcKey]}---${row[dstKey]}`,
+          inboundValue: row[inboundKey],
+          outboundValue: null,
+        });
+      }
 
       let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
       if (indexIn >= 0) {
@@ -164,6 +183,16 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   const endpointId = fields.endpointId;
 
   mapJson.edges.forEach((edge) => {
+    // first, color all edges with their default "dead link" values
+    edge.azColor = colors.defaultColor;
+    edge.zaColor = colors.defaultColor;
+    edge.AZdisplayValue = 'N/A';
+    edge.ZAdisplayValue = 'N/A';
+    edge.AZvalue += null;
+    edge.ZAvalue += null;
+  });
+
+  mapJson.edges.forEach((edge) => {
     // set up the layer number so the edge "knows" which layer it's in.
     edge.layer = layer;
     // Find A and Z node
@@ -180,33 +209,28 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
     if (matchAZ) {
       // if we get an a-z match, assign inbound and outbound "normally"
       edge.AZvalue = matchAZ.inboundValue;
-      edge.ZAvalue = matchAZ.outboundValue;
       edge.azColor = valueField[0].display(edge.AZvalue).color;
-      edge.zaColor = valueField[0].display(edge.ZAvalue).color;
       let AZdisplay = valueField[0].display(edge.AZvalue);
       edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
-      let ZAdisplay = valueField[0].display(edge.ZAvalue);
-      edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+      if (matchAZ.outboundValue) {
+        edge.ZAvalue = matchAZ.outboundValue;
+        edge.zaColor = valueField[0].display(edge.ZAvalue).color;
+        let ZAdisplay = valueField[0].display(edge.ZAvalue);
+        edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+      }
     }
     if (matchZA) {
       // if we get a z-a match, flip-flop inbound and outbound
-      edge.AZvalue = matchZA.outboundValue;
       edge.ZAvalue = matchZA.inboundValue;
-      edge.azColor = valueField[0].display(edge.AZvalue).color;
       edge.zaColor = valueField[0].display(edge.ZAvalue).color;
-      let AZdisplay = valueField[0].display(edge.AZvalue);
-      edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
       let ZAdisplay = valueField[0].display(edge.ZAvalue);
       edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
-    }
-    if (!matchAZ && !matchZA) {
-      // if neither matches, do the "dead link" thing
-      edge.azColor = colors.defaultColor;
-      edge.zaColor = colors.defaultColor;
-      edge.AZdisplayValue = 'N/A';
-      edge.ZAdisplayValue = 'N/A';
-      edge.AZvalue += null;
-      edge.ZAvalue += null;
+      if (matchZA.outboundValue) {
+        edge.AZvalue = matchZA.outboundValue;
+        edge.azColor = valueField[0].display(edge.AZvalue).color;
+        let AZdisplay = valueField[0].display(edge.AZvalue);
+        edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
+      }
     }
   });
 
