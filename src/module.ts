@@ -36,6 +36,89 @@ plugin.setPanelOptions((builder) => {
       step: 0.5,
     },
   });
+  builder.addSelect({
+    path: 'tileSetLayer',
+    name: 'Geographic Tileset',
+    description: 'Select a geographical tileset for the map.',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        return Promise.resolve([
+          {
+            label: 'ArcGIS Default Set',
+            value: 'arcgis',
+          },
+          {
+            label: 'Open Topography Map',
+            value: 'opentopomap',
+          },
+          {
+            label: 'USGS Satellite Imagery',
+            value: 'usgs',
+          },
+          {
+            label: 'ESRI World Shaded Relief',
+            value: 'esri.shaded',
+          },
+          {
+            label: 'Geoportail France',
+            value: 'geoportail',
+          },
+          {
+            label: 'CartoDB DarkMatter (Labeled)',
+            value: 'cartodb.labeled',
+          },
+          {
+            label: 'CartoDB DarkMatter (No Labels)',
+            value: 'cartodb.unlabeled',
+          },
+        ]);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'boundaryLayer',
+    name: 'Political Boundary Tileset',
+    description: 'Select a political boundary tileset for the map.',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        return Promise.resolve([
+          {
+            label: '[No Political Boundaries]',
+            value: null,
+          },
+          {
+            label: '"Toner" Political Boundaries (Unlabeled)',
+            value: 'toner.boundaries',
+          },
+        ]);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'labelLayer',
+    name: 'Political Label Tileset',
+    description: 'Select a political label tileset for the map.',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        return Promise.resolve([
+          {
+            label: '[No Political Labels]',
+            value: null,
+          },
+          {
+            label: '"Toner" Political Labels',
+            value: 'toner.labels',
+          },
+        ]);
+      },
+    },
+  });
 
   // -------------------- Layer Options -------------------
   builder.addBooleanSwitch({
