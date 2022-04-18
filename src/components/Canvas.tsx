@@ -33,10 +33,12 @@ export const Canvas = (props) => {
   options.layerValid3 = props.jsonSchemaL3[1];
   const mapContainer = 'Map_' + panelId + options.editMode.toString();
 
-  const [, triggerRefresh] = useState('');
+  const [, setState] = useState('');
+  const [showDialog, setDialog] = useState('');
+  const [srcDstOptions, setSrcDstOptions] = useState(['']);
 
   const setButtonScope = (value) => {
-    triggerRefresh('');
+    setState('');
   };
   const clearSelection = () => {
     PubSub.publish('setVariables', null);
@@ -49,6 +51,243 @@ export const Canvas = (props) => {
   const recalcPaths = () => {
     PubSub.publish('recalcPaths', null);
   };
+  const showSrcDest = function (event) {
+    let selectOptions: any[];
+    selectOptions = [];
+    let layer = event.target.value;
+    let json = { nodes: [] };
+    try {
+      json = JSON.parse(options['mapjson' + layer]);
+    } catch (e) {
+      console.error(e);
+    }
+    for (let i = 0; i < json.nodes.length; i++) {
+      let node: { name: null };
+      node = json.nodes[i];
+      if (node.name) {
+        selectOptions.push(node.name);
+      }
+    }
+    setSrcDstOptions(selectOptions);
+  };
+  const renderSrcDstOptions = (name) => {
+    if (srcDstOptions.length === 0) {
+      return (
+        <div className={'no-node-message'}>
+          The Layer You&apos;ve Selected has no Nodes.
+          <div className={'add-node-link'} onClick={showAddNodeDialog}>
+            Add Node
+          </div>
+        </div>
+      );
+    }
+    let optionsList =
+      srcDstOptions.length > 0 &&
+      srcDstOptions.map((value, i) => {
+        return (
+          <option key={i} value={value}>
+            {value}
+          </option>
+        );
+      });
+    return <select className={'node_' + name}>{optionsList}</select>;
+  };
+  const renderDialog = (toRender) => {
+    if (toRender === 'addNodeDialog') {
+      return (
+        <div className={'add_edge_dialog dialog-form'}>
+          <form>
+            <h2>Add a Node</h2>
+            <table>
+              <tr>
+                <td>
+                  <label>Layer:</label>
+                </td>
+                <td>
+                  <select className={'node_layer'} onChange={showSrcDest}>
+                    <option value={'L1'}>Layer 1</option>
+                    <option value={'L2'}>Layer 2</option>
+                    <option value={'L3'}>Layer 3</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Name:</label>
+                </td>
+                <td>
+                  <input className={'text-input node_name'} type={'text'}></input>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Latitude:</label>
+                </td>
+                <td>
+                  <input className={'text-input node_lat'} type={'text'}></input>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Longitude:</label>
+                </td>
+                <td>
+                  <input className={'text-input node_lng'} type={'text'}></input>
+                </td>
+              </tr>
+              <tr>
+                <td colSpan={2}>
+                  <input className={'button'} type={'button'} value={'Create Node'} onClick={createNode} />
+                  <input className={'button'} type={'button'} value={'Cancel'} onClick={hideDialogs} />
+                </td>
+              </tr>
+            </table>
+          </form>
+        </div>
+      );
+    }
+    if (toRender === 'addEdgeDialog') {
+      return (
+        <div className={'add_edge_dialog dialog-form'}>
+          <form>
+            <h2>Add an Edge</h2>
+            <table>
+              <tr>
+                <td>
+                  <label>Layer:</label>
+                </td>
+                <td>
+                  <select className={'node_layer'} onChange={showSrcDest}>
+                    <option value={'L1'}>Layer 1</option>
+                    <option value={'L2'}>Layer 2</option>
+                    <option value={'L3'}>Layer 3</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Source:</label>
+                </td>
+                <td>{renderSrcDstOptions('source')}</td>
+              </tr>
+              <tr>
+                <td>
+                  <label>Destination:</label>
+                </td>
+                <td>{renderSrcDstOptions('destination')}</td>
+              </tr>
+              <tr>
+                <td colSpan={2}>
+                  <input className={'button'} type={'button'} value={'Create Edge'} onClick={createEdge} />
+                  <input className={'button'} type={'button'} value={'Cancel'} onClick={hideDialogs} />
+                </td>
+              </tr>
+            </table>
+          </form>
+        </div>
+      );
+    }
+    return null;
+  };
+  const createNode = function (event) {
+    // so kludgy. yuck react.
+    var form = event.target.parentNode.parentNode.parentNode.parentNode;
+    var node_layer = form.getElementsByClassName('node_layer')[0].value;
+    var node_name = form.getElementsByClassName('node_name')[0].value;
+    var node_lat = form.getElementsByClassName('node_lat')[0].value;
+    var node_lng = form.getElementsByClassName('node_lng')[0].value;
+    var optionsJson: any;
+    optionsJson = {};
+    var accessors = ['mapjsonL1', 'mapjsonL2', 'mapjsonL3'];
+    for (var i = 0; i < accessors.length; i++) {
+      try {
+        optionsJson[accessors[i]] = JSON.parse(options[accessors[i]]);
+      } catch (e) {
+        optionsJson[accessors[i]] = { nodes: [], edges: [] };
+      }
+    }
+
+    optionsJson['mapjson' + node_layer].nodes.push({
+      name: node_name,
+      meta: {},
+      latLng: [Math.floor(node_lat), Math.floor(node_lng)],
+      children: [],
+    });
+    updateMapJson(optionsJson.mapjsonL1, optionsJson.mapjsonL2, optionsJson.mapjsonL3);
+    hideDialogs();
+    setTimeout(function () {
+      PubSub.publish(
+        'repaint', // the renderMap signal triggers a re-render of json layers
+        mapData
+      );
+      PubSub.publish('setNodeEdit', null);
+    }, 100);
+  };
+  const createEdge = function (event) {
+    // so kludgy. yuck react.
+    var form = event.target.parentNode.parentNode.parentNode.parentNode;
+    var node_layer = form.getElementsByClassName('node_layer')[0].value;
+    var node_source = form.getElementsByClassName('node_source')[0].value;
+    var node_destination = form.getElementsByClassName('node_destination')[0].value;
+
+    var optionsJson: any;
+    optionsJson = {};
+
+    var accessors = ['mapjsonL1', 'mapjsonL2', 'mapjsonL3'];
+    for (var i = 0; i < accessors.length; i++) {
+      try {
+        optionsJson[accessors[i]] = JSON.parse(options[accessors[i]]);
+      } catch (e) {
+        optionsJson[accessors[i]] = { nodes: [], edges: [] };
+      }
+    }
+
+    var latLngs = [null, null];
+    for (let i = 0; i < optionsJson['mapjson' + node_layer].nodes.length; i++) {
+      if (optionsJson['mapjson' + node_layer].nodes[i].name === node_source) {
+        latLngs[0] = optionsJson['mapjson' + node_layer].nodes[i].latLng;
+      }
+      if (optionsJson['mapjson' + node_layer].nodes[i].name === node_destination) {
+        latLngs[1] = optionsJson['mapjson' + node_layer].nodes[i].latLng;
+      }
+    }
+    optionsJson['mapjson' + node_layer].edges.push({
+      name: node_source + '--' + node_destination,
+      meta: {
+        endpoint_identifiers: {
+          pops: [node_source, node_destination],
+        },
+      },
+      latLngs: latLngs,
+      children: [],
+    });
+    updateMapJson(optionsJson.mapjsonL1, optionsJson.mapjsonL2, optionsJson.mapjsonL3);
+    hideDialogs();
+    setTimeout(function () {
+      PubSub.publish(
+        'repaint', // the renderMap signal triggers a re-render of json layers
+        mapData
+      );
+    }, 100);
+  };
+  const renderDialogs = () => {
+    return (
+      <div className={'dialog'} hidden={!showDialog}>
+        {renderDialog(showDialog)}
+      </div>
+    );
+  };
+  const showAddNodeDialog = () => {
+    setDialog('addNodeDialog');
+  };
+  const showAddEdgeDialog = () => {
+    showSrcDest({ target: { value: 'L1' } });
+    setDialog('addEdgeDialog');
+  };
+  const hideDialogs = () => {
+    setDialog('');
+  };
+
   const renderButtons = () => {
     return (
       <div className="button-overlay">
@@ -66,6 +305,18 @@ export const Canvas = (props) => {
         </div>
         <div className={'button'} id={'recalc_paths'} hidden={!params.editPanel} onClick={recalcPaths}>
           Straighten All Edges
+        </div>
+      </div>
+    );
+  };
+  const renderTools = () => {
+    return (
+      <div className="tools-overlay">
+        <div className={'button'} id={'add_node'} hidden={!params.editPanel} onClick={showAddNodeDialog}>
+          + Node
+        </div>
+        <div className={'button'} id={'add_edge'} hidden={!params.editPanel} onClick={showAddEdgeDialog}>
+          + Edge
         </div>
       </div>
     );
@@ -88,7 +339,18 @@ export const Canvas = (props) => {
   };
   PubSub.subscribe('repaint', drawMap);
 
-  useEffect(drawMap, [width, height, panelId, editMode, layer2, layer1, layer3]); // adding options var here breaks it
+  useEffect(drawMap, [
+    width,
+    height,
+    panelId,
+    editMode,
+    layer2,
+    layer1,
+    layer3,
+    options.tileSetLayer,
+    options.boundaryLayer,
+    options.labelLayer,
+  ]); // adding options var here breaks it
   // above return statement throws a warning that we're not using all the variables, but that's ok.
 
   const renderLayers = () => {
@@ -143,8 +405,10 @@ export const Canvas = (props) => {
 
   return (
     <div className="map-panel">
+      {renderDialogs()}
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       {renderButtons()}
+      {renderTools()}
       <SideBar
         height={height}
         width={tooltipWidth}
