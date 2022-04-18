@@ -13,31 +13,31 @@ Hash: SHA512
   ],
   "plugin": "esnet-networkmap-panel",
   "version": "1.0.0",
-  "time": 1648497954615,
+  "time": 1650299167925,
   "keyId": "7e4d0c6a708866e7",
   "files": {
     "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
     "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
     "module.js.LICENSE.txt": "1f3f51aa9ff8b99696b5609fb962c10ffb6082816b5d250692589ef41c082878",
-    "module.js.map": "e1f58dc89956105cef0b854b424901c425f75c334c46bcddc95a12aac39c1ac7",
-    "plugin.json": "652f4f69b562af72844d5d215f0ff8dba2c4ca58ad9ff164c09beb293500ea41",
+    "module.js.map": "5888e32bdd9f2647213d90defdb750e172d7e8de9c7e668a62b6183f2bd25334",
+    "plugin.json": "00077bb58e60cde9b20a4ae31a34cd64a8501f195d511045e279ce00f27ab9cb",
     "README.md": "9ab41adee180f8249029a8707fb4d0341d7b9e04f12dcb74b1b374c964022afd",
     "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
     "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
     "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
     "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
     "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
-    "module.js": "12167a601ec63b24f42c03b959b718322f89601c5582e1102667d84793c34dfe"
+    "module.js": "6f44ddc1d03a01b90867208bf32c421bbd46d16ca6ccd1758fadd66c88f40f32"
   }
 }
 -----BEGIN PGP SIGNATURE-----
 Version: OpenPGP.js v4.10.10
 Comment: https://openpgpjs.org
 
-wrgEARMKAAYFAmJCFSIAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
-cIhm5wTyAgUeiM9HS0R/aJtDL3uJ33NgoaXWfzX15XhVurpQJ20X0qR9eae8
-/U36ftrzTTBS1F13JeQSWny7jisGsqXIGXr8bwIJAb5v1rQjWAyCnyTXnVs1
-liEfrYwyTxkz88UPv8QaEiwBrDobonIlu+Gpk7JvniAIqyPldgVhJ2Qp1ltR
-U38sbdKG
-=Zcg3
+wrgEARMKAAYFAmJdkSAAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm5/USAgkBUvXa/oCIL1myW1mdRhieSg64gDPnoJHsTR7rVEoHTIWW9u0x
+r72CovL2/xJOKsSONZJR+dq3SuNM7PbJiFq7pMYCCOWsFN58U5HKEJ2sHWRX
+QdYS8hDyM+mWvSGe4KEe4Xbm4NsMPqjwUR3NljmMoTk25NSIG8rcrXTYdKY3
+I4GP3jmm
+=9AKh
 -----END PGP SIGNATURE-----
