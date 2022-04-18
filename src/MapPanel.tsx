@@ -33,14 +33,20 @@ export class MapPanel extends Component<Props> {
       name: layerData.name,
       layer: layerData.layer,
       pathLayout: layerData.pathLayout,
-      edges: layerData.edges.reduce((output, edge) => {
-        output.push(this.sanitizeEdge(edge));
-        return output;
-      }, []),
-      nodes: layerData.nodes.reduce((output, node) => {
-        output.push(this.sanitizeNode(node));
-        return output;
-      }, []),
+      edges:
+        (layerData.edges &&
+          layerData.edges.reduce((output, edge) => {
+            output.push(this.sanitizeEdge(edge));
+            return output;
+          }, [])) ||
+        [],
+      nodes:
+        (layerData.nodes &&
+          layerData.nodes.reduce((output, node) => {
+            output.push(this.sanitizeNode(node));
+            return output;
+          }, [])) ||
+        [],
     };
   };
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -61,7 +67,6 @@ export class MapPanel extends Component<Props> {
   };
 
   straightenEdges = (mapJson) => {
-    console.log('straighten edges');
     mapJson = JSON.parse(mapJson);
     for (let i = 0; i < mapJson.edges.length; i++) {
       let edge = mapJson.edges[i];
