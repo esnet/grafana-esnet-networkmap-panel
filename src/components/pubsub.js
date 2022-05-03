@@ -42,12 +42,16 @@ PrivateMessageBus.prototype.last = function(topic){
 
 var messageBus = null;
 
-function getInstance() {
+export function getInstance() {
     if(!messageBus){
         messageBus = new PrivateMessageBus();
     }
     return messageBus;
 }
-
-module.exports.PubSub = getInstance();
-exports.PubSub = getInstance();
+export var PubSub = getInstance();
+try {
+    module.exports.PubSub = getInstance();    
+    exports.PubSub = getInstance();    
+} catch (e) {
+    console.log(e)
+}
