@@ -8,7 +8,7 @@ import { PubSub } from 'components/pubsub.js';
 
 export const Canvas = (props) => {
   const panelId = props.panelId;
-  const data = { layer1: props.dataL1, layer2: props.dataL2, layer3: props.dataL3 };
+  //const data = { layer1: props.dataL1, layer2: props.dataL2, layer3: props.dataL3 };
   const mapData = { layer1: props.mapDataL1, layer2: props.mapDataL2, layer3: props.mapDataL3 };
   const options = props.options;
   const updateMapJson = props.updateMapJson;
@@ -328,8 +328,8 @@ export const Canvas = (props) => {
   const drawMap = () => {
     // destroys the in-RAM map, and unsubscribes all signals
     destroyCurrentLeafletMap();
-    const map = new NetworkMap(mapContainer);
-    map.renderMap(data, mapData, options, updateMapJson, updateCenter, mapWidth, height, editMode, mapContainer);
+    const map = new NetworkMap(mapContainer, options, mapData, updateMapJson, updateCenter);
+    map.renderMap();
     console.log('resubscribing to recalcPaths');
     // resubscribe to the callback for home and "straighten edges" buttons
     PubSub.subscribe('recalcPaths', props.recalcEdges);
