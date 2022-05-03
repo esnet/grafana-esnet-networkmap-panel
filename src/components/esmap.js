@@ -1,6 +1,10 @@
-import * as d3 from './d3.min.js';
-import React from 'react';
 import * as pubsub from './pubsub.js';
+import * as d3_import from './d3.min.js';
+// populate either with import or ES6 root-scope version
+const d3 = window['d3'] || d3_import;
+import * as React_import from "./react.js";
+// populate either with import or ES6 root-scope version
+const React = window['React'] || React_import;
 
 function createSvgMarker(svg) {
   //--- setup markers
