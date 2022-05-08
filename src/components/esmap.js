@@ -1,4 +1,5 @@
 import * as pubsub from './pubsub.js';
+const PubSub = pubsub.PubSub;
 import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
@@ -53,7 +54,7 @@ function clearSelection(){
     .classed('animated-edge', false)
     .classed('edge', true)
 }
-pubsub.PubSub.subscribe("clearSelection", clearSelection);
+PubSub.subscribe("clearSelection", clearSelection);
 
 function renderEdges(g, data, ref) {
   var div = ref.div;
@@ -90,7 +91,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      pubsub.PubSub.publish("setVariables", d);
+      PubSub.publish("setVariables", d);
+      PubSub.publish("setSelection", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -157,7 +159,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      pubsub.PubSub.publish("setVariables", d);
+      PubSub.publish("setVariables", d);
+      PubSub.publish("setSelection", d);
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -240,7 +243,7 @@ function renderNodeControl(g, data, ref){
 
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
-    pubsub.PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
+    PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     pointData['latLng'][0] = ll.lat;
@@ -253,14 +256,26 @@ function renderNodeControl(g, data, ref){
           // if we are manipulating the "A" end
           // the index of the point we want is 0
           var idx = 0;
+          var step = 1;
+          var end = d.latLngs.length - 1;
           if(d.nodeZ == pointData.name){
             // if we are manipulating the "Z" end
             // the index of the point we want is the last one
             idx = d.latLngs.length - 1;
+            step = -1;
+            end = 0;
           } 
           // manipulate the point
           d.latLngs[idx][0] = ll.lat;
           d.latLngs[idx][1] = ll.lng;
+          // and each of the other points (but not the endpoint);
+          var divisor = 1;
+          for(var i=(idx + step); i != end; i += step){
+            //debugger;
+            divisor++;
+            d.latLngs[i][0] = (ll.lat + d.latLngs[end][0]) / divisor;
+            d.latLngs[i][1] = (ll.lng + d.latLngs[end][1]) / divisor;
+          }
         })
     // 
     //--- rerender stuff
@@ -269,8 +284,17 @@ function renderNodeControl(g, data, ref){
 
   function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
-    var center = L.latLng(ref.leafletMap.getCenter());
-    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3']);
+    var center = L.latLng(ref.mapCanvas.leafletMap.getCenter());
+    /*PubSub.publish("updateMapJson", {
+      "layer1": ref.data["layer1"],
+      "layer2": ref.data["layer2"],
+      "layer3": ref.data["layer3"],
+    });*/
+    ref.mapCanvas.updateMapJson && ref.mapCanvas.updateMapJson({
+      "layer1": ref.data["layer1"],
+      "layer2": ref.data["layer2"],
+      "layer3": ref.data["layer3"],
+    });
   }
 
   feature
@@ -286,7 +310,7 @@ function renderNodeControl(g, data, ref){
       ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
-      pubsub.PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
+      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"});
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
@@ -328,7 +352,7 @@ function renderEdgeControl(g, data, ref) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData) {
-    pubsub.PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
+    PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -341,7 +365,16 @@ function renderEdgeControl(g, data, ref) {
   function endDrag(evt, d, edgeData) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    ref.updateMapJson(ref.data['layer1'], ref.data['layer2'], ref.data['layer3']);
+    /*PubSub.publish("updateMapJson", {
+      "layer1": ref.data["layer1"],
+      "layer2": ref.data["layer2"],
+      "layer3": ref.data["layer3"],
+    });*/
+    ref.mapCanvas.updateMapJson && ref.mapCanvas.updateMapJson({
+      "layer1": ref.data["layer1"],
+      "layer2": ref.data["layer2"],
+      "layer3": ref.data["layer3"],
+    });
   }
 
   data.edges.forEach(function (edgeData) {
@@ -373,7 +406,7 @@ function renderEdgeControl(g, data, ref) {
         ref.leafletMap.dragging.enable();
       })
       .on('mousedown', function(evt, d){
-        pubsub.PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
+        PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"});
       });
 
     feature.exit().remove();
@@ -498,21 +531,20 @@ function offsetPoints(origPoints, offset) {
 }
 
 export class EsMap {
-  constructor(leafletMap, svg, div, curve, options, updateMapJson, updateCenter) {
-    this.leafletMap = leafletMap;
+  constructor(mapCanvas, svg, div, curve) {
+    this.mapCanvas = mapCanvas;
+    this.leafletMap = this.mapCanvas.getCurrentLeafletMap();
     this.svg = svg;
     this.data = {};
     this.mapLayers = {};
-    this.offsetL1 = options.pathOffsetL1;
-    this.offsetL2 = options.pathOffsetL2;
-    this.offsetL3 = options.pathOffsetL3;
+    this.offsetL1 = this.mapCanvas.options.pathOffsetL1;
+    this.offsetL2 = this.mapCanvas.options.pathOffsetL2;
+    this.offsetL3 = this.mapCanvas.options.pathOffsetL3;
     this.lineGen = d3.line().curve(curve);
     this.editEdges = 0;
     this.editNodes = 0;
     this.div = div;
-    this.options = options;
-    this.updateMapJson = updateMapJson;
-    this.updateCenter = updateCenter;
+    this.options = this.mapCanvas.options;
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
     this.lastInteractedType = null; // "nodes" or "edges"
@@ -521,6 +553,7 @@ export class EsMap {
 
     //
     let ref = this;
+
     this.leafletMap.on('moveend', function () {
       ref.update();
     });
@@ -536,13 +569,13 @@ export class EsMap {
       self.offsetL2 = options.pathOffsetL2;
       self.offsetL3 = options.pathOffsetL3;
     }
-    pubsub.PubSub.subscribe("updateOptions", updateOptions);
+    PubSub.subscribe("updateOptions", updateOptions);
 
     function updateLastInteractedObject(event){
       self.lastInteractedObject = event.object;
       self.lastInteractedType = event.type;
     }
-    pubsub.PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject);
+    PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject);
 
     function deleteObject(object, type){
       for(var i=1; i<=3; i++){ 
@@ -709,13 +742,21 @@ export class EsMap {
         renderNodeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
-        this.updateCenter(zoom, center);        
+        /*PubSub.publish("updateCenter", {
+          "zoom": zoom,
+          "center": center,
+        });*/
+        this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
       }
       if (this.editEdges == 1) {
         renderEdgeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
-        this.updateCenter(zoom, center);
+        /*PubSub.publish("updateCenter", {
+          "zoom": zoom,
+          "center": center,
+        });*/
+        this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
       }
       if (!this.editEdges && !this.editNodes) {
         //  delete all the control point g children
