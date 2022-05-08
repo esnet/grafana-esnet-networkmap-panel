@@ -17,6 +17,7 @@
     </script>
 
     <script type="module">
+        import { sanitizeTopology } from "./src/topologyTools.js"
         var parsedData = {};
         var lavender = "rgb(202, 149, 229)"
         var mapData = {
@@ -151,8 +152,26 @@
         document.getElementById("mapOptionsContainer").append(optionsElem);
 
         var canvas = document.createElement("map-canvas");
+        canvas.setAttribute('width', 600);
+        canvas.setAttribute('height', 400);
         canvas.topology = mapData;
         canvas.options = options;
+        canvas.updateCenter = function(centerData){
+            var newValue = JSON.parse(optionsElem.value);
+            newValue.startZoom = centerData.zoom;
+            newValue.startLat = centerData.center.lat.toFixed(2);
+            newValue.startLng = centerData.center.lng.toFixed(2);
+            optionsElem.value = JSON.stringify(newValue);
+        }
+        canvas.updateMapJson = function(topology){
+            var cleanTopology = { layer1: null, layer2: null, layer3: null };
+            for(var i=1; i<=3; i++){
+                if(topology["layer" + i]){
+                    cleanTopology["layer"+i] = sanitizeTopology(topology['layer'+i]);
+                }
+            }
+            dataElem.value = JSON.stringify(cleanTopology);
+        }
         document.getElementById("mapContainer").append(canvas);
     </script>
 
