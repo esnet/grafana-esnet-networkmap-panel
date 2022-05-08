@@ -2,66 +2,32 @@ import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'dataParser';
-import { testJsonSchema } from 'components/schema';
-import { Canvas } from 'components/Canvas';
+import { sanitizeTopology } from 'topologyTools';
 import { PubSub } from 'components/pubsub.js';
+import 'components/MapCanvas.component.js';
 
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {
   constructor(props: Props) {
     super(props);
+    PubSub.subscribe('updateMapJson', this.updateMapJson);
+    PubSub.subscribe('updateCenter', this.updateCenter);
   }
 
-  sanitizeNode = (node) => {
-    return {
-      name: node.name,
-      meta: node.meta,
-      latLng: node.latLng,
-    };
-  };
-  sanitizeEdge = (edge) => {
-    return {
-      name: edge.name,
-      meta: edge.meta,
-      latLngs: edge.latLngs,
-      children: edge.children,
-    };
-  };
-  sanitizeMapJsonLayer = (layerData) => {
-    return {
-      name: layerData.name,
-      layer: layerData.layer,
-      pathLayout: layerData.pathLayout,
-      edges:
-        (layerData.edges &&
-          layerData.edges.reduce((output, edge) => {
-            output.push(this.sanitizeEdge(edge));
-            return output;
-          }, [])) ||
-        [],
-      nodes:
-        (layerData.nodes &&
-          layerData.nodes.reduce((output, node) => {
-            output.push(this.sanitizeNode(node));
-            return output;
-          }, [])) ||
-        [],
-    };
-  };
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
   updateMapJson = (newDataL1, newDataL2, newDataL3) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
     if (newDataL1 != null) {
-      mapjsonL1 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL1));
+      mapjsonL1 = JSON.stringify(sanitizeTopology(newDataL1));
     }
     if (newDataL2 != null) {
-      mapjsonL2 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL2));
+      mapjsonL2 = JSON.stringify(sanitizeTopology(newDataL2));
     }
     if (newDataL3 != null) {
-      mapjsonL3 = JSON.stringify(this.sanitizeMapJsonLayer(newDataL3));
+      mapjsonL3 = JSON.stringify(sanitizeTopology(newDataL3));
     }
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
@@ -93,7 +59,10 @@ export class MapPanel extends Component<Props> {
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
-  updateCenter = (zoom, center) => {
+  updateCenter = (updateData) => {
+    let zoom = updateData['zoom'];
+    let center = updateData['center'];
+    console.log('MapPanel.updateCenter');
     const { options } = this.props;
     let { startLat, startLng, startZoom } = options;
     startZoom = zoom;
@@ -120,7 +89,7 @@ export class MapPanel extends Component<Props> {
   };
 
   render() {
-    const { options, data, width, height, id } = this.props;
+    const { options, data, width, height } = this.props;
     var colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
@@ -160,24 +129,24 @@ export class MapPanel extends Component<Props> {
     var mapDataL1;
     var mapDataL2;
     var mapDataL3;
-    var resultL1 = [false, ''];
+    /*var resultL1 = [false, ''];
     var resultL2 = [false, ''];
-    var resultL3 = [false, ''];
+    var resultL3 = [false, ''];*/
 
     try {
       if (data) {
         if (options.mapjsonL1) {
-          resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
+          //resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
           parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1, 1);
           mapDataL1 = parsedDataL1[3];
         }
         if (options.mapjsonL2) {
-          resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
+          //resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
           parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2, 2);
           mapDataL2 = parsedDataL2[3];
         }
         if (options.mapjsonL3) {
-          resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
+          //resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
           parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3, 3);
           mapDataL3 = parsedDataL3[3];
         }
@@ -186,26 +155,13 @@ export class MapPanel extends Component<Props> {
       console.error('Parsing error : ', error);
     }
 
-    return (
-      <Canvas
-        height={height}
-        width={width}
-        panelId={id}
-        options={options}
-        dataL1={parsedDataL1}
-        dataL2={parsedDataL2}
-        dataL3={parsedDataL3}
-        mapDataL1={mapDataL1}
-        mapDataL2={mapDataL2}
-        mapDataL3={mapDataL3}
-        updateMapJson={this.updateMapJson}
-        updateCenter={this.updateCenter}
-        toggleLayer={this.toggleLayer}
-        recalcEdges={this.recalcEdges}
-        jsonSchemaL1={resultL1}
-        jsonSchemaL2={resultL2}
-        jsonSchemaL3={resultL3}
-      />
-    );
+    var output = React.createElement('map-canvas', {
+      options: JSON.stringify(options),
+      topology: JSON.stringify({ layer1: mapDataL1, layer2: mapDataL2, layer3: mapDataL3 }),
+      width: width,
+      height: height,
+    });
+
+    return output;
   }
 }
