@@ -89,6 +89,7 @@
             "nodeWidthL1":4,
             "edgeWidthL1":1.5,
             "pathOffsetL1":1.5,
+            "layerName1":"Core Topology",
             // unnecessary outside grafana context
             /*"srcFieldL1":"meta.device_info.loc_name",
             "dstFieldL1":"meta.remote.loc_name",
@@ -98,7 +99,6 @@
             "srcVarL1":"meta.device_info.loc_name",
             "dstVarL1":"meta.remote.loc_name",
             "legendL1":true,
-            "layerName1":"Core Topology",
             "destVarL1":"meta.remote.loc_name",
             "filterVarL1":"l1edge",
             "valFieldL1":"meta.org.short_name",*/
@@ -108,6 +108,7 @@
             "nodeWidthL2":5,
             "edgeWidthL2":3,
             "pathOffsetL2":3,
+            "layerName2":"Site Topology",
             // unnecessary outside grafana context
             /*"srcFieldL2":"meta.device",
             "dstFieldL2":"meta.org.short_name",
@@ -117,7 +118,6 @@
             "srcVarL2":"meta.device",
             "dstVarL2":"meta.org.short_name",
             "legendL2":true,
-            "layerName2":"Site Topology",
             "destVarL2":"meta.org.short_name",
             "filterVarL2":"l2edge",*/
             // layer 3 rendering options
@@ -127,6 +127,7 @@
             "nodeWidthL3":6.5,
             "edgeWidthL3":2,
             "pathOffsetL3":1.5,
+            "layerName3":"Peer Topology",
             // unnecessary outside grafana context
             /*"srcFieldL3":"meta.device",
             "dstFieldL3":"meta.org.short_name",
@@ -136,34 +137,21 @@
             "srcVarL3":"meta.device_info.loc_name",
             "dstVarL3":"meta.remote.loc_name",
             "legendL3":true,
-            "layerName3":"Peer Topology",
             "destVarL3":"meta.remote.loc_name",
             "filterVarL3":"l3edge",*/
         };
-
-        var dataElem = document.createElement('textarea');
-        dataElem.value = JSON.stringify(mapData);
-        dataElem.style = "height: 300px; width: 300px;";
-        document.getElementById("mapDataContainer").append(dataElem);
-
-        var optionsElem = document.createElement('textarea');
-        optionsElem.value = JSON.stringify(options);
-        optionsElem.style = "height: 300px; width: 300px;";
-        document.getElementById("mapOptionsContainer").append(optionsElem);
-
         var canvas = document.createElement("map-canvas");
-        canvas.setAttribute('width', 600);
+        var optionsElem = document.createElement('textarea');
+        var dataElem = document.createElement('textarea');
+
+        canvas.setAttribute('width', 800);
         canvas.setAttribute('height', 400);
         canvas.topology = mapData;
         canvas.options = options;
-        canvas.updateCenter = function(centerData){
-            var newValue = JSON.parse(optionsElem.value);
-            newValue.startZoom = centerData.zoom;
-            newValue.startLat = centerData.center.lat.toFixed(2);
-            newValue.startLng = centerData.center.lng.toFixed(2);
-            optionsElem.value = JSON.stringify(newValue);
+        canvas.updateOptions = function(options){
+            optionsElem.value = JSON.stringify(options);
         }
-        canvas.updateMapJson = function(topology){
+        canvas.updateTopology = function(topology){
             var cleanTopology = { layer1: null, layer2: null, layer3: null };
             for(var i=1; i<=3; i++){
                 if(topology["layer" + i]){
@@ -173,6 +161,21 @@
             dataElem.value = JSON.stringify(cleanTopology);
         }
         document.getElementById("mapContainer").append(canvas);
+
+        dataElem.value = JSON.stringify(mapData);
+        dataElem.style = "height: 300px; width: 300px;";
+        dataElem.onChange = function(event){
+            canvas.topology = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapDataContainer").append(dataElem);
+
+        optionsElem.value = JSON.stringify(options);
+        optionsElem.style = "height: 300px; width: 300px;";
+        optionsElem.onChange = function(event){
+            canvas.options = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapOptionsContainer").append(optionsElem);
+
     </script>
 
 </head>
