@@ -79,12 +79,12 @@ class EditingInterface extends HTMLElement {
     get selectedLayer(){
         return this._selectedLayer;
     }
-    set updateMapJson(newValue){
-        this._updateMapJson = newValue;
+    set updateTopology(newValue){
+        this._updateTopology = newValue;
         this.setSrcDstOptions();
     }
-    get updateMapJson(){
-        return this._updateMapJson;
+    get updateTopology(){
+        return this._updateTopology;
     }
     // end setters and getters
     //////////////////////////////////
@@ -140,8 +140,10 @@ class EditingInterface extends HTMLElement {
             optionsJson[accessors[i]] = { nodes: [], edges: [] };
           }
         }
+        var lavender = "rgb(202, 149, 229)";
         this._topology[node_layer].nodes.push({
           name: node_name,
+          color: lavender,
           meta: {},
           latLng: [Math.floor(node_lat), Math.floor(node_lng)],
           children: [],
@@ -151,9 +153,9 @@ class EditingInterface extends HTMLElement {
             "layer2": optionsJson.layer2,
             "layer3": optionsJson.layer3
         }
-        PubSub.publish("updateMapJson", mapJson);
+        PubSub.publish("updateTopology", mapJson);
 
-        this.updateMapJson && this.updateMapJson(mapJson);
+        this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
         setTimeout(function () {
@@ -189,6 +191,7 @@ class EditingInterface extends HTMLElement {
             latLngs[1] = optionsJson[edge_layer].nodes[i].latLng;
           }
         }
+        var lavender = "rgb(202, 149, 229)";
         optionsJson[edge_layer].edges.push({
           name: node_source + '--' + node_destination,
           meta: {
@@ -196,17 +199,21 @@ class EditingInterface extends HTMLElement {
               pops: [node_source, node_destination],
             },
           },
+          layer: edge_layer.charAt(edge_layer.length - 1) * 1,
+          azColor:lavender,
+          zaColor:lavender,
           latLngs: latLngs,
           children: [],
         });
+        console.log(optionsJson[edge_layer]);
         var mapJson = {
             "layer1": optionsJson.layer1,
             "layer2": optionsJson.layer2,
             "layer3": optionsJson.layer3
         }
-        PubSub.publish("updateMapJson", mapJson);
+        PubSub.publish("updateTopology", mapJson);
 
-        this.updateMapJson && this.updateMapJson(mapJson);
+        this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
         setTimeout(function () {
           PubSub.publish(
@@ -263,7 +270,7 @@ class EditingInterface extends HTMLElement {
             }
             let [elem_id, event] = key.split("@");
             // use JS built-in 'apply' to set "this" keyword properly for callbacks.
-            this.shadow.querySelector(elem_id)[event] = ()=>{ 
+            this.shadow.querySelector(elem_id)[event] = function(){ 
                 bindings[key].apply(self, arguments) 
             };
         })
@@ -274,6 +281,7 @@ class EditingInterface extends HTMLElement {
             this.shadow = this.attachShadow({"mode": "open"})
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
+        let editModeOnlyToolsDisplay = this._editMode && "block" || "none";
         let selectedOnlyButtonDisplay = this._selection && "inline-block" || "none";
         this.shadow.innerHTML = `
             <style>
@@ -315,11 +323,14 @@ class EditingInterface extends HTMLElement {
                 .tools-overlay > .button:hover {
                     background: #EEE;
                 }
-                .button-overlay > .button.edit-mode-only { 
-                    display: ${ editModeOnlyButtonDisplay } 
+                .button-overlay > .button.edit-mode-only {
+                    display: ${ editModeOnlyButtonDisplay }
                 }
-                .button-overlay > .button.selected-only { 
-                    display: ${ selectedOnlyButtonDisplay } 
+                .tools-overlay > .button.edit-mode-only {
+                    display: ${ editModeOnlyToolsDisplay }
+                }
+                .button-overlay > .button.selected-only {
+                    display: ${ selectedOnlyButtonDisplay }
                 }
                 .dialog {
                   position: absolute;
@@ -459,7 +470,7 @@ class EditingInterface extends HTMLElement {
                       </tr>
                       <tr>
                         <td colSpan='2'>
-                          <input class="button" type="button" id="create_edge" value="Create Edge" />
+                          <input class="buttony" type="button" id="create_edge" value="Create Edge" />
                           <input class="button" type="button" id="create_edge_cancel" value="Cancel" />
                         </td>
                       </tr>
@@ -482,10 +493,10 @@ class EditingInterface extends HTMLElement {
               </div>
             </div>
             <div class="tools-overlay">
-              <div class='button' id='add_node'>
+              <div class='button edit-mode-only' id='add_node'>
                 + Node
               </div>
-              <div class='button' id='add_edge'>
+              <div class='button edit-mode-only' id='add_edge'>
                 + Edge
               </div>
             </div>
@@ -666,12 +677,6 @@ customElements.define( 'editing-interface', EditingInterface );
       <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
       {renderButtons()}
       {renderTools()}
-      <SideBar
-        height={height}
-        width={tooltipWidth}
-        panelId={panelId}
-        options={options}
-        toggleLayer={props.toggleLayer}
-      />
+      
     </div>
   );*/
