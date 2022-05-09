@@ -2,6 +2,7 @@ import NetworkMap from  "./RenderMap.js";
 import { leafletCss } from "./leaflet.css.js";
 import { esmapCss } from "./esmap.css.js";
 import "./EditingInterface.component.js"
+import "./SideBar.component.js"
 import * as maplayers from './maplayers.js';
 import * as pubsub from './pubsub.js';
 const PubSub = pubsub.PubSub;
@@ -25,6 +26,7 @@ class MapCanvas extends HTMLElement {
     console.log('this.destroyMap', this.destroyMap);
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('repaint', this.newMap, this);
+    PubSub.subscribe('toggleLayer', this.toggleLayer, this);
   }
 
   get topology() {
@@ -43,24 +45,37 @@ class MapCanvas extends HTMLElement {
     return newValue;
   }
   
-  get updateMapJson(){
-    return this._updateMapJson;
+  get updateTopology(){
+    return this._updateTopology;
   }
-  set updateMapJson(newValue){
-    this._updateMapJson = newValue;
-    this.map && this.map.setUpdateMapJson(this._updateMapJson);
-    if(this.editingInterface) this.editingInterface.updateMapJson = newValue;
+  set updateTopology(newValue){
+    this._updateTopology = newValue;
+    this.map && this.map.setUpdateMapJson(this._updateTopology);
+    if(this.editingInterface) this.editingInterface.updateTopology = newValue;
     return newValue;
   }
 
-  get updateCenter(){
-    return this._updateCenter;
+  get updateOptions(){
+    return this._updateOptions;
   }
-  set updateCenter(newValue){
-    this._updateCenter = newValue;
+  set updateOptions(newValue){
+    this._updateOptions = newValue;
     return newValue;
   }
+  updateCenter(centerData){
+    var newValue = this._options;
+    newValue.startZoom = centerData.zoom;
+    newValue.startLat = centerData.center.lat.toFixed(2);
+    newValue.startLng = centerData.center.lng.toFixed(2);
+    this._updateOptions && this._updateOptions(newValue);
+  }
 
+  toggleLayer(layerData){
+    var newValue = this._options;
+    newValue[layerData.layer] = layerData.visible;
+    this.map.renderMapLayers();
+    this._updateOptions && this._updateOptions(newValue);
+  }
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       this.leafletMap = L.map(this.mapContainer, {
@@ -115,11 +130,13 @@ class MapCanvas extends HTMLElement {
       this.shadow.innerHTML = `
       <style>
           #map { 
-            ${this.height && "height: "+this.height+"px;" }
-            ${this.width && "width: "+this.width+"px;" }
+            font-family: sans-serif;
+            ${this.height && "height: "+this.height +"px;" }
+            ${this.width && "width: "+this.width * 0.75+"px;" }
             border:1px solid black; 
             background: #CCC; 
             position: relative;
+            display: inline-block;
           }
       </style>
       <style>
@@ -131,11 +148,16 @@ class MapCanvas extends HTMLElement {
 
       <div id='map'>
         <editing-interface></editing-interface>
-      </div>`;
+      </div>
+      <side-bar></side-bar>`;
       this.mapContainer = this.shadow.querySelector("#map");
+
       this.editingInterface = this.shadow.querySelector("editing-interface");
       this.editingInterface.topology = this.topology;
-      this.editingInterface.updateMapJson = this.updateMapJson;
+      this.editingInterface.updateTopology = this.updateTopology;
+
+      this.sideBar = this.shadow.querySelector("side-bar");
+      this.sideBar.mapCanvas = this;
     }
     if(!this.map && this._options && this._topology){
       this.newMap();
