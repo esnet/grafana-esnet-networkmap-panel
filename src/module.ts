@@ -46,6 +46,10 @@ plugin.setPanelOptions((builder) => {
       getOptions: async (context: FieldOverrideContext) => {
         return Promise.resolve([
           {
+            label: '[Blank Tileset]',
+            value: null,
+          },
+          {
             label: 'ArcGIS Default Set',
             value: 'arcgis',
           },
