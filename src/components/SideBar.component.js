@@ -53,11 +53,17 @@ class SideBar extends HTMLElement {
             font-family: sans-serif;
             padding: 0 1em;
             vertical-align: top;
-            ${this.mapCanvas.height && "height: "+this.mapCanvas.height +"px;" }
-            ${this.mapCanvas.width && "width: "+(this.mapCanvas.width * 0.25) - 5+"px;" }
-            border:1px solid black;
-            background:#FAFAFA;
+            ${this.mapCanvas.height && "height: "+this.mapCanvas.height + "px;" }
+            ${this.mapCanvas.width && ("width: "+ (this.mapCanvas.width * 0.20) + "px;") }
+            border:1px solid #F0F0F0;
+            background:#FCFCFC;
             display: inline-block;
+          }
+          .toggle.container { 
+            display: block;
+            margin-bottom: 8px;
+            margin-top:8px;
+            padding: 0 5px;
           }
           #tooltip .legend-text { 
             vertical-align: bottom;
@@ -67,11 +73,12 @@ class SideBar extends HTMLElement {
           }
           #tooltip h2 { 
             margin-bottom: 5px;
+            margin-top: 10px;
             font-size:20px;
           }
         </style>
         <h2>Map Layers</h2>
-        <div class='toggle container'>
+        <div class='toggle container' ${ !this.mapCanvas.options.legendL1 && "style='display: none;'" }>
           <label class="switch">
             <input type="checkbox" ${ this.mapCanvas.options.layer1 && "checked"} id='layer1'>
             <span class="slider round"></span>
@@ -82,7 +89,7 @@ class SideBar extends HTMLElement {
           </div>
         </div>
 
-        <div class='toggle container'>
+        <div class='toggle container' ${ !this.mapCanvas.options.legendL2 && "style='display: none;'" }>
           <label class="switch">
             <input type="checkbox" ${ this.mapCanvas.options.layer2 && "checked"} id='layer2'>
             <span class="slider round"></span>
@@ -93,7 +100,7 @@ class SideBar extends HTMLElement {
           </div>
         </div>
 
-        <div class='toggle container'>
+        <div class='toggle container' ${ !this.mapCanvas.options.legendL3 && "style='display: none;'" }>
           <label class="switch">
             <input type="checkbox" ${ this.mapCanvas.options.layer3 && "checked"} id='layer3'>
             <span class="slider round"></span>
