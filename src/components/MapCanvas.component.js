@@ -23,10 +23,11 @@ class MapCanvas extends HTMLElement {
     this.map = null;
     this.leafletMap = null;
 
-    console.log('this.destroyMap', this.destroyMap);
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('repaint', this.newMap, this);
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
+    PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
+    PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
   }
 
   get topology() {
@@ -62,6 +63,31 @@ class MapCanvas extends HTMLElement {
     this._updateOptions = newValue;
     return newValue;
   }
+  updateMapOptions(changedOptions){
+    var {options, changed} = changedOptions;
+    console.log('updateMapOptions', changed);
+    var keys = Object.keys(options);
+    keys.forEach((k)=>{
+      this._options[k] = options[k];
+    })
+
+    if (
+      changed.indexOf('tileSetLayer')>=0 ||
+      changed.indexOf('boundaryLayer')>=0 ||
+      changed.indexOf('labelLayer')>=0
+    ) {
+      this.newMap();
+    } else {
+      this.map && this.map.renderMap();
+    }
+
+    this.sideBar && this.sideBar.render();
+  }
+  updateMapTopology(newTopology){
+    this._topology = newTopology;
+    this.map && this.map.renderMap();    
+  }
+
   updateCenter(centerData){
     var newValue = this._options;
     newValue.startZoom = centerData.zoom;
@@ -87,9 +113,11 @@ class MapCanvas extends HTMLElement {
           doubleClickZoom: false,
           keyboard: false,
         }).setView([this._options.startLat, this._options.startLng], this._options.startZoom);
-        L.tileLayer(
-          maplayers.TILESETS[this._options.tileSetLayer].url,
-          maplayers.TILESETS[this._options.tileSetLayer].attributes).addTo(this.leafletMap);
+        if(this._options.tileSetLayer){
+          L.tileLayer(
+            maplayers.TILESETS[this._options.tileSetLayer].url,
+            maplayers.TILESETS[this._options.tileSetLayer].attributes).addTo(this.leafletMap);
+        }
         if(this._options.boundaryLayer){
           L.tileLayer(
             maplayers.BOUNDARIES[this._options.boundaryLayer].url,
@@ -132,7 +160,7 @@ class MapCanvas extends HTMLElement {
           #map { 
             font-family: sans-serif;
             ${this.height && "height: "+this.height +"px;" }
-            ${this.width && "width: "+this.width * 0.75+"px;" }
+            ${this.width && "width: "+ ((this.width * 0.75) - 5) +"px;" }
             border:1px solid black; 
             background: #CCC; 
             position: relative;

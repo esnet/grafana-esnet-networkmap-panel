@@ -9,27 +9,40 @@ import 'components/MapCanvas.component.js';
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {
+  mapCanvas: any;
+  lastOptions: any;
+
   constructor(props: Props) {
     super(props);
-    PubSub.subscribe('updateMapJson', this.updateMapJson);
-    PubSub.subscribe('updateCenter', this.updateCenter);
+    // ref approach... doesn't seem to want to work.
+    this.mapCanvas = React.createRef();
+    this.lastOptions = {};
+    PubSub.subscribe('updateTopology', this.updateMapJson, this);
+    PubSub.subscribe('updateOptions', this.updateCenter, this);
+    //PubSub.subscribe('toggleLayer', this.toggleLayer);
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
-  updateMapJson = (newDataL1, newDataL2, newDataL3) => {
+  updateMapJson = (mapData) => {
     const { options } = this.props;
     let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
-    if (newDataL1 != null) {
-      mapjsonL1 = JSON.stringify(sanitizeTopology(newDataL1));
+    if (mapData.layer1 != null) {
+      mapjsonL1 = JSON.stringify(sanitizeTopology(mapData.layer1));
     }
-    if (newDataL2 != null) {
-      mapjsonL2 = JSON.stringify(sanitizeTopology(newDataL2));
+    if (mapData.layer2 != null) {
+      mapjsonL2 = JSON.stringify(sanitizeTopology(mapData.layer2));
     }
-    if (newDataL3 != null) {
-      mapjsonL3 = JSON.stringify(sanitizeTopology(newDataL3));
+    if (mapData.layer3 != null) {
+      mapjsonL3 = JSON.stringify(sanitizeTopology(mapData.layer3));
     }
-    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
+    console.log(this);
+    console.log(this.props);
+    console.log(this.props.onOptionsChange);
+    var theObj: any;
+    theObj = { ...options, mapjsonL1, mapjsonL2, mapjsonL3 };
+    console.log(theObj);
+    this.props.onOptionsChange(theObj);
   };
 
   straightenEdges = (mapJson) => {
@@ -87,6 +100,50 @@ export class MapPanel extends Component<Props> {
     }
     this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
   };
+
+  componentDidUpdate() {
+    const optionsToWatch = [
+      'tileSetLayer',
+      'boundaryLayer',
+      'labelLayer',
+
+      'layer1',
+      'color1',
+      'endpointIdL1',
+      'nodeHighlightL1',
+      'nodeWidthL1',
+      'edgeWidthL1',
+      'pathOffsetL1',
+
+      'layer2',
+      'color2',
+      'endpointIdL2',
+      'nodeHighlightL2',
+      'nodeWidthL2',
+      'edgeWidthL2',
+      'pathOffsetL2',
+
+      'layer3',
+      'color3',
+      'endpointIdL3',
+      'nodeHighlightL3',
+      'nodeWidthL3',
+      'edgeWidthL3',
+      'pathOffsetL3',
+    ];
+    var changed: string[];
+    changed = [];
+
+    optionsToWatch.forEach((option) => {
+      if (this.lastOptions[option] !== this.props.options[option]) {
+        this.lastOptions[option] = this.props.options[option];
+        changed.push(option);
+      }
+    });
+    if (changed.length > 0) {
+      PubSub.publish('updateMapOptions', { options: this.lastOptions, changed: changed });
+    }
+  }
 
   render() {
     const { options, data, width, height } = this.props;
@@ -157,10 +214,22 @@ export class MapPanel extends Component<Props> {
 
     var output = React.createElement('map-canvas', {
       options: JSON.stringify(options),
-      topology: JSON.stringify({ layer1: mapDataL1, layer2: mapDataL2, layer3: mapDataL3 }),
+      topology: JSON.stringify({
+        layer1: mapDataL1,
+        layer2: mapDataL2,
+        layer3: mapDataL3,
+      }),
       width: width,
       height: height,
+      ref: this.mapCanvas,
     });
+    PubSub.publish('updateMapTopology', {
+      layer1: mapDataL1,
+      layer2: mapDataL2,
+      layer3: mapDataL3,
+    });
+    PubSub.publish('updateMapDimensions', {"width": width, "height": height});
+    console.log(this.mapCanvas);
 
     return output;
   }

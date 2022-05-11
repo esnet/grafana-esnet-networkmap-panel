@@ -54,7 +54,7 @@ class SideBar extends HTMLElement {
             padding: 0 1em;
             vertical-align: top;
             ${this.mapCanvas.height && "height: "+this.mapCanvas.height +"px;" }
-            ${this.mapCanvas.width && "width: "+this.mapCanvas.width * 0.25+"px;" }
+            ${this.mapCanvas.width && "width: "+(this.mapCanvas.width * 0.25) - 5+"px;" }
             border:1px solid black;
             background:#FAFAFA;
             display: inline-block;

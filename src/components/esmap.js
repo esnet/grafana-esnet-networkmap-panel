@@ -285,12 +285,12 @@ function renderNodeControl(g, data, ref){
   function endDrag(evt, d) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.mapCanvas.leafletMap.getCenter());
-    /*PubSub.publish("updateMapJson", {
+    PubSub.publish("updateTopology", {
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
-    });*/
-    ref.mapCanvas.updateMapJson && ref.mapCanvas.updateMapJson({
+    });
+    ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
@@ -365,12 +365,12 @@ function renderEdgeControl(g, data, ref) {
   function endDrag(evt, d, edgeData) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    /*PubSub.publish("updateMapJson", {
+    PubSub.publish("updateTopology", {
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
-    });*/
-    ref.mapCanvas.updateMapJson && ref.mapCanvas.updateMapJson({
+    });
+    ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
@@ -537,9 +537,6 @@ export class EsMap {
     this.svg = svg;
     this.data = {};
     this.mapLayers = {};
-    this.offsetL1 = this.mapCanvas.options.pathOffsetL1;
-    this.offsetL2 = this.mapCanvas.options.pathOffsetL2;
-    this.offsetL3 = this.mapCanvas.options.pathOffsetL3;
     this.lineGen = d3.line().curve(curve);
     this.editEdges = 0;
     this.editNodes = 0;
@@ -565,9 +562,6 @@ export class EsMap {
 
     function updateOptions(options){
       self.options = options;
-      self.offsetL1 = options.pathOffsetL1;
-      self.offsetL2 = options.pathOffsetL2;
-      self.offsetL3 = options.pathOffsetL3;
     }
     PubSub.subscribe("updateOptions", updateOptions);
 
@@ -716,10 +710,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.lineGen(offsetPoints(d.points, ref["offsetL"+d.layer]));
+      d.azPath = ref.lineGen(offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+d.layer]));
 
       //--- setup the zaPath
-      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref["offsetL"+d.layer]));
+      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+d.layer]));
     });
 
     //---swap out edge list with the filtered list
@@ -742,21 +736,21 @@ export class EsMap {
         renderNodeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
-        /*PubSub.publish("updateCenter", {
+        /*PubSub.publish("updateOptions", {
           "zoom": zoom,
           "center": center,
         });*/
-        this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
+        //this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
       }
       if (this.editEdges == 1) {
         renderEdgeControl(controlpoint_g, data, this);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
-        /*PubSub.publish("updateCenter", {
+        /*PubSub.publish("updateOptions", {
           "zoom": zoom,
           "center": center,
         });*/
-        this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
+        //this.mapCanvas.updateCenter && this.mapCanvas.updateCenter({"zoom": zoom, "center": center});        
       }
       if (!this.editEdges && !this.editNodes) {
         //  delete all the control point g children
