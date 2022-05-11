@@ -114,6 +114,8 @@ export class MapPanel extends Component<Props> {
       'nodeWidthL1',
       'edgeWidthL1',
       'pathOffsetL1',
+      'layerName1',
+      'legendL1',
 
       'layer2',
       'color2',
@@ -122,6 +124,8 @@ export class MapPanel extends Component<Props> {
       'nodeWidthL2',
       'edgeWidthL2',
       'pathOffsetL2',
+      'layerName2',
+      'legendL2',
 
       'layer3',
       'color3',
@@ -130,6 +134,8 @@ export class MapPanel extends Component<Props> {
       'nodeWidthL3',
       'edgeWidthL3',
       'pathOffsetL3',
+      'layerName3',
+      'legendL3',
     ];
     var changed: string[];
     changed = [];
@@ -228,7 +234,10 @@ export class MapPanel extends Component<Props> {
       layer2: mapDataL2,
       layer3: mapDataL3,
     });
-    PubSub.publish('updateMapDimensions', {"width": width, "height": height});
+    PubSub.publish('updateMapDimensions', {
+      width: width,
+      height: height,
+    });
     console.log(this.mapCanvas);
 
     return output;
