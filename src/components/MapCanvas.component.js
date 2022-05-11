@@ -28,6 +28,7 @@ class MapCanvas extends HTMLElement {
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
+    PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
   }
 
   get topology() {
@@ -86,6 +87,13 @@ class MapCanvas extends HTMLElement {
   updateMapTopology(newTopology){
     this._topology = newTopology;
     this.map && this.map.renderMap();    
+  }
+
+  updateMapDimensions(newDimensions){
+    this.width = newDimensions.width;
+    this.height = newDimensions.height;
+    this.render();
+    this.sideBar.render();
   }
 
   updateCenter(centerData){
@@ -159,9 +167,6 @@ class MapCanvas extends HTMLElement {
       <style>
           #map { 
             font-family: sans-serif;
-            ${this.height && "height: "+this.height +"px;" }
-            ${this.width && "width: "+ ((this.width * 0.75) - 5) +"px;" }
-            border:1px solid black; 
             background: #CCC; 
             position: relative;
             display: inline-block;
@@ -187,7 +192,13 @@ class MapCanvas extends HTMLElement {
       this.sideBar = this.shadow.querySelector("side-bar");
       this.sideBar.mapCanvas = this;
     }
-    if(!this.map && this._options && this._topology){
+    if(this.height){
+      this.mapContainer.style.height = this.height + 'px';
+    }
+    if(this.width){
+      this.mapContainer.style.width = (this.width * 0.80) - 5 + 'px';
+    }
+    if(!this.map && this.options && this.topology){
       this.newMap();
     }
 
@@ -203,10 +214,10 @@ class MapCanvas extends HTMLElement {
       this.options = JSON.parse(this.getAttribute("options"));
     }
     if(!this.height && this.getAttribute("height")){
-      this.height = JSON.parse(this.getAttribute("height"));
+      this.height = this.getAttribute("height");
     }
     if(!this.width && this.getAttribute("width")){
-      this.width = JSON.parse(this.getAttribute("width"));
+      this.width = this.getAttribute("width");
     }
     this.render();
   }
