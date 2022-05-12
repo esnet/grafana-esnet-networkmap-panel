@@ -1,23 +1,21 @@
 <html>
 <head>
     <title>Embedded Map Demonstration Page</title>
-    <style>
-    </style>
     <!-- do imports in totally separate script tags to force resolution ordering -->
-    <script src="./src/components/react.17.0.2.umd.js"></script>
+    <script src="./src/components/lib/react.17.0.2.umd.js"></script>
     <script type="module">
-        import * as Leaflet from './src/components/leaflet.esm.js';
+        import * as Leaflet from './src/components/lib/leaflet.esm.js';
         window['L'] = Leaflet;
     </script>
     <script type="module">
-        import "./src/components/d3.min.js"; 
+        import "./src/components/lib/d3.min.js"; 
     </script>
     <script type="module">
         import "./src/components/MapCanvas.component.js"
     </script>
 
     <script type="module">
-        import { sanitizeTopology } from "./src/topologyTools.js"
+        import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
         var parsedData = {};
         var lavender = "rgb(202, 149, 229)"
         var mapData = {
@@ -90,6 +88,7 @@
             "edgeWidthL1":1.5,
             "pathOffsetL1":1.5,
             "layerName1":"Core Topology",
+            "legendL1":true,
             // unnecessary outside grafana context
             /*"srcFieldL1":"meta.device_info.loc_name",
             "dstFieldL1":"meta.remote.loc_name",
@@ -98,7 +97,6 @@
             "dashboardVarL1":"edge",
             "srcVarL1":"meta.device_info.loc_name",
             "dstVarL1":"meta.remote.loc_name",
-            "legendL1":true,
             "destVarL1":"meta.remote.loc_name",
             "filterVarL1":"l1edge",
             "valFieldL1":"meta.org.short_name",*/
@@ -109,6 +107,7 @@
             "edgeWidthL2":3,
             "pathOffsetL2":3,
             "layerName2":"Site Topology",
+            "legendL2":true,
             // unnecessary outside grafana context
             /*"srcFieldL2":"meta.device",
             "dstFieldL2":"meta.org.short_name",
@@ -117,7 +116,6 @@
             "dashboardVarL2":"l2edge",
             "srcVarL2":"meta.device",
             "dstVarL2":"meta.org.short_name",
-            "legendL2":true,
             "destVarL2":"meta.org.short_name",
             "filterVarL2":"l2edge",*/
             // layer 3 rendering options
@@ -128,6 +126,7 @@
             "edgeWidthL3":2,
             "pathOffsetL3":1.5,
             "layerName3":"Peer Topology",
+            "legendL3":true,
             // unnecessary outside grafana context
             /*"srcFieldL3":"meta.device",
             "dstFieldL3":"meta.org.short_name",
@@ -136,7 +135,6 @@
             "dashboardVarL3":"l3edge",
             "srcVarL3":"meta.device_info.loc_name",
             "dstVarL3":"meta.remote.loc_name",
-            "legendL3":true,
             "destVarL3":"meta.remote.loc_name",
             "filterVarL3":"l3edge",*/
         };

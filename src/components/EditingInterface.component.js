@@ -1,7 +1,8 @@
-import * as pubsub from './pubsub.js';
+import * as pubsub from './lib/pubsub.js';
 const PubSub = pubsub.PubSub;
+import { BindableHTMLElement } from './lib/rubbercement.js'
 
-class EditingInterface extends HTMLElement {
+class EditingInterface extends BindableHTMLElement {
     constructor(topology) {
         super();
         this._topology = {};
@@ -110,8 +111,6 @@ class EditingInterface extends HTMLElement {
         PubSub.publish('repaint', null);        
         //PubSub.publish("homeMap");
     }
-    // the outer closures here bind 'this' properly...
-    // maybe this can be generalized in our bind
     showAddNodeDialog(){
         this.selectedLayer = "layer1";
         this.dialog = "node";
@@ -259,22 +258,6 @@ class EditingInterface extends HTMLElement {
         });
         return `<select id="${name}">${optionsList}</select>`;
     };
-
-    // syntactical sugar for event bindings to IDs
-    bindEvents(bindings){
-        let keys = Object.keys(bindings);
-        let self = this;
-        keys.forEach((key)=>{
-            if(!bindings[key]){
-                throw new Error(`Bad binding supplied for ${key}`)
-            }
-            let [elem_id, event] = key.split("@");
-            // use JS built-in 'apply' to set "this" keyword properly for callbacks.
-            this.shadow.querySelector(elem_id)[event] = function(){ 
-                bindings[key].apply(self, arguments) 
-            };
-        })
-    }
 
     render(){
         if(!this.shadow){

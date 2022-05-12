@@ -1,7 +1,8 @@
-import * as pubsub from './pubsub.js';
+import * as pubsub from './lib/pubsub.js';
 const PubSub = pubsub.PubSub;
+import { BindableHTMLElement } from './lib/rubbercement.js'
 
-class SideBar extends HTMLElement {
+class SideBar extends BindableHTMLElement {
 
   constructor() {
     super();
@@ -24,21 +25,6 @@ class SideBar extends HTMLElement {
     var layer = element.id;
     var value = element.checked;
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value});
-  }
-  // syntactical sugar for event bindings to IDs
-  bindEvents(bindings){
-      let keys = Object.keys(bindings);
-      let self = this;
-      keys.forEach((key)=>{
-          if(!bindings[key]){
-              throw new Error(`Bad binding supplied for ${key}`)
-          }
-          let [elem_id, event] = key.split("@");
-          // use JS built-in 'apply' to set "this" keyword properly for callbacks.
-          this.shadow.querySelector(elem_id)[event] = function(){ 
-              bindings[key].apply(self, arguments) 
-          };
-      })
   }
 
   render(){

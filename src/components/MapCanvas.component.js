@@ -1,15 +1,15 @@
-import NetworkMap from  "./RenderMap.js";
-import { leafletCss } from "./leaflet.css.js";
-import { esmapCss } from "./esmap.css.js";
+import NetworkMap from  "./NetworkMap.js";
+import { leafletCss } from "./css/leaflet.css.js";
+import { esmapCss } from "./css/esmap.css.js";
 import "./EditingInterface.component.js"
 import "./SideBar.component.js"
-import * as maplayers from './maplayers.js';
-import * as pubsub from './pubsub.js';
+import * as maplayers from './lib/maplayers.js';
+import * as pubsub from './lib/pubsub.js';
 const PubSub = pubsub.PubSub;
 
 var L = window['L'];
 if(typeof require !== "undefined"){
-  var L = require('./leaflet.js');
+  var L = require('./lib/leaflet.js');
 }
 
 
