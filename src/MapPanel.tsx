@@ -1,9 +1,9 @@
 import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
-import { parseData } from 'dataParser';
-import { sanitizeTopology } from 'topologyTools';
-import { PubSub } from 'components/pubsub.js';
+import { parseData } from 'components/lib/dataParser';
+import { sanitizeTopology } from 'components/lib/topologyTools';
+import { PubSub } from 'components/lib/pubsub.js';
 import 'components/MapCanvas.component.js';
 
 interface Props extends PanelProps<MapOptions> {}
@@ -16,10 +16,9 @@ export class MapPanel extends Component<Props> {
     super(props);
     // ref approach... doesn't seem to want to work.
     this.mapCanvas = React.createRef();
-    this.lastOptions = {};
+    this.lastOptions = this.props.options;
     PubSub.subscribe('updateTopology', this.updateMapJson, this);
     PubSub.subscribe('updateOptions', this.updateCenter, this);
-    //PubSub.subscribe('toggleLayer', this.toggleLayer);
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -36,38 +35,7 @@ export class MapPanel extends Component<Props> {
     if (mapData.layer3 != null) {
       mapjsonL3 = JSON.stringify(sanitizeTopology(mapData.layer3));
     }
-    console.log(this);
-    console.log(this.props);
-    console.log(this.props.onOptionsChange);
-    var theObj: any;
-    theObj = { ...options, mapjsonL1, mapjsonL2, mapjsonL3 };
-    console.log(theObj);
-    this.props.onOptionsChange(theObj);
-  };
-
-  straightenEdges = (mapJson) => {
-    mapJson = JSON.parse(mapJson);
-    for (let i = 0; i < mapJson.edges.length; i++) {
-      let edge = mapJson.edges[i];
-      let zIdx = edge.latLngs.length - 1;
-      let a = edge.latLngs[0];
-      let z = edge.latLngs[zIdx];
-      let midpoint = [(a[0] + z[0]) / 2, (a[1] + z[1]) / 2];
-      mapJson.edges[i].latLngs = [a, midpoint, z];
-    }
-    return JSON.stringify(mapJson);
-  };
-
-  recalcEdges = () => {
-    const { options } = this.props;
-    let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
-    mapjsonL1 = this.straightenEdges(mapjsonL1);
-    mapjsonL2 = this.straightenEdges(mapjsonL2);
-    mapjsonL3 = this.straightenEdges(mapjsonL3);
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
-    setTimeout(function () {
-      PubSub.publish('repaint', null);
-    }, 10);
   };
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -229,6 +197,7 @@ export class MapPanel extends Component<Props> {
       height: height,
       ref: this.mapCanvas,
     });
+    console.log("about to do 'updateMapTopology'");
     PubSub.publish('updateMapTopology', {
       layer1: mapDataL1,
       layer2: mapDataL2,
