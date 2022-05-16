@@ -185,27 +185,24 @@ export class MapPanel extends Component<Props> {
       console.error('Parsing error : ', error);
     }
 
-    var output = React.createElement('map-canvas', {
-      options: JSON.stringify(options),
-      topology: JSON.stringify({
-        layer1: mapDataL1,
-        layer2: mapDataL2,
-        layer3: mapDataL3,
-      }),
-      width: width,
-      height: height,
-      ref: this.mapCanvas,
-    });
-    PubSub.publish('updateMapTopology', {
+    const topology = {
       layer1: mapDataL1,
       layer2: mapDataL2,
       layer3: mapDataL3,
-    });
+    };
+
+    PubSub.publish('updateMapTopology', topology);
     PubSub.publish('updateMapDimensions', {
       width: width,
       height: height,
     });
 
-    return output;
+    return React.createElement('map-canvas', {
+      options: JSON.stringify(options),
+      topology: JSON.stringify(topology),
+      width: width,
+      height: height,
+      ref: this.mapCanvas,
+    });
   }
 }
