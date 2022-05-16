@@ -43,7 +43,6 @@ export class MapPanel extends Component<Props> {
   updateCenter = (updateData) => {
     let zoom = updateData['zoom'];
     let center = updateData['center'];
-    console.log('MapPanel.updateCenter');
     const { options } = this.props;
     let { startLat, startLng, startZoom } = options;
     startZoom = zoom;
@@ -197,7 +196,6 @@ export class MapPanel extends Component<Props> {
       height: height,
       ref: this.mapCanvas,
     });
-    console.log("about to do 'updateMapTopology'");
     PubSub.publish('updateMapTopology', {
       layer1: mapDataL1,
       layer2: mapDataL2,
@@ -207,7 +205,6 @@ export class MapPanel extends Component<Props> {
       width: width,
       height: height,
     });
-    console.log(this.mapCanvas);
 
     return output;
   }
