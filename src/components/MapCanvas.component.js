@@ -25,10 +25,12 @@ class MapCanvas extends HTMLElement {
 
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('repaint', this.newMap, this);
+    PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
+    PubSub.subscribe('updateJsonValidation', this.updateJsonResults, this);
   }
 
   get topology() {
@@ -45,6 +47,12 @@ class MapCanvas extends HTMLElement {
   set options(newValue){
     this._options = newValue;
     return newValue;
+  }
+  get jsonResults(){
+    return this._jsonResults;
+  }
+  set jsonResults(newResults){
+    this._jsonResults = newResults;
   }
   
   get updateTopology(){
@@ -83,6 +91,10 @@ class MapCanvas extends HTMLElement {
     }
 
     this.sideBar && this.sideBar.render();
+  }
+  updateJsonResults(newResults){
+    this.jsonResults = newResults;
+    this.sideBar.render();
   }
   updateMapTopology(newTopology){
     this._topology = newTopology;
