@@ -159,24 +159,24 @@ export class MapPanel extends Component<Props> {
     var mapDataL1;
     var mapDataL2;
     var mapDataL3;
-    /*var resultL1 = [false, ''];
+    var resultL1 = [false, ''];
     var resultL2 = [false, ''];
-    var resultL3 = [false, ''];*/
+    var resultL3 = [false, ''];
 
     try {
       if (data) {
         if (options.mapjsonL1) {
-          //resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
+          resultL1 = testJsonSchema(JSON.parse(options.mapjsonL1));
           parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1, 1);
           mapDataL1 = parsedDataL1[3];
         }
         if (options.mapjsonL2) {
-          //resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
+          resultL2 = testJsonSchema(JSON.parse(options.mapjsonL2));
           parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2, 2);
           mapDataL2 = parsedDataL2[3];
         }
         if (options.mapjsonL3) {
-          //resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
+          resultL3 = testJsonSchema(JSON.parse(options.mapjsonL3));
           parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3, 3);
           mapDataL3 = parsedDataL3[3];
         }
@@ -190,8 +190,14 @@ export class MapPanel extends Component<Props> {
       layer2: mapDataL2,
       layer3: mapDataL3,
     };
+    const jsonResults = {
+      layer1: resultL1,
+      layer2: resultL2,
+      layer3: resultL3,
+    }
 
     PubSub.publish('updateMapTopology', topology);
+    PubSub.publish('updateJsonValidation', jsonResults);
     PubSub.publish('updateMapDimensions', {
       width: width,
       height: height,
