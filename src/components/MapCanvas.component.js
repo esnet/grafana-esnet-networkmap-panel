@@ -5,6 +5,7 @@ import "./EditingInterface.component.js"
 import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
+import { testJsonSchema } from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 
 var L = window['L'];
@@ -22,15 +23,15 @@ class MapCanvas extends HTMLElement {
     this._options = null;
     this.map = null;
     this.leafletMap = null;
+    this.jsonResults = { layer1: false, layer2: false, layer3: false };
 
     PubSub.subscribe('destroyMap', this.destroyMap, this);
-    PubSub.subscribe('repaint', this.newMap, this);
+    PubSub.subscribe('newMap', this.newMap, this);
     PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
-    PubSub.subscribe('updateJsonValidation', this.updateJsonResults, this);
   }
 
   get topology() {
@@ -74,7 +75,6 @@ class MapCanvas extends HTMLElement {
   }
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
-    console.log('updateMapOptions', changed);
     var keys = Object.keys(options);
     keys.forEach((k)=>{
       this._options[k] = options[k];
@@ -92,12 +92,14 @@ class MapCanvas extends HTMLElement {
 
     this.sideBar && this.sideBar.render();
   }
-  updateJsonResults(newResults){
-    this.jsonResults = newResults;
-    this.sideBar.render();
-  }
   updateMapTopology(newTopology){
     this._topology = newTopology;
+    this.jsonResults = { 
+      "layer1": testJsonSchema(this.topology.layer1),
+      "layer2": testJsonSchema(this.topology.layer2),
+      "layer3": testJsonSchema(this.topology.layer3),
+    }
+    this.sideBar.render();
     this.map && this.map.renderMap();    
   }
 
@@ -164,7 +166,12 @@ class MapCanvas extends HTMLElement {
   }
 
   newMap(){
-      console.log("newMap called. This: ", this);
+      this.jsonResults = { 
+        "layer1": testJsonSchema(this.topology.layer1),
+        "layer2": testJsonSchema(this.topology.layer2),
+        "layer3": testJsonSchema(this.topology.layer3),
+      }
+      this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this);
