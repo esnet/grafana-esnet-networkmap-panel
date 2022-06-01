@@ -10,6 +10,7 @@ class SideBar extends BindableHTMLElement {
         "options": {},
         "editingInterface": {}
     }
+    PubSub.subscribe("updateEditMode", this.render, this)
   }
 
   set mapCanvas(newValue){
@@ -45,19 +46,26 @@ class SideBar extends BindableHTMLElement {
             background:#FCFCFC;
             display: inline-block;
           }
-          .toggle.container { 
+          .toggle.container {
             display: block;
             margin-bottom: 8px;
             margin-top:8px;
             padding: 0 5px;
           }
-          #tooltip .legend-text { 
+          #tooltip .legend-text {
             vertical-align: bottom;
             margin-bottom:3px;
             line-height: 27px;
             font-size: 14px;
           }
-          #tooltip h2 { 
+          #tooltip .legend-text.small {
+            vertical-align: bottom;
+            color: #888;
+            line-height: 12px;
+            font-size: 12px;
+            margin-top:3px;
+          }
+          #tooltip h2 {
             margin-bottom: 5px;
             margin-top: 10px;
             font-size:20px;
@@ -70,8 +78,8 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName1 || "Layer 1" }</text>
-          <div class="legend-text" style="font-size: 12px; color: #888; ${!this.mapCanvas.editingInterface.editMode && 'display: none' }">
-            JSON Schema: ${this.mapCanvas.options.layerValid1}
+          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer1[0]) ? "valid" : "invalid" }
           </div>
         </div>
 
@@ -81,8 +89,8 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName2 || "Layer 2" }</text>
-          <div class="legend-text" style="font-size: 12px; color: #888; ${!this.mapCanvas.editingInterface.editMode && 'display: none' }">
-            JSON Schema: ${this.mapCanvas.options.layerValid2}
+          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer2[0]) ? "valid" : "invalid" }
           </div>
         </div>
 
@@ -92,8 +100,8 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName3 || "Layer 3" }</text>
-          <div class="legend-text" style="font-size: 12px; color: #888; ${!this.mapCanvas.editingInterface.editMode && 'display: none' }">
-            JSON Schema: ${this.mapCanvas.options.layerValid3}
+          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer3[0]) ? "valid" : "invalid" }
           </div>
         </div>
         <h2>Tooltip</h2>

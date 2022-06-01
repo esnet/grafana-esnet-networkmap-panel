@@ -108,12 +108,21 @@ export default class NetworkMap {
   renderMapLayers() {
     if(this.mapCanvas.topology){
         let layers = Object.keys(this.mapCanvas.topology);
+        function getDisplayName(nodeName, nodes){
+          var displayName = nodeName;
+          nodes.forEach((node)=>{
+            if(node.name == nodeName && node.meta.display_name){
+              displayName = node.meta.display_name;
+            }
+          });
+          return displayName;
+        }
         layers.forEach((name)=>{
           for(var i=0; i<this.mapCanvas.topology[name].edges.length; i++){
             var endpointId = `endpointIdL${name.charAt(name.length-1)}`;
             var edge = this.mapCanvas.topology[name].edges[i];
-            edge.nodeA = edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][0];
-            edge.nodeZ = edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][1];
+            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][0], this.mapCanvas.topology[name].nodes);
+            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][1], this.mapCanvas.topology[name].nodes);
           }
         });
     }
@@ -121,7 +130,7 @@ export default class NetworkMap {
     if(this.g1) this.g1.remove();
     if(this.g2) this.g2.remove();
     if(this.g3) this.g3.remove();
-    //try {
+    try {
       // Draw the map json topology data!!! Currently supports up to 3 layers
       if (this.mapCanvas.options.layer1 && this.mapCanvas.topology.layer1) {
         this.g1 = this.esmap.addNetLayer('layer1', this.mapCanvas.topology.layer1);
@@ -132,9 +141,9 @@ export default class NetworkMap {
       if (this.mapCanvas.options.layer3 && this.mapCanvas.topology.layer3) {
         this.g3 = this.esmap.addNetLayer('layer3', this.mapCanvas.topology.layer3);
       }
-    /*} catch(e) {
+    } catch(e) {
       console.error("had an issue rendering map layers...")
-    }*/
+    }
   }
 
   renderMap() {
@@ -143,7 +152,7 @@ export default class NetworkMap {
     }
 
     const params = utils.getUrlSearchParams();
-    // don't bother resetting edit mode if it's already set
+    // don't bother resetting edit mode if it's already
     if(!this.esmap.editEdges && !this.esmap.editNodes){
       if (params.editPanel != null) {
         this.esmap.editEdgeMode(true);
