@@ -240,6 +240,10 @@ function addControlPoint(evt, obj, ref) {
 
 function renderNodeControl(g, data, ref){
   var feature = g.selectAll('circle').data(data.nodes);
+  var layerId = 1;
+  if(data.edges.length > 1){
+    layerId = data.edges[0].layer;
+  }
 
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
@@ -271,7 +275,6 @@ function renderNodeControl(g, data, ref){
           // and each of the other points (but not the endpoint);
           var divisor = 1;
           for(var i=(idx + step); i != end; i += step){
-            //debugger;
             divisor++;
             d.latLngs[i][0] = (ll.lat + d.latLngs[end][0]) / divisor;
             d.latLngs[i][1] = (ll.lng + d.latLngs[end][1]) / divisor;
@@ -303,6 +306,20 @@ function renderNodeControl(g, data, ref){
     .attr('r', 6)
     .attr('class', 'control controlPoint')
     .merge(feature)
+    .on('dblclick', function(evt, pointData){
+      pointData.layer = "layer" + layerId;
+      var i=0;
+      var spliceIndex = null;
+      evt.currentTarget.parentElement.childNodes.forEach(function(item){
+        if(item == evt.currentTarget){
+          spliceIndex = i;
+        }
+        i++;
+      })
+      console.log(pointData, spliceIndex, pointData.layer);
+      PubSub.publish("updateLastInteractedObject", null);
+      PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer });
+    })
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
     })
@@ -422,8 +439,11 @@ function renderNodes(g, data, ref) {
   }
   feature
     .enter()
-    .append('circle')
-    .attr('r', ref.options["nodeWidthL"+layerId])
+    .append('g')
+    .html(function(d){
+      var circle = `<circle r='${ref.options["nodeWidthL"+layerId]}' />`
+      return d.meta.svg || circle;
+    })
     .attr('class', 'node')
     .attr('text', function (d) {
       return d.name;
@@ -431,10 +451,12 @@ function renderNodes(g, data, ref) {
     .attr('fill', function (d) {
       return d.color;
     })
+    .attr('stroke-width', 0.25)
+    .attr('stroke', "black")
     .on('mouseover', function (event, d) {
       div
         .html(() => {
-          var text = `<p><b>${d.name}</b></p>
+          var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
             <p><b>In Volume: </b> ${d.inValue}</p>
             <p><b>Out Volume: </b> ${d.outValue}</p>`;
           return text;
@@ -447,9 +469,25 @@ function renderNodes(g, data, ref) {
     })
     .on('mouseout', function (d) {
       div.transition().duration(500).style('opacity', 0);
-    });
+    })
+    .select(function(d){
+      return this.childNodes[0];
+    })
+    .attr("height", function(d){
+      return ref.options["nodeWidthL"+layerId] * 2;
+    })
+    .attr("width", function(d){
+      return ref.options["nodeWidthL"+layerId] * 2;
+    })
+    .attr("x", function(d){
+      return ref.options["nodeWidthL"+layerId] * -1;
+    })
+    .attr("y", function(d){
+      return ref.options["nodeWidthL"+layerId] * -1;
+    })
 
-  g.selectAll('circle').attr('transform', function (d) {
+
+  g.selectAll('g.node').attr('transform', function (d) {
     var ll = L.latLng(d.latLng);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
     return 'translate(' + pt.x + ',' + pt.y + ')';
@@ -549,16 +587,14 @@ export class EsMap {
     createSvgMarker(this.svg);
 
     //
-    let ref = this;
+    let self = this;
 
     this.leafletMap.on('moveend', function () {
-      ref.update();
+      self.update();
     });
     this.leafletMap.on('viewreset', function () {
-      ref.update();
+      self.update();
     });
-
-    var self = this;
 
     function updateOptions(options){
       self.options = options;
@@ -566,12 +602,18 @@ export class EsMap {
     PubSub.subscribe("updateOptions", updateOptions);
 
     function updateLastInteractedObject(event){
-      self.lastInteractedObject = event.object;
-      self.lastInteractedType = event.type;
+      if(event){
+        self.lastInteractedObject = event.object;
+        self.lastInteractedType = event.type;
+      } else {
+        self.lastInteractedObject = null;
+        self.lastInteractedType = null;
+      }
     }
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject);
 
     function deleteObject(object, type){
+      if(object === null || type === null) return;
       for(var i=1; i<=3; i++){ 
         if(!self.data["layer"+i]){
           continue;
@@ -585,6 +627,7 @@ export class EsMap {
       }
     }
     function nudge(latOrLng, amount){
+      if (self.lastInteractedType === null || self.lastInteractedObject === null) return;
       if (self.lastInteractedType == "nodes"){
         var idx = 0;
         if(latOrLng == "longitude"){
