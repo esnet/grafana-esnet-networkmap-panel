@@ -6,49 +6,6 @@
   position: relative;
 }
 
-.map-panel > .button-overlay { 
-  position: absolute;
-  z-index: 400;
-  margin-top: 12px;
-  margin-left: 57px;
-}
-
-.map-panel > .button-overlay > .button {
-  background: white;
-  border-radius: 10px;
-  padding: 5px 10px;
-  margin-right: 10px;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-  border: 1px solid #b3b3b3;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.map-panel > .button-overlay > .button:hover {
-  background: #EEE;
-}
-
-.map-panel > .tools-overlay { 
-  position: absolute;
-  z-index: 400;
-  margin-top: 84px;
-  margin-left: 10px;
-}
-
-.map-panel > .tools-overlay > .button {
-  background: white;
-  border-radius: 10px;
-  padding: 5px 10px;
-  margin-bottom: 10px;
-  box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-  border: 1px solid #b3b3b3;
-  display: block;
-  cursor: pointer;
-}
-
-.map-panel > .tools-overlay > .button:hover {
-  background: #EEE;
-}
 
 
 svg circle.node {
@@ -181,46 +138,3 @@ input:checked + .slider:before {
   z-index: 1000;
 }
 
-.dialog {
-  position: absolute;
-  z-index: 10000;
-  width: 100%;
-}
-
-.dialog .dialog-form {
-  background: white;
-  border-radius: 5px;
-  padding:20px;
-  margin: 20px 30%;
-  box-shadow: 3px 3px 13px black;
-}
-
-.dialog .dialog-form div {
-  margin: 0.5em 0;
-}
-
-.dialog .dialog-form .no-node-message {
-  padding-left:10px;
-}
-.dialog .dialog-form .add-node-link {
-  color: blue;
-  text-decoration: underline;
-}
-.dialog .dialog-form input {
-  border:1px solid #b5b5b5;
-}
-.dialog .dialog-form select {
-  margin-left:10px;
-}
-.dialog .dialog-form .text-input {
-  margin-left:10px;
-}
-
-.dialog .dialog-form input.button {
-  background: #ccc;
-  margin: 1em 0.5em 0 0;
-}
-
-.dialog .dialog-form table td {
-  padding-bottom:10px;
-}
