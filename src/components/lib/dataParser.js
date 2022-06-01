@@ -186,6 +186,16 @@ export function parseData(data, mapData, colors, fields, layer) {
     edge.ZAvalue += null;
   });
 
+  function getDisplayName(nodeName){
+    var displayName = nodeName;
+    mapJson.nodes.forEach((node)=>{
+      if(node.name == nodeName && node.meta.display_name){
+        displayName = node.meta.display_name;
+      }
+    });
+    return displayName;
+  }
+
   mapJson.edges.forEach((edge) => {
     // set up the layer number so the edge "knows" which layer it's in.
     edge.layer = layer;
@@ -193,8 +203,8 @@ export function parseData(data, mapData, colors, fields, layer) {
     let nodeA = edge.meta.endpoint_identifiers[endpointId][0];
     let nodeZ = edge.meta.endpoint_identifiers[endpointId][1];
     // create names
-    edge.nodeA = nodeA;
-    edge.nodeZ = nodeZ;
+    edge.nodeA = getDisplayName(nodeA);
+    edge.nodeZ = getDisplayName(nodeZ);
     edge.AZname = `${nodeA}---${nodeZ}`;
     edge.ZAname = `${nodeZ}---${nodeA}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.AZname);
