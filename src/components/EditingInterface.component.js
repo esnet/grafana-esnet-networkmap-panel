@@ -13,6 +13,7 @@ class EditingInterface extends BindableHTMLElement {
         this._selection = false;
         this._dialog = false;
         this._selectedLayer = "layer1";
+        this._spliceNodeIndex = null;
         PubSub.subscribe("setSelection", (d)=>{ 
             this.selection = true;
         });
@@ -27,12 +28,21 @@ class EditingInterface extends BindableHTMLElement {
             this._nodeEditMode = false;
             this.edgeEditMode = !this.edgeEditMode;
         })
+        PubSub.subscribe("showEditNodeDialog", (evtData)=>{
+            console.log("showEditNodeDialog");
+            this._selectedNode = evtData['object'];
+            this._spliceNodeIndex = evtData['index'];
+            console.log(this._selectedNode.layer);
+            this.selectedLayer = this._selectedNode.layer;
+            this.dialog = "node";
+        })
     }
     
     //////////////////////////////////////
     // setters and getters
     set editMode(newValue){
         this._editMode = newValue;
+        PubSub.publish("updateEditMode", null);
         this.render();
     }
     get editMode(){
@@ -107,16 +117,19 @@ class EditingInterface extends BindableHTMLElement {
     }
     homeMap(){
         // old style:
-        PubSub.publish('destroyMap', null);
-        PubSub.publish('repaint', null);        
+        PubSub.publish('newMap', null);        
         //PubSub.publish("homeMap");
     }
     showAddNodeDialog(){
         this.selectedLayer = "layer1";
+        this._selectedNode = null;
+        this._spliceNodeIndex = null;
         this.dialog = "node";
     }
     showAddEdgeDialog(){
         this.selectedLayer = "layer1";
+        this._selectedNode = null;
+        this._spliceNodeIndex = null;
         this.dialog = "edge";
     }
     hideDialogs(){
@@ -125,32 +138,40 @@ class EditingInterface extends BindableHTMLElement {
     showSrcDst(){
         this.selectedLayer = event.target.value;
     }
-    createMapNode(){
-        var node_layer = this.shadow.getElementById('node_layer').value;
-        var node_name = this.shadow.getElementById('node_name').value;
-        var node_lat = this.shadow.getElementById('node_lat').value;
-        var node_lng = this.shadow.getElementById('node_lng').value;
-        var optionsJson = {};
-        var accessors = ['layer1', 'layer2', 'layer3'];
-        for (var i = 0; i < accessors.length; i++) {
-          try {
-            optionsJson[accessors[i]] = this._topology[accessors[i]];
-          } catch (e) {
-            optionsJson[accessors[i]] = { nodes: [], edges: [] };
-          }
-        }
+
+    updateMapNodes(){
+        var nodeLayer = this.shadow.getElementById('node_layer').value;
+        var nodeName = this.shadow.getElementById('node_name').value;
+        var nodeDisplayName = this.shadow.getElementById('node_display_name').value;
+        var nodeSvg = this.shadow.getElementById('node_svg').value;
+        var nodeLat = this.shadow.getElementById('node_lat').value;
+        var nodeLng = this.shadow.getElementById('node_lng').value;
         var lavender = "rgb(202, 149, 229)";
-        this._topology[node_layer].nodes.push({
-          name: node_name,
+
+        var newNode = {
+          name: nodeName,
           color: lavender,
-          meta: {},
-          latLng: [Math.floor(node_lat), Math.floor(node_lng)],
+          meta: {
+            display_name: nodeDisplayName,
+            svg: nodeSvg
+          },
+          latLng: [nodeLat, nodeLng],
           children: [],
-        });
+        }
+
+        this.updateLayerNodes(nodeLayer, newNode, this._spliceNodeIndex);
+    }
+    updateLayerNodes(layer, node, spliceIndex){
+        if(spliceIndex === null){
+            this._topology[layer].nodes.push(node);
+        } else {
+            this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+        }
+        var defaultLayer = {"nodes":[], "edges": []};
         const mapJson = {
-            "layer1": optionsJson.layer1,
-            "layer2": optionsJson.layer2,
-            "layer3": optionsJson.layer3
+            "layer1": this._topology.layer1 || defaultLayer,
+            "layer2": this._topology.layer2 || defaultLayer,
+            "layer3": this._topology.layer3 || defaultLayer,
         }
         PubSub.publish("updateTopology", mapJson);
 
@@ -158,11 +179,7 @@ class EditingInterface extends BindableHTMLElement {
         this.dialog = false;
 
         setTimeout(function () {
-          PubSub.publish(
-            'repaint', // the renderMap signal triggers a re-render of json layers
-            mapJson
-          );
-          PubSub.publish('setNodeEdit', null);
+          PubSub.publish('renderMap', mapJson); // repaint re-renders the topology layers
         }, 100);
     }
     createMapEdge(){
@@ -216,7 +233,7 @@ class EditingInterface extends BindableHTMLElement {
         this.dialog = false;
         setTimeout(function () {
           PubSub.publish(
-            'repaint', // the renderMap signal triggers a re-render of json layers
+            'renderMap', // the renderMap signal triggers a re-render of json layers
             mapJson
           );
         }, 100);
@@ -375,7 +392,7 @@ class EditingInterface extends BindableHTMLElement {
                 <!-- add node dialog -->
                 <div class="dialog-form" id="add_node_dialog">
                   <form id='add_node_form'>
-                    <h2>Add a Node</h2>
+                    <h2>${this._selectedNode ? "Edit Node" : "Add a Node" }</h2>
                     <table>
                       <tr>
                         <td>
@@ -394,7 +411,15 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_name' type='text'></input>
+                          <input class='text-input' id='node_name' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.name+"'" : "" }></input>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <label>Display Name:</label>
+                        </td>
+                        <td>
+                          <input class='text-input' id='node_display_name' type='text' ${ this._selectedNode ? "value='"+ (this._selectedNode.meta.display_name || "") +"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -402,7 +427,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='text'></input>
+                          <input class='text-input' id='node_lat' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.latLng[0].toFixed(3)+"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -410,13 +435,21 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='text'></input>
+                          <input class='text-input' id='node_lng' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.latLng[1].toFixed(3)+"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
-                        <td colSpan={2}>
-                          <input class='button' type='button' id='create_node' value='Create Node' />
+                        <td>
+                          <label>SVG Icon:</label>
+                        </td>
+                        <td>
+                          <textarea class='text-input' id='node_svg'>${ this._selectedNode && this._selectedNode.meta.svg || "" }</textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td colspan="2">
                           <input class='button' type='button' id='create_node_cancel' value='Cancel' />
+                          <input class='button' type='button' id='create_node' value='${this._selectedNode ? "Update Node" : "Add Node" }' />
                         </td>
                       </tr>
                     </table>
@@ -452,9 +485,9 @@ class EditingInterface extends BindableHTMLElement {
                         <td>${ this.renderSrcDstOptions('node_destination') }</td>
                       </tr>
                       <tr>
-                        <td colSpan='2'>
-                          <input class="buttony" type="button" id="create_edge" value="Create Edge" />
+                        <td colspan='2'>
                           <input class="button" type="button" id="create_edge_cancel" value="Cancel" />
+                          <input class="button" type="button" id="create_edge" value="Create Edge" />
                         </td>
                       </tr>
                     </table>
@@ -491,7 +524,7 @@ class EditingInterface extends BindableHTMLElement {
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
             "#add_node@onclick": this.showAddNodeDialog,
-            "#create_node@onclick": this.createMapNode,
+            "#create_node@onclick": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,
             "#node_layer@onchange": this.showSrcDst,
 
@@ -510,156 +543,3 @@ class EditingInterface extends BindableHTMLElement {
 
 // register component
 customElements.define( 'editing-interface', EditingInterface );
-
-/*
-
-
-  options.layerValid1 = props.jsonSchemaL1[1];
-  options.layerValid2 = props.jsonSchemaL2[1];
-  options.layerValid3 = props.jsonSchemaL3[1];
-  const mapContainer = 'Map_' + panelId + options.editMode.toString();
-
-  const [, setState] = useState('');
-  const [showDialog, setDialog] = useState('');
-  const [srcDstOptions, setSrcDstOptions] = useState(['']);
-
-  const setButtonScope = (value) => {
-    setState('');
-  };
-
-  const renderDialog = (toRender) => {
-    if (toRender === 'addNodeDialog') {
-      return (
-
-      );
-    }
-    if (toRender === 'addEdgeDialog') {
-      return (
-
-      );
-    }
-    return null;
-  };
-  const createNode = function (event) {
-  };
-  const createEdge = function (event) {
-
-  };
-  const renderDialogs = () => {
-    return (
-      <div className="dialog" hidden={!showDialog}>
-        {renderDialog(showDialog)}
-      </div>
-    );
-  };
-  const showAddNodeDialog = () => {
-    setDialog('addNodeDialog');
-  };
-  const showAddEdgeDialog = () => {
-    showSrcDest({ target: { value: 'L1' } });
-    setDialog('addEdgeDialog');
-  };
-  const hideDialogs = () => {
-    setDialog('');
-  };
-
-  const renderButtons = () => {
-    return (
-
-    );
-  };
-  const renderTools = () => {
-    return (
-    );
-  };
-
-  // setup our pubsub callback to allow interoperation with d3
-  PubSub.subscribe('setVariables', setButtonScope);
-
-  const drawMap = () => {
-    // destroys the in-RAM map, and unsubscribes all signals
-    destroyCurrentLeafletMap();
-    const map = new NetworkMap(mapContainer, options, mapData, updateMapJson, updateCenter);
-    map.renderMap();
-    console.log('resubscribing to recalcPaths');
-    // resubscribe to the callback for home and "straighten edges" buttons
-    PubSub.subscribe('recalcPaths', props.recalcEdges);
-    PubSub.subscribe('repaint', drawMap);
-
-    return destroyCurrentLeafletMap;
-  };
-  PubSub.subscribe('repaint', drawMap);
-
-  useEffect(drawMap, [
-    width,
-    height,
-    panelId,
-    editMode,
-    layer2,
-    layer1,
-    layer3,
-    options.tileSetLayer,
-    options.boundaryLayer,
-    options.labelLayer,
-  ]); // adding options var here breaks it
-  // above return statement throws a warning that we're not using all the variables, but that's ok.
-
-  const renderLayers = () => {
-    if (!params.editPanel) {
-      PubSub.publish(
-        'renderMap', // the renderMap signal triggers a re-render of json layers
-        mapData
-      );
-    }
-  };
-  useEffect(renderLayers, [mapData]);
-
-  const updateMapWithOptions = () => {
-    if (!!params.editPanel) {
-      PubSub.publish('updateOptions', options);
-      PubSub.publish(
-        'renderMap', // the renderMap signal triggers a re-render of json layers
-        mapData
-      );
-    }
-  };
-  const optionsToWatchInEditMode = [
-    options.layer1,
-    options.color1,
-    options.endpointIdL1,
-    options.nodeHighlightL1,
-    options.nodeWidthL1,
-    options.edgeWidthL1,
-    options.pathOffsetL1,
-    options.nodeWidthL1,
-    options.edgeWidthL1,
-    options.pathOffsetL1,
-    options.layer2,
-    options.color2,
-    options.endpointIdL2,
-    options.nodeHighlightL2,
-    options.nodeWidthL2,
-    options.edgeWidthL2,
-    options.pathOffsetL2,
-    options.nodeWidthL2,
-    options.edgeWidthL2,
-    options.pathOffsetL2,
-    options.layer3,
-    options.color3,
-    options.endpointIdL3,
-    options.nodeHighlightL3,
-    options.nodeWidthL3,
-    options.edgeWidthL3,
-    options.pathOffsetL3,
-  ];
-  useEffect(updateMapWithOptions, optionsToWatchInEditMode);
-
-  return (
-    <div className="map-panel">
-      {renderDialogs()}
-      <div id={mapContainer} style={{ height: mapHeight, width: mapWidth, float: 'left' }}></div>
-      {renderButtons()}
-      {renderTools()}
-      
-    </div>
-  );*/
