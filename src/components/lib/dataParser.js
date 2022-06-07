@@ -1,8 +1,8 @@
 import { DataFrameView } from '@grafana/data';
 
-export function parseData(data: { series: any[] }, mapData, colors, fields, layer) {
+export function parseData(data, mapData, colors, fields, layer) {
   // helper function to parse grafana colors
-  function fixColor(color: string) {
+  function fixColor(color) {
     switch (color) {
       case 'dark-green':
         color = '#1A7311';
@@ -86,7 +86,7 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   colors.defaultColor = fixColor(colors.defaultColor);
   colors.nodeHighlight = fixColor(colors.nodeHighlight);
 
-  let dataFrames: DataFrameView[] = [];
+  let dataFrames = [];
 
   data.series.forEach(function (series) {
     dataFrames.push(new DataFrameView(series));
@@ -97,15 +97,9 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   var outboundKey = fields.outboundValueField;
 
   // initialize arrays
-  let parsedData: Array<{
-    in: any;
-    out: any;
-    azName: any;
-    inboundValue: any;
-    outboundValue: any;
-  }> = [];
-  let infIn: Array<{ name: any; value: number }> = [];
-  let infOut: Array<{ name: any; value: number }> = [];
+  let parsedData = [];
+  let infIn= [];
+  let infOut= [];
 
   // const valueField = valKey
   //   ? data.series.map((series: { fields: any[] }) =>
@@ -115,8 +109,8 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
   //       series.fields.find((field: { type: string }) => field.type === 'number')
   //     );
 
-  const valueField = data.series.map((series: { fields: any[] }) =>
-    series.fields.find((field: { type: string }) => field.type === 'number')
+  const valueField = data.series.map((series) =>
+    series.fields.find((field) => field.type === 'number')
   );
 
   // set defaults if fields were not chosen
@@ -192,6 +186,16 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
     edge.ZAvalue += null;
   });
 
+  function getDisplayName(nodeName){
+    var displayName = nodeName;
+    mapJson.nodes.forEach((node)=>{
+      if(node.name == nodeName && node.meta.display_name){
+        displayName = node.meta.display_name;
+      }
+    });
+    return displayName;
+  }
+
   mapJson.edges.forEach((edge) => {
     // set up the layer number so the edge "knows" which layer it's in.
     edge.layer = layer;
@@ -199,8 +203,8 @@ export function parseData(data: { series: any[] }, mapData, colors, fields, laye
     let nodeA = edge.meta.endpoint_identifiers[endpointId][0];
     let nodeZ = edge.meta.endpoint_identifiers[endpointId][1];
     // create names
-    edge.nodeA = nodeA;
-    edge.nodeZ = nodeZ;
+    edge.nodeA = getDisplayName(nodeA);
+    edge.nodeZ = getDisplayName(nodeZ);
     edge.AZname = `${nodeA}---${nodeZ}`;
     edge.ZAname = `${nodeZ}---${nodeA}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.AZname);

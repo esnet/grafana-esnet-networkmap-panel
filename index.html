@@ -1,0 +1,253 @@
+<html>
+<head>
+    <title>Embedded Map Demonstration Page</title>
+    <!-- do imports in totally separate script tags to force resolution ordering -->
+    <script src="./src/components/lib/react.17.0.2.umd.js"></script>
+    <script type="module">
+        import * as Leaflet from './src/components/lib/leaflet.esm.js';
+        window['L'] = Leaflet;
+    </script>
+    <script type="module">
+        import "./src/components/lib/d3.min.js"; 
+    </script>
+    <script type="module">
+        import "./src/components/MapCanvas.component.js"
+    </script>
+
+    <script type="module">
+        import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
+        var parsedData = {};
+        var lavender = "rgb(202, 149, 229)"
+        var mapData = {
+            "layer1":{
+                "edges":[
+                    {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                        "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":1,
+                    },
+                    {"name":"B--C","meta":{
+                        "endpoint_identifiers":{"pops":["B","C"]}},
+                        "latLngs":[[34.59,-96.06],[37.99,-93.86],[42.16,-93.95]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":1
+                    },
+                    {"name":"A--C","meta":{
+                        "endpoint_identifiers":{"pops":["A","C"]}},
+                        "latLngs":[[39.02,-105.99],[41.90,-100.72],[42.16,-93.95]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":1
+                    }
+                ],
+                "nodes":[
+                        {
+                            "name":"A",
+                            "meta":{},
+                            "latLng":[39.027718840211605,-105.99609375000001],
+                            "color":lavender,
+                        },
+                        {
+                            "name":"B",
+                            "meta":{},
+                            "latLng":[34.59704151614417,-96.064453125],
+                            "color":lavender,
+                        },
+                        {
+                            "name":"C",
+                            "meta":{},
+                            "latLng":[42.16340342422403,-93.95507812500001],
+                            "color":lavender,
+                        }
+                ],"aTest":0},
+            "layer2":{
+                "edges":[
+                    {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                        "latLngs":[[49.02,-105.99],[45.81,-101.77],[44.59,-96.06]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":2,
+                    },
+                    {"name":"B--C","meta":{
+                        "endpoint_identifiers":{"pops":["B","C"]}},
+                        "latLngs":[[44.59,-96.06],[47.99,-93.86],[52.16,-93.95]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":2
+                    },
+                    {"name":"A--C","meta":{
+                        "endpoint_identifiers":{"pops":["A","C"]}},
+                        "latLngs":[[49.02,-105.99],[51.90,-100.72],[52.16,-93.95]],
+                        "children":[],
+                        "azColor":lavender,
+                        "zaColor":lavender,
+                        "layer":2
+                    }
+                ],
+                "nodes":[
+                        {
+                            "name":"A",
+                            "meta":{},
+                            "latLng":[49.027718840211605,-105.99609375000001],
+                            "color":lavender,
+                        },
+                        {
+                            "name":"B",
+                            "meta":{},
+                            "latLng":[44.59704151614417,-96.064453125],
+                            "color":lavender,
+                        },
+                        {
+                            "name":"C",
+                            "meta":{},
+                            "latLng":[52.16340342422403,-93.95507812500001],
+                            "color":lavender,
+                        }
+                ],"aTest":0}};
+        var options = {
+            "startLat":38.68,
+            "startLng":-96.96,
+            "startZoom":3,
+            // global options
+            // this string corresponds to options in RenderMap.js
+            "tileSetLayer":"esri.shaded",
+            // this string (or null) corresponds to options in RenderMap.js
+            "boundaryLayer":"toner.boundaries",
+            // this string (or null) corresponds to options in RenderMap.js
+            "labelLayer":null,
+            // these are legacy, they've been overridden by per-layer options.
+            "edgeWidth":3,
+            "editMode":true,
+            "nodeWidth":5,
+            "pathOffset":3,
+            // layer 1 rendering options
+            "layer1":true,
+            "endpointIdL1":"pops",
+            "nodeWidthL1":4,
+            "edgeWidthL1":1.5,
+            "pathOffsetL1":1.5,
+            "layerName1":"Core Topology",
+            "legendL1":true,
+            // unnecessary outside grafana context
+            /*"srcFieldL1":"meta.device_info.loc_name",
+            "dstFieldL1":"meta.remote.loc_name",
+            "inboundValueFieldL1":"Average values.in_bits.rate",
+            "outboundValueFieldL1":"Average values.out_bits.rate",
+            "dashboardVarL1":"edge",
+            "srcVarL1":"meta.device_info.loc_name",
+            "dstVarL1":"meta.remote.loc_name",
+            "destVarL1":"meta.remote.loc_name",
+            "filterVarL1":"l1edge",
+            "valFieldL1":"meta.org.short_name",*/
+            // layer 2 rendering options
+            "layer2":false,
+            "endpointIdL2":"pops",
+            "nodeWidthL2":5,
+            "edgeWidthL2":3,
+            "pathOffsetL2":3,
+            "layerName2":"Site Topology",
+            "legendL2":true,
+            // unnecessary outside grafana context
+            /*"srcFieldL2":"meta.device",
+            "dstFieldL2":"meta.org.short_name",
+            "inboundValueFieldL2":"Average values.in_bits.rate",
+            "outboundValueFieldL2":"Average values.out_bits.rate",
+            "dashboardVarL2":"l2edge",
+            "srcVarL2":"meta.device",
+            "dstVarL2":"meta.org.short_name",
+            "destVarL2":"meta.org.short_name",
+            "filterVarL2":"l2edge",*/
+            // layer 3 rendering options
+            "layer3":false,
+            "endpointIdL3":"pops",
+            "nodeHighlightL3":"red",
+            "nodeWidthL3":6.5,
+            "edgeWidthL3":2,
+            "pathOffsetL3":1.5,
+            "layerName3":"Peer Topology",
+            "legendL3":true,
+            // unnecessary outside grafana context
+            /*"srcFieldL3":"meta.device",
+            "dstFieldL3":"meta.org.short_name",
+            "inboundValueFieldL3":"Average values.in_bits.rate",
+            "outboundValueFieldL3":"Average values.out_bits.rate",
+            "dashboardVarL3":"l3edge",
+            "srcVarL3":"meta.device_info.loc_name",
+            "dstVarL3":"meta.remote.loc_name",
+            "destVarL3":"meta.remote.loc_name",
+            "filterVarL3":"l3edge",*/
+        };
+        var canvas = document.createElement("map-canvas");
+        var optionsElem = document.createElement('textarea');
+        var dataElem = document.createElement('textarea');
+
+        canvas.setAttribute('width', 800);
+        canvas.setAttribute('height', 400);
+        canvas.topology = mapData;
+        canvas.options = options;
+        canvas.updateOptions = function(options){
+            optionsElem.value = JSON.stringify(options);
+        }
+        canvas.updateTopology = function(topology){
+            var cleanTopology = { layer1: null, layer2: null, layer3: null };
+            for(var i=1; i<=3; i++){
+                if(topology["layer" + i]){
+                    cleanTopology["layer"+i] = sanitizeTopology(topology['layer'+i]);
+                }
+            }
+            dataElem.value = JSON.stringify(cleanTopology);
+        }
+        document.getElementById("mapContainer").append(canvas);
+
+        dataElem.value = JSON.stringify(mapData);
+        dataElem.style = "height: 300px; width: 300px;";
+        dataElem.onChange = function(event){
+            canvas.topology = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapDataContainer").append(dataElem);
+
+        optionsElem.value = JSON.stringify(options);
+        optionsElem.style = "height: 300px; width: 300px;";
+        optionsElem.onChange = function(event){
+            canvas.options = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapOptionsContainer").append(optionsElem);
+
+    </script>
+
+</head>
+<body>
+    <table>
+        <tr>
+            <th colspan='2'>
+                <h1>Embedded Map Demonstration page</h1>
+            </th>
+        <tr>
+            <td colspan='2'>
+                <div id='mapContainer'>
+                </div>
+            </td>
+            <td>
+                <a href='/?editPanel=true'>Edit Mode On</a><br />
+                <a href='/'>Edit Mode Off</a><br />
+                <input type="button" onClick="test()" value='test click'>
+            </td>
+        </tr>
+        <tr>
+            <td>Map Data</td>
+            <td>Map Options</td>
+        </tr>
+        <tr>
+            <td id='mapDataContainer'></td>
+            <td id='mapOptionsContainer'></td>
+        </tr>
+    </table>
+</body>
+</html>

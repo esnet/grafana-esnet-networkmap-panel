@@ -1,4 +1,4 @@
-.leaflet-pane > svg path {
+export const esmapCss = `.leaflet-pane > svg path {
     pointer-events: all;
 }
 
@@ -22,11 +22,11 @@ svg path.edge {
 }
 
 svg path.animated-edge {
-	stroke-linecap: butt;
+    stroke-linecap: butt;
         stroke-width: 5;
         /* stroke: #aaa; */
         fill:  none;
-	cursor: crosshair;
+    cursor: crosshair;
 
         stroke-dasharray:  90 10 ;
         stroke-dashoffset: 100;
@@ -52,22 +52,22 @@ svg path.control {
         stroke-width: 6;
         stroke: #f808;
         fill:  none;
-	cursor: crosshair;
+    cursor: crosshair;
 }
 
 svg circle.controlPoint {
-	stroke: black;
-	stroke-width: 1;
+    stroke: black;
+    stroke-width: 1;
         fill: #f80;
         cursor: move;
 }
 
-div.sidebar-tooltip {	
-    position: absolute;			
+div.sidebar-tooltip {   
+    position: absolute;         
     text-align: left;
-    height: auto;					
+    height: auto;                   
     font: sans-serif;
-    pointer-events: none;	
+    pointer-events: none;   
     line-height: 0.9;
 }
 
@@ -137,4 +137,4 @@ input:checked + .slider:before {
 .panel-header:hover {
   z-index: 1000;
 }
-
+`
