@@ -292,7 +292,7 @@ function renderNodeControl(g, data, ref){
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
-    }, ref);
+    }, ref.div.node());
     ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
@@ -317,8 +317,8 @@ function renderNodeControl(g, data, ref){
         i++;
       })
       console.log(pointData, spliceIndex, pointData.layer);
-      PubSub.publish("updateLastInteractedObject", null, ref);
-      PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref);
+      PubSub.publish("updateLastInteractedObject", null, ref.div.node());
+      PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.div.node());
     })
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
@@ -327,7 +327,7 @@ function renderNodeControl(g, data, ref){
       ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
-      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref);
+      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref.div.node());
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
