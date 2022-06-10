@@ -153,7 +153,7 @@ class EditingInterface extends BindableHTMLElement {
             display_name: nodeDisplayName,
             svg: nodeSvg
           },
-          latLng: [nodeLat, nodeLng],
+          latLng: [parseFloat(nodeLat), parseFloat(nodeLng)],
           children: [],
         }
 
@@ -176,7 +176,7 @@ class EditingInterface extends BindableHTMLElement {
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
-        setTimeout(function () {
+        setTimeout(()=>{
           PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
         }, 100);
     }
