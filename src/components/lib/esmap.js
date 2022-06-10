@@ -48,14 +48,6 @@ function createSvgMarker(svg) {
   return marker;
 }
 
-function clearSelection(){
-  d3.selectAll(".selected")
-    .classed('selected', false)
-    .classed('animated-edge', false)
-    .classed('edge', true)
-}
-PubSub.subscribe("clearSelection", clearSelection);
-
 function renderEdges(g, data, ref) {
   var div = ref.div;
   var layerId = 1;
@@ -91,8 +83,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      PubSub.publish("setVariables", d, div);
-      PubSub.publish("setSelection", d, div);
+      PubSub.publish("setVariables", d, ref.svg.node());
+      PubSub.publish("setSelection", d, ref.svg.node());
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -159,8 +151,8 @@ function renderEdges(g, data, ref) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      PubSub.publish("setVariables", d, div);
-      PubSub.publish("setSelection", d, div);
+      PubSub.publish("setVariables", d, ref.svg.node());
+      PubSub.publish("setSelection", d, ref.svg.node());
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -292,7 +284,7 @@ function renderNodeControl(g, data, ref){
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
-    }, ref.div.node());
+    }, ref.svg.node());
     ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
@@ -316,9 +308,8 @@ function renderNodeControl(g, data, ref){
         }
         i++;
       })
-      console.log(pointData, spliceIndex, pointData.layer);
-      PubSub.publish("updateLastInteractedObject", null, ref.div.node());
-      PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.div.node());
+      PubSub.publish("updateLastInteractedObject", null, ref.svg.node());
+      PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.svg.node());
     })
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
@@ -327,7 +318,7 @@ function renderNodeControl(g, data, ref){
       ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
-      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref.div.node());
+      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref.svg.node());
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
@@ -369,7 +360,7 @@ function renderEdgeControl(g, data, ref) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData) {
-    PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref);
+    PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -386,7 +377,7 @@ function renderEdgeControl(g, data, ref) {
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
-    }, ref);
+    }, ref.svg.node());
     ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
@@ -423,7 +414,7 @@ function renderEdgeControl(g, data, ref) {
         ref.leafletMap.dragging.enable();
       })
       .on('mousedown', function(evt, d){
-        PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref);
+        PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
       });
 
     feature.exit().remove();
@@ -599,7 +590,15 @@ export class EsMap {
     function updateOptions(options){
       self.options = options;
     }
-    PubSub.subscribe("updateOptions", updateOptions);
+    PubSub.subscribe("updateOptions", updateOptions, this.svg.node());
+
+    function clearSelection(){
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-edge', false)
+        .classed('edge', true)
+    }
+    PubSub.subscribe("clearSelection", clearSelection, this.svg.node());
 
     function updateLastInteractedObject(event){
       if(event){
@@ -610,7 +609,7 @@ export class EsMap {
         self.lastInteractedType = null;
       }
     }
-    PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject);
+    PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
     function deleteObject(object, type){
       if(object === null || type === null) return;
