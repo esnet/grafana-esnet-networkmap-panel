@@ -3,7 +3,7 @@ export class PrivateMessageBus {
         this.topics = {}
         this.lastEvents = {}
         this.instanceId = Math.random().toString(16).substr(2, 8);
-        console.log("instantiating bus with ID #"+this.instanceId);
+        console.debug("instantiating bus with ID #"+this.instanceId);
         if(busScope){
             busScope.__privatemessagebus__ = this;
             busScope.addEventListener("$SCOPE.DISCOVERY$", (event)=>{
@@ -58,7 +58,7 @@ PrivateMessageBus.prototype.publish = function(topic, eventData, context){
         privateBus = this;
         scopeMessage = "on the global bus with ID #"+privateBus.instanceId
     }
-    console.log("publishing event on topic", topic, scopeMessage);
+    console.debug("publishing event on topic", topic, scopeMessage);
     privateBus.lastEvents[topic] = eventData;
     var subscriberData = privateBus.topics[topic];
     if (!subscriberData) return;
@@ -70,7 +70,7 @@ PrivateMessageBus.prototype.publish = function(topic, eventData, context){
 }
 
 PrivateMessageBus.prototype.clearAllCallbacks = function() {
-    console.log("destroying all callbacks");
+    console.debug("destroying all callbacks");
     var keys = Object.keys(this.topics);
     for(var i=0; i<keys.length; i++){
         this.topics[keys[i]] = {};
@@ -78,7 +78,7 @@ PrivateMessageBus.prototype.clearAllCallbacks = function() {
 };
 
 PrivateMessageBus.prototype.clearTopicCallbacks = function(topic) {
-    console.log("destroying callbacks on topic '"+topic+"'");
+    console.debug("destroying callbacks on topic '"+topic+"'");
     if(this.topics[topic]) this.topics[topic] = {};
 };
 
@@ -100,5 +100,5 @@ try {
     module.exports.PubSub = getInstance();    
     exports.PubSub = getInstance();    
 } catch (e) {
-    console.log(e)
+    console.error(e)
 }
