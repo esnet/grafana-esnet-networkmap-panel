@@ -83,7 +83,6 @@ export default class NetworkMap {
           dstVariable + "|=|" + event.nodeZ
       ]        
     }
-    console.log("locationService", locationService);
 
     locationService.partial(setLocation, false)
   }
