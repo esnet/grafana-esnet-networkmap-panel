@@ -99,7 +99,6 @@ export default class NetworkMap {
   }
 
   toggleNodeEdit() {
-    console.log("toggling Node Edit")
     if (!!this.esmap.editNodes) {
       this.esmap.editEdgeMode(false);
       this.esmap.editNodeMode(false);
