@@ -7,6 +7,7 @@ import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
 const PubSub = pubsub.PubSub;
+const PrivateMessageBus = pubsub.PrivateMessageBus;
 
 var L = window['L'];
 if(typeof require !== "undefined"){
@@ -24,6 +25,8 @@ class MapCanvas extends HTMLElement {
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
+
+    new PrivateMessageBus(this);
 
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('newMap', this.newMap, this);
@@ -106,6 +109,7 @@ class MapCanvas extends HTMLElement {
   updateMapDimensions(newDimensions){
     this.width = newDimensions.width;
     this.height = newDimensions.height;
+    this.leafletMap && this.leafletMap.invalidateSize();
     this.render();
     this.sideBar.render();
   }

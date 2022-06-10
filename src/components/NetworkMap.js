@@ -50,6 +50,10 @@ export default class NetworkMap {
     PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
 
+  dispatchEvent(event){
+    return this.mapCanvas.dispatchEvent(event);
+  }
+
   /**
    * Renders the Network Map in the panel.
    *

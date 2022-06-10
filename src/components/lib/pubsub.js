@@ -1,28 +1,66 @@
-class PrivateMessageBus {
-    constructor(){
+export class PrivateMessageBus {
+    constructor(busScope){
         this.topics = {}
         this.lastEvents = {}
+        this.instanceId = Math.random().toString(16).substr(2, 8);
+        console.log("instantiating bus with ID #"+this.instanceId);
+        if(busScope){
+            busScope.__privatemessagebus__ = this;
+            busScope.addEventListener("$SCOPE.DISCOVERY$", (event)=>{
+                event.callback && event.callback(busScope.__privatemessagebus__);
+                event.stopPropagation();
+            })
+        }
     }
 }
 
 PrivateMessageBus.prototype.subscribe = function(topic, callback, context){
+    var privateBus = null;
+    if(context && context.dispatchEvent){
+        var discoveryEvent = new CustomEvent("$SCOPE.DISCOVERY$", {bubbles: true, cancelable: true, composed: true});
+        discoveryEvent.callback = function(bus){ 
+            privateBus = bus;
+        }
+        context.dispatchEvent(discoveryEvent);
+    }
+    if(privateBus === null){
+        privateBus = this;
+    }
+
     // use toLocaleString as a (good) approximation of a unique hash so we don't
     // resubscribe to the same topic on code load over and over.
     var hash = callback.toLocaleString();
     if(!context){
         context = this;
     }
-    if(!this.topics[topic]){
-        this.topics[topic] = {hash: {"callback": callback, "context":context }};
+    if(!privateBus.topics[topic]){
+        privateBus.topics[topic] = {hash: {"callback": callback, "context":context }};
     } else {
-        this.topics[topic][hash] = {"callback": callback, "context":context };
+        privateBus.topics[topic][hash] = {"callback": callback, "context":context };
     }
 }
 
-PrivateMessageBus.prototype.publish = function(topic, eventData){
-    console.log("publishing event on topic", topic);
-    this.lastEvents[topic] = eventData;
-    var subscriberData = this.topics[topic];
+PrivateMessageBus.prototype.publish = function(topic, eventData, context){
+    var privateBus = null;
+    if(context){
+        var discoveryEvent = new CustomEvent("$SCOPE.DISCOVERY$", {bubbles: true, cancelable: true, composed: true});
+        discoveryEvent.callback = function(bus){ 
+            privateBus = bus;
+        }
+        context.dispatchEvent(discoveryEvent);
+    }
+
+    var scopeMessage = "";
+    if(!!privateBus){
+        scopeMessage = "scoped to PrivateMessageBus #"+privateBus.instanceId;
+    }
+    if(!privateBus){
+        privateBus = this;
+        scopeMessage = "on the global bus with ID #"+privateBus.instanceId
+    }
+    console.log("publishing event on topic", topic, scopeMessage);
+    privateBus.lastEvents[topic] = eventData;
+    var subscriberData = privateBus.topics[topic];
     if (!subscriberData) return;
     var subscribers = Object.values(subscriberData);
     for(var i=0; subscribers && i<subscribers.length; i++){

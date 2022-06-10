@@ -6,6 +6,7 @@ class SideBar extends BindableHTMLElement {
 
   constructor() {
     super();
+    this.instanceId = Math.random().toString(16).substr(2, 8);
     this._mapCanvas = {
         "options": {},
         "editingInterface": {}
@@ -25,18 +26,18 @@ class SideBar extends BindableHTMLElement {
     var element = event.target;
     var layer = element.id;
     var value = element.checked;
-    PubSub.publish("toggleLayer", {"layer": layer, "visible": value});
+    PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
 
   render(){
       if(!this.shadow){
           this.shadow = document.createElement("div");
-          this.shadow.id = "tooltip"
+          this.shadow.id = "tooltip-"+this.instanceId;
           this.append(this.shadow);        
       }
       this.shadow.innerHTML = `
         <style>
-          #tooltip {
+          #tooltip-${this.instanceId} {
             font-family: sans-serif;
             padding: 0 1em;
             vertical-align: top;
@@ -52,20 +53,20 @@ class SideBar extends BindableHTMLElement {
             margin-top:8px;
             padding: 0 5px;
           }
-          #tooltip .legend-text {
+          #tooltip-${this.instanceId} .legend-text {
             vertical-align: bottom;
             margin-bottom:3px;
             line-height: 27px;
             font-size: 14px;
           }
-          #tooltip .legend-text.small {
+          #tooltip-${this.instanceId} .legend-text.small {
             vertical-align: bottom;
             color: #888;
             line-height: 12px;
             font-size: 12px;
             margin-top:3px;
           }
-          #tooltip h2 {
+          #tooltip-${this.instanceId} h2 {
             margin-bottom: 5px;
             margin-top: 10px;
             font-size:20px;

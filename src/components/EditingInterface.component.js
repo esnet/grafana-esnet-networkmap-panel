@@ -42,7 +42,7 @@ class EditingInterface extends BindableHTMLElement {
     // setters and getters
     set editMode(newValue){
         this._editMode = newValue;
-        PubSub.publish("updateEditMode", null);
+        PubSub.publish("updateEditMode", null, this);
         this.render();
     }
     get editMode(){
@@ -103,22 +103,20 @@ class EditingInterface extends BindableHTMLElement {
     ///////////////////////////
     // event bindings
     clearSelection(){
-        PubSub.publish('setVariables', null);
-        PubSub.publish('clearSelection', null);
+        PubSub.publish('setVariables', null, this);
+        PubSub.publish('clearSelection', null, this);
     }
     toggleNodeEdit(){
-        PubSub.publish("toggleNodeEdit");
+        PubSub.publish("toggleNodeEdit", null, this);
     }
     toggleEdgeEdit(){
-        PubSub.publish("toggleEdgeEdit");
+        PubSub.publish("toggleEdgeEdit", null, this);
     }
     recalcPaths(){
-        PubSub.publish('recalcPaths', null);
+        PubSub.publish('recalcPaths', null, this);
     }
     homeMap(){
-        // old style:
-        PubSub.publish('newMap', null);        
-        //PubSub.publish("homeMap");
+        PubSub.publish('newMap', null, this);
     }
     showAddNodeDialog(){
         this.selectedLayer = "layer1";
@@ -173,13 +171,13 @@ class EditingInterface extends BindableHTMLElement {
             "layer2": this._topology.layer2 || defaultLayer,
             "layer3": this._topology.layer3 || defaultLayer,
         }
-        PubSub.publish("updateTopology", mapJson);
+        PubSub.publish("updateTopology", mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
         setTimeout(function () {
-          PubSub.publish('renderMap', mapJson); // repaint re-renders the topology layers
+          PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
         }, 100);
     }
     createMapEdge(){
@@ -227,14 +225,15 @@ class EditingInterface extends BindableHTMLElement {
             "layer2": optionsJson.layer2,
             "layer3": optionsJson.layer3
         }
-        PubSub.publish("updateTopology", mapJson);
+        PubSub.publish("updateTopology", mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
         setTimeout(function () {
           PubSub.publish(
             'renderMap', // the renderMap signal triggers a re-render of json layers
-            mapJson
+            mapJson,
+            this
           );
         }, 100);
     }

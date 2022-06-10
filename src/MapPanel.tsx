@@ -68,57 +68,7 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
   };
 
-  componentDidUpdate() {
-    const optionsToWatch = [
-      'tileSetLayer',
-      'boundaryLayer',
-      'labelLayer',
-
-      'layer1',
-      'color1',
-      'endpointIdL1',
-      'nodeHighlightL1',
-      'nodeWidthL1',
-      'edgeWidthL1',
-      'pathOffsetL1',
-      'layerName1',
-      'legendL1',
-
-      'layer2',
-      'color2',
-      'endpointIdL2',
-      'nodeHighlightL2',
-      'nodeWidthL2',
-      'edgeWidthL2',
-      'pathOffsetL2',
-      'layerName2',
-      'legendL2',
-
-      'layer3',
-      'color3',
-      'endpointIdL3',
-      'nodeHighlightL3',
-      'nodeWidthL3',
-      'edgeWidthL3',
-      'pathOffsetL3',
-      'layerName3',
-      'legendL3',
-    ];
-    var changed: string[];
-    changed = [];
-
-    optionsToWatch.forEach((option) => {
-      if (this.lastOptions[option] !== this.props.options[option]) {
-        this.lastOptions[option] = this.props.options[option];
-        changed.push(option);
-      }
-    });
-    if (changed.length > 0) {
-      PubSub.publish('updateMapOptions', { options: this.lastOptions, changed: changed });
-    }
-  }
-
-  render() {
+  updateMap() {
     const { options, data, width, height } = this.props;
     var colorsL1 = {
       defaultColor: options.color1,
@@ -185,15 +135,69 @@ export class MapPanel extends Component<Props> {
       layer3: mapDataL3,
     };
 
-    PubSub.publish('updateMapTopology', topology);
-    PubSub.publish('updateMapDimensions', {
-      width: width,
-      height: height,
-    });
+    this.mapCanvas.current.updateMapTopology(topology);
+    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+  }
+  componentDidMount() {
+    this.updateMap();
+  }
 
+  componentDidUpdate() {
+    this.updateMap();
+
+    const optionsToWatch = [
+      'tileSetLayer',
+      'boundaryLayer',
+      'labelLayer',
+
+      'layer1',
+      'color1',
+      'endpointIdL1',
+      'nodeHighlightL1',
+      'nodeWidthL1',
+      'edgeWidthL1',
+      'pathOffsetL1',
+      'layerName1',
+      'legendL1',
+
+      'layer2',
+      'color2',
+      'endpointIdL2',
+      'nodeHighlightL2',
+      'nodeWidthL2',
+      'edgeWidthL2',
+      'pathOffsetL2',
+      'layerName2',
+      'legendL2',
+
+      'layer3',
+      'color3',
+      'endpointIdL3',
+      'nodeHighlightL3',
+      'nodeWidthL3',
+      'edgeWidthL3',
+      'pathOffsetL3',
+      'layerName3',
+      'legendL3',
+    ];
+    var changed: string[];
+    changed = [];
+
+    optionsToWatch.forEach((option) => {
+      if (this.lastOptions[option] !== this.props.options[option]) {
+        this.lastOptions[option] = this.props.options[option];
+        changed.push(option);
+      }
+    });
+    if (changed.length > 0) {
+      this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
+    }
+  }
+
+  render() {
+    const { options, width, height } = this.props;
     return React.createElement('map-canvas', {
       options: JSON.stringify(options),
-      topology: JSON.stringify(topology),
       width: width,
       height: height,
       ref: this.mapCanvas,
