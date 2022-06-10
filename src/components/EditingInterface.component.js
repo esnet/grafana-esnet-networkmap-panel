@@ -16,26 +16,24 @@ class EditingInterface extends BindableHTMLElement {
         this._spliceNodeIndex = null;
         PubSub.subscribe("setSelection", (d)=>{ 
             this.selection = true;
-        });
+        }, this);
         PubSub.subscribe("clearSelection", ()=>{ 
             this.selection = false;
-        })
+        }, this)
         PubSub.subscribe("toggleNodeEdit", ()=>{
             this._edgeEditMode = false;
             this.nodeEditMode = !this.nodeEditMode;
-        })
+        }, this)
         PubSub.subscribe("toggleEdgeEdit", ()=>{
             this._nodeEditMode = false;
             this.edgeEditMode = !this.edgeEditMode;
-        })
+        }, this)
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
-            console.log("showEditNodeDialog");
             this._selectedNode = evtData['object'];
             this._spliceNodeIndex = evtData['index'];
-            console.log(this._selectedNode.layer);
             this.selectedLayer = this._selectedNode.layer;
             this.dialog = "node";
-        })
+        }, this)
     }
     
     //////////////////////////////////////
@@ -219,7 +217,7 @@ class EditingInterface extends BindableHTMLElement {
           latLngs: latLngs,
           children: [],
         });
-        console.log(optionsJson[edge_layer]);
+
         var mapJson = {
             "layer1": optionsJson.layer1,
             "layer2": optionsJson.layer2,
