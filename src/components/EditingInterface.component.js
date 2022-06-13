@@ -171,6 +171,7 @@ class EditingInterface extends BindableHTMLElement {
         }
         PubSub.publish("updateTopology", mapJson, this);
 
+        console.log('in updateLayerNodes. this.updateTopology:', this.updateTopology)
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
@@ -244,7 +245,7 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this.selectedLayer];
         } catch (e) {
-          console.error(e);
+          console.debug(e);
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }

@@ -64,7 +64,6 @@ class MapCanvas extends HTMLElement {
   }
   set updateTopology(newValue){
     this._updateTopology = newValue;
-    this.map && this.map.setUpdateMapJson(this._updateTopology);
     if(this.editingInterface) this.editingInterface.updateTopology = newValue;
     return newValue;
   }
@@ -97,6 +96,9 @@ class MapCanvas extends HTMLElement {
   }
   updateMapTopology(newTopology){
     this._topology = newTopology;
+    if(this.editingInterface){
+      this.editingInterface._topology = newTopology;
+    }
     this.jsonResults = { 
       "layer1": testJsonSchema(this.topology.layer1),
       "layer2": testJsonSchema(this.topology.layer2),

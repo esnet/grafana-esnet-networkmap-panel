@@ -100,5 +100,5 @@ try {
     module.exports.PubSub = getInstance();    
     exports.PubSub = getInstance();    
 } catch (e) {
-    console.error(e)
+    console.debug(e)
 }

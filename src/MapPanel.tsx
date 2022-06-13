@@ -3,7 +3,6 @@ import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
-import { PubSub } from 'components/lib/pubsub.js';
 import 'components/MapCanvas.component.js';
 
 interface Props extends PanelProps<MapOptions> {}
@@ -17,8 +16,6 @@ export class MapPanel extends Component<Props> {
     // ref approach... doesn't seem to want to work.
     this.mapCanvas = React.createRef();
     this.lastOptions = this.props.options;
-    PubSub.subscribe('updateTopology', this.updateMapJson, this);
-    PubSub.subscribe('updateOptions', this.updateCenter, this);
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -38,17 +35,53 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
 
-  // A function to update the map jsons in the Edit panel based on the current map state
-  // Used in esmap.js
-  updateCenter = (updateData) => {
-    let zoom = updateData['zoom'];
-    let center = updateData['center'];
-    const { options } = this.props;
-    let { startLat, startLng, startZoom } = options;
-    startZoom = zoom;
-    startLat = center.lat;
-    startLng = center.lng;
-    this.props.onOptionsChange({ ...options, startZoom, startLat, startLng });
+  calculateOptionsChanges = () => {
+    var changed: string[];
+    changed = [];
+
+    const optionsToWatch = [
+      'tileSetLayer',
+      'boundaryLayer',
+      'labelLayer',
+
+      'layer1',
+      'color1',
+      'endpointIdL1',
+      'nodeHighlightL1',
+      'nodeWidthL1',
+      'edgeWidthL1',
+      'pathOffsetL1',
+      'layerName1',
+      'legendL1',
+
+      'layer2',
+      'color2',
+      'endpointIdL2',
+      'nodeHighlightL2',
+      'nodeWidthL2',
+      'edgeWidthL2',
+      'pathOffsetL2',
+      'layerName2',
+      'legendL2',
+
+      'layer3',
+      'color3',
+      'endpointIdL3',
+      'nodeHighlightL3',
+      'nodeWidthL3',
+      'edgeWidthL3',
+      'pathOffsetL3',
+      'layerName3',
+      'legendL3',
+    ];
+
+    optionsToWatch.forEach((option) => {
+      if (this.lastOptions[option] !== this.props.options[option]) {
+        this.lastOptions[option] = this.props.options[option];
+        changed.push(option);
+      }
+    });
+    return changed;
   };
 
   // A function to turn layers on or off. Takes in the layer and boolean value
@@ -70,6 +103,9 @@ export class MapPanel extends Component<Props> {
 
   updateMap() {
     const { options, data, width, height } = this.props;
+
+    this.mapCanvas.current.updateTopology = this.updateMapJson;
+
     var colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
@@ -145,50 +181,8 @@ export class MapPanel extends Component<Props> {
   componentDidUpdate() {
     this.updateMap();
 
-    const optionsToWatch = [
-      'tileSetLayer',
-      'boundaryLayer',
-      'labelLayer',
+    var changed = this.calculateOptionsChanges();
 
-      'layer1',
-      'color1',
-      'endpointIdL1',
-      'nodeHighlightL1',
-      'nodeWidthL1',
-      'edgeWidthL1',
-      'pathOffsetL1',
-      'layerName1',
-      'legendL1',
-
-      'layer2',
-      'color2',
-      'endpointIdL2',
-      'nodeHighlightL2',
-      'nodeWidthL2',
-      'edgeWidthL2',
-      'pathOffsetL2',
-      'layerName2',
-      'legendL2',
-
-      'layer3',
-      'color3',
-      'endpointIdL3',
-      'nodeHighlightL3',
-      'nodeWidthL3',
-      'edgeWidthL3',
-      'pathOffsetL3',
-      'layerName3',
-      'legendL3',
-    ];
-    var changed: string[];
-    changed = [];
-
-    optionsToWatch.forEach((option) => {
-      if (this.lastOptions[option] !== this.props.options[option]) {
-        this.lastOptions[option] = this.props.options[option];
-        changed.push(option);
-      }
-    });
     if (changed.length > 0) {
       this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
     }
