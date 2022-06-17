@@ -239,6 +239,7 @@ function renderNodeControl(g, data, ref){
 
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
+    PubSub.publish("dragStarted", evt);
     PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, mapDiv);
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -278,8 +279,14 @@ function renderNodeControl(g, data, ref){
   }
 
   function endDrag(evt, d) {
-    var zoom = ref.leafletMap.getZoom();
-    var center = L.latLng(ref.mapCanvas.leafletMap.getCenter());
+    if(!PubSub.last("dragStarted")){
+      // if the drag start event never fired,
+      // we have a no-op, and should return early
+      // to allow other downstream event handlers
+      // to run.
+      return
+    }
+    PubSub.clearLast("dragStarted");
     PubSub.publish("updateTopology", {
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
