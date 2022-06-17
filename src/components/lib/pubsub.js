@@ -86,6 +86,10 @@ PrivateMessageBus.prototype.clearTopicCallbacks = function(topic) {
 PrivateMessageBus.prototype.last = function(topic){
     return this.lastEvents[topic];
 }
+// clears the last eventData value for a particular topic
+PrivateMessageBus.prototype.clearLast = function(topic){
+    return this.lastEvents[topic] = null;
+}
 
 var messageBus = null;
 
