@@ -24,6 +24,11 @@ if(typeof require !== "undefined"){
 }
 
 export default class NetworkMap {
+  /**
+   * Renders the Network Map in the panel.
+   *
+   * @param mapCanvas - the parent MapCanvas object.
+   */
   constructor(mapCanvas) {
     this.mapCanvas = mapCanvas;
     this.g1 = null;
@@ -53,18 +58,6 @@ export default class NetworkMap {
   dispatchEvent(event){
     return this.mapCanvas.dispatchEvent(event);
   }
-
-  /**
-   * Renders the Network Map in the panel.
-   *
-   * @param parsedData - the parsed data from parseData.js
-   * @param topology - the topology data from the json input
-   * @param options - 
-   * @param updateMapJson, @param updateCenter - functions from MapPanel.tsx to update the mapJson & center in the editor
-   * @param width, @param height - determined by Grafana panel size
-   * @param editMode - whether the panel is in editMode or not
-   * @param mapContainer - the container the map is drawn in.
-   */
 
   setDashboardVariables(event){
     const l1var = "var-"+this.mapCanvas.options["dashboardVarL1"];
