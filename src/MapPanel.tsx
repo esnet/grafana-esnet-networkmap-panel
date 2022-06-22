@@ -4,6 +4,7 @@ import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
 import 'components/MapCanvas.component.js';
+import { PubSub } from 'components/lib/pubsub.js';
 
 interface Props extends PanelProps<MapOptions> {}
 
@@ -170,7 +171,13 @@ export class MapPanel extends Component<Props> {
       layer2: mapDataL2,
       layer3: mapDataL3,
     };
-
+    PubSub.subscribe(
+      'updateTopologyData',
+      () => {
+        console.log(this.updateMapJson(this.mapCanvas.current['topology']));
+      },
+      this.mapCanvas.current
+    );
     this.mapCanvas.current.updateMapTopology(topology);
     this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
   }
