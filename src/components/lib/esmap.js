@@ -99,27 +99,16 @@ function renderEdges(g, data, ref) {
     })
     .on('mouseover', function (event, d) {
       d3.select(this).classed("animated-edge", true);
-      div
-        .html(() => {
-          var text =
-            '<p><b>From: ' +
-            d.nodeA +
-            '</b></p><p><b>To: </b> ' +
-            d.nodeZ +
-            '</b></p><p><b>Volume: </b> ' +
-            d.AZdisplayValue +
-            '</p>';
-          return text;
-        })
-        .transition()
-        .duration(500)
-        .style('opacity', 0.8);
+      var text = `<p><b>From:</b> ${ d.nodeA }</p>
+        <p><b>To:</b>  ${ d.nodeZ }</p>
+        <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
+      PubSub.publish("showTooltip", text, ref.svg.node());
     })
     .on('mouseout', function (d, i) {
       // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
-      div.transition().duration(500).style('opacity', 0);
+      PubSub.publish("hideTooltip", null, ref.svg.node());
     });
   azLines.exit().remove();
 
@@ -166,27 +155,21 @@ function renderEdges(g, data, ref) {
     })
     .on('mouseover', function (event, d) {
       d3.select(this).classed("animated-edge", true);
-      div
-        .html(() => {
-          var text =
-            '<p><b>From:</b> ' +
-            d.nodeZ +
-            '</p><p><b>To:</b> ' +
-            d.nodeA +
-            '</p><p><b>Volume: </b> ' +
-            d.ZAdisplayValue +
-            '</p>';
-          return text;
-        })
-        .transition()
-        .duration(500)
-        .style('opacity', 0.8);
+      var text =
+        '<p><b>From:</b> ' +
+        d.nodeZ +
+        '</p><p><b>To:</b> ' +
+        d.nodeA +
+        '</p><p><b>Volume: </b> ' +
+        d.ZAdisplayValue +
+        '</p>';
+      PubSub.publish("showTooltip", text, ref.svg.node());
     })
     .on('mouseout', function (d, i) {
       // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
-      div.transition().duration(500).style('opacity', 0);
+      PubSub.publish("hideTooltip", null, ref.svg.node());
     });
   zaLines.exit().remove();
 }
@@ -452,21 +435,14 @@ function renderNodes(g, data, ref) {
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")
     .on('mouseover', function (event, d) {
-      div
-        .html(() => {
-          var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-            <p><b>In Volume: </b> ${d.inValue}</p>
-            <p><b>Out Volume: </b> ${d.outValue}</p>`;
-          return text;
-        })
-        .style('left', ref.width + 'px')
-        .style('top', ref.height + 100 + 'px')
-        .transition()
-        .duration(500)
-        .style('opacity', 0.8);
+      var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
+      <p><b>In Volume: </b> ${d.inValue}</p>
+      <p><b>Out Volume: </b> ${d.outValue}</p>`;
+
+      PubSub.publish("showTooltip", text, ref.svg.node());
     })
     .on('mouseout', function (d) {
-      div.transition().duration(500).style('opacity', 0);
+      PubSub.publish("hideTooltip", null, ref.svg.node());
     })
     .select(function(d){
       return this.childNodes[0];
@@ -624,10 +600,19 @@ export class EsMap {
         if(!self.data["layer"+i]){
           continue;
         }
-        var idx = self.data["layer"+i][type].indexOf(object)
+        var idx = -1;
+        var length = self.data && self.data['layer'+i] && self.data['layer'+i][type].length || 0;
+        for(var j=0; j<length; j++){
+          if(self.data["layer"+i][type][j].name == object.name){
+            idx = j;
+            break;
+          }
+        }
         if(idx > -1){
           self.data["layer"+i][type].splice(idx, 1);
-          self.update()
+          PubSub.publish("updateMapTopology", self.data, self.svg.node());
+          PubSub.publish("refresh", null, self.svg.node());
+          PubSub.publish("updateTopologyData", null, self.svg.node());
           return;
         }
       }
