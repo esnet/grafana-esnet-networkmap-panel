@@ -11,7 +11,9 @@ class SideBar extends BindableHTMLElement {
         "options": {},
         "editingInterface": {}
     }
-    PubSub.subscribe("updateEditMode", this.render, this)
+    PubSub.subscribe("updateEditMode", this.render, this);
+    PubSub.subscribe("showTooltip", this.showTooltip, this);
+    PubSub.subscribe("hideTooltip", this.hideTooltip, this);
   }
 
   set mapCanvas(newValue){
@@ -27,6 +29,16 @@ class SideBar extends BindableHTMLElement {
     var layer = element.id;
     var value = element.checked;
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
+  }
+
+  showTooltip(tooltip){
+    var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");
+    tooltipTarget.style.opacity = 1; // this gets set incorrectly at times.
+    tooltipTarget.innerHTML = tooltip;
+  }
+  hideTooltip(){
+    var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");
+    tooltipTarget.innerHTML = "";
   }
 
   render(){
@@ -70,6 +82,9 @@ class SideBar extends BindableHTMLElement {
             margin-bottom: 5px;
             margin-top: 10px;
             font-size:20px;
+          }
+          #sidebar-tooltip p {
+            margin: 0;
           }
         </style>
         <h2>Map Layers</h2>
