@@ -540,4 +540,4 @@ class EditingInterface extends BindableHTMLElement {
 }
 
 // register component
-customElements.define( 'editing-interface', EditingInterface );
+customElements.get('editing-interface') || customElements.define( 'editing-interface', EditingInterface );

@@ -4,14 +4,13 @@
     <!-- do imports in totally separate script tags to force resolution ordering -->
     <script src="./src/components/lib/react.17.0.2.umd.js"></script>
     <script type="module">
-        import * as Leaflet from './src/components/lib/leaflet.esm.js';
-        window['L'] = Leaflet;
+        import "./src/components/lib/leaflet.global.js";
     </script>
     <script type="module">
         import "./src/components/lib/d3.min.js"; 
     </script>
     <script type="module">
-        import "./src/components/MapCanvas.component.js"
+        import "./src/components/MapCanvas.component.js";
     </script>
 
     <script type="module">
