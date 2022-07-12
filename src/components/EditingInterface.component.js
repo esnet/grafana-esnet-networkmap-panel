@@ -172,12 +172,13 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.publish("updateTopology", mapJson, this);
 
         console.log('in updateLayerNodes. this.updateTopology:', this.updateTopology)
+
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
         setTimeout(()=>{
           PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
-        }, 100);
+        }, 10);
     }
     createMapEdge(){
         var edge_layer = this.shadow.getElementById('edge_layer').value;

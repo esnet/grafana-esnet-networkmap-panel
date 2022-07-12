@@ -2,10 +2,19 @@ import * as should from "../node_modules/should/should.js"
 import * as pubsub from '../src/components/lib/pubsub.js';
 const PubSub = pubsub.PubSub;
 
-describe( "Class MapCanvas", () => {
-    beforeEach(async function(){  
-        if(document.querySelector("map-canvas")){ return; }
+const EXPECTED_MOUSEOVER_TEXT = `A
 
+In Volume: undefined
+
+Out Volume: undefined`;
+
+
+describe( "Class MapCanvas", () => {
+    afterEach(async function(){
+        var canvas = document.querySelector("map-canvas");
+        canvas.remove();
+    })
+    beforeEach(async function(){  
         var elem = document.createElement("map-canvas");
         elem.setAttribute('width', 800);
         elem.setAttribute('height', 400);
@@ -66,7 +75,7 @@ describe( "Class MapCanvas", () => {
             "startLng":-96.96,
             "startZoom":3,
             "tileSetLayer":"esri.shaded",
-            "boundaryLayer":"toner.boundaries",
+            "boundaryLayer":null,
             "labelLayer":null,
             "edgeWidth":3,
             "editMode":true,
@@ -117,7 +126,7 @@ describe( "Class MapCanvas", () => {
       mapCanvas.updateTopology = () => { closureVar = "called"; }
       PubSub.publish("updateTopology", null, mapCanvas);
       "called".should.equal(closureVar);
-    })
+    });
     it("should have a node vertex around (262, 194) with reference to the map-canvas's offset", ()=>{
       var map_coords = document.querySelector("map-canvas").getBoundingClientRect();
       // find the first circle in a "g.node". This should be the "A" node from topology
@@ -134,5 +143,382 @@ describe( "Class MapCanvas", () => {
       var expected_circle = document.elementFromPoint(map_coords.x + expected_x + 4, map_coords.y + expected_y + 4);
       expected_circle.tagName.should.equal("circle");
       // we bother with all of this work because we'll need to simulate click/drag/etc events on the nodes in other test
-    })
+    });
+    it("should enter edit mode when we set a boolean", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
+      // using window.getComputedStyle, get the full computed style including cascading upstream styles
+      var style = window.getComputedStyle(toolOverlayButton);
+      style.display.should.equal("block");
+    });
+    it("should show a tooltip in the sidebar when a user hovers over a node", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var node = document.querySelector("g.node > circle");
+      // create a bubbling mouseover event
+      let mouseoverEvent = new Event('mouseover', { bubbles: true });
+      // fire the mouseover event on our demonstration node
+      node.dispatchEvent(mouseoverEvent);
+      // get the sidebar tooltip text
+      var sidebarText = canvas.querySelector("#sidebar-tooltip").innerText;
+      // test that the sidebar tooltip text is as expected
+      sidebarText.should.equal(EXPECTED_MOUSEOVER_TEXT);
+    });
+    it("should have an edit mode characterized by edit buttons", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
+      // using window.getComputedStyle, get the full computed style including cascading upstream styles
+      var style = window.getComputedStyle(toolOverlayButton);
+      style.display.should.equal("block");
+    });
+    it("should allow users to change the map layer tileset", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var newOptions = canvas.options;
+      newOptions['tileSetLayer'] = "usgs";
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['tileSetLayer']}, canvas);
+      var i=0;
+      var firstLayerUrl = null;
+      canvas.leafletMap.eachLayer((layer)=>{
+        if(i==0) firstLayerUrl = layer._url;
+        i++;
+      });
+      const usgsUrl = 'https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}';0
+      usgsUrl.should.equal(firstLayerUrl);
+    });
+    it("should allow users to change the political boundary layer tileset", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var newOptions = canvas.options;
+      newOptions['boundaryLayer'] = 'toner.boundaries';
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['boundaryLayer']}, canvas);
+      var i=0;
+      var secondLayerUrl = null;
+      canvas.leafletMap.eachLayer((layer)=>{
+        if(i==1) secondLayerUrl = layer._url;
+        i++;
+      });
+      const tonerBoundariesUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}{r}.{ext}';
+      secondLayerUrl.should.equal(tonerBoundariesUrl);
+    });
+    it("should allow users to change the political label layer tileset", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var newOptions = canvas.options;
+      newOptions['labelLayer'] = 'toner.labels';
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['labelLayer']}, canvas);
+      var i=0;
+      var secondLayerUrl = null;
+      canvas.leafletMap.eachLayer((layer)=>{
+        if(i==1) secondLayerUrl = layer._url;
+        i++;
+      });
+      const tonerLabelsUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.{ext}';
+      secondLayerUrl.should.equal(tonerLabelsUrl);
+    });
+    it("should allow users to 'home' the map by clicking a button", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var node = document.querySelector("g.node > circle");
+      var originalPosition = node.getBoundingClientRect();
+      var mouseOrigin = { x: originalPosition.x - 10, y: originalPosition.y - 10 };
+
+      // simulate the outcome of a drag event, changing the center and zoom
+      canvas.leafletMap.setView([75, -101.426], 3);
+
+      // verify that the point for the A node has moved N pixels
+      var afterDragPosition = node.getBoundingClientRect();
+      afterDragPosition.x.should.not.equal(originalPosition.x);
+      afterDragPosition.y.should.not.equal(originalPosition.y);
+      // click the home button
+      var clickEvent = new Event('click', { bubbles: true })
+      var home_button = canvas.editingInterface.shadow.querySelector("#home_map")
+      home_button.dispatchEvent(clickEvent);
+      // verify that the point for the A node is back at original position (262, 194) w/r/t map-canvas (0,0)
+      node = document.querySelector("g.node > circle");
+      var afterHomeClickPosition = node.getBoundingClientRect();
+      afterHomeClickPosition.x.should.equal(originalPosition.x);
+      afterHomeClickPosition.y.should.equal(originalPosition.y);
+    });
+    it("should allow users to toggle layers", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      var node = document.querySelector("g.node > circle");
+      var nodeStyle = window.getComputedStyle(node);
+      // verify that the point for the A node is visible
+      nodeStyle.display.should.equal("inline");
+      // click the toggle containing the A node
+      var newOptions = canvas.options;
+      newOptions['layer1'] = false;
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['layer1']}, canvas);
+      // verify that the point for the A node is not visible / not in DOM
+      node = document.querySelector("g.node > circle");
+      (String(node)).should.equal("null");
+    });
+    it("should have an edge edit mode characterized by control points on edges", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for edge edit mode
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      // run a query selector for control points
+      var controlPoints = document.querySelectorAll("circle.control");
+      // expect a specific count of control points
+      controlPoints.length.should.equal(9)
+    });
+    it("should show a UI for adding a node", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // create a click event
+      var clickEvent = new Event('click', { bubbles: true })
+      // fire click event on add node button
+      var addNodeButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > #add_node");
+      addNodeButton.dispatchEvent(clickEvent)
+      // run a query selector for UI elements
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_node_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.equal("block");
+    });
+    it("should allow users to change the display text for a node", async function(){
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for node edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      // create a click event
+      var clickEvent = new Event('dblclick', { bubbles: true })
+      // fire double click event on node
+      var node = document.querySelector("circle.control");
+
+      node.dispatchEvent(clickEvent);
+      // change display text
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_node_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.equal("block");
+      // set display name value
+      var display_name = canvas.editingInterface.shadow.querySelector("#node_display_name");
+      display_name.setAttribute("value", "An Unexpected Value");
+      // click 'Update Node' button
+      clickEvent = new Event('click', { bubbles: true });
+      var button = canvas.editingInterface.shadow.querySelector("#create_node");
+      button.dispatchEvent(clickEvent);
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_node_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.not.equal("block");
+      // fire mouseover event for edge
+      canvas.topology.layer1.nodes[0].meta.display_name.should.equal("An Unexpected Value");
+    });
+    it("should allow users to change the display icon (as SVG) for a node", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for node edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      // create a click event
+      var clickEvent = new Event('dblclick', { bubbles: true })
+      // fire double click event on node
+      var node = document.querySelector("circle.control");
+      node.dispatchEvent(clickEvent);
+      // change display text
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_node_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.equal("block");
+      // set display name value
+      var svg = canvas.editingInterface.shadow.querySelector("#node_svg");
+      svg.value = "<rect />";
+      // click 'Update Node' button
+      clickEvent = new Event('click', { bubbles: true });
+      var button = canvas.editingInterface.shadow.querySelector("#create_node");
+      button.dispatchEvent(clickEvent);
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_node_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.not.equal("block");
+      // fire mouseover event for edge
+      canvas.topology.layer1.nodes[0].meta.svg.should.equal("<rect />");
+    });
+    it("should show a UI for adding an edge", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // create a click event
+      var clickEvent = new Event('click', { bubbles: true })
+      // fire click event on add edge button
+      var addNodeButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > #add_edge");
+      addNodeButton.dispatchEvent(clickEvent)
+      // run a query selector for UI elements
+      var addNodeDialog = canvas.editingInterface.shadow.querySelector("#add_edge_dialog");
+      window.getComputedStyle(addNodeDialog).display.should.equal("block");
+    });
+    it("should allow users to add an edge control point on double-click", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for edge edit mode
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      // create a (double) click event
+      var dblClickEvent = new MouseEvent('dblclick', { bubbles: true, clientX: 200, clientY: 200 })
+      // fire double click event on edge
+      var controlPointsBefore = document.querySelectorAll("circle.control").length
+      var path = document.querySelector("path.control");
+      path.dispatchEvent(dblClickEvent);
+      var controlPointsAfter = document.querySelectorAll("circle.control").length
+      controlPointsBefore.should.not.equal(controlPointsAfter);
+      // check that we now have more control points on the edge
+      controlPointsAfter.should.be.greaterThan(controlPointsBefore);
+    });
+    it("should allow users to remove layer toggles", ()=>{
+      var canvas = document.querySelector("map-canvas");
+      // set option boolean
+      var newOptions = canvas.options;
+      newOptions['legendL1'] = false;
+      newOptions['legendL2'] = false;
+      newOptions['legendL3'] = false;
+      // update options
+      PubSub.publish("updateMapOptions", {
+          options: newOptions,
+          changed: ['legendL1', 'legendL2', 'legendL3']
+        },
+        canvas);
+      // check that no toggle visible for layer toggle we turned off
+      var toggleContainers = canvas.querySelectorAll(".toggle.container");
+      for(var i=0; i<toggleContainers.length; i++){
+        toggleContainers[i].style.display.should.equal("none");
+      }
+    });
+    it("should have a node edit mode characterized by control points on nodes", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for edge edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      // run a query selector for control points
+      var controlPoints = document.querySelectorAll("circle.control");
+      // expect a specific count of control points
+      controlPoints.length.should.equal(3)
+    });
+    it("should allow users to drag node edit control points", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for node edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      var node = document.querySelector("circle.control");
+      var originalPos = node.getBoundingClientRect();
+      // compensate for radius
+      originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // fire down
+      node.dispatchEvent(downEvent);
+      // fire drag
+      node.dispatchEvent(dragEvent);
+      // fire up
+      node.dispatchEvent(upEvent);
+      // check node moved
+      var newPos = node.getBoundingClientRect()
+      newPos = {x: newPos.x + 4, y: newPos.y + 4};
+      (newPos.x).should.be.approximately(originalPos.x + 10, 4);
+      (newPos.y).should.be.approximately(originalPos.y + 10, 4);
+    });
+    it("should persist a topology change when a user drags an editable node control point", ()=>{
+      var canvas = document.querySelector("map-canvas");
+
+      var closureVar = null;
+      canvas.updateTopology = () => { closureVar = "called"; }
+
+      // enter editing mode
+      canvas.editingInterface.editMode = true;
+      // throw the signal for node edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      var node = document.querySelector("circle.control");
+      var originalPos = node.getBoundingClientRect();
+      // compensate for radius
+      originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // fire down
+      node.dispatchEvent(downEvent);
+      // fire drag
+      node.dispatchEvent(dragEvent);
+      // fire up
+      node.dispatchEvent(upEvent);
+      // check node moved
+      var newPos = node.getBoundingClientRect()
+      newPos = {x: newPos.x + 4, y: newPos.y + 4};
+      (newPos.x).should.be.approximately(originalPos.x + 10, 4);
+      (newPos.y).should.be.approximately(originalPos.y + 10, 4);
+      // check callback fired
+      closureVar.should.equal("called");
+    });
+    it("should allow users to drag edge edit control points", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("map-canvas");
+      canvas.editingInterface.editMode = true;
+      // throw the signal for edge edit mode
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      var cPoint = canvas.querySelector("circle.control");
+
+      var originalPos = cPoint.getBoundingClientRect();
+      // compensate for radius
+      originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
+      console.log(originalPos.x, originalPos.y);
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // fire down
+      cPoint.dispatchEvent(downEvent);
+      // fire drag
+      cPoint.dispatchEvent(dragEvent);
+      // fire up
+      cPoint.dispatchEvent(upEvent);
+      // check edge control point moved
+      var cPoint = canvas.querySelector("circle.control");
+      var newPos = cPoint.getBoundingClientRect()
+      console.log(newPos.x);
+      newPos = {x: newPos.x + 4, y: newPos.y + 4};
+      (newPos.x).should.approximately(originalPos.x + 10, 4);
+      (newPos.y).should.approximately(originalPos.y + 10, 4);
+    });
+    it("should persist a topology change when a user drags an editable edge control point", ()=>{
+      var canvas = document.querySelector("map-canvas");
+    
+      var closureVar = null;
+      canvas.updateTopology = () => { closureVar = "called"; }
+
+      // enter editing mode
+      canvas.editingInterface.editMode = true;
+      // throw the signal for edge edit mode
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      var cPoint = document.querySelector("circle.control");
+      var originalPos = cPoint.getBoundingClientRect();
+      // compensate for radius
+      originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // fire down
+      cPoint.dispatchEvent(downEvent);
+      // fire drag
+      cPoint.dispatchEvent(dragEvent);
+      // the drag event destroys and repaints the circle control...
+      // this seems like a bug...
+      cPoint = canvas.querySelector("circle.control");
+      // fire up
+      cPoint.dispatchEvent(upEvent);
+      // check edge control point moved
+      var newPos = cPoint.getBoundingClientRect()
+      newPos = {x: newPos.x + 4, y: newPos.y + 4};
+      (newPos.x).should.approximately(originalPos.x + 10, 4);
+      (newPos.y).should.approximately(originalPos.y + 10, 4);
+      // check callback fired
+      closureVar.should.equal("called");
+    });
 } );
