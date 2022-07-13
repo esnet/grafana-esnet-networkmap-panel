@@ -21,6 +21,7 @@ module.exports = function( config ) {
         ],
         exclude: [
             "src/components/lib/leaflet.js",
+            "src/components/lib/dataParser.js",
             "src/components/old/*"
         ],
 
