@@ -1,14 +1,21 @@
-dist: focal
+dist: trusty
 
 language: node_js
+sudo: required
+addons:
+  chrome: stable # have Travis install Chrome stable.
 
 node_js:
 - 'lts/*'
 
-cache: npm
+cache: 
+  yarn: true
+  directories:
+    - node_modules
 
 install:
-- yarn install
+  - yarn
+  - yarn install
 
 before_install:
   - sudo apt-get -y install chromium-browser
@@ -20,7 +27,7 @@ before_script:
   - sh -e systemctl start xvfb
 
 script:
-  - "yarn test"
+  - yarn test
 #script:
 #- coverage run --source='.' manage.py test -v2
 
