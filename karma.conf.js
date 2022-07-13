@@ -20,7 +20,7 @@ module.exports = function( config ) {
             "src/components/old/*"
         ],
 
-        browsers: ["Chrome"],
+        browsers: ["ChromeHeadless"],
 
         singleRun: false
 
