@@ -17,9 +17,9 @@ install:
   - yarn
   - yarn install
 
-before_install:
-  - sudo apt-get -y install chromium-browser
-  - sudo apt-get -y install xvfb
+#before_install:
+#  - sudo apt-get -y install chromium-browser
+#  - sudo apt-get -y install xvfb
 
 #before_script:
 #  - export CHROME_BIN=chromium-browser
