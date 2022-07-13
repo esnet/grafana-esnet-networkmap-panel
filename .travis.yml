@@ -3,7 +3,11 @@ dist: focal
 language: node_js
 sudo: required
 addons:
-  chrome: stable # have Travis install Chrome stable.
+  apt:
+    sources:
+      - sourceline: 'deb http://dl.google.com/linux/chrome/deb/ stable main'
+    packages:
+      - google-chrome-stable
 
 node_js:
 - 'lts/*'
