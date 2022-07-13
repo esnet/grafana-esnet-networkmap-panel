@@ -9,7 +9,7 @@
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign",
     "start": "yarn watch",
-    "test": "karma start --single-run --browsers Chrome"
+    "test": "karma start --single-run --browsers ChromeHeadless"
   },
   "author": "ESnet",
   "email": "khturner2@es.net",
