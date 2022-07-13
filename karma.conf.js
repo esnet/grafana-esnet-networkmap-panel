@@ -10,10 +10,6 @@ module.exports = function( config ) {
         files: [
             // tests
             { pattern: "test/*.spec.js", type: "module" },
-            // manually include this file to make sure it exists in travis land...
-            { pattern: "src/components/lib/pubsub.js", type: "module", included: true, served: true },
-            // manually include this file to make sure it exists in travis land...
-            { pattern: "src/components/MapCanvas.component.js", type: "module", included: true, served: true },
             // manually include the file that defines Leaflet as `window['L']` first.
             { pattern: "src/components/lib/leaflet.global.js", type: "module", included: true, served: true },
             // files tests rely on
