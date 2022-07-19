@@ -16,7 +16,7 @@ if(typeof require !== "undefined"){
 
 
 // web component
-class MapCanvas extends HTMLElement {
+export class MapCanvas extends HTMLElement {
 
   constructor() {
     super();
@@ -35,6 +35,7 @@ class MapCanvas extends HTMLElement {
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
+    PubSub.subscribe('updateTopology', () => { this.updateTopology(this.topology) }, this);
   }
 
   get topology() {
@@ -250,4 +251,4 @@ class MapCanvas extends HTMLElement {
 }
 
 // register component
-customElements.define( 'map-canvas', MapCanvas );
+customElements.get('map-canvas') || customElements.define( 'map-canvas', MapCanvas );

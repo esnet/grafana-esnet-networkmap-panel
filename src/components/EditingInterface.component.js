@@ -31,7 +31,7 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
             this._selectedNode = evtData['object'];
             this._spliceNodeIndex = evtData['index'];
-            this.selectedLayer = this._selectedNode.layer;
+            this.selectedLayer = evtData['layer'];
             this.dialog = "node";
         }, this)
     }
@@ -131,7 +131,7 @@ class EditingInterface extends BindableHTMLElement {
     hideDialogs(){
         this.dialog = false;
     }
-    showSrcDst(){
+    showSrcDst(event){
         this.selectedLayer = event.target.value;
     }
 
@@ -172,12 +172,13 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.publish("updateTopology", mapJson, this);
 
         console.log('in updateLayerNodes. this.updateTopology:', this.updateTopology)
+
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
         setTimeout(()=>{
           PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
-        }, 100);
+        }, 10);
     }
     createMapEdge(){
         var edge_layer = this.shadow.getElementById('edge_layer').value;
@@ -540,4 +541,4 @@ class EditingInterface extends BindableHTMLElement {
 }
 
 // register component
-customElements.define( 'editing-interface', EditingInterface );
+customElements.get('editing-interface') || customElements.define( 'editing-interface', EditingInterface );

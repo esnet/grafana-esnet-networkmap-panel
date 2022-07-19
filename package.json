@@ -5,11 +5,11 @@
   "repository": "https://github.com/esnet/grafana-esnet-networkmap-panel",
   "scripts": {
     "build": "grafana-toolkit plugin:build",
-    "test": "grafana-toolkit plugin:test",
     "dev": "grafana-toolkit plugin:dev",
     "watch": "grafana-toolkit plugin:dev --watch",
     "sign": "grafana-toolkit plugin:sign",
-    "start": "yarn watch"
+    "start": "yarn watch",
+    "test": "karma start --single-run --browsers ChromeHeadless"
   },
   "author": "ESnet",
   "email": "khturner2@es.net",
@@ -18,7 +18,13 @@
     "@grafana/data": "8.3.0",
     "@grafana/toolkit": "8.0.6",
     "@grafana/ui": "8.3.0",
-    "emotion": "10.0.27"
+    "emotion": "10.0.27",
+    "karma": "^6.4.0",
+    "karma-chrome-launcher": "^3.1.1",
+    "karma-mocha": "^2.0.1",
+    "karma-should": "^1.0.0",
+    "mocha": "^10.0.0",
+    "should": "^2.0.2"
   },
   "engines": {
     "node": ">=14"

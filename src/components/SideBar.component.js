@@ -137,4 +137,4 @@ class SideBar extends BindableHTMLElement {
 }
 
 // register component
-customElements.define( 'side-bar', SideBar );
+customElements.get('side-bar') || customElements.define( 'side-bar', SideBar );

@@ -1,3 +1,5 @@
+[![Build Status](https://secure.travis-ci.org/travis-ci/grafana-esnet-networkmap-panel.png?branch=master)](http://travis-ci.org/travis-ci/grafana-esnet-networkmap-panel)
+
 # grafana-esnet-networkmap-panel
 A geographic bidirectional network map using the leaflet and d3 libraries.
 
