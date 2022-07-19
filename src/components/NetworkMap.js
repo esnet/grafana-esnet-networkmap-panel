@@ -151,11 +151,11 @@ export default class NetworkMap {
     if(!this.esmap.editEdges && !this.esmap.editNodes){
       if (params.editPanel != null) {
         this.esmap.editEdgeMode(true);
-        this.mapCanvas.editingInterface.editMode = true;
+        if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = true;
       } else {
         this.esmap.editEdgeMode(false);
         this.esmap.editNodeMode(false);
-        this.mapCanvas.editingInterface.editMode = false;
+        if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = false;
       }
     }
 

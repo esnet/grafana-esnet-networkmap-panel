@@ -541,4 +541,4 @@ class EditingInterface extends BindableHTMLElement {
 }
 
 // register component
-customElements.get('editing-interface') || customElements.define( 'editing-interface', EditingInterface );
+customElements.get('esnet-map-editing-interface') || customElements.define( 'esnet-map-editing-interface', EditingInterface );

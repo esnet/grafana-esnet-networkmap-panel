@@ -178,8 +178,12 @@ export class MapPanel extends Component<Props> {
       },
       this.mapCanvas.current
     );
-    this.mapCanvas.current.updateMapTopology(topology);
-    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+    this.mapCanvas.current &&
+      this.mapCanvas.current.updateMapTopology &&
+      this.mapCanvas.current.updateMapTopology(topology);
+    this.mapCanvas.current &&
+      this.mapCanvas.current.updateMapDimensions &&
+      this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
   }
   componentDidMount() {
     this.updateMap();
@@ -197,7 +201,7 @@ export class MapPanel extends Component<Props> {
 
   render() {
     const { options, width, height } = this.props;
-    return React.createElement('map-canvas', {
+    return React.createElement('esnet-map-canvas', {
       options: JSON.stringify(options),
       width: width,
       height: height,

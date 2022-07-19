@@ -105,7 +105,7 @@ export class MapCanvas extends HTMLElement {
       "layer2": testJsonSchema(this.topology.layer2),
       "layer3": testJsonSchema(this.topology.layer3),
     }
-    this.sideBar.render();
+    this.sideBar && this.sideBar.render();
     this.map && this.map.renderMap();    
   }
 
@@ -114,7 +114,7 @@ export class MapCanvas extends HTMLElement {
     this.height = newDimensions.height;
     this.leafletMap && this.leafletMap.invalidateSize();
     this.render();
-    this.sideBar.render();
+    this.sideBar && this.sideBar.render();
   }
 
   updateCenter(centerData){
@@ -178,7 +178,7 @@ export class MapCanvas extends HTMLElement {
         "layer2": testJsonSchema(this.topology.layer2),
         "layer3": testJsonSchema(this.topology.layer3),
       }
-      this.sideBar.render();
+      this.sideBar && this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this);
@@ -206,16 +206,16 @@ export class MapCanvas extends HTMLElement {
       </style>
 
       <div id='map'>
-        <editing-interface></editing-interface>
+        <esnet-map-editing-interface></esnet-map-editing-interface>
       </div>
-      <side-bar></side-bar>`;
+      <esnet-map-side-bar></esnet-map-side-bar>`;
       this.mapContainer = this.shadow.querySelector("#map");
 
-      this.editingInterface = this.shadow.querySelector("editing-interface");
+      this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
       this.editingInterface.topology = this.topology;
       this.editingInterface.updateTopology = this.updateTopology;
 
-      this.sideBar = this.shadow.querySelector("side-bar");
+      this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       this.sideBar.mapCanvas = this;
     }
     if(this.height){
@@ -251,4 +251,4 @@ export class MapCanvas extends HTMLElement {
 }
 
 // register component
-customElements.get('map-canvas') || customElements.define( 'map-canvas', MapCanvas );
+customElements.get('esnet-map-canvas') || customElements.define( 'esnet-map-canvas', MapCanvas );

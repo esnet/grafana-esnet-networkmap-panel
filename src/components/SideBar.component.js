@@ -123,11 +123,11 @@ class SideBar extends BindableHTMLElement {
         <h2>Tooltip</h2>
         <div class='sidebar tooltip' id='sidebar-tooltip'>
         </div>`
-        this.bindEvents({
-            "#layer1@onchange": this.toggleLayer,
-            "#layer2@onchange": this.toggleLayer,
-            "#layer3@onchange": this.toggleLayer,
-        })
+        var bindings = {}
+        bindings["#tooltip-" + this.instanceId + " #layer1@onchange"] = this.toggleLayer;
+        bindings["#tooltip-" + this.instanceId + " #layer2@onchange"] = this.toggleLayer;
+        bindings["#tooltip-" + this.instanceId + " #layer3@onchange"] = this.toggleLayer;
+        this.bindEvents(bindings);
 
   }
   // connect component
@@ -137,4 +137,4 @@ class SideBar extends BindableHTMLElement {
 }
 
 // register component
-customElements.get('side-bar') || customElements.define( 'side-bar', SideBar );
+customElements.get('esnet-map-side-bar') || customElements.define( 'esnet-map-side-bar', SideBar );
