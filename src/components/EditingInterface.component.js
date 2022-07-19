@@ -16,33 +16,31 @@ class EditingInterface extends BindableHTMLElement {
         this._spliceNodeIndex = null;
         PubSub.subscribe("setSelection", (d)=>{ 
             this.selection = true;
-        });
+        }, this);
         PubSub.subscribe("clearSelection", ()=>{ 
             this.selection = false;
-        })
+        }, this)
         PubSub.subscribe("toggleNodeEdit", ()=>{
             this._edgeEditMode = false;
             this.nodeEditMode = !this.nodeEditMode;
-        })
+        }, this)
         PubSub.subscribe("toggleEdgeEdit", ()=>{
             this._nodeEditMode = false;
             this.edgeEditMode = !this.edgeEditMode;
-        })
+        }, this)
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
-            console.log("showEditNodeDialog");
             this._selectedNode = evtData['object'];
             this._spliceNodeIndex = evtData['index'];
-            console.log(this._selectedNode.layer);
             this.selectedLayer = this._selectedNode.layer;
             this.dialog = "node";
-        })
+        }, this)
     }
     
     //////////////////////////////////////
     // setters and getters
     set editMode(newValue){
         this._editMode = newValue;
-        PubSub.publish("updateEditMode", null);
+        PubSub.publish("updateEditMode", null, this);
         this.render();
     }
     get editMode(){
@@ -103,22 +101,20 @@ class EditingInterface extends BindableHTMLElement {
     ///////////////////////////
     // event bindings
     clearSelection(){
-        PubSub.publish('setVariables', null);
-        PubSub.publish('clearSelection', null);
+        PubSub.publish('setVariables', null, this);
+        PubSub.publish('clearSelection', null, this);
     }
     toggleNodeEdit(){
-        PubSub.publish("toggleNodeEdit");
+        PubSub.publish("toggleNodeEdit", null, this);
     }
     toggleEdgeEdit(){
-        PubSub.publish("toggleEdgeEdit");
+        PubSub.publish("toggleEdgeEdit", null, this);
     }
     recalcPaths(){
-        PubSub.publish('recalcPaths', null);
+        PubSub.publish('recalcPaths', null, this);
     }
     homeMap(){
-        // old style:
-        PubSub.publish('newMap', null);        
-        //PubSub.publish("homeMap");
+        PubSub.publish('newMap', null, this);
     }
     showAddNodeDialog(){
         this.selectedLayer = "layer1";
@@ -155,7 +151,7 @@ class EditingInterface extends BindableHTMLElement {
             display_name: nodeDisplayName,
             svg: nodeSvg
           },
-          latLng: [nodeLat, nodeLng],
+          latLng: [parseFloat(nodeLat), parseFloat(nodeLng)],
           children: [],
         }
 
@@ -173,13 +169,14 @@ class EditingInterface extends BindableHTMLElement {
             "layer2": this._topology.layer2 || defaultLayer,
             "layer3": this._topology.layer3 || defaultLayer,
         }
-        PubSub.publish("updateTopology", mapJson);
+        PubSub.publish("updateTopology", mapJson, this);
 
+        console.log('in updateLayerNodes. this.updateTopology:', this.updateTopology)
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
 
-        setTimeout(function () {
-          PubSub.publish('renderMap', mapJson); // repaint re-renders the topology layers
+        setTimeout(()=>{
+          PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
         }, 100);
     }
     createMapEdge(){
@@ -221,20 +218,21 @@ class EditingInterface extends BindableHTMLElement {
           latLngs: latLngs,
           children: [],
         });
-        console.log(optionsJson[edge_layer]);
+
         var mapJson = {
             "layer1": optionsJson.layer1,
             "layer2": optionsJson.layer2,
             "layer3": optionsJson.layer3
         }
-        PubSub.publish("updateTopology", mapJson);
+        PubSub.publish("updateTopology", mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
         setTimeout(function () {
           PubSub.publish(
             'renderMap', // the renderMap signal triggers a re-render of json layers
-            mapJson
+            mapJson,
+            this
           );
         }, 100);
     }
@@ -247,7 +245,7 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this.selectedLayer];
         } catch (e) {
-          console.error(e);
+          console.debug(e);
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }

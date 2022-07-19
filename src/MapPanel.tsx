@@ -3,8 +3,8 @@ import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
-import { PubSub } from 'components/lib/pubsub.js';
 import 'components/MapCanvas.component.js';
+import { PubSub } from 'components/lib/pubsub.js';
 
 interface Props extends PanelProps<MapOptions> {}
 
@@ -17,8 +17,6 @@ export class MapPanel extends Component<Props> {
     // ref approach... doesn't seem to want to work.
     this.mapCanvas = React.createRef();
     this.lastOptions = this.props.options;
-    PubSub.subscribe('updateTopology', this.updateMapJson, this);
-    PubSub.subscribe('updateOptions', this.updateCenter, this);
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -38,37 +36,10 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
 
-  // A function to update the map jsons in the Edit panel based on the current map state
-  // Used in esmap.js
-  updateCenter = (updateData) => {
-    let zoom = updateData['zoom'];
-    let center = updateData['center'];
-    const { options } = this.props;
-    let { startLat, startLng, startZoom } = options;
-    startZoom = zoom;
-    startLat = center.lat;
-    startLng = center.lng;
-    this.props.onOptionsChange({ ...options, startZoom, startLat, startLng });
-  };
+  calculateOptionsChanges = () => {
+    var changed: string[];
+    changed = [];
 
-  // A function to turn layers on or off. Takes in the layer and boolean value
-  // Used in SideBar.tsx
-  toggleLayer = (layer, value) => {
-    const { options } = this.props;
-    let { layer1, layer2, layer3 } = options;
-    if (layer === 'layer1') {
-      layer1 = value;
-    }
-    if (layer === 'layer2') {
-      layer2 = value;
-    }
-    if (layer === 'layer3') {
-      layer3 = value;
-    }
-    this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
-  };
-
-  componentDidUpdate() {
     const optionsToWatch = [
       'tileSetLayer',
       'boundaryLayer',
@@ -104,8 +75,6 @@ export class MapPanel extends Component<Props> {
       'layerName3',
       'legendL3',
     ];
-    var changed: string[];
-    changed = [];
 
     optionsToWatch.forEach((option) => {
       if (this.lastOptions[option] !== this.props.options[option]) {
@@ -113,13 +82,31 @@ export class MapPanel extends Component<Props> {
         changed.push(option);
       }
     });
-    if (changed.length > 0) {
-      PubSub.publish('updateMapOptions', { options: this.lastOptions, changed: changed });
-    }
-  }
+    return changed;
+  };
 
-  render() {
+  // A function to turn layers on or off. Takes in the layer and boolean value
+  // Used in SideBar.tsx
+  toggleLayer = (layer, value) => {
+    const { options } = this.props;
+    let { layer1, layer2, layer3 } = options;
+    if (layer === 'layer1') {
+      layer1 = value;
+    }
+    if (layer === 'layer2') {
+      layer2 = value;
+    }
+    if (layer === 'layer3') {
+      layer3 = value;
+    }
+    this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
+  };
+
+  updateMap() {
     const { options, data, width, height } = this.props;
+
+    this.mapCanvas.current.updateTopology = this.updateMapJson;
+
     var colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
@@ -184,16 +171,34 @@ export class MapPanel extends Component<Props> {
       layer2: mapDataL2,
       layer3: mapDataL3,
     };
+    PubSub.subscribe(
+      'updateTopologyData',
+      () => {
+        console.log(this.updateMapJson(this.mapCanvas.current['topology']));
+      },
+      this.mapCanvas.current
+    );
+    this.mapCanvas.current.updateMapTopology(topology);
+    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+  }
+  componentDidMount() {
+    this.updateMap();
+  }
 
-    PubSub.publish('updateMapTopology', topology);
-    PubSub.publish('updateMapDimensions', {
-      width: width,
-      height: height,
-    });
+  componentDidUpdate() {
+    this.updateMap();
 
+    var changed = this.calculateOptionsChanges();
+
+    if (changed.length > 0) {
+      this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
+    }
+  }
+
+  render() {
+    const { options, width, height } = this.props;
     return React.createElement('map-canvas', {
       options: JSON.stringify(options),
-      topology: JSON.stringify(topology),
       width: width,
       height: height,
       ref: this.mapCanvas,

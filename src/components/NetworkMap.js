@@ -24,6 +24,11 @@ if(typeof require !== "undefined"){
 }
 
 export default class NetworkMap {
+  /**
+   * Renders the Network Map in the panel.
+   *
+   * @param mapCanvas - the parent MapCanvas object.
+   */
   constructor(mapCanvas) {
     this.mapCanvas = mapCanvas;
     this.g1 = null;
@@ -50,17 +55,9 @@ export default class NetworkMap {
     PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
 
-  /**
-   * Renders the Network Map in the panel.
-   *
-   * @param parsedData - the parsed data from parseData.js
-   * @param topology - the topology data from the json input
-   * @param options - 
-   * @param updateMapJson, @param updateCenter - functions from MapPanel.tsx to update the mapJson & center in the editor
-   * @param width, @param height - determined by Grafana panel size
-   * @param editMode - whether the panel is in editMode or not
-   * @param mapContainer - the container the map is drawn in.
-   */
+  dispatchEvent(event){
+    return this.mapCanvas.dispatchEvent(event);
+  }
 
   setDashboardVariables(event){
     const l1var = "var-"+this.mapCanvas.options["dashboardVarL1"];
@@ -79,7 +76,6 @@ export default class NetworkMap {
           dstVariable + "|=|" + event.nodeZ
       ]        
     }
-    console.log("locationService", locationService);
 
     locationService.partial(setLocation, false)
   }
@@ -95,7 +91,6 @@ export default class NetworkMap {
   }
 
   toggleNodeEdit() {
-    console.log("toggling Node Edit")
     if (!!this.esmap.editNodes) {
       this.esmap.editEdgeMode(false);
       this.esmap.editNodeMode(false);
