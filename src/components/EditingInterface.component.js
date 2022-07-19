@@ -31,7 +31,7 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
             this._selectedNode = evtData['object'];
             this._spliceNodeIndex = evtData['index'];
-            this.selectedLayer = this._selectedNode.layer;
+            this.selectedLayer = evtData['layer'];
             this.dialog = "node";
         }, this)
     }
@@ -131,7 +131,7 @@ class EditingInterface extends BindableHTMLElement {
     hideDialogs(){
         this.dialog = false;
     }
-    showSrcDst(){
+    showSrcDst(event){
         this.selectedLayer = event.target.value;
     }
 
