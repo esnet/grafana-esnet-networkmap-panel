@@ -39,8 +39,16 @@ class EditingInterface extends BindableHTMLElement {
     //////////////////////////////////////
     // setters and getters
     set editMode(newValue){
+        if(this._editMode == newValue) return;
+        // in situations where the new value is true, we know the current value
+        // is false (because of the logical condition above)
+        // we should always set _edgeEditMode to a boolean coercion of `newValue`.
+        this._edgeEditMode = !!newValue;
+        this._nodeEditMode = false;
         this._editMode = newValue;
-        PubSub.publish("updateEditMode", null, this);
+        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editEdgeMode(this._edgeEditMode);
+        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editNodeMode(this._edgeNodeMode);
+        PubSub.publish("updateEditMode", newValue, this);
         this.render();
     }
     get editMode(){
