@@ -212,6 +212,7 @@ export class MapCanvas extends HTMLElement {
       this.mapContainer = this.shadow.querySelector("#map");
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
+      this.editingInterface.mapCanvas = this;
       this.editingInterface.topology = this.topology;
       this.editingInterface.updateTopology = this.updateTopology;
 
