@@ -90,7 +90,7 @@ class SideBar extends BindableHTMLElement {
         <h2>Map Layers</h2>
         <div class='toggle container' ${ !this.mapCanvas.options.legendL1 && "style='display: none;'" }>
           <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer1 && "checked"} id='layer1'>
+            <input type="checkbox" ${ this.mapCanvas.options.layer1 && "checked"} id='sidebar-layer1'>
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName1 || "Layer 1" }</text>
@@ -101,7 +101,7 @@ class SideBar extends BindableHTMLElement {
 
         <div class='toggle container' ${ !this.mapCanvas.options.legendL2 && "style='display: none;'" }>
           <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer2 && "checked"} id='layer2'>
+            <input type="checkbox" ${ this.mapCanvas.options.layer2 && "checked"} id='sidebar-layer2'>
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName2 || "Layer 2" }</text>
@@ -112,7 +112,7 @@ class SideBar extends BindableHTMLElement {
 
         <div class='toggle container' ${ !this.mapCanvas.options.legendL3 && "style='display: none;'" }>
           <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer3 && "checked"} id='layer3'>
+            <input type="checkbox" ${ this.mapCanvas.options.layer3 && "checked"} id='sidebar-layer3'>
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName3 || "Layer 3" }</text>
@@ -124,9 +124,9 @@ class SideBar extends BindableHTMLElement {
         <div class='sidebar tooltip' id='sidebar-tooltip'>
         </div>`
         var bindings = {}
-        bindings["#tooltip-" + this.instanceId + " #layer1@onchange"] = this.toggleLayer;
-        bindings["#tooltip-" + this.instanceId + " #layer2@onchange"] = this.toggleLayer;
-        bindings["#tooltip-" + this.instanceId + " #layer3@onchange"] = this.toggleLayer;
+        bindings["#tooltip-" + this.instanceId + " #sidebar-layer1@onchange"] = this.toggleLayer;
+        bindings["#tooltip-" + this.instanceId + " #sidebar-layer2@onchange"] = this.toggleLayer;
+        bindings["#tooltip-" + this.instanceId + " #sidebar-layer3@onchange"] = this.toggleLayer;
         this.bindEvents(bindings);
 
   }
