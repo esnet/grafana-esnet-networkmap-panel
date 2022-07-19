@@ -6,6 +6,7 @@ const d3 = window['d3'] || d3_import;
 import * as React_import from "./react.js";
 // populate either with import or ES6 root-scope version
 const React = window['React'] || React_import;
+import * as renderTemplate from "./templates.js"
 
 function createSvgMarker(svg) {
   //--- setup markers
@@ -48,12 +49,8 @@ function createSvgMarker(svg) {
   return marker;
 }
 
-function renderEdges(g, data, ref) {
+function renderEdges(g, data, ref, layerId) {
   var div = ref.div;
-  var layerId = 1;
-  if(data.edges.length >= 1){
-     layerId = data.edges[0].layer;
-  }
   const edgeWidth = ref.options["edgeWidthL"+layerId];
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
@@ -213,12 +210,8 @@ function addControlPoint(evt, obj, ref) {
   }
 }
 
-function renderNodeControl(g, data, ref){
+function renderNodeControl(g, data, ref, layerId){
   var feature = g.selectAll('circle').data(data.nodes);
-  var layerId = 1;
-  if(data.edges.length > 1){
-    layerId = data.edges[0].layer;
-  }
 
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
@@ -320,7 +313,7 @@ function renderNodeControl(g, data, ref){
  feature.exit().remove();
 }
 
-function renderEdgeControl(g, data, ref) {
+function renderEdgeControl(g, data, ref, layerId) {
   var lines = g.selectAll('path').data(data.edges);
 
   lines
@@ -411,13 +404,9 @@ function renderEdgeControl(g, data, ref) {
   });
 }
 
-function renderNodes(g, data, ref) {
+function renderNodes(g, data, ref, layerId) {
   var feature = g.selectAll('circle').data(data.nodes);
   var div = ref.div;
-  var layerId = 1;
-  if(data.edges.length > 1){
-    layerId = data.edges[0].layer;
-  }
   feature
     .enter()
     .append('g')
@@ -435,9 +424,13 @@ function renderNodes(g, data, ref) {
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")
     .on('mouseover', function (event, d) {
-      var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-      <p><b>In Volume: </b> ${d.inValue}</p>
-      <p><b>Out Volume: </b> ${d.outValue}</p>`;
+      if(d.meta.template){
+        var text = renderTemplate(d.meta.template, d);
+      } else {
+        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
+        <p><b>In Volume: </b> ${d.inValue}</p>
+        <p><b>Out Volume: </b> ${d.outValue}</p>`;
+      }
 
       PubSub.publish("showTooltip", text, ref.svg.node());
     })
@@ -760,19 +753,22 @@ export class EsMap {
     for (const [name, data] of Object.entries(this.data)) {
       this.updateCoordinates(data);
     }
+    var layerId = 0;
     for (const [name, g] of Object.entries(this.mapLayers)) {
+      layerId++;
+
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
       var controlpoint_g = g.select('g.cp');
       var data = this.data[name];
 
       if (this.editNodes == 1) {
-        renderNodeControl(controlpoint_g, data, this);
+        renderNodeControl(controlpoint_g, data, this, layerId);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
       }
       if (this.editEdges == 1) {
-        renderEdgeControl(controlpoint_g, data, this);
+        renderEdgeControl(controlpoint_g, data, this, layerId);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
       }
@@ -780,8 +776,8 @@ export class EsMap {
         //  delete all the control point g children
         controlpoint_g.selectAll('*').remove();
       }
-      renderNodes(node_g, data, this);
-      renderEdges(edge_g, data, this);
+      renderNodes(node_g, data, this, layerId);
+      renderEdges(edge_g, data, this, layerId);
     }
   }
 
