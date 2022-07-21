@@ -190,7 +190,7 @@ export class MapCanvas extends HTMLElement {
   renderStyle(){
     let mapstyle = this.shadow.querySelector("#mapstyle");
     mapstyle.innerHTML = `
-      <style id='mapstyle'>
+      <style>
           #map { 
             font-family: sans-serif;
             background: ${this.options.background};
