@@ -1,0 +1,48 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "private",
+  "signedByOrg": "jkafaderesnet",
+  "signedByOrgName": "jkafaderesnet",
+  "rootUrls": [
+    "https://dashboard.stardust.es.net/",
+    "https://gf.gc1.dev-stage.stardust.es.net/"
+  ],
+  "plugin": "esnet-networkmap-panel",
+  "version": "1.0.0",
+  "time": 1658422504776,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
+    "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
+    "module.js.LICENSE.txt": "13dedd789c7a3b2b8c6f7116b09b5b78bf6b0953cccf1719753fb0fed0791f39",
+    "1.js.map": "751cc051925e7e89726a64397f6cbabf747ab670a74a3a0a344cb4c1a59aa922",
+    "module.js.map": "a173259d39337a5f42d9aab657ba4462e407d11b4683f96bdc82bf55c8d05ae4",
+    "plugin.json": "b4ecb202303254394b35ace58fc0b6320f94c5b52bbe0eb82c369bbeb7e4f7ce",
+    "README.md": "32e9d7e07418ff6d4b1701f47cd8dfb81818cbe4897eadb481e978355b259b04",
+    "img/slopegraph.png": "6522086b5717c31d334a4562bbec047e3d0050ee81ac081f4b2ab4d12e6ab9f1",
+    "img/logo.svg": "1defc6f7e585c67657bcfd8fddc599ee7dfa82f8674413f49fa274c2cd453ec6",
+    "components/cr copy.json": "5665e7be30dcf03598e5583b153056dcffbbe2f636061b4b2c30929db36977b3",
+    "components/old/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
+    "components/old.html": "290fbe64cf9b0054e5c017f8c212c3d1ad51405b10b932f419f095add1804738",
+    "components/cr.json": "00be9328767f3f05b832c0c47330ed0476911c2c7660401b5fc35b6856e2ac89",
+    "module.js": "cfc2c43dfa7f6a9032371784b03c2c65c5d8d45b7066be97c823d306882d2721",
+    "0.js.map": "35a8f2c9f02baf73bc400dd0e6b91dacd9b742bb6fb4be1d39a1e8a14a538ffc",
+    "0.js": "29ba11c152f6da1254a9545ee4b3390e903202e8e8ea76a4c65bdd0b6d8de627",
+    "1.js": "14a9c7c950f4b049c43dd2fb2dfaef2277c137f7874f0a8ee033cca44c13188d"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.10
+Comment: https://openpgpjs.org
+
+wrcEARMKAAYFAmLZhOkAIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm50wHAgd+lKtpI3qcwCWcoCMAY5bsgbJlHMV2Xm8b1JO0iC6dz37pxdUY
+gsCX3oCkY6Mt1Klt2YPsJDlywn37E2xwqLswawIHXL17JsBH2uqbfnPuRqVt
+pGaY8DjA2ltElDp45oEVQCjcb7TRJI+N6THJ0Vt75QaNl2RuY81+w6xOzjUL
+M+0wIkg=
+=ElmS
+-----END PGP SIGNATURE-----
