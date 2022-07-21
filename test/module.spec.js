@@ -261,8 +261,6 @@ describe( "Class MapCanvas", () => {
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
       canvas.editingInterface.editMode = true;
-      // throw the signal for edge edit mode
-      PubSub.publish("toggleEdgeEdit", null, canvas);
       // run a query selector for control points
       var controlPoints = document.querySelectorAll("circle.control");
       // expect a specific count of control points
@@ -351,8 +349,6 @@ describe( "Class MapCanvas", () => {
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
       canvas.editingInterface.editMode = true;
-      // throw the signal for edge edit mode
-      PubSub.publish("toggleEdgeEdit", null, canvas);
       // create a (double) click event
       var dblClickEvent = new MouseEvent('dblclick', { bubbles: true, clientX: 200, clientY: 200 })
       // fire double click event on edge
@@ -460,10 +456,6 @@ describe( "Class MapCanvas", () => {
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
       canvas.editingInterface.editMode = true;
-      // throw the signal for edge edit mode
-      PubSub.publish("toggleEdgeEdit", null, canvas);
-      PubSub.publish("toggleEdgeEdit", null, canvas);
-      PubSub.publish("toggleEdgeEdit", null, canvas);
       var cPoint = canvas.querySelector("circle.control");
 
       var originalPos = cPoint.getBoundingClientRect();
@@ -498,8 +490,6 @@ describe( "Class MapCanvas", () => {
 
       // enter editing mode
       canvas.editingInterface.editMode = true;
-      // throw the signal for edge edit mode
-      PubSub.publish("toggleEdgeEdit", null, canvas);
       var cPoint = document.querySelector("circle.control");
       var originalPos = cPoint.getBoundingClientRect();
       // compensate for radius
