@@ -9,9 +9,10 @@ export class BindableHTMLElement extends HTMLElement {
             if(!bindings[key]){
                 throw new Error(`Bad binding supplied for ${key}`)
             }
-            let [elem_id, event] = key.split("@");
+            let [selector, event] = key.split("@");
             // use JS built-in 'apply' to set "this" keyword properly for callbacks.
-            this.shadow.querySelector(elem_id)[event] = function(){ 
+            let element = self.shadow.querySelector(selector)
+            element[event] = function(){
                 bindings[key].apply(self, arguments) 
             };
         })

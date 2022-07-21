@@ -147,16 +147,11 @@ export default class NetworkMap {
     }
 
     const params = utils.getUrlSearchParams();
-    // don't bother resetting edit mode if it's already
-    if(!this.esmap.editEdges && !this.esmap.editNodes){
-      if (params.editPanel != null) {
-        this.esmap.editEdgeMode(true);
-        this.mapCanvas.editingInterface.editMode = true;
-      } else {
-        this.esmap.editEdgeMode(false);
-        this.esmap.editNodeMode(false);
-        this.mapCanvas.editingInterface.editMode = false;
-      }
+    // don't bother resetting edit mode if it's already set
+    if (params.editPanel != null) {
+      if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = true;
+    } else {
+      if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = false;
     }
 
     d3.selectAll('#edge_edit_mode').on('click', this.toggleEdgeEdit);
