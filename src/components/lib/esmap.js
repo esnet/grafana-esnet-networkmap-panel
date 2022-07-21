@@ -294,6 +294,17 @@ function renderNodeControl(g, data, ref, layerId){
       PubSub.publish("updateLastInteractedObject", null, ref.svg.node());
       PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.svg.node());
     })
+    .on('mouseover', function (event, d) {
+      if(d.meta.template){
+        var text = renderTemplate(d.meta.template, d);
+      } else {
+        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
+        <p><b>In Volume: </b> ${d.inValue}</p>
+        <p><b>Out Volume: </b> ${d.outValue}</p>`;
+      }
+
+      PubSub.publish("showTooltip", text, ref.svg.node());
+    })
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
     })
