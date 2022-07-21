@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps } from '@grafana/data';
+import { PanelProps, createTheme } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
@@ -11,12 +11,14 @@ interface Props extends PanelProps<MapOptions> {}
 export class MapPanel extends Component<Props> {
   mapCanvas: any;
   lastOptions: any;
+  theme: any;
 
   constructor(props: Props) {
     super(props);
     // ref approach... doesn't seem to want to work.
     this.mapCanvas = React.createRef();
     this.lastOptions = this.props.options;
+    this.theme = createTheme();
   }
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -41,6 +43,7 @@ export class MapPanel extends Component<Props> {
     changed = [];
 
     const optionsToWatch = [
+      'background',
       'tileSetLayer',
       'boundaryLayer',
       'labelLayer',
@@ -78,6 +81,9 @@ export class MapPanel extends Component<Props> {
 
     optionsToWatch.forEach((option) => {
       if (this.lastOptions[option] !== this.props.options[option]) {
+        if (option === 'background') {
+          this.props.options[option] = this.theme.visualization.getColorByName(this.props.options.background);
+        }
         this.lastOptions[option] = this.props.options[option];
         changed.push(option);
       }

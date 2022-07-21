@@ -92,7 +92,9 @@ export class MapCanvas extends HTMLElement {
     } else {
       this.map && this.map.renderMap();
     }
-
+    if(changed.indexOf('background')>=0){
+      this.renderStyle();
+    }
     this.sideBar && this.sideBar.render();
   }
   updateMapTopology(newTopology){
@@ -185,19 +187,27 @@ export class MapCanvas extends HTMLElement {
       this.map.renderMap();
   }
 
+  renderStyle(){
+    let mapstyle = this.shadow.querySelector("#mapstyle");
+    mapstyle.innerHTML = `
+      <style id='mapstyle'>
+          #map { 
+            font-family: sans-serif;
+            background: ${this.options.background};
+            position: relative;
+            display: inline-block;
+          }
+      </style>
+    `;
+  }
+
   render(){
     if(!this.shadow){
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       this.shadow.innerHTML = `
-      <style>
-          #map { 
-            font-family: sans-serif;
-            background: #CCC; 
-            position: relative;
-            display: inline-block;
-          }
-      </style>
+      <div id='mapstyle'>
+      </div>
       <style>
         ${esmapCss}
       </style>
@@ -219,6 +229,7 @@ export class MapCanvas extends HTMLElement {
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       this.sideBar.mapCanvas = this;
     }
+    this.renderStyle();
     if(this.height){
       this.mapContainer.style.height = this.height + 'px';
     }

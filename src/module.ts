@@ -36,6 +36,12 @@ plugin.setPanelOptions((builder) => {
       step: 0.5,
     },
   });
+  builder.addColorPicker({
+    path: 'background',
+    name: 'Map Background Color',
+    description: 'The default color for the background, with no tileset',
+    defaultValue: '#EDEDED',
+  });
   builder.addSelect({
     path: 'tileSetLayer',
     name: 'Geographic Tileset',
