@@ -379,6 +379,24 @@ describe( "Class MapCanvas", () => {
         toggleContainers[i].style.display.should.equal("none");
       }
     });
+    it("should allow users to style edges in all layers, even when some are not visible", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("esnet-map-canvas");
+      var newTopology = canvas.topology;
+      newTopology.layer2 = newTopology.layer1;
+      newTopology.layer3 = newTopology.layer1;
+      var newOptions = canvas.options;
+      newOptions['edgeWidthL3'] = 5;
+      newOptions['layer1'] = false;
+      newOptions['layer2'] = false;
+      newOptions['layer3'] = true;
+      PubSub.publish("updateMapOptions", {
+        options: newOptions,
+        changed: ['layer1', 'layer2', 'layer3', 'edgeWidthL3']
+      }, canvas);
+      var randomEdge = canvas.querySelector('.edge.edge-az');
+      randomEdge.getAttribute("stroke-width").should.equal("5");
+    })
     it("should have a node edit mode characterized by control points on nodes", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
