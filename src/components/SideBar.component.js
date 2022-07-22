@@ -26,7 +26,7 @@ class SideBar extends BindableHTMLElement {
 
   toggleLayer(event){
     var element = event.target;
-    var layer = element.id;
+    var layer = element.id.split("-")[1];
     var value = element.checked;
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
@@ -124,9 +124,9 @@ class SideBar extends BindableHTMLElement {
         <div class='sidebar tooltip' id='sidebar-tooltip'>
         </div>`
         var bindings = {}
-        bindings["#tooltip-" + this.instanceId + " #sidebar-layer1@onchange"] = this.toggleLayer;
-        bindings["#tooltip-" + this.instanceId + " #sidebar-layer2@onchange"] = this.toggleLayer;
-        bindings["#tooltip-" + this.instanceId + " #sidebar-layer3@onchange"] = this.toggleLayer;
+        bindings["#sidebar-layer1@onchange"] = this.toggleLayer;
+        bindings["#sidebar-layer2@onchange"] = this.toggleLayer;
+        bindings["#sidebar-layer3@onchange"] = this.toggleLayer;
         this.bindEvents(bindings);
 
   }
