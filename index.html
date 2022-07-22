@@ -47,7 +47,12 @@
                 "nodes":[
                         {
                             "name":"A",
-                            "meta":{},
+                            "meta":{
+                                "template": "<b>${ self.name }</b><br>"+
+                                    "2021 Grant Award: $${self.meta.awardAmount}<br>"+
+                                    "Inbound Data Volume: ${d.inValue}",
+                                "awardAmount": 10000,
+                            },
                             "latLng":[39.027718840211605,-105.99609375000001],
                             "color":lavender,
                         },
@@ -114,7 +119,7 @@
             "startLat":38.68,
             "startLng":-96.96,
             "startZoom":3,
-            "background":"#EDEDED";
+            "background":"#EDEDED",
             // global options
             // this string corresponds to options in RenderMap.js
             "tileSetLayer":"esri.shaded",
@@ -184,7 +189,7 @@
             "destVarL3":"meta.remote.loc_name",
             "filterVarL3":"l3edge",*/
         };
-        var canvas = document.createElement("map-canvas");
+        var canvas = document.createElement("esnet-map-canvas");
         var optionsElem = document.createElement('textarea');
         var dataElem = document.createElement('textarea');
 
