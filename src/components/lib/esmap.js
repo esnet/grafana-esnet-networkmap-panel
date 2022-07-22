@@ -438,7 +438,7 @@ function renderNodes(g, data, ref, layerId) {
     .attr('stroke', "black")
     .on('mouseover', function (event, d) {
       if(d.meta.template){
-        var text = renderTemplate(d.meta.template, d);
+        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
       } else {
         var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
         <p><b>In Volume: </b> ${d.inValue}</p>
