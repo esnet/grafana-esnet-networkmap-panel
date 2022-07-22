@@ -8,7 +8,7 @@ function resolveObjPath(path, obj, fallback = '') {
     return path.split('.').reduce((res, key) => res[key] || fallback, obj);
 }
 
-export default function render(template, variables, fallback) {
+export function render(template, variables, fallback) {
     return template.replace(TEMPLATE_REGEX, (match) => {
         const path = match.slice(2, -1).trim();
         return resolveObjPath(path, variables, fallback);

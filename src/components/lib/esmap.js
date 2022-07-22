@@ -6,7 +6,7 @@ const d3 = window['d3'] || d3_import;
 import * as React_import from "./react.js";
 // populate either with import or ES6 root-scope version
 const React = window['React'] || React_import;
-import * as renderTemplate from "./templates.js"
+import { render as renderTemplate } from "./templates.js"
 
 function createSvgMarker(svg) {
   //--- setup markers
@@ -296,14 +296,16 @@ function renderNodeControl(g, data, ref, layerId){
     })
     .on('mouseover', function (event, d) {
       if(d.meta.template){
-        var text = renderTemplate(d.meta.template, d);
+        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
       } else {
         var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
         <p><b>In Volume: </b> ${d.inValue}</p>
         <p><b>Out Volume: </b> ${d.outValue}</p>`;
       }
-
       PubSub.publish("showTooltip", text, ref.svg.node());
+    })
+    .on('mouseleave', function(){
+      PubSub.publish("hideTooltip", null, ref.svg.node());
     })
     .on('mouseenter', function () {
       ref.leafletMap.dragging.disable();
