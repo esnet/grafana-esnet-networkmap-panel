@@ -379,6 +379,134 @@ describe( "Class MapCanvas", () => {
         toggleContainers[i].style.display.should.equal("none");
       }
     });
+    it("should allow users to double click to remove edge control points", ()=>{
+      // get canvas
+      var canvas = document.querySelector("esnet-map-canvas");
+      // turn on editing mode
+      canvas.editingInterface.editMode = true;
+      // double click control point to remove
+      var beforeAllCps = canvas.querySelectorAll(".control.controlPoint")
+      var cp = canvas.querySelector(".control.controlPoint")
+      var clickEvent = new Event('dblclick', { bubbles: true })
+      cp.dispatchEvent(clickEvent);
+      // edge should have 2 control points
+      var canvas = document.querySelector("esnet-map-canvas");
+      canvas.editingInterface.editMode = true;
+      var afterAllCps = canvas.querySelectorAll(".control.controlPoint")
+      afterAllCps.length.should.be.lessThan(beforeAllCps.length)
+    })
+    it("should evenly space edge control points after node drag", ()=>{
+      // enter editing mode
+      var canvas = document.querySelector("esnet-map-canvas");
+      canvas.editingInterface.editMode = true;
+      // edge edit mode. Do some work adding vertices to the edge.
+      var edgeAC = document.querySelector(".control-for-A.control-for-C")
+      console.log("edgeAC is ", edgeAC);
+      var edgeACPos = edgeAC.getBoundingClientRect();
+      var clickEvents = [
+        new MouseEvent('dblclick', { bubbles: true, clientX: edgeACPos.x, clientY: edgeACPos.y, view: window }),
+        new MouseEvent('dblclick', { bubbles: true, clientX: edgeACPos.x, clientY: edgeACPos.y, view: window })
+      ]
+      // add vertices and check our work
+      var beforeAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
+      for(var i=0; i<clickEvents.length; i++){
+          edgeAC = document.querySelector(".control-for-A.control-for-C");
+          console.log(edgeAC);
+          console.log("dispatching ", clickEvents[0]);
+          edgeAC.dispatchEvent(clickEvents[i]);
+      }
+      var afterAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
+      afterAllCps.length.should.be.greaterThan(beforeAllCps.length)
+      var positionsBeforeDrag = [];
+      for(var i=0; i<afterAllCps.length; i++){
+        var rect = afterAllCps[i].getBoundingClientRect();
+        positionsBeforeDrag.push([rect.x, rect.y]);
+      }
+
+      // throw the signal for node edit mode
+      PubSub.publish("toggleNodeEdit", null, canvas);
+      var nodes = document.querySelectorAll("circle.control");
+      var nodeA = nodes[0];
+      var nodeC = nodes[2];
+
+
+      var originalNodeAPos = nodeA.getBoundingClientRect();
+      // compensate for radius
+      originalNodeAPos = {x: originalNodeAPos.x + 4, y: originalNodeAPos.y + 4};
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalNodeAPos.x, clientY: originalNodeAPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalNodeAPos.x + 10, clientY: originalNodeAPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalNodeAPos.x + 10, clientY: originalNodeAPos.y + 10, view: window })
+      // fire down
+      nodeA.dispatchEvent(downEvent);
+      // fire drag
+      nodeA.dispatchEvent(dragEvent);
+      // fire up
+      nodeA.dispatchEvent(upEvent);
+      // check node moved
+      var newPos = nodeA.getBoundingClientRect()
+      newPos = {x: newPos.x + 4, y: newPos.y + 4};
+      (newPos.x).should.be.approximately(originalNodeAPos.x + 10, 4);
+      (newPos.y).should.be.approximately(originalNodeAPos.y + 10, 4);
+
+
+      PubSub.publish("toggleEdgeEdit", null, canvas);
+      var afterAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
+      afterAllCps.length.should.be.greaterThan(beforeAllCps.length)
+      var positionsAfterDrag = [];
+      for(var i=0; i<afterAllCps.length; i++){
+        var rect = afterAllCps[i].getBoundingClientRect();
+        positionsAfterDrag.push([rect.x, rect.y]);
+      }
+      var positionCount = positionsBeforeDrag.length - 1;
+      // check that none of the node positions are the same
+      for(var i=0; i<positionCount; i++){
+        positionsAfterDrag[i][0].should.not.equal(positionsBeforeDrag[i][0]);
+        positionsAfterDrag[i][1].should.not.equal(positionsBeforeDrag[i][1]);
+      }
+      // except the last one in the array, the node that didn't move.
+      positionsAfterDrag[positionCount][0].should.equal(positionsBeforeDrag[positionCount][0]);
+      positionsAfterDrag[positionCount][1].should.equal(positionsBeforeDrag[positionCount][1]);
+      for(var i=1; i<positionCount; i++){
+        var deltaX = positionsAfterDrag[i][0] - positionsAfterDrag[i-1][0];
+        deltaX.should.equal(15);
+        var deltaY = positionsAfterDrag[i][1] - positionsAfterDrag[i-1][1];
+        deltaY.should.equal(-8);
+      }
+      // calculate x deltas for each position. they should all be 15.
+      // calculate y deltas for each position. they should all be xx.
+    });
+    it("should show the same tooltip on nodes and node control points", ()=>{
+      // get canvas
+      var canvas = document.querySelector("esnet-map-canvas");
+      // turn on editing mode
+      canvas.editingInterface.editMode = true;
+      // toggle node editing mode
+      // create hover event
+      // fire hover event on a control point
+      // get the tooltip text
+      // turn off editing mode
+      // fire hover event on a node
+      // get the tooltip text
+      // tooltip text before and after should be equal
+    })
+    it("should allow users to set the background color", ()=>{
+      // get canvas
+      var canvas = document.querySelector("esnet-map-canvas");
+      // set options to turn off background
+      // set option for background color
+      // check that background color is as expected
+    })
+    it("should allow users to toggle layer visibility", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      // find a layer toggle
+      // create click event
+      // fire click event on layer toggle
+      // layer should be invisible
+
+    })
     it("should allow users to style edges in all layers, even when some are not visible", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");

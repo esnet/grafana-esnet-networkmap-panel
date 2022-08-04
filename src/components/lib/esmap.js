@@ -171,6 +171,18 @@ function renderEdges(g, data, ref, layerId) {
   zaLines.exit().remove();
 }
 
+function deleteControlPoint(evt, d, obj, edgeData, ref){
+  for(var i=0; i<edgeData.latLngs.length; i++){
+    if(edgeData.latLngs[i] == d){
+      edgeData.latLngs.splice(i, 1);
+      PubSub.publish("updateMapTopology", ref.data, ref.svg.node());
+      PubSub.publish("refresh", null, ref.svg.node());
+      PubSub.publish("updateTopologyData", null, ref.svg.node());
+      break;
+    }
+  }
+}
+
 function addControlPoint(evt, obj, ref) {
 
   var mapDiv = ref.leafletMap.getContainer();
@@ -242,11 +254,17 @@ function renderNodeControl(g, data, ref, layerId){
           d.latLngs[idx][0] = ll.lat;
           d.latLngs[idx][1] = ll.lng;
           // and each of the other points (but not the endpoint);
-          var divisor = 1;
+          var totalCtrlPnts = d.latLngs.length - 1;
+          var latDelta = (ll.lat - d.latLngs[end][0]) / (totalCtrlPnts);
+          var lngDelta = (ll.lng - d.latLngs[end][1]) / (totalCtrlPnts);
           for(var i=(idx + step); i != end; i += step){
-            divisor++;
-            d.latLngs[i][0] = (ll.lat + d.latLngs[end][0]) / divisor;
-            d.latLngs[i][1] = (ll.lng + d.latLngs[end][1]) / divisor;
+            if(end > 0){
+              d.latLngs[i][0] = ll.lat - latDelta * i;
+              d.latLngs[i][1] = ll.lng - lngDelta * i;
+            } else {
+              d.latLngs[i][0] = d.latLngs[end][0] + latDelta * i;
+              d.latLngs[i][1] = d.latLngs[end][1] + lngDelta * i;
+            }
           }
         })
     // 
@@ -336,9 +354,11 @@ function renderEdgeControl(g, data, ref, layerId) {
     .attr('d', function (d) {
       return d.controlPointPath;
     })
-    .attr('class', function(d){
-      return 'control'
+    .attr('class', function (d) {
+      var connections = " control-for-"+d.name.split("--").join(" control-for-");
+      return 'control controlEddge edge-az-' + d.name + connections;
     })
+
     // still need to figure out how to not zoom when doubleclicking here
     .on('dblclick', function (d) {
       addControlPoint(d, this, ref);
@@ -389,7 +409,9 @@ function renderEdgeControl(g, data, ref, layerId) {
       .enter()
       .append('circle')
       .attr('r', 4)
-      .attr('class', 'control controlPoint')
+      .attr('class', function(d){
+        return 'control controlPoint control-point-for-edge-' + edgeData.name;
+      })
       .merge(feature)
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData); })
@@ -408,6 +430,9 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .on('mouseout', function () {
         ref.leafletMap.dragging.enable();
+      })
+      .on('dblclick', function (evt, d) {
+        deleteControlPoint(evt, d, this, edgeData, ref);
       })
       .on('mousedown', function(evt, d){
         PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
