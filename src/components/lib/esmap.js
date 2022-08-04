@@ -376,6 +376,7 @@ function renderEdgeControl(g, data, ref, layerId) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData) {
+    PubSub.publish("dragStarted", evt);
     PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
@@ -387,6 +388,14 @@ function renderEdgeControl(g, data, ref, layerId) {
   }
 
   function endDrag(evt, d, edgeData) {
+    if(!PubSub.last("dragStarted")){
+      // if the drag start event never fired,
+      // we have a no-op, and should return early
+      // to allow other downstream event handlers
+      // to run.
+      return
+    }
+    PubSub.clearLast("dragStarted");
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
     PubSub.publish("updateTopology", {
