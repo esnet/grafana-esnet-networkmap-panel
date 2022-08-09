@@ -61,43 +61,6 @@ https://localhost:3500/
 
 `index.html` contains a complete example to run this plugin in a native HTML context. 
 
-#### Imports:
-```
-    <script src="./src/components/lib/react.17.0.2.umd.js"></script>
-    <script type="module">
-        import "./src/components/lib/leaflet.global.js";
-    </script>
-    <script type="module">
-        import "./src/components/lib/d3.min.js"; 
-    </script>
-    <script type="module">
-        import "./src/components/MapCanvas.component.js";
-    </script>```
-
-```
-
-#### Minimal JSON Topology:
-```
-        var topology = {
-            "layer1":{ "edges":[], "nodes": [] },
-            "layer2":{ "edges":[], "nodes": [] },
-            "layer3":{ "edges":[], "nodes": [] },
-        }
-```
-
-
-#### Instantiate the Web Component (create a DOM element) and bind Topology and Options. Bind to DOM
-
-```
-        var canvas = document.createElement("esnet-map-canvas");
-        canvas.setAttribute('width', 800);
-        canvas.setAttribute('height', 400);
-        canvas.topology = topology;
-        canvas.options = options;
-        document.getElementById("mapContainer").append(canvas);        
-```
-
-
 #### Minimal Options JSON
 ```
         var options = {
@@ -144,6 +107,44 @@ https://localhost:3500/
             "legendL3":true,
         };
 ```
+
+
+#### Imports:
+```
+    <script src="./src/components/lib/react.17.0.2.umd.js"></script>
+    <script type="module">
+        import "./src/components/lib/leaflet.global.js";
+    </script>
+    <script type="module">
+        import "./src/components/lib/d3.min.js";
+    </script>
+    <script type="module">
+        import "./src/components/MapCanvas.component.js";
+    </script>```
+
+```
+
+#### Minimal JSON Topology:
+```
+        var topology = {
+            "layer1":{ "edges":[], "nodes": [] },
+            "layer2":{ "edges":[], "nodes": [] },
+            "layer3":{ "edges":[], "nodes": [] },
+        }
+```
+
+
+#### Instantiate the Web Component (create a DOM element) and bind Topology and Options. Bind to DOM
+
+```
+        var canvas = document.createElement("esnet-map-canvas");
+        canvas.setAttribute('width', 800);
+        canvas.setAttribute('height', 400);
+        canvas.topology = topology;
+        canvas.options = options;
+        document.getElementById("mapContainer").append(canvas);
+```
+
 
 #### JSON Schema
 ```
