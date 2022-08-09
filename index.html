@@ -17,7 +17,7 @@
         import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
         var parsedData = {};
         var lavender = "rgb(202, 149, 229)"
-        var mapData = {
+        var topology = {
             "layer1":{
                 "edges":[
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
@@ -140,17 +140,6 @@
             "pathOffsetL1":1.5,
             "layerName1":"Core Topology",
             "legendL1":true,
-            // unnecessary outside grafana context
-            /*"srcFieldL1":"meta.device_info.loc_name",
-            "dstFieldL1":"meta.remote.loc_name",
-            "inboundValueFieldL1":"Average values.in_bits.rate",
-            "outboundValueFieldL1":"Average values.out_bits.rate",
-            "dashboardVarL1":"edge",
-            "srcVarL1":"meta.device_info.loc_name",
-            "dstVarL1":"meta.remote.loc_name",
-            "destVarL1":"meta.remote.loc_name",
-            "filterVarL1":"l1edge",
-            "valFieldL1":"meta.org.short_name",*/
             // layer 2 rendering options
             "layer2":false,
             "endpointIdL2":"pops",
@@ -159,16 +148,6 @@
             "pathOffsetL2":3,
             "layerName2":"Site Topology",
             "legendL2":true,
-            // unnecessary outside grafana context
-            /*"srcFieldL2":"meta.device",
-            "dstFieldL2":"meta.org.short_name",
-            "inboundValueFieldL2":"Average values.in_bits.rate",
-            "outboundValueFieldL2":"Average values.out_bits.rate",
-            "dashboardVarL2":"l2edge",
-            "srcVarL2":"meta.device",
-            "dstVarL2":"meta.org.short_name",
-            "destVarL2":"meta.org.short_name",
-            "filterVarL2":"l2edge",*/
             // layer 3 rendering options
             "layer3":false,
             "endpointIdL3":"pops",
@@ -178,16 +157,6 @@
             "pathOffsetL3":1.5,
             "layerName3":"Peer Topology",
             "legendL3":true,
-            // unnecessary outside grafana context
-            /*"srcFieldL3":"meta.device",
-            "dstFieldL3":"meta.org.short_name",
-            "inboundValueFieldL3":"Average values.in_bits.rate",
-            "outboundValueFieldL3":"Average values.out_bits.rate",
-            "dashboardVarL3":"l3edge",
-            "srcVarL3":"meta.device_info.loc_name",
-            "dstVarL3":"meta.remote.loc_name",
-            "destVarL3":"meta.remote.loc_name",
-            "filterVarL3":"l3edge",*/
         };
         var canvas = document.createElement("esnet-map-canvas");
         var optionsElem = document.createElement('textarea');
@@ -195,7 +164,7 @@
 
         canvas.setAttribute('width', 800);
         canvas.setAttribute('height', 400);
-        canvas.topology = mapData;
+        canvas.topology = topology;
         canvas.options = options;
         canvas.updateOptions = function(options){
             optionsElem.value = JSON.stringify(options);

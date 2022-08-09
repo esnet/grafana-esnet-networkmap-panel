@@ -1,6 +1,7 @@
 import { FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName } from '@grafana/data';
 import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
+import { CustomTextArea } from './components/CustomTextArea';
 
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
@@ -137,14 +138,16 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: true,
   });
-  builder.addTextInput({
+  builder.addCustomEditor({
+    id: 'mapjsonL1',
     path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
     category: LayersCategory,
     showIf: layer1Bool(true),
     description: 'JSON with edges and nodes of network map',
-    defaultValue: '',
+    defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
+    editor: CustomTextArea,
   });
   builder.addColorPicker({
     path: 'color1',
@@ -160,7 +163,7 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     showIf: layer1Bool(true),
     description: 'The endpoint identifier in the meta data to match to the query',
-    defaultValue: 'router',
+    defaultValue: 'pops',
   });
   builder.addColorPicker({
     path: 'nodeHighlightL1',
@@ -214,14 +217,16 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: false,
   });
-  builder.addTextInput({
+  builder.addCustomEditor({
+    id: 'mapjsonL2',
     path: 'mapjsonL2',
     name: 'Layer 2 Map data (json)',
     category: LayersCategory,
+    showIf: layer1Bool(true),
     description: 'JSON with edges and nodes of network map',
-    showIf: layer2Bool(true),
-    defaultValue: '',
+    defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
+    editor: CustomTextArea,
   });
   builder.addColorPicker({
     path: 'color2',
@@ -237,7 +242,7 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     description: 'The endpoint identifier in the meta data to match to the query',
     showIf: layer2Bool(true),
-    defaultValue: 'router',
+    defaultValue: 'pops',
   });
   builder.addColorPicker({
     path: 'nodeHighlightL2',
@@ -292,14 +297,16 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: false,
   });
-  builder.addTextInput({
+  builder.addCustomEditor({
+    id: 'mapjsonL3',
     path: 'mapjsonL3',
     name: 'Layer 3 Map data (json)',
     category: LayersCategory,
+    showIf: layer1Bool(true),
     description: 'JSON with edges and nodes of network map',
-    showIf: layer3Bool(true),
-    defaultValue: '',
+    defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
+    editor: CustomTextArea,
   });
   builder.addColorPicker({
     path: 'color3',
@@ -315,7 +322,7 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     description: 'The endpoint identifier in the meta data to match to the query',
     showIf: layer3Bool(true),
-    defaultValue: 'router',
+    defaultValue: 'pops',
   });
   builder.addColorPicker({
     path: 'nodeHighlightL3',

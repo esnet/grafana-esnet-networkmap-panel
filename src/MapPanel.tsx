@@ -35,7 +35,7 @@ export class MapPanel extends Component<Props> {
     if (mapData.layer3 != null) {
       mapjsonL3 = JSON.stringify(sanitizeTopology(mapData.layer3));
     }
-    this.props.onOptionsChange({ ...options, mapjsonL1, mapjsonL2, mapjsonL3 });
+    this.props.onOptionsChange({ ...this.props.options, mapjsonL1, mapjsonL2, mapjsonL3 });
   };
 
   calculateOptionsChanges = () => {
@@ -180,7 +180,7 @@ export class MapPanel extends Component<Props> {
     PubSub.subscribe(
       'updateTopologyData',
       () => {
-        console.log(this.updateMapJson(this.mapCanvas.current['topology']));
+        this.updateMapJson(this.mapCanvas.current['topology']);
       },
       this.mapCanvas.current
     );
