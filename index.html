@@ -180,7 +180,7 @@
         }
         document.getElementById("mapContainer").append(canvas);
 
-        dataElem.value = JSON.stringify(mapData);
+        dataElem.value = JSON.stringify(topology);
         dataElem.style = "height: 300px; width: 300px;";
         dataElem.onChange = function(event){
             canvas.topology = JSON.parse(event.target.value);

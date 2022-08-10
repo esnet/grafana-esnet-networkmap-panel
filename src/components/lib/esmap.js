@@ -457,20 +457,24 @@ function renderNodes(g, data, ref, layerId) {
   feature
     .enter()
     .append('g')
+    .attr('class', 'node')
+    .attr('stroke-width', 0.25)
+    .attr('stroke', "black")
+    .append('g')
+    .attr('class', 'scale-container')
+    .attr('transform', "scale(1.0, 1.0)")
     .html(function(d){
       var circle = `<circle r='${ref.options["nodeWidthL"+layerId]}' />`
       return d.meta.svg || circle;
     })
-    .attr('class', 'node')
     .attr('text', function (d) {
       return d.name;
     })
     .attr('fill', function (d) {
       return d.color;
     })
-    .attr('stroke-width', 0.25)
-    .attr('stroke', "black")
     .on('mouseover', function (event, d) {
+      d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)")
       if(d.meta.template){
         var text = renderTemplate(d.meta.template, {"d": d, "self": d });
       } else {
@@ -481,7 +485,8 @@ function renderNodes(g, data, ref, layerId) {
 
       PubSub.publish("showTooltip", text, ref.svg.node());
     })
-    .on('mouseout', function (d) {
+    .on('mouseout', function (event, d) {
+      d3.select(event.target.parentElement).attr("transform", "scale(1.0, 1.0)")
       PubSub.publish("hideTooltip", null, ref.svg.node());
     })
     .select(function(d){
