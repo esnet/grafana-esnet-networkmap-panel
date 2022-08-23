@@ -3,6 +3,7 @@ export interface MapOptions {
   color1: string;
   color2: string;
   color3: string;
+  showSidebar: boolean;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;

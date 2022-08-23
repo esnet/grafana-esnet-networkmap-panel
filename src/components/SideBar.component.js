@@ -31,7 +31,8 @@ class SideBar extends BindableHTMLElement {
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
 
-  showTooltip(tooltip){
+  showTooltip(data){
+    var tooltip = data.text;
     var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");
     tooltipTarget.style.opacity = 1; // this gets set incorrectly at times.
     tooltipTarget.innerHTML = tooltip;

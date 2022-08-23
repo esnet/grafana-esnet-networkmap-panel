@@ -6,6 +6,7 @@ import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
+
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
 
@@ -36,6 +37,15 @@ export class MapCanvas extends HTMLElement {
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
     PubSub.subscribe('updateTopology', () => { this.updateTopology(this.topology) }, this);
+    PubSub.subscribe('getMapCenterAndZoom', (() => {
+      var self = this;
+      return () => {
+        PubSub.publish("returnMapCenterAndZoom", {
+          center: self.map.leafletMap.getBounds().getCenter(),
+          zoom: self.map.leafletMap.getZoom()
+        })
+      } 
+    })());
   }
 
   get topology() {
@@ -83,6 +93,20 @@ export class MapCanvas extends HTMLElement {
       this._options[k] = options[k];
     })
 
+    if(changed.indexOf('showSidebar') >= 0){
+      var edgeEditMode = this.editingInterface.edgeEditMode;
+      var nodeEditMode = this.editingInterface.nodeEditMode;
+      this.shadow.remove();
+      this.shadow = null;
+      this.render();
+      this.newMap();
+      if(edgeEditMode){
+        PubSub.publish("toggleEdgeEdit", edgeEditMode, this);
+      }
+      if(nodeEditMode){
+        PubSub.publish("toggleNodeEdit", nodeEditMode, this);
+      }
+    }
     if (
       changed.indexOf('tileSetLayer')>=0 ||
       changed.indexOf('boundaryLayer')>=0 ||
@@ -215,10 +239,11 @@ export class MapCanvas extends HTMLElement {
         ${leafletCss}
       </style>
 
+
       <div id='map'>
         <esnet-map-editing-interface></esnet-map-editing-interface>
       </div>
-      <esnet-map-side-bar></esnet-map-side-bar>`;
+      ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
       this.mapContainer = this.shadow.querySelector("#map");
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
@@ -227,14 +252,20 @@ export class MapCanvas extends HTMLElement {
       this.editingInterface.updateTopology = this.updateTopology;
 
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
-      this.sideBar.mapCanvas = this;
+      if(this.sideBar){
+        this.sideBar.mapCanvas = this;
+      }
     }
     this.renderStyle();
     if(this.height){
       this.mapContainer.style.height = this.height + 'px';
     }
     if(this.width){
-      this.mapContainer.style.width = (this.width * 0.80) - 5 + 'px';
+      if(this.options.showSidebar){
+        this.mapContainer.style.width = (this.width * 0.80) - 5 + 'px';
+      } else {
+        this.mapContainer.style.width = this.width + "px";
+      }
     }
     if(!this.map && this.options && this.topology){
       this.newMap();

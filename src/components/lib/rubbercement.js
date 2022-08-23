@@ -18,3 +18,52 @@ export class BindableHTMLElement extends HTMLElement {
         })
     }
 }
+
+export const utils = {
+    // excerpted from https://stackoverflow.com/questions/40710628/how-to-convert-snake-case-to-camelcase-in-my-app
+    "snakeToCamel": function(str){
+      return str.toLowerCase().replace(/([-_][a-z])/g, group =>
+        group
+          .toUpperCase()
+          .replace('-', '')
+          .replace('_', '')
+      );
+    }
+}
+
+
+export const types = {
+    "choiceAmong": function(choices, value){
+      return choices.indexOf(value) >= 0;
+    },
+    "boolean": function(value){
+        return choiceAmong(["true", 1, "yes", "True", true], value);
+    },
+    "string": function(value){
+        return String(value);
+    },
+    "number": function(value){
+        return Number(value);
+    },
+    "function": function(value){
+        return value;
+    }
+}
+
+
+const TEMPLATE_REGEX = /\${[^{}]+}/g;
+
+// copied from Matt Browne's answer https://stackoverflow.com/questions/29182244/convert-a-string-to-a-template-string
+// functions renamed slightly for readability
+
+//get the specified property or nested property of an object
+function resolveObjPath(path, obj, fallback = '') {
+    return path.split('.').reduce((res, key) => res[key] || fallback, obj);
+}
+
+export function render(template, variables, fallback) {
+    return template.replace(TEMPLATE_REGEX, (match) => {
+        const path = match.slice(2, -1).trim();
+        return resolveObjPath(path, variables, fallback);
+    });
+}

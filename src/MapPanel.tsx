@@ -15,11 +15,18 @@ export class MapPanel extends Component<Props> {
 
   constructor(props: Props) {
     super(props);
-    // ref approach... doesn't seem to want to work.
     this.mapCanvas = React.createRef();
     this.lastOptions = this.props.options;
     this.theme = createTheme();
+    PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
   }
+
+  updateCenter = (centerData) => {
+    const startLat = centerData.center.lat;
+    const startLng = centerData.center.lng;
+    const startZoom = centerData.zoom;
+    this.props.onOptionsChange({ ...this.props.options, startLat, startLng, startZoom });
+  };
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
@@ -47,6 +54,7 @@ export class MapPanel extends Component<Props> {
       'tileSetLayer',
       'boundaryLayer',
       'labelLayer',
+      'showSidebar',
 
       'layer1',
       'color1',

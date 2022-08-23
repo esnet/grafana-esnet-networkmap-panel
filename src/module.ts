@@ -2,6 +2,7 @@ import { FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplay
 import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
+import { CoordinateButton } from './components/CoordinateButton';
 
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
@@ -15,17 +16,32 @@ const layer3Bool = (layer3: boolean) => (config: MapOptions) => config.layer3 ==
 
 // -------------------- Network Map Panel Options --------------------
 plugin.setPanelOptions((builder) => {
-  builder.addNumberInput({
+  builder.addCustomEditor({
+    id: 'setLatLngZoom',
+    path: 'setLatLngZoom',
+    name: 'Set Default Latitude / Longitude / Zoom',
+    description:
+      'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
+    settings: { label: 'Set Lat/Lng & Zoom' },
+    editor: CoordinateButton,
+  });
+  builder.addCustomEditor({
+    id: 'startLat',
     path: 'startLat',
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
-    defaultValue: 42,
+    defaultValue: 39,
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
   });
-  builder.addNumberInput({
+  builder.addCustomEditor({
+    id: 'startLng',
     path: 'startLng',
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
-    defaultValue: -105,
+    defaultValue: -98,
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
   });
   builder.addSliderInput({
     path: 'startZoom',
@@ -129,6 +145,11 @@ plugin.setPanelOptions((builder) => {
         ]);
       },
     },
+  });
+  builder.addBooleanSwitch({
+    path: 'showSidebar',
+    name: 'Show Map Sidebar',
+    defaultValue: true,
   });
 
   // -------------------- Layer Options -------------------

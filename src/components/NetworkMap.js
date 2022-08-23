@@ -5,22 +5,24 @@ import * as utils from './lib/utils.js';
 
 // these imports are the result of very significant trial and error.
 // they allow ES6 browser imports to propagate, but also use static import
-// statements, without which some of these libraries (d3 in particular) 
+// statements, without which some of these libraries (d3 in particular)
 // will not function. This can also be accomplished using the `import()` function
 // but it causes the code to become complexly asynchronous. keeping these as
 // static imports allows the best balance of simplicity and functionality
 import * as d3_import from './lib/d3.min.js';
 // populate either with import or ES6 root-scope version
-const d3 = window['d3'] || d3_import; 
+const d3 = window['d3'] || d3_import;
 
 // dynamic import of modules that must be handled this way
 var locationService = { "partial": function(){ } }
 // require is only defined in the webpack context, not ES6
 var L = window['L'];
-if(typeof require !== "undefined"){
+try {
   var L = require('./lib/leaflet.js');
-  const m = require('@grafana/runtime');
-  locationService = m.locationService;
+  /*const m = require('@grafana/runtime');
+  locationService = m.locationService;*/
+} catch (e) {
+  console.log(e);
 }
 
 export default class NetworkMap {
@@ -74,30 +76,27 @@ export default class NetworkMap {
       setLocation[dashboardVariable] = [
           srcVariable + "|=|" + event.nodeA,
           dstVariable + "|=|" + event.nodeZ
-      ]        
+      ]
     }
 
     locationService.partial(setLocation, false)
   }
 
-  toggleEdgeEdit() {
-    if (!!this.esmap.editEdges) {
+  setEdgeEdit(bool){
       this.esmap.editNodeMode(false);
+      this.esmap.editEdgeMode(bool);
+  }
+  setNodeEdit(bool){
       this.esmap.editEdgeMode(false);
-    } else {
-      this.esmap.editNodeMode(false);
-      this.esmap.editEdgeMode(true);
-    }
+      this.esmap.editNodeMode(bool);
+  }
+
+  toggleEdgeEdit() {
+    this.setEdgeEdit(!this.esmap.editEdges);
   }
 
   toggleNodeEdit() {
-    if (!!this.esmap.editNodes) {
-      this.esmap.editEdgeMode(false);
-      this.esmap.editNodeMode(false);
-    } else {
-      this.esmap.editEdgeMode(false);
-      this.esmap.editNodeMode(true);
-    }
+    this.setNodeEdit(!this.esmap.editNodes);
   }
 
   renderMapLayers() {

@@ -1,4 +1,5 @@
-export const esmapCss = `.leaflet-pane > svg path {
+export const esmapCss = `
+.leaflet-pane > svg path {
     pointer-events: all;
 }
 
@@ -6,7 +7,13 @@ export const esmapCss = `.leaflet-pane > svg path {
   position: relative;
 }
 
+svg path.edge-az {
+  marker-start: url("#arrow");
+}
 
+svg path.edge-za {
+  marker-start: url("#arrow");
+}
 
 svg circle.node {
         /* fill: #999; */
@@ -21,23 +28,23 @@ svg path.edge {
         pointer-events: visiblePainted !important;
 }
 
-svg path.animated-edge {
-    stroke-linecap: butt;
-        stroke-width: 5;
-        /* stroke: #aaa; */
+svg path.animated-edge.edge-az {
+        stroke: transparent;
+        stroke-linecap: butt;
         fill:  none;
-    cursor: crosshair;
+        cursor: crosshair;
+}
 
-        stroke-dasharray:  90 10 ;
-        stroke-dashoffset: 100;
-        animation-name: dash;
-        animation-duration: 5s;
-        animation-timing-function: steps(25,start);
-        animation-delay: 0s;
-        animation-direction: forwards;
-        animation-iteration-count: infinite;
-        animation-play-state: running;
+svg path.animated-edge.edge-za {
+        stroke: transparent;
+        stroke-linecap: butt;
+        fill:  none;
+        cursor: crosshair;
+}
+svg path.animated-edge.edge-az.selected {
+}
 
+svg path.animated-edge.edge-za.selected {
 }
 
 @keyframes dash {
@@ -60,6 +67,26 @@ svg circle.controlPoint {
     stroke-width: 1;
         fill: #f80;
         cursor: move;
+}
+
+div.tooltip-hover {
+  position:absolute;
+  z-index:10000;
+  background: white;
+  border-radius:4px;
+  padding:10px;
+  margin:10px;
+  max-width:250px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+}
+
+div.tooltip-hover p:first-of-type {
+  margin-top:0;
+}
+
+div.tooltip-hover p {
+  margin-top: 6px;
+  margin-bottom:0;
 }
 
 div.sidebar-tooltip {   

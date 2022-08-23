@@ -6,47 +6,55 @@ const d3 = window['d3'] || d3_import;
 import * as React_import from "./react.js";
 // populate either with import or ES6 root-scope version
 const React = window['React'] || React_import;
-import { render as renderTemplate } from "./templates.js"
+import { render as renderTemplate } from "./rubbercement.js"
 
-function createSvgMarker(svg) {
-  //--- setup markers
-  var defs = svg.append('svg:defs').attr('id', 'markers');
+// functions to calculate bearings between two points
+// Converts from degrees to radians.
+function toRadians(degrees) {
+  return degrees * Math.PI / 180;
+};
 
-  //--- could not  this just be in a template somewhere?
-  var marker = defs
-    .selectAll('marker')
-    .data([
-      {
-        id: 2,
-        name: 'arrow',
-        path: 'M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z',
-        viewbox: '0 0 20 20',
-      },
-    ])
-    .enter()
-    .append('svg:marker')
-    .attr('id', function (d) {
-      return d.name;
-    })
-    .attr('markerHeight', 5)
-    .attr('markerWidth', 4)
-    .attr('markerUnits', 'strokeWidth')
-    .attr('orient', 'auto')
-    .attr('refX', 10)
-    .attr('refY', 10)
-    .attr('viewBox', function (d) {
-      return d.viewbox;
-    })
-    .append('svg:path')
-    .attr('d', function (d) {
-      return d.path;
-    })
-    .attr('fill', function (d, i) {
-      return '#333';
-    })
-    .attr('stroke', '#555') // color
-    .attr('stroke-width', 0.5);
-  return marker;
+// Converts from radians to degrees.
+function toDegrees(radians) {
+  return radians * 180 / Math.PI;
+}
+
+function bearingAngle(src, dest){
+  const deltaX = dest[0] - src[0];
+  const deltaY = dest[1] - src[1];
+
+  const slope = deltaY / deltaX;
+  const angleInRads = Math.atan(slope);
+  return toDegrees(angleInRads);
+}
+
+function pathCrawl(path, klass, color, edgeWidth){
+    var svgns = "http://www.w3.org/2000/svg";
+    //path.setAttribute("stroke", "transparent");
+    var totalDashWidth = 10;
+    for(var i=0; i<(path.getTotalLength() / totalDashWidth); i++){
+        var animStart = i/(path.getTotalLength()/totalDashWidth);
+        var animEnd = (i+1)/(path.getTotalLength()/totalDashWidth);
+        if(animStart >= 0 && animEnd < 1){
+          var value = path.getAttribute("d");
+          var dashWidth = edgeWidth * 1.2; // this will vary with the stroke width for the line
+          var rect = document.createElementNS(svgns, "polygon");
+          rect.setAttributeNS(null, "points", `${(totalDashWidth / 5 * 4)-(dashWidth/3)*2},${dashWidth} -${(dashWidth/3) * 2},${dashWidth} 0,0 -${(dashWidth/3) * 2},-${dashWidth} ${(totalDashWidth / 5 * 4)-(dashWidth/3)*2},-${dashWidth} ${(totalDashWidth / 5 * 4)},0`)
+          rect.setAttributeNS(null, "fill", color);
+          rect.setAttributeNS(null, "class", klass);
+          var anim = document.createElementNS(svgns, "animateMotion");
+          anim.setAttributeNS(null, "dur", "0.5s");
+          anim.setAttributeNS(null, "path", value);
+          anim.setAttributeNS(null, "class", "animation");
+          anim.setAttributeNS(null, "repeatCount", "indefinite");
+          anim.setAttributeNS(null, "keyPoints", `${animStart};${animEnd}`);
+          anim.setAttributeNS(null, "keyTimes", "0;1");
+          anim.setAttributeNS(null, "calcMode", "linear");
+          anim.setAttributeNS(null, "rotate", "auto");
+          rect.appendChild(anim);
+          path.parentElement.insertBefore(rect, path);
+        }
+    }
 }
 
 function renderEdges(g, data, ref, layerId) {
@@ -67,26 +75,34 @@ function renderEdges(g, data, ref, layerId) {
     .attr('stroke', function (d) {
       return d.azColor;
     })
-    .attr('marker-mid', function (d, i) {
-      return 'url(#arrow)';
-    })
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      var connections = " connects-to-"+d.name.split("--").join(" connects-to-");
-      return 'edge edge-az edge-az-' + d.name + connections;
+      var name = d.name.replaceAll(" ", "-");
+      var connections = " connects-to-"+name.split("--").join(" connects-to-");
+      var layerClass = ' l'+layerId;
+      return 'edge edge-az edge-az-' + name + connections + layerClass;
     })
     .attr('text', function (d) {
       return d.AZname;
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
+      var dashes = document.querySelectorAll(".dash-selected");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
+
+      var name = d.name.replaceAll(" ", "-");
+      pathCrawl(this, "dash-selected", d.azColor, edgeWidth);
+      pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor, edgeWidth);
+
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", d, ref.svg.node());
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
         .classed('edge', true);
-      d3.select(".edge-za-"+d.name)
+      d3.select(".edge-za-"+name)
         .classed('selected', true)
         .classed('animated-edge', true);
       d3.select(this)
@@ -95,17 +111,25 @@ function renderEdges(g, data, ref, layerId) {
         .classed('animated-edge', true);
     })
     .on('mouseover', function (event, d) {
+
+      pathCrawl(this, "dash-over", d.azColor, edgeWidth);
+
       d3.select(this).classed("animated-edge", true);
       var text = `<p><b>From:</b> ${ d.nodeA }</p>
         <p><b>To:</b>  ${ d.nodeZ }</p>
         <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
-      PubSub.publish("showTooltip", text, ref.svg.node());
+      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
-    .on('mouseout', function (d, i) {
+    .on('mouseout', function (event, d) {
+      d3.select(this).attr('stroke', d.azColor);
+      var dashes = document.querySelectorAll(".dash-over");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
-      PubSub.publish("hideTooltip", null, ref.svg.node());
     });
   azLines.exit().remove();
 
@@ -124,26 +148,36 @@ function renderEdges(g, data, ref, layerId) {
     .attr('stroke', function (d) {
       return d.zaColor;
     })
-    .attr('marker-mid', function (d, i) {
+    /*.attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
-    })
+    })*/
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      var connections = " connects-to-"+d.name.split("--").join(" connects-to-");
-      return 'edge edge-za edge-za-' + d.name + connections;
+      var name = d.name.replaceAll(" ", "-");
+      var connections = " connects-to-"+name.split("--").join(" connects-to-");
+      return 'edge edge-za edge-za-' + name + connections;
     })
     .attr('text', function (d) {
       return d.ZAname;
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
+      var dashes = document.querySelectorAll(".dash-selected");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
+      var name = d.name.replaceAll(" ", "-");
+
+      pathCrawl(this, "dash-selected", d.zaColor, edgeWidth);
+      pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.zaColor, edgeWidth);
+
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", d, ref.svg.node());
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
         .classed('edge', true);
-      d3.select(".edge-az-"+d.name)
+      d3.select(".edge-az-"+name)
         .classed('selected', true)
         .classed('animated-edge', true);
       d3.select(this)
@@ -151,22 +185,24 @@ function renderEdges(g, data, ref, layerId) {
         .classed('animated-edge', true);
     })
     .on('mouseover', function (event, d) {
+      pathCrawl(this, "dash-over", d.zaColor, edgeWidth);
+
       d3.select(this).classed("animated-edge", true);
       var text =
-        '<p><b>From:</b> ' +
-        d.nodeZ +
-        '</p><p><b>To:</b> ' +
-        d.nodeA +
-        '</p><p><b>Volume: </b> ' +
-        d.ZAdisplayValue +
-        '</p>';
-      PubSub.publish("showTooltip", text, ref.svg.node());
+        `<p><b>From:</b>  ${d.nodeZ}</p>
+        <p><b>To:</b>  ${d.nodeA}</p>
+        <p><b>Volume:</b> ${d.ZAdisplayValue}</p>`;
+      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
-    .on('mouseout', function (d, i) {
-      // don't stop animating if this component is selected
+    .on('mouseout', function (event, d) {
+      d3.select(this).attr('stroke', d.azColor);
+      var dashes = document.querySelectorAll(".dash-over");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
-      PubSub.publish("hideTooltip", null, ref.svg.node());
     });
   zaLines.exit().remove();
 }
@@ -249,7 +285,7 @@ function renderNodeControl(g, data, ref, layerId){
             idx = d.latLngs.length - 1;
             step = -1;
             end = 0;
-          } 
+          }
           // manipulate the point
           d.latLngs[idx][0] = ll.lat;
           d.latLngs[idx][1] = ll.lng;
@@ -267,7 +303,7 @@ function renderNodeControl(g, data, ref, layerId){
             }
           }
         })
-    // 
+    //
     //--- rerender stuff
     ref.update();
   }
@@ -320,7 +356,7 @@ function renderNodeControl(g, data, ref, layerId){
         <p><b>In Volume: </b> ${d.inValue}</p>
         <p><b>Out Volume: </b> ${d.outValue}</p>`;
       }
-      PubSub.publish("showTooltip", text, ref.svg.node());
+      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseleave', function(){
       PubSub.publish("hideTooltip", null, ref.svg.node());
@@ -355,8 +391,9 @@ function renderEdgeControl(g, data, ref, layerId) {
       return d.controlPointPath;
     })
     .attr('class', function (d) {
-      var connections = " control-for-"+d.name.split("--").join(" control-for-");
-      return 'control controlEddge edge-az-' + d.name + connections;
+      var name = d.name.replaceAll(" ", "-");
+      var connections = " control-for-"+name.split("--").join(" control-for-");
+      return 'control controlEddge edge-az-' + name + connections;
     })
 
     // still need to figure out how to not zoom when doubleclicking here
@@ -483,7 +520,7 @@ function renderNodes(g, data, ref, layerId) {
         <p><b>Out Volume: </b> ${d.outValue}</p>`;
       }
 
-      PubSub.publish("showTooltip", text, ref.svg.node());
+      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseout', function (event, d) {
       d3.select(event.target.parentElement).attr("transform", "scale(1.0, 1.0)")
@@ -595,16 +632,31 @@ export class EsMap {
     this.data = {};
     this.mapLayers = {};
     this.lineGen = d3.line().curve(curve);
-    this.editEdges = 0;
-    this.editNodes = 0;
+    this.editEdges = this.mapCanvas.editingInterface.editEdgeMode;
+    this.editNodes = this.mapCanvas.editingInterface.editNodeMode;
+    console.log(this.editEdges);
+    console.log(this.editNodes);
     this.div = div;
     this.options = this.mapCanvas.options;
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
     this.lastInteractedType = null; // "nodes" or "edges"
 
-    createSvgMarker(this.svg);
-
+    if(!this.mapCanvas.options.showSidebar){
+      PubSub.subscribe("showTooltip",function(data){
+        var elem = document.createElement("div");
+        elem.setAttribute("id", "tooltip-hover");
+        elem.setAttribute("class", "tooltip-hover");
+        elem.innerHTML = data.text;
+        elem.setAttribute("style", `top:${data.event.clientY+10}px; left:${data.event.clientX+10}px;`);
+        document.body.appendChild(elem);
+      },
+      this.svg.node())
+      PubSub.subscribe("hideTooltip",function(){
+        document.querySelector("#tooltip-hover").remove();
+      },
+      this.svg.node())
+    }
     //
     let self = this;
 
@@ -621,6 +673,10 @@ export class EsMap {
     PubSub.subscribe("updateOptions", updateOptions, this.svg.node());
 
     function clearSelection(){
+      var dashes = document.querySelectorAll(".dash-selected");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -641,7 +697,7 @@ export class EsMap {
 
     function deleteObject(object, type){
       if(object === null || type === null) return;
-      for(var i=1; i<=3; i++){ 
+      for(var i=1; i<=3; i++){
         if(!self.data["layer"+i]){
           continue;
         }
@@ -681,7 +737,7 @@ export class EsMap {
                 // if we are manipulating the "Z" end
                 // the index of the point we want is the last one
                 idx = d.latLngs.length - 1;
-              } 
+              }
               // manipulate the point
               d.latLngs[idx] = ll;
             })
