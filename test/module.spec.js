@@ -74,6 +74,7 @@ describe( "Class MapCanvas", () => {
             "startLat":38.68,
             "startLng":-96.96,
             "startZoom":3,
+            "showSidebar": true,
             "tileSetLayer":"esri.shaded",
             "boundaryLayer":null,
             "labelLayer":null,
@@ -136,7 +137,9 @@ describe( "Class MapCanvas", () => {
     it("should have a node vertex around (262, 194) with reference to the esnet-map-canvas's offset", ()=>{
       var map_coords = document.querySelector("esnet-map-canvas").getBoundingClientRect();
       // find the first circle in a "g.node". This should be the "A" node from topology
-      var node_coords = document.querySelectorAll("g.node > circle")[0].getBoundingClientRect();
+      var nodes = document.querySelectorAll("g.node > g.scale-container > circle");
+      console.log(nodes);
+      var node_coords = nodes[0].getBoundingClientRect();
 
       // at 800x400 canvas size, we expect the offset (from the esnet-map-canvas top-left) of the first node to be 262, 194
       const expected_x = 262;
@@ -160,7 +163,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should show a tooltip in the sidebar when a user hovers over a node", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var node = document.querySelector("g.node > circle");
+      var node = document.querySelector("g.node > g.scale-container > circle");
       // create a bubbling mouseover event
       let mouseoverEvent = new Event('mouseover', { bubbles: true });
       // fire the mouseover event on our demonstration node
@@ -222,7 +225,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should allow users to 'home' the map by clicking a button", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var node = document.querySelector("g.node > circle");
+      var node = document.querySelector("g.node > g.scale-container > circle");
       var originalPosition = node.getBoundingClientRect();
       var mouseOrigin = { x: originalPosition.x - 10, y: originalPosition.y - 10 };
 
@@ -238,14 +241,14 @@ describe( "Class MapCanvas", () => {
       var home_button = canvas.editingInterface.shadow.querySelector("#home_map")
       home_button.dispatchEvent(clickEvent);
       // verify that the point for the A node is back at original position (262, 194) w/r/t esnet-map-canvas (0,0)
-      node = document.querySelector("g.node > circle");
+      node = document.querySelector("g.node > g.scale-container > circle");
       var afterHomeClickPosition = node.getBoundingClientRect();
       afterHomeClickPosition.x.should.equal(originalPosition.x);
       afterHomeClickPosition.y.should.equal(originalPosition.y);
     });
     it("should allow users to toggle layers", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var node = document.querySelector("g.node > circle");
+      var node = document.querySelector("g.node > g.scale-container > circle");
       var nodeStyle = window.getComputedStyle(node);
       // verify that the point for the A node is visible
       nodeStyle.display.should.equal("inline");
