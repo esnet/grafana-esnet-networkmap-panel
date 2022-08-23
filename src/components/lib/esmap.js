@@ -60,6 +60,7 @@ function pathCrawl(path, klass, color, edgeWidth){
 function renderEdges(g, data, ref, layerId) {
   var div = ref.div;
   const edgeWidth = ref.options["edgeWidthL"+layerId];
+  const defaultEdgeColor = ref.options["color"+layerId];
   var azLines = g.selectAll('path.edge-az').data(data.edges);
   azLines
     .enter()
@@ -73,7 +74,7 @@ function renderEdges(g, data, ref, layerId) {
       return d.azPath;
     })
     .attr('stroke', function (d) {
-      return d.azColor;
+      return d.azColor ? d.azColor : defaultEdgeColor;
     })
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
@@ -93,8 +94,8 @@ function renderEdges(g, data, ref, layerId) {
       }
 
       var name = d.name.replaceAll(" ", "-");
-      pathCrawl(this, "dash-selected", d.azColor, edgeWidth);
-      pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor, edgeWidth);
+      pathCrawl(this, "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
+      pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
 
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", d, ref.svg.node());
@@ -112,7 +113,7 @@ function renderEdges(g, data, ref, layerId) {
     })
     .on('mouseover', function (event, d) {
 
-      pathCrawl(this, "dash-over", d.azColor, edgeWidth);
+      pathCrawl(this, "dash-over", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
 
       d3.select(this).classed("animated-edge", true);
       var text = `<p><b>From:</b> ${ d.nodeA }</p>
@@ -121,7 +122,7 @@ function renderEdges(g, data, ref, layerId) {
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseout', function (event, d) {
-      d3.select(this).attr('stroke', d.azColor);
+      d3.select(this).attr('stroke', d.azColor ? d.azColor : defaultEdgeColor);
       var dashes = document.querySelectorAll(".dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
@@ -146,7 +147,7 @@ function renderEdges(g, data, ref, layerId) {
       return d.zaPath;
     })
     .attr('stroke', function (d) {
-      return d.zaColor;
+      return d.zaColor ? d.zaColor : defaultEdgeColor;
     })
     /*.attr('marker-mid', function (d, i) {
       return 'url(#arrow)';
@@ -168,8 +169,8 @@ function renderEdges(g, data, ref, layerId) {
       }
       var name = d.name.replaceAll(" ", "-");
 
-      pathCrawl(this, "dash-selected", d.zaColor, edgeWidth);
-      pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.zaColor, edgeWidth);
+      pathCrawl(this, "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
+      pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
 
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", d, ref.svg.node());
@@ -185,7 +186,7 @@ function renderEdges(g, data, ref, layerId) {
         .classed('animated-edge', true);
     })
     .on('mouseover', function (event, d) {
-      pathCrawl(this, "dash-over", d.zaColor, edgeWidth);
+      pathCrawl(this, "dash-over", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
 
       d3.select(this).classed("animated-edge", true);
       var text =
@@ -195,7 +196,7 @@ function renderEdges(g, data, ref, layerId) {
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseout', function (event, d) {
-      d3.select(this).attr('stroke', d.azColor);
+      d3.select(this).attr('stroke', d.zaColor ? d.zaColor : defaultEdgeColor);
       var dashes = document.querySelectorAll(".dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
@@ -489,6 +490,7 @@ function renderEdgeControl(g, data, ref, layerId) {
 }
 
 function renderNodes(g, data, ref, layerId) {
+  const defaultNodeColor = ref.options["color"+layerId];
   var feature = g.selectAll('circle').data(data.nodes);
   var div = ref.div;
   feature
@@ -508,7 +510,7 @@ function renderNodes(g, data, ref, layerId) {
       return d.name;
     })
     .attr('fill', function (d) {
-      return d.color;
+      return d.color ? d.color : defaultNodeColor;
     })
     .on('mouseover', function (event, d) {
       d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)")

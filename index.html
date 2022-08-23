@@ -23,24 +23,18 @@
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                         "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":1,
                     },
                     {"name":"B--C","meta":{
                         "endpoint_identifiers":{"pops":["B","C"]}},
                         "latLngs":[[34.59,-96.06],[37.99,-93.86],[42.16,-93.95]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":1
                     },
                     {"name":"A--C","meta":{
                         "endpoint_identifiers":{"pops":["A","C"]}},
                         "latLngs":[[39.02,-105.99],[41.90,-100.72],[42.16,-93.95]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":1
                     }
                 ],
@@ -54,19 +48,16 @@
                                 "awardAmount": 10000,
                             },
                             "latLng":[39.027718840211605,-105.99609375000001],
-                            "color":lavender,
                         },
                         {
                             "name":"B",
                             "meta":{},
                             "latLng":[34.59704151614417,-96.064453125],
-                            "color":lavender,
                         },
                         {
                             "name":"C",
                             "meta":{},
                             "latLng":[42.16340342422403,-93.95507812500001],
-                            "color":lavender,
                         }
                 ],"aTest":0},
             "layer2":{
@@ -74,24 +65,18 @@
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                         "latLngs":[[49.02,-105.99],[45.81,-101.77],[44.59,-96.06]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":2,
                     },
                     {"name":"B--C","meta":{
                         "endpoint_identifiers":{"pops":["B","C"]}},
                         "latLngs":[[44.59,-96.06],[47.99,-93.86],[52.16,-93.95]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":2
                     },
                     {"name":"A--C","meta":{
                         "endpoint_identifiers":{"pops":["A","C"]}},
                         "latLngs":[[49.02,-105.99],[51.90,-100.72],[52.16,-93.95]],
                         "children":[],
-                        "azColor":lavender,
-                        "zaColor":lavender,
                         "layer":2
                     }
                 ],
@@ -100,25 +85,23 @@
                             "name":"A",
                             "meta":{},
                             "latLng":[49.027718840211605,-105.99609375000001],
-                            "color":lavender,
                         },
                         {
                             "name":"B",
                             "meta":{},
                             "latLng":[44.59704151614417,-96.064453125],
-                            "color":lavender,
                         },
                         {
                             "name":"C",
                             "meta":{},
                             "latLng":[52.16340342422403,-93.95507812500001],
-                            "color":lavender,
                         }
                 ],"aTest":0}};
         var options = {
             "startLat":38.68,
             "startLng":-96.96,
             "startZoom":3,
+            "showSidebar": false,
             "background":"#EDEDED",
             // global options
             // this string corresponds to options in RenderMap.js
@@ -134,6 +117,7 @@
             "pathOffset":3,
             // layer 1 rendering options
             "layer1":true,
+            "color1": lavender,
             "endpointIdL1":"pops",
             "nodeWidthL1":4,
             "edgeWidthL1":1.5,
@@ -142,6 +126,7 @@
             "legendL1":true,
             // layer 2 rendering options
             "layer2":false,
+            "color2": lavender,
             "endpointIdL2":"pops",
             "nodeWidthL2":5,
             "edgeWidthL2":3,
@@ -150,6 +135,7 @@
             "legendL2":true,
             // layer 3 rendering options
             "layer3":false,
+            "color3": lavender,
             "endpointIdL3":"pops",
             "nodeHighlightL3":"red",
             "nodeWidthL3":6.5,
