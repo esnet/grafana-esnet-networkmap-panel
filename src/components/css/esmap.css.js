@@ -77,7 +77,8 @@ div.tooltip-hover {
   padding:10px;
   margin:10px;
   max-width:250px;
-  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.3);
+  box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.2);
+  font-family: sans-serif;
 }
 
 div.tooltip-hover p:first-of-type {

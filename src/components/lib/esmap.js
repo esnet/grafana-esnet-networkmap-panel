@@ -804,7 +804,7 @@ export class EsMap {
     return this.editNodes;
   }
 
-  updateCoordinates(data) {
+  updateCoordinates(data, layerId) {
     var ref = this;
 
     var idx = 0;
@@ -847,10 +847,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.lineGen(offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+d.layer]));
+      d.azPath = ref.lineGen(offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+layerId]));
 
       //--- setup the zaPath
-      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+d.layer]));
+      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+layerId]));
     });
 
     //---swap out edge list with the filtered list
@@ -860,8 +860,10 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.leafletMap.dragging.enable();
+    var layerId = 0;
     for (const [name, data] of Object.entries(this.data)) {
-      this.updateCoordinates(data);
+      layerId++;
+      this.updateCoordinates(data, layerId);
     }
     var layerId = 0;
     for (const [name, g] of Object.entries(this.mapLayers)) {
