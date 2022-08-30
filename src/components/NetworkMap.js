@@ -14,13 +14,26 @@ import * as d3_import from './lib/d3.min.js';
 const d3 = window['d3'] || d3_import;
 
 // dynamic import of modules that must be handled this way
-var locationService = { "partial": function(){ } }
+// dynamic import of modules that must be handled this way
+var locationService = { "partial": function(query){
+    const location = new URL(window.location);
+    for(const key of Object.keys(query)){
+      if(query[key] === null || query[key] === undefined){
+        location.searchParams.delete(key)
+      } else {
+        location.searchParams.set(key, query[key]);
+      }
+    }
+    const updatedUrl = location.toString();
+    console.log('locationservice.partial', updatedUrl);
+    window.history.pushState(null, "", updatedUrl);
+} }
 // require is only defined in the webpack context, not ES6
 var L = window['L'];
 try {
   var L = require('./lib/leaflet.js');
-  /*const m = require('@grafana/runtime');
-  locationService = m.locationService;*/
+  const m = require('@grafana/runtime');
+  locationService = m.locationService;
 } catch (e) {
   console.log(e);
 }

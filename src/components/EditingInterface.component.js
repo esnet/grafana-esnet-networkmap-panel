@@ -129,9 +129,6 @@ class EditingInterface extends BindableHTMLElement {
     recalcPaths(){
         PubSub.publish('recalcPaths', null, this);
     }
-    homeMap(){
-        PubSub.publish('newMap', null, this);
-    }
     showAddNodeDialog(){
         this.selectedLayer = "layer1";
         this._selectedNode = null;
@@ -304,7 +301,7 @@ class EditingInterface extends BindableHTMLElement {
                     position: absolute;
                     z-index: 600;
                     margin-top: 12px;
-                    margin-left: 57px;
+                    margin-left: 109px;
                 }
                 .button-overlay > .button {
                    background: white;
@@ -510,9 +507,6 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class="button" id="home_map">
-                🏠
-              </div>
               <div class='button selected-only' id='clear_selection'">
                 &times; Clear Selection
               </div>
@@ -533,7 +527,6 @@ class EditingInterface extends BindableHTMLElement {
             </div>
             `;
           this.bindEvents({
-            "#home_map@onclick": this.homeMap,
             "#clear_selection@onclick": this.clearSelection,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,

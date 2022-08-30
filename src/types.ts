@@ -3,7 +3,13 @@ export interface MapOptions {
   color1: string;
   color2: string;
   color3: string;
+  mapCenterFromVars: boolean;
+  latitudeVar: string;
+  longitudeVar: string;
   showSidebar: boolean;
+  showViewControls: boolean;
+  enableScrolling: boolean;
+  enableEditing: boolean;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;

@@ -165,4 +165,24 @@ input:checked + .slider:before {
 .panel-header:hover {
   z-index: 1000;
 }
+
+.home-overlay {
+    position: absolute;
+    z-index: 600;
+    margin-top: 12px;
+    margin-left: 57px;
+}
+.home-overlay > .button {
+   background: white;
+   border-radius: 4px;
+   padding: 5px 10px;
+   margin-right: 5px;
+   box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
+   border: 1px solid #b3b3b3;
+   display: inline-block;
+   cursor: pointer;
+}
+.home-overlay > .button:hover {
+    background: #EEE;
+}
 `

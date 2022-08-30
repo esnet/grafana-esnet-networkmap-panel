@@ -95,7 +95,7 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName1 || "Layer 1" }</text>
-          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
             JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer1[0]) ? "valid" : "invalid" }
           </div>
         </div>
@@ -106,7 +106,7 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName2 || "Layer 2" }</text>
-          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
             JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer2[0]) ? "valid" : "invalid" }
           </div>
         </div>
@@ -117,7 +117,7 @@ class SideBar extends BindableHTMLElement {
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layerName3 || "Layer 3" }</text>
-          <div class="legend-text small" style="${!this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
             JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer3[0]) ? "valid" : "invalid" }
           </div>
         </div>

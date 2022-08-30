@@ -7,21 +7,91 @@ import { CoordinateButton } from './components/CoordinateButton';
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
 const LegendCategory = ['Legend options'];
+const ViewCategory = ['View options'];
 const QueryCategory = ['Ad-hoc Query Variable Bindings'];
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
-const layer1Bool = (layer1: boolean) => (config: MapOptions) => config.layer1 === layer1;
-const layer2Bool = (layer2: boolean) => (config: MapOptions) => config.layer2 === layer2;
-const layer3Bool = (layer3: boolean) => (config: MapOptions) => config.layer3 === layer3;
+
+function checkBool(settingName: string, value: boolean) {
+  return function (config: MapOptions) {
+    return config[settingName] === value;
+  };
+}
 
 // -------------------- Network Map Panel Options --------------------
 plugin.setPanelOptions((builder) => {
+  builder.addBooleanSwitch({
+    path: 'mapCenterFromVars',
+    name: 'Set Map Center from Variables',
+    defaultValue: false,
+  });
+  builder.addSelect({
+    path: 'latitudeVar',
+    name: 'Latitude Variable',
+    description: 'Select a dashboard or query variable to set initial latitude of map',
+    showIf: checkBool('mapCenterFromVars', true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context !== undefined && context.getSuggestions) {
+          const suggestions: any[] = context.getSuggestions();
+          suggestions.forEach((suggestion: any) => {
+            options.push(suggestion);
+          });
+        }
+        if (context && context.data) {
+          for (const frame of context.data) {
+            const frameName = frame.refId;
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: '[' + frameName + '] ' + name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
+  builder.addSelect({
+    path: 'longitudeVar',
+    name: 'Longitude Variable',
+    description: 'Select a dashboard or query variable to set initial latitude of map',
+    showIf: checkBool('mapCenterFromVars', true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        const options: any[] = [];
+        if (context !== undefined && context.getSuggestions) {
+          const suggestions: any[] = context.getSuggestions();
+          suggestions.forEach((suggestion: any) => {
+            options.push(suggestion);
+          });
+        }
+        if (context && context.data) {
+          for (const frame of context.data) {
+            const frameName = frame.refId;
+            for (const field of frame.fields) {
+              const name = getFieldDisplayName(field, frame, context.data);
+              const value = name;
+              options.push({ value, label: '[' + frameName + '] ' + name });
+            }
+          }
+        }
+        return Promise.resolve(options);
+      },
+    },
+  });
   builder.addCustomEditor({
     id: 'setLatLngZoom',
     path: 'setLatLngZoom',
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
+    showIf: checkBool('mapCenterFromVars', false),
     settings: { label: 'Set Lat/Lng & Zoom' },
     editor: CoordinateButton,
   });
@@ -30,6 +100,7 @@ plugin.setPanelOptions((builder) => {
     path: 'startLat',
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
+    showIf: checkBool('mapCenterFromVars', false),
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
     editor: CustomTextArea,
@@ -39,6 +110,7 @@ plugin.setPanelOptions((builder) => {
     path: 'startLng',
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
+    showIf: checkBool('mapCenterFromVars', false),
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
     editor: CustomTextArea,
@@ -146,9 +218,33 @@ plugin.setPanelOptions((builder) => {
       },
     },
   });
+
   builder.addBooleanSwitch({
     path: 'showSidebar',
     name: 'Show Map Sidebar',
+    description: 'Show sidebar. If hidden, tooltips will appear on hover.',
+    category: ViewCategory,
+    defaultValue: true,
+  });
+  builder.addBooleanSwitch({
+    path: 'showViewControls',
+    name: 'Show View Controls',
+    description: 'show zoom in/out and "home" button',
+    category: ViewCategory,
+    defaultValue: true,
+  });
+  builder.addBooleanSwitch({
+    path: 'enableScrolling',
+    name: 'Enable Map Scrolling on Drag',
+    description: 'allows user to scroll map on drag',
+    category: ViewCategory,
+    defaultValue: true,
+  });
+  builder.addBooleanSwitch({
+    path: 'enableEditing',
+    name: 'Enable Map Editing',
+    description: 'Enable map editing controls in edit mode',
+    category: ViewCategory,
     defaultValue: true,
   });
 
@@ -164,7 +260,7 @@ plugin.setPanelOptions((builder) => {
     path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -174,7 +270,7 @@ plugin.setPanelOptions((builder) => {
     path: 'color1',
     name: 'Layer 1 Default color',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     description: 'The default color for nodes and links on Layer 1',
     defaultValue: 'grey',
   });
@@ -182,7 +278,7 @@ plugin.setPanelOptions((builder) => {
     path: 'endpointIdL1',
     name: 'Layer 1 Endpoint Identifier',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     description: 'The endpoint identifier in the meta data to match to the query',
     defaultValue: 'pops',
   });
@@ -190,7 +286,7 @@ plugin.setPanelOptions((builder) => {
     path: 'nodeHighlightL1',
     name: 'Layer 1 Node highlight color',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     description: 'The color to highlight nodes that match the query',
     defaultValue: 'red',
   });
@@ -198,7 +294,7 @@ plugin.setPanelOptions((builder) => {
     path: 'nodeWidthL1',
     name: 'Layer 1 Node Size',
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     defaultValue: 5,
     settings: {
       min: 1,
@@ -211,7 +307,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 1 Edge Width',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     settings: {
       min: 1,
       max: 15,
@@ -224,7 +320,7 @@ plugin.setPanelOptions((builder) => {
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     settings: {
       min: 1,
       max: 15,
@@ -243,7 +339,7 @@ plugin.setPanelOptions((builder) => {
     path: 'mapjsonL2',
     name: 'Layer 2 Map data (json)',
     category: LayersCategory,
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -253,7 +349,7 @@ plugin.setPanelOptions((builder) => {
     path: 'color2',
     name: 'Layer 2 Default color',
     category: LayersCategory,
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     description: 'The default color for nodes and links on Layer 2',
     defaultValue: 'grey',
   });
@@ -262,7 +358,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 Endpoint Identifier',
     category: LayersCategory,
     description: 'The endpoint identifier in the meta data to match to the query',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     defaultValue: 'pops',
   });
   builder.addColorPicker({
@@ -270,14 +366,14 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 Node highlight color',
     category: LayersCategory,
     description: 'The color to highlight nodes that match the query',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     defaultValue: 'red',
   });
   builder.addSliderInput({
     path: 'nodeWidthL2',
     name: 'Layer 2 Node Size',
     category: LayersCategory,
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     defaultValue: 5,
     settings: {
       min: 1,
@@ -290,7 +386,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 2 Edge Width',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     settings: {
       min: 1,
       max: 15,
@@ -303,7 +399,7 @@ plugin.setPanelOptions((builder) => {
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     settings: {
       min: 1,
       max: 15,
@@ -323,7 +419,7 @@ plugin.setPanelOptions((builder) => {
     path: 'mapjsonL3',
     name: 'Layer 3 Map data (json)',
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -333,7 +429,7 @@ plugin.setPanelOptions((builder) => {
     path: 'color3',
     name: 'Layer 3 Default color',
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     description: 'The default color for nodes and links on Layer 3',
     defaultValue: 'grey',
   });
@@ -342,7 +438,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Endpoint Identifier',
     category: LayersCategory,
     description: 'The endpoint identifier in the meta data to match to the query',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     defaultValue: 'pops',
   });
   builder.addColorPicker({
@@ -350,14 +446,14 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Node highlight color',
     category: LayersCategory,
     description: 'The color to highlight nodes that match the query',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     defaultValue: 'red',
   });
   builder.addSliderInput({
     path: 'nodeWidthL3',
     name: 'Layer 3 Node Size',
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     defaultValue: 5,
     settings: {
       min: 1,
@@ -370,7 +466,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Edge Width',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     settings: {
       min: 1,
       max: 15,
@@ -383,7 +479,7 @@ plugin.setPanelOptions((builder) => {
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
     category: LayersCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     settings: {
       min: 1,
       max: 15,
@@ -397,7 +493,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 1 Source Field',
     description: 'Select the field to match source nodes',
     category: FieldsCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     settings: {
       allowCustomValue: false,
       options: [],
@@ -422,7 +518,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 1 Destination Field',
     description: 'Select the field to match destination nodes',
     category: FieldsCategory,
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     settings: {
       allowCustomValue: false,
       options: [],
@@ -446,7 +542,7 @@ plugin.setPanelOptions((builder) => {
     path: 'inboundValueFieldL1',
     name: 'Layer 1 Inbound Value Field',
     description: 'Select the field to use for A-Z traffic values',
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -471,7 +567,7 @@ plugin.setPanelOptions((builder) => {
     path: 'outboundValueFieldL1',
     name: 'Layer 1 Outbound Value Field',
     description: 'Select the field to use for Z-A traffic values',
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -496,7 +592,7 @@ plugin.setPanelOptions((builder) => {
     path: 'srcFieldL2',
     name: 'Layer 2 Source Field',
     description: 'Select the field to match source nodes',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -521,7 +617,7 @@ plugin.setPanelOptions((builder) => {
     path: 'dstFieldL2',
     name: 'Layer 2 Destination Field',
     description: 'Select the field to match destination nodes',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -546,7 +642,7 @@ plugin.setPanelOptions((builder) => {
     path: 'inboundValueFieldL2',
     name: 'Layer 2 Inbound Value Field',
     description: 'Select the field to use for A-Z traffic values',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -571,7 +667,7 @@ plugin.setPanelOptions((builder) => {
     path: 'outboundValueFieldL2',
     name: 'Layer 2 Outbound Value Field',
     description: 'Select the field to use for Z-A traffic values',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -597,7 +693,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Source Field',
     description: 'Select the field to match source nodes',
     category: FieldsCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     settings: {
       allowCustomValue: false,
       options: [],
@@ -622,7 +718,7 @@ plugin.setPanelOptions((builder) => {
     name: 'Layer 3 Destination Field',
     description: 'Select the field to match destination nodes',
     category: FieldsCategory,
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     settings: {
       allowCustomValue: false,
       options: [],
@@ -646,7 +742,7 @@ plugin.setPanelOptions((builder) => {
     path: 'inboundValueFieldL3',
     name: 'Layer 3 Inbound Value Field',
     description: 'Select the field to use for A-Z traffic values',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -671,7 +767,7 @@ plugin.setPanelOptions((builder) => {
     path: 'outboundValueFieldL3',
     name: 'Layer 3 Outbound Value Field',
     description: 'Select the field to use for Z-A traffic values',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     category: FieldsCategory,
     settings: {
       allowCustomValue: false,
@@ -696,63 +792,63 @@ plugin.setPanelOptions((builder) => {
   builder.addTextInput({
     path: 'dashboardVarL1',
     name: 'Layer 1 Dashboard Variable',
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     category: QueryCategory,
     defaultValue: 'l1edge',
   });
   builder.addTextInput({
     path: 'srcVarL1',
     name: 'Binding: Edge "Source" Layer 1',
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     category: QueryCategory,
     defaultValue: 'meta.device_info.loc_name',
   });
   builder.addTextInput({
     path: 'dstVarL1',
     name: 'Binding: Edge "Destination" Layer 1',
-    showIf: layer1Bool(true),
+    showIf: checkBool('layer1', true),
     category: QueryCategory,
     defaultValue: 'meta.remote.loc_name',
   });
   builder.addTextInput({
     path: 'dashboardVarL2',
     name: 'Layer 2 Dashboard Variable',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: QueryCategory,
     defaultValue: 'l2edge',
   });
   builder.addTextInput({
     path: 'srcVarL2',
     name: 'Binding: Edge "Source" Layer 2',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: QueryCategory,
     defaultValue: 'meta.device',
   });
   builder.addTextInput({
     path: 'dstVarL2',
     name: 'Binding: Edge "Destination" Layer 2',
-    showIf: layer2Bool(true),
+    showIf: checkBool('layer2', true),
     category: QueryCategory,
     defaultValue: 'meta.org.short_name',
   });
   builder.addTextInput({
     path: 'dashboardVarL3',
     name: 'Layer 3 Dashboard Variable',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     category: QueryCategory,
     defaultValue: 'l3edge',
   });
   builder.addTextInput({
     path: 'srcVarL3',
     name: 'Binding: Edge "Source" Layer 3',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     category: QueryCategory,
     defaultValue: 'meta.device_info.loc_name',
   });
   builder.addTextInput({
     path: 'dstVarL3',
     name: 'Binding: Edge "Destination" Layer 3',
-    showIf: layer3Bool(true),
+    showIf: checkBool('layer3', true),
     category: QueryCategory,
     defaultValue: 'meta.remote.loc_name',
   });

@@ -363,10 +363,10 @@ function renderNodeControl(g, data, ref, layerId){
       PubSub.publish("hideTooltip", null, ref.svg.node());
     })
     .on('mouseenter', function () {
-      ref.leafletMap.dragging.disable();
+      ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.disable();
     })
     .on('mouseout', function () {
-      ref.leafletMap.dragging.enable();
+      ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
       PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref.svg.node());
@@ -403,10 +403,10 @@ function renderEdgeControl(g, data, ref, layerId) {
     })
     //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
     .on('mouseenter', function () {
-      ref.leafletMap.dragging.disable();
+      ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.disable();
     })
     .on('mouseout', function () {
-      ref.leafletMap.dragging.enable();
+      ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
     });
 
   lines.exit().remove();
@@ -473,10 +473,10 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
       .on('mouseenter', function () {
-        ref.leafletMap.dragging.disable();
+        ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.disable();
       })
       .on('mouseout', function () {
-        ref.leafletMap.dragging.enable();
+        ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
       })
       .on('dblclick', function (evt, d) {
         deleteControlPoint(evt, d, this, edgeData, ref);
@@ -634,8 +634,8 @@ export class EsMap {
     this.data = {};
     this.mapLayers = {};
     this.lineGen = d3.line().curve(curve);
-    this.editEdges = this.mapCanvas.editingInterface.editEdgeMode;
-    this.editNodes = this.mapCanvas.editingInterface.editNodeMode;
+    this.editEdges = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editEdgeMode;
+    this.editNodes = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editNodeMode;
     console.log(this.editEdges);
     console.log(this.editNodes);
     this.div = div;
@@ -859,7 +859,7 @@ export class EsMap {
 
   //--- loop through data and map objects and refresh them
   update() {
-    this.leafletMap.dragging.enable();
+    this.mapCanvas.options.enableScrolling && this.leafletMap.dragging.enable();
     var layerId = 0;
     for (const [name, data] of Object.entries(this.data)) {
       layerId++;

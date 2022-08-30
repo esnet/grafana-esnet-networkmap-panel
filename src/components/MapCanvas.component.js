@@ -6,6 +6,7 @@ import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
+import { BindableHTMLElement } from './lib/rubbercement.js'
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -17,7 +18,7 @@ if(typeof require !== "undefined"){
 
 
 // web component
-export class MapCanvas extends HTMLElement {
+export class MapCanvas extends BindableHTMLElement {
 
   constructor() {
     super();
@@ -93,13 +94,27 @@ export class MapCanvas extends HTMLElement {
       this._options[k] = options[k];
     })
 
-    if(changed.indexOf('showSidebar') >= 0){
-      var edgeEditMode = this.editingInterface.edgeEditMode;
-      var nodeEditMode = this.editingInterface.nodeEditMode;
+    function wasChanged(option, changes){
+      return changes.indexOf(option) >= 0;
+    }
+
+    if(
+        wasChanged('showSidebar', changed) ||
+        wasChanged('showViewControls', changed) ||
+        wasChanged('enableEditing', changed) ||
+        wasChanged('enableScrolling', changed)
+      ){
       this.shadow.remove();
       this.shadow = null;
       this.render();
       this.newMap();
+
+      var edgeEditMode = false;
+      var nodeEditMode = false;
+      if(this.editingInterface){
+        edgeEditMode = this.editingInterface.edgeEditMode;
+        nodeEditMode = this.editingInterface.nodeEditMode;
+      }
       if(edgeEditMode){
         PubSub.publish("toggleEdgeEdit", edgeEditMode, this);
       }
@@ -108,15 +123,15 @@ export class MapCanvas extends HTMLElement {
       }
     }
     if (
-      changed.indexOf('tileSetLayer')>=0 ||
-      changed.indexOf('boundaryLayer')>=0 ||
-      changed.indexOf('labelLayer')>=0
+      wasChanged('tileSetLayer', changed) ||
+      wasChanged('boundaryLayer', changed) ||
+      wasChanged('labelLayer', changed)
     ) {
       this.newMap();
     } else {
       this.map && this.map.renderMap();
     }
-    if(changed.indexOf('background')>=0){
+    if(wasChanged('background', changed)){
       this.renderStyle();
     }
     this.sideBar && this.sideBar.render();
@@ -159,6 +174,7 @@ export class MapCanvas extends HTMLElement {
   }
   getCurrentLeafletMap(){
     if(!this.leafletMap){
+      var centerCoords = [this._options.resolvedLat || this._options.startLat, this._options.resolvedLng || this._options.startLng];
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
@@ -167,7 +183,9 @@ export class MapCanvas extends HTMLElement {
           scrollWheelZoom: false,
           doubleClickZoom: false,
           keyboard: false,
-        }).setView([this._options.startLat, this._options.startLng], this._options.startZoom);
+          dragging: this._options.enableScrolling,
+          zoomControl: this._options.showViewControls,
+        }).setView(centerCoords, this._options.startZoom);
         if(this._options.tileSetLayer){
           L.tileLayer(
             maplayers.TILESETS[this._options.tileSetLayer].url,
@@ -241,15 +259,22 @@ export class MapCanvas extends HTMLElement {
 
 
       <div id='map'>
-        <esnet-map-editing-interface></esnet-map-editing-interface>
+        <div class='home-overlay'>
+            <div class="button" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
+              🏠
+            </div>
+        </div>
+        ${ this.options.enableEditing ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
       </div>
       ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
       this.mapContainer = this.shadow.querySelector("#map");
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
-      this.editingInterface.mapCanvas = this;
-      this.editingInterface.topology = this.topology;
-      this.editingInterface.updateTopology = this.updateTopology;
+      if(this.editingInterface){
+        this.editingInterface.mapCanvas = this;
+        this.editingInterface.topology = this.topology;
+        this.editingInterface.updateTopology = this.updateTopology;
+      }
 
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       if(this.sideBar){
@@ -272,6 +297,9 @@ export class MapCanvas extends HTMLElement {
     }
 
     this.map && this.map.renderMap();
+    this.bindEvents({
+      "#home_map@onclick": this.newMap,
+    })
   }
 
   // connect component

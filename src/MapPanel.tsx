@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme } from '@grafana/data';
+import { PanelProps, createTheme, DataFrameView } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
@@ -55,6 +55,9 @@ export class MapPanel extends Component<Props> {
       'boundaryLayer',
       'labelLayer',
       'showSidebar',
+      'showViewControls',
+      'enableScrolling',
+      'enableEditing',
 
       'layer1',
       'color1',
@@ -213,8 +216,47 @@ export class MapPanel extends Component<Props> {
     }
   }
 
+  resolveLatLngFromVars(options, data) {
+    var output = {
+      resolvedLat: 0,
+      resolvedLng: 0,
+    };
+    if (this.props.options.mapCenterFromVars) {
+      var frames: any[];
+      frames = data.series.map((series) => {
+        return new DataFrameView(series);
+      });
+      const toResolve = {
+        latitudeVar: 'resolvedLat',
+        longitudeVar: 'resolvedLng',
+      };
+      Object.keys(toResolve).forEach((variableName) => {
+        const resolvedName = toResolve[variableName];
+        // if the latitudeVar has the string "__data.fields"
+        if (options[variableName].indexOf('__data.fields') >= 0) {
+          let fieldName = this.props.options[variableName].split('"')[1];
+          for (var i = 0; i < frames.length; i++) {
+            var frameFields = Object.keys(frames[i].fields);
+            if (frameFields.indexOf(fieldName) >= 0) {
+              var buffer = frames[i].fields[fieldName].values.buffer;
+              output[resolvedName] = buffer[buffer.length - 1];
+              break;
+            }
+          }
+        } else {
+          // otherwise we're looking up the value from a dashboard variable...
+          throw new Error('Looking up lat/lng values from dashboard variables is not implemented');
+        }
+      });
+    }
+    return output;
+  }
+
   render() {
-    const { options, width, height } = this.props;
+    const { options, width, height, data } = this.props;
+    const output = this.resolveLatLngFromVars(options, data);
+    options['resolvedLat'] = output['resolvedLat'];
+    options['resolvedLng'] = output['resolvedLng'];
     return React.createElement('esnet-map-canvas', {
       options: JSON.stringify(options),
       width: width,
