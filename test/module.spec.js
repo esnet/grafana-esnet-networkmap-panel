@@ -75,6 +75,9 @@ describe( "Class MapCanvas", () => {
             "startLng":-96.96,
             "startZoom":3,
             "showSidebar": true,
+            "showViewControls": true,
+            "enableScrolling": true,
+            "enableEditing": true,
             "tileSetLayer":"esri.shaded",
             "boundaryLayer":null,
             "labelLayer":null,
@@ -238,7 +241,7 @@ describe( "Class MapCanvas", () => {
       afterDragPosition.y.should.not.equal(originalPosition.y);
       // click the home button
       var clickEvent = new Event('click', { bubbles: true })
-      var home_button = canvas.editingInterface.shadow.querySelector("#home_map")
+      var home_button = canvas.shadow.querySelector("#home_map")
       home_button.dispatchEvent(clickEvent);
       // verify that the point for the A node is back at original position (262, 194) w/r/t esnet-map-canvas (0,0)
       node = document.querySelector("g.node > g.scale-container > circle");
