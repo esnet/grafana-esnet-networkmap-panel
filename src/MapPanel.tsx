@@ -216,7 +216,7 @@ export class MapPanel extends Component<Props> {
     }
   }
 
-  resolveLatLngFromVars(options, data) {
+  resolveLatLngFromVars(options, data, replaceVariables) {
     var output = {
       resolvedLat: 0,
       resolvedLng: 0,
@@ -233,19 +233,21 @@ export class MapPanel extends Component<Props> {
       Object.keys(toResolve).forEach((variableName) => {
         const resolvedName = toResolve[variableName];
         // if the latitudeVar has the string "__data.fields"
+        var fieldName = options[variableName];
         if (options[variableName].indexOf('__data.fields') >= 0) {
-          let fieldName = this.props.options[variableName].split('"')[1];
-          for (var i = 0; i < frames.length; i++) {
-            var frameFields = Object.keys(frames[i].fields);
-            if (frameFields.indexOf(fieldName) >= 0) {
-              var buffer = frames[i].fields[fieldName].values.buffer;
-              output[resolvedName] = buffer[buffer.length - 1];
-              break;
-            }
+          fieldName = this.props.options[variableName].split('"')[1];
+        }
+        var candidateVal = parseInt(replaceVariables(fieldName));
+        if(!isNan(candidateVal)){
+          output[resolvedName] = candidateVal;
+        }
+        for (var i = 0; i < frames.length; i++) {
+          var frameFields = Object.keys(frames[i].fields);
+          if (frameFields.indexOf(fieldName) >= 0) {
+            var buffer = frames[i].fields[fieldName].values.buffer;
+            output[resolvedName] = buffer[buffer.length - 1];
+            break;
           }
-        } else {
-          // otherwise we're looking up the value from a dashboard variable...
-          throw new Error('Looking up lat/lng values from dashboard variables is not implemented');
         }
       });
     }
@@ -253,8 +255,8 @@ export class MapPanel extends Component<Props> {
   }
 
   render() {
-    const { options, width, height, data } = this.props;
-    const output = this.resolveLatLngFromVars(options, data);
+    const { options, width, height, data, replaceVariables } = this.props;
+    const output = this.resolveLatLngFromVars(options, data, replaceVariables);
     options['resolvedLat'] = output['resolvedLat'];
     options['resolvedLng'] = output['resolvedLng'];
     return React.createElement('esnet-map-canvas', {
