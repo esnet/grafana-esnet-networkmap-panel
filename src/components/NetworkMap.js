@@ -32,8 +32,8 @@ var locationService = { "partial": function(query){
 var L = window['L'];
 try {
   var L = require('./lib/leaflet.js');
-  const m = require('@grafana/runtime');
-  locationService = m.locationService;
+  /*const m = require('@grafana/runtime');
+  locationService = m.locationService;*/
 } catch (e) {
   console.log(e);
 }
