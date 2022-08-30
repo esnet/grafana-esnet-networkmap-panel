@@ -237,8 +237,8 @@ export class MapPanel extends Component<Props> {
         if (options[variableName].indexOf('__data.fields') >= 0) {
           fieldName = this.props.options[variableName].split('"')[1];
         }
-        var candidateVal = parseInt(replaceVariables(fieldName));
-        if(!isNan(candidateVal)){
+        var candidateVal = parseInt(replaceVariables(fieldName), 10);
+        if (!isNaN(candidateVal)) {
           output[resolvedName] = candidateVal;
         }
         for (var i = 0; i < frames.length; i++) {
