@@ -14,18 +14,22 @@ export class PrivateMessageBus {
     }
 }
 
-PrivateMessageBus.prototype.subscribe = function(topic, callback, context){
-    var privateBus = null;
+function discoverBusAbove(context, defaultBus){
+    var messageBus = defaultBus;
+
     if(context && context.dispatchEvent){
         var discoveryEvent = new CustomEvent("$SCOPE.DISCOVERY$", {bubbles: true, cancelable: true, composed: true});
         discoveryEvent.callback = function(bus){ 
-            privateBus = bus;
+            messageBus = bus;
         }
         context.dispatchEvent(discoveryEvent);
     }
-    if(privateBus === null){
-        privateBus = this;
-    }
+
+    return messageBus;
+}
+
+PrivateMessageBus.prototype.subscribe = function(topic, callback, context){
+    var messageBus = discoverBusAbove(context, this);
 
     // use toLocaleString as a (good) approximation of a unique hash so we don't
     // resubscribe to the same topic on code load over and over.
@@ -33,34 +37,23 @@ PrivateMessageBus.prototype.subscribe = function(topic, callback, context){
     if(!context){
         context = this;
     }
-    if(!privateBus.topics[topic]){
-        privateBus.topics[topic] = {hash: {"callback": callback, "context":context }};
+    if(!messageBus.topics[topic]){
+        messageBus.topics[topic] = {hash: {"callback": callback, "context":context }};
     } else {
-        privateBus.topics[topic][hash] = {"callback": callback, "context":context };
+        messageBus.topics[topic][hash] = {"callback": callback, "context":context };
     }
 }
 
 PrivateMessageBus.prototype.publish = function(topic, eventData, context){
-    var privateBus = null;
-    if(context){
-        var discoveryEvent = new CustomEvent("$SCOPE.DISCOVERY$", {bubbles: true, cancelable: true, composed: true});
-        discoveryEvent.callback = function(bus){ 
-            privateBus = bus;
-        }
-        context.dispatchEvent(discoveryEvent);
-    }
+    var messageBus = discoverBusAbove(context, this);
 
-    var scopeMessage = "";
-    if(!!privateBus){
-        scopeMessage = "scoped to PrivateMessageBus #"+privateBus.instanceId;
-    }
-    if(!privateBus){
-        privateBus = this;
-        scopeMessage = "on the global bus with ID #"+privateBus.instanceId
+    var scopeMessage = "scoped to PrivateMessageBus #"+messageBus.instanceId;
+    if(messageBus.instanceId === this.instanceId){
+        scopeMessage = "on the global bus with ID #"+messageBus.instanceId;
     }
     console.debug("publishing event on topic", topic, scopeMessage);
-    privateBus.lastEvents[topic] = eventData;
-    var subscriberData = privateBus.topics[topic];
+    messageBus.lastEvents[topic] = eventData;
+    var subscriberData = messageBus.topics[topic];
     if (!subscriberData) return;
     var subscribers = Object.values(subscriberData);
     for(var i=0; subscribers && i<subscribers.length; i++){
@@ -69,26 +62,31 @@ PrivateMessageBus.prototype.publish = function(topic, eventData, context){
     }
 }
 
-PrivateMessageBus.prototype.clearAllCallbacks = function() {
+PrivateMessageBus.prototype.clearAllCallbacks = function(context) {
+    var messageBus = discoverBusAbove(context, this);
     console.debug("destroying all callbacks");
     var keys = Object.keys(this.topics);
     for(var i=0; i<keys.length; i++){
-        this.topics[keys[i]] = {};
+        messageBus.topics[keys[i]] = {};
     }
 };
 
-PrivateMessageBus.prototype.clearTopicCallbacks = function(topic) {
+PrivateMessageBus.prototype.clearTopicCallbacks = function(topic, context) {
+    var messageBus = discoverBusAbove(context, this);
     console.debug("destroying callbacks on topic '"+topic+"'");
-    if(this.topics[topic]) this.topics[topic] = {};
+    if(messageBus.topics[topic]) this.topics[topic] = {};
 };
 
 // returns the last eventData value for a particular topic
-PrivateMessageBus.prototype.last = function(topic){
-    return this.lastEvents[topic];
+PrivateMessageBus.prototype.last = function(topic, context){
+    var messageBus = discoverBusAbove(context, this);
+    console.log("returning last value for", topic, messageBus.lastEvents[topic], "from bus with id #", messageBus.instanceId);
+    return messageBus.lastEvents[topic];
 }
 // clears the last eventData value for a particular topic
-PrivateMessageBus.prototype.clearLast = function(topic){
-    return this.lastEvents[topic] = null;
+PrivateMessageBus.prototype.clearLast = function(topic, context){
+    var messageBus = discoverBusAbove(context, this);
+    return messageBus.lastEvents[topic] = null;
 }
 
 var messageBus = null;
