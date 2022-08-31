@@ -6,7 +6,7 @@ import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
-import { BindableHTMLElement } from './lib/rubbercement.js'
+import { types, BindableHTMLElement } from './lib/rubbercement.js'
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -14,6 +14,13 @@ const PrivateMessageBus = pubsub.PrivateMessageBus;
 var L = window['L'];
 if(typeof require !== "undefined"){
   var L = require('./lib/leaflet.js');
+}
+
+const ATTRIBUTES = {
+    "height": types.number,
+    "width": types.number,
+    "startlat": types.number,
+    "startlng": types.number,
 }
 
 
@@ -87,6 +94,52 @@ export class MapCanvas extends BindableHTMLElement {
     this._updateOptions = newValue;
     return newValue;
   }
+
+  // "propattribute" setters/getters
+  get height(){
+    return this._height;
+  }
+  set height(newValue){
+    this._height = newValue;
+    return newValue;
+  }
+
+  get width(){
+    return this._width;
+  }
+  set width(newValue){
+    this._width = newValue;
+    return newValue;
+  }
+
+  get startlat(){
+    return this._startlat;
+  }
+  set startlat(newValue){
+    this._startlat = newValue;
+    this.newMap();
+    return newValue;
+  }
+  get startlng(){
+    return this._startlng;
+  }
+  set startlng(newValue){
+    this._startlng = newValue;
+    this.newMap();
+    return newValue;
+  }
+
+  // "propattribute" helper functions
+  static get observedAttributes() {
+      return Object.keys(ATTRIBUTES);
+  }
+  attributeChangedCallback(attribute, oldValue, newValue) {
+    if(oldValue != newValue && newValue != this[attribute]){
+      this[attribute] = ATTRIBUTES[attribute](newValue);
+    }
+  }
+
+
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
     var keys = Object.keys(options);
@@ -110,19 +163,6 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow = null;
       this.render();
       this.newMap();
-
-      var edgeEditMode = false;
-      var nodeEditMode = false;
-      if(this.editingInterface){
-        edgeEditMode = this.editingInterface.edgeEditMode;
-        nodeEditMode = this.editingInterface.nodeEditMode;
-      }
-      if(edgeEditMode){
-        PubSub.publish("toggleEdgeEdit", edgeEditMode, this);
-      }
-      if(nodeEditMode){
-        PubSub.publish("toggleNodeEdit", nodeEditMode, this);
-      }
     }
     if (
       wasChanged('tileSetLayer', changed) ||
@@ -176,7 +216,8 @@ export class MapCanvas extends BindableHTMLElement {
   }
   getCurrentLeafletMap(){
     if(!this.leafletMap){
-      var centerCoords = [this._options.resolvedLat || this._options.startLat, this._options.resolvedLng || this._options.startLng];
+      var centerCoords = [this.startlat || this._options.startLat, this.startlng || this._options.startLng];
+      console.log('centerCoords', centerCoords);
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
@@ -219,6 +260,12 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   newMap(){
+      var edgeEditMode = false;
+      var nodeEditMode = false;
+      if(this.editingInterface){
+        edgeEditMode = this.editingInterface.edgeEditMode;
+        nodeEditMode = this.editingInterface.nodeEditMode;
+      }
       this.jsonResults = { 
         "layer1": testJsonSchema(this.topology.layer1),
         "layer2": testJsonSchema(this.topology.layer2),
@@ -228,6 +275,12 @@ export class MapCanvas extends BindableHTMLElement {
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this);
+      if(edgeEditMode){
+        PubSub.publish("toggleEdgeEdit", edgeEditMode, this);
+      }
+      if(nodeEditMode){
+        PubSub.publish("toggleNodeEdit", nodeEditMode, this);
+      }
       this.map.renderMap();
   }
 
@@ -311,12 +364,6 @@ export class MapCanvas extends BindableHTMLElement {
     }
     if(!this.options && this.getAttribute("options")){
       this.options = JSON.parse(this.getAttribute("options"));
-    }
-    if(!this.height && this.getAttribute("height")){
-      this.height = this.getAttribute("height");
-    }
-    if(!this.width && this.getAttribute("width")){
-      this.width = this.getAttribute("width");
     }
     this.render();
   }

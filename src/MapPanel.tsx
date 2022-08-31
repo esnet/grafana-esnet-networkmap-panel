@@ -122,10 +122,62 @@ export class MapPanel extends Component<Props> {
     this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
   };
 
+  resolveLatLngFromVars(options, data, replaceVariables) {
+    // set a sensible default output: 0,0 in case we can't resolve.
+    var output = {
+      resolvedLat: 0,
+      resolvedLng: 0,
+    };
+    if (this.props.options.mapCenterFromVars) {
+      var frames: any[];
+      frames = data.series.map((series) => {
+        return new DataFrameView(series);
+      });
+      const toResolve = {
+        latitudeVar: 'resolvedLat',
+        longitudeVar: 'resolvedLng',
+      };
+
+      Object.keys(toResolve).forEach((variableName) => {
+        const resolvedName = toResolve[variableName];
+        var fieldName = options[variableName];
+        // if the latitudeVar contains the string "__data.fields"
+        if (options[variableName].indexOf('__data.fields') >= 0) {
+          // we're trying to get the field name from the interior of the string,
+          // surrounded by quotation marks
+          fieldName = this.props.options[variableName].split('"')[1];
+        }
+        // this block attempts to resolve "template level" i.e. dashboard vars
+        var candidateVal = parseFloat(replaceVariables(fieldName));
+        if (!isNaN(candidateVal)) {
+          output[resolvedName] = candidateVal;
+        } else {
+          // in the case that we can't resolve the dashboard var,
+          // loop through the dataframeview searching for our field,
+          // and once the field is found, loop through until we find the
+          // first value. Then set the var and return
+          frames.forEach((frame) => {
+            frame.forEach((row) => {
+              if (!!row[fieldName]) {
+                output[resolvedName] = row[fieldName];
+              }
+            });
+          });
+        }
+      });
+    }
+    return output;
+  }
+
   updateMap() {
-    const { options, data, width, height } = this.props;
+    const { options, data, width, height, replaceVariables } = this.props;
+
+    const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
     this.mapCanvas.current.updateTopology = this.updateMapJson;
+
+    this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
+    this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
 
     var colorsL1 = {
       defaultColor: options.color1,
@@ -219,68 +271,15 @@ export class MapPanel extends Component<Props> {
     }
   }
 
-  resolveLatLngFromVars(options, data, replaceVariables) {
-    // set a sensible default output: 0,0 in case we can't resolve.
-    var output = {
-      resolvedLat: 0,
-      resolvedLng: 0,
-    };
-    if (this.props.options.mapCenterFromVars) {
-      var frames: any[];
-      frames = data.series.map((series) => {
-        return new DataFrameView(series);
-      });
-      const toResolve = {
-        latitudeVar: 'resolvedLat',
-        longitudeVar: 'resolvedLng',
-      };
-
-      Object.keys(toResolve).forEach((variableName) => {
-        const resolvedName = toResolve[variableName];
-        var fieldName = options[variableName];
-        // if the latitudeVar contains the string "__data.fields"
-        if (options[variableName].indexOf('__data.fields') >= 0) {
-          // we're trying to get the field name from the interior of the string,
-          // surrounded by quotation marks
-          fieldName = this.props.options[variableName].split('"')[1];
-        }
-        // this block attempts to resolve "template level" i.e. dashboard vars
-        var candidateVal = parseFloat(replaceVariables(fieldName));
-        if (!isNaN(candidateVal)) {
-          output[resolvedName] = candidateVal;
-        } else {
-          // in the case that we can't resolve the dashboard var,
-          // loop through the dataframeview searching for our field,
-          // and once the field is found, loop through until we find the
-          // first value. Then set the var and return
-          frames.forEach((frame) => {
-            frame.forEach((row) => {
-              if (!!row[fieldName]) {
-                output[resolvedName] = row[fieldName];
-              }
-            });
-          });
-        }
-      });
-    }
-    return output;
-  }
-
   render() {
     const { options, width, height, data, replaceVariables } = this.props;
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
-    if (options['resolvedLat'] !== output['resolvedLat']) {
-      console.log('resolvedLat has changed. old:', options['resolvedLat'], 'new:', output['resolvedLat']);
-      options['resolvedLat'] = output['resolvedLat'];
-    }
-    if (options['resolvedLng'] !== output['resolvedLng']) {
-      console.log('resolvedLng has changed. old:', options['resolvedLng'], 'new:', output['resolvedLng']);
-      options['resolvedLng'] = output['resolvedLng'];
-    }
     return React.createElement('esnet-map-canvas', {
       options: JSON.stringify(options),
       width: width,
       height: height,
+      startlat: output['resolvedLat'],
+      startlng: output['resolvedLng'],
       ref: this.mapCanvas,
     });
   }

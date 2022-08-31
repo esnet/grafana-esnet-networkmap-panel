@@ -21,16 +21,16 @@ class EditingInterface extends BindableHTMLElement {
             this.selection = false;
         }, this)
         PubSub.subscribe("toggleNodeEdit", (value)=>{
-            this._edgeEditMode = false;
             if(value === null || value === undefined){
+                this._edgeEditMode = false;
                 this.nodeEditMode = !this.nodeEditMode;
             } else {
                 this.nodeEditMode = value;
             }
         }, this)
         PubSub.subscribe("toggleEdgeEdit", (value)=>{
-            this._nodeEditMode = false;
             if(value === null || value === undefined){
+                this._nodeEditMode = false;
                 this.edgeEditMode = !this.edgeEditMode;
             } else {
                 this.edgeEditMode = value;
