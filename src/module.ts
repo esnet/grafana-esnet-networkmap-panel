@@ -18,6 +18,44 @@ function checkBool(settingName: string, value: boolean) {
   };
 }
 
+async function buildChoices(context: FieldOverrideContext) {
+  const options: any[] = [{ value: null, label: '- No Mapping -' }];
+  if (context && context.data) {
+    for (const frame of context.data) {
+      const frameName = frame.refId;
+      for (const field of frame.fields) {
+        const name = getFieldDisplayName(field, frame, context.data);
+        const value = field.name;
+        options.push({ value, label: (!!frameName ? '[' + frameName + '] ' : '') + name });
+      }
+    }
+  }
+  return Promise.resolve(options);
+}
+
+async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
+  const options: any[] = [{ value: null, label: '- No Mapping -' }];
+  if (context !== undefined && context.getSuggestions) {
+    const suggestions: any[] = context.getSuggestions();
+    suggestions.forEach((suggestion: any) => {
+      if (suggestion.orgin === 'template') {
+        options.push(suggestion);
+      }
+    });
+  }
+  if (context && context.data) {
+    for (const frame of context.data) {
+      const frameName = frame.refId;
+      for (const field of frame.fields) {
+        const name = getFieldDisplayName(field, frame, context.data);
+        const value = field.name;
+        options.push({ value, label: (!!frameName ? '[' + frameName + '] ' : '') + name });
+      }
+    }
+  }
+  return Promise.resolve(options);
+}
+
 // -------------------- Network Map Panel Options --------------------
 plugin.setPanelOptions((builder) => {
   builder.addBooleanSwitch({
@@ -33,28 +71,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context !== undefined && context.getSuggestions) {
-          const suggestions: any[] = context.getSuggestions();
-          suggestions.forEach((suggestion: any) => {
-            if (suggestion.orgin === 'template') {
-              options.push(suggestion);
-            }
-          });
-        }
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = field.name;
-              options.push({ value, label: (frameName ? '[' + frameName + '] ' : '') + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoicesWithSuggestions,
     },
   });
   builder.addSelect({
@@ -65,28 +82,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context !== undefined && context.getSuggestions) {
-          const suggestions: any[] = context.getSuggestions();
-          suggestions.forEach((suggestion: any) => {
-            if (suggestion.orgin === 'template') {
-              options.push(suggestion);
-            }
-          });
-        }
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = field.name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoicesWithSuggestions,
     },
   });
   builder.addCustomEditor({
@@ -501,20 +497,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -526,20 +509,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -551,20 +521,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -576,20 +533,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -601,20 +545,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -626,20 +557,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -651,20 +569,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -676,20 +581,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -701,20 +593,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -726,20 +605,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -751,20 +617,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   builder.addSelect({
@@ -776,20 +629,7 @@ plugin.setPanelOptions((builder) => {
     settings: {
       allowCustomValue: false,
       options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        const options: any[] = [{ value: null, label: '- No Mapping -' }];
-        if (context && context.data) {
-          for (const frame of context.data) {
-            const frameName = frame.refId;
-            for (const field of frame.fields) {
-              const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
-            }
-          }
-        }
-        return Promise.resolve(options);
-      },
+      getOptions: buildChoices,
     },
   });
   // -------------------- Ad-Hoc Query Variable Bindings --------------------

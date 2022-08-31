@@ -217,6 +217,7 @@ export class MapPanel extends Component<Props> {
   }
 
   resolveLatLngFromVars(options, data, replaceVariables) {
+    // set a sensible default output: 0,0 in case we can't resolve.
     var output = {
       resolvedLat: 0,
       resolvedLng: 0,
@@ -230,29 +231,32 @@ export class MapPanel extends Component<Props> {
         latitudeVar: 'resolvedLat',
         longitudeVar: 'resolvedLng',
       };
+
       Object.keys(toResolve).forEach((variableName) => {
         const resolvedName = toResolve[variableName];
         var fieldName = options[variableName];
         // if the latitudeVar contains the string "__data.fields"
         if (options[variableName].indexOf('__data.fields') >= 0) {
+          // we're trying to get the field name from the interior of the string,
+          // surrounded by quotation marks
           fieldName = this.props.options[variableName].split('"')[1];
         }
+        // this block attempts to resolve "template level" i.e. dashboard vars
         var candidateVal = parseFloat(replaceVariables(fieldName));
         if (!isNaN(candidateVal)) {
           output[resolvedName] = candidateVal;
-        }
-        for (var i = 0; i < frames.length; i++) {
-          var frameFields = Object.keys(frames[i].fields);
-          if (frameFields.indexOf(fieldName) >= 0) {
-            var values = frames[i].fields[fieldName].values;
-            for (var j = 0; j < values.length; j++) {
-              if (values.get(j)) {
-                output[resolvedName] = values.get(j);
-                break; // we found a value to set the resolved field to, so end looping
+        } else {
+          // in the case that we can't resolve the dashboard var,
+          // loop through the dataframeview searching for our field,
+          // and once the field is found, loop through until we find the
+          // first value. Then set the var and return
+          frames.forEach((frame) => {
+            frame.forEach((row) => {
+              if (!!row[fieldName]) {
+                output[resolvedName] = row[fieldName];
               }
-            }
-            break; // (inside if(frameFields...) above)
-          }
+            });
+          });
         }
       });
     }
