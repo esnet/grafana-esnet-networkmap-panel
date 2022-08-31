@@ -636,8 +636,6 @@ export class EsMap {
     this.lineGen = d3.line().curve(curve);
     this.editEdges = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editEdgeMode;
     this.editNodes = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editNodeMode;
-    console.log(this.editEdges);
-    console.log(this.editNodes);
     this.div = div;
     this.options = this.mapCanvas.options;
     this.lastInteractedObject = null; // the last object that the user interacted with

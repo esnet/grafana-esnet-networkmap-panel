@@ -102,7 +102,9 @@ export class MapCanvas extends BindableHTMLElement {
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
         wasChanged('enableEditing', changed) ||
-        wasChanged('enableScrolling', changed)
+        wasChanged('enableScrolling', changed) ||
+        wasChanged('resolveLat', changed) || 
+        wasChanged('resolveLng', changed)
       ){
       this.shadow.remove();
       this.shadow = null;

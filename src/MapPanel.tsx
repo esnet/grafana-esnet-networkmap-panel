@@ -88,6 +88,9 @@ export class MapPanel extends Component<Props> {
       'pathOffsetL3',
       'layerName3',
       'legendL3',
+
+      'resolvedLat',
+      'resolvedLng',
     ];
 
     optionsToWatch.forEach((option) => {

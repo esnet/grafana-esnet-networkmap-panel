@@ -25,7 +25,6 @@ var locationService = { "partial": function(query){
       }
     }
     const updatedUrl = location.toString();
-    console.log('locationservice.partial', updatedUrl);
     window.history.pushState(null, "", updatedUrl);
 } }
 // require is only defined in the webpack context, not ES6
