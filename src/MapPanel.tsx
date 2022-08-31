@@ -244,10 +244,10 @@ export class MapPanel extends Component<Props> {
         for (var i = 0; i < frames.length; i++) {
           var frameFields = Object.keys(frames[i].fields);
           if (frameFields.indexOf(fieldName) >= 0) {
-            var buffer = frames[i].fields[fieldName].values.buffer;
-            for (var j = 0; j < buffer.length; j++) {
-              if (buffer[j]) {
-                output[resolvedName] = buffer[j];
+            var values = frames[i].fields[fieldName].values;
+            for (var j = 0; j < values.length; j++) {
+              if (values.get(j)) {
+                output[resolvedName] = values.get(j);
                 break; // we found a value to set the resolved field to, so end looping
               }
             }
