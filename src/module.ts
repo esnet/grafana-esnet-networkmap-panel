@@ -38,7 +38,9 @@ plugin.setPanelOptions((builder) => {
         if (context !== undefined && context.getSuggestions) {
           const suggestions: any[] = context.getSuggestions();
           suggestions.forEach((suggestion: any) => {
-            options.push(suggestion);
+            if (suggestion.orgin === 'template') {
+              options.push(suggestion);
+            }
           });
         }
         if (context && context.data) {
@@ -46,8 +48,8 @@ plugin.setPanelOptions((builder) => {
             const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
-              options.push({ value, label: '[' + frameName + '] ' + name });
+              const value = field.name;
+              options.push({ value, label: (frameName ? '[' + frameName + '] ' : '') + name });
             }
           }
         }
@@ -68,7 +70,9 @@ plugin.setPanelOptions((builder) => {
         if (context !== undefined && context.getSuggestions) {
           const suggestions: any[] = context.getSuggestions();
           suggestions.forEach((suggestion: any) => {
-            options.push(suggestion);
+            if (suggestion.orgin === 'template') {
+              options.push(suggestion);
+            }
           });
         }
         if (context && context.data) {
@@ -76,7 +80,7 @@ plugin.setPanelOptions((builder) => {
             const frameName = frame.refId;
             for (const field of frame.fields) {
               const name = getFieldDisplayName(field, frame, context.data);
-              const value = name;
+              const value = field.name;
               options.push({ value, label: '[' + frameName + '] ' + name });
             }
           }

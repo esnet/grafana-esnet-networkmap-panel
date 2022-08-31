@@ -232,8 +232,8 @@ export class MapPanel extends Component<Props> {
       };
       Object.keys(toResolve).forEach((variableName) => {
         const resolvedName = toResolve[variableName];
-        // if the latitudeVar has the string "__data.fields"
         var fieldName = options[variableName];
+        // if the latitudeVar contains the string "__data.fields"
         if (options[variableName].indexOf('__data.fields') >= 0) {
           fieldName = this.props.options[variableName].split('"')[1];
         }
@@ -245,8 +245,13 @@ export class MapPanel extends Component<Props> {
           var frameFields = Object.keys(frames[i].fields);
           if (frameFields.indexOf(fieldName) >= 0) {
             var buffer = frames[i].fields[fieldName].values.buffer;
-            output[resolvedName] = buffer[buffer.length - 1];
-            break;
+            for (var j = 0; j < buffer.length; j++) {
+              if (buffer[j]) {
+                output[resolvedName] = buffer[j];
+                break; // we found a value to set the resolved field to, so end looping
+              }
+            }
+            break; // (inside if(frameFields...) above)
           }
         }
       });
