@@ -269,6 +269,12 @@ export class MapPanel extends Component<Props> {
   render() {
     const { options, width, height, data, replaceVariables } = this.props;
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
+    if(options['resolvedLat'] != output['resolvedLat']){
+      console.log('resolvedLat has changed. old:', options['resolvedLat'], "new:", output['resolvedLat'])
+    }
+    if(options['resolvedLng'] != output['resolvedLng']){
+      console.log('resolvedLng has changed. old:', options['resolvedLng'], "new:", output['resolvedLng'])
+    }
     options['resolvedLat'] = output['resolvedLat'];
     options['resolvedLng'] = output['resolvedLng'];
     return React.createElement('esnet-map-canvas', {
