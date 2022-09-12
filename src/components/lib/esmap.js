@@ -57,6 +57,12 @@ function pathCrawl(path, klass, color, edgeWidth){
     }
 }
 
+function sanitizeName(name){
+  var sanitized = name.replaceAll(" ", "-"); // replace all spaces with hyphens
+  sanitized = sanitized.replaceAll(/[^\w-]/g, ''); // replace anything other than alphanum and hyphen with empty string
+  return sanitized;
+}
+
 function renderEdges(g, data, ref, layerId) {
   var div = ref.div;
   const edgeWidth = ref.options["edgeWidthL"+layerId];
@@ -78,7 +84,7 @@ function renderEdges(g, data, ref, layerId) {
     })
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      var name = d.name.replaceAll(" ", "-");
+      var name = sanitizeName(d.name);
       var connections = " connects-to-"+name.split("--").join(" connects-to-");
       var layerClass = ' l'+layerId;
       return 'edge edge-az edge-az-' + name + connections + layerClass;
@@ -93,7 +99,7 @@ function renderEdges(g, data, ref, layerId) {
           dashes[i].remove();
       }
 
-      var name = d.name.replaceAll(" ", "-");
+      var name = sanitizeName(d.name);
       pathCrawl(this, "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
       pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
 
@@ -116,6 +122,7 @@ function renderEdges(g, data, ref, layerId) {
       pathCrawl(this, "dash-over", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
 
       d3.select(this).classed("animated-edge", true);
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       var text = `<p><b>From:</b> ${ d.nodeA }</p>
         <p><b>To:</b>  ${ d.nodeZ }</p>
         <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
@@ -154,7 +161,7 @@ function renderEdges(g, data, ref, layerId) {
     })*/
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
-      var name = d.name.replaceAll(" ", "-");
+      var name = sanitizeName(d.name);
       var connections = " connects-to-"+name.split("--").join(" connects-to-");
       return 'edge edge-za edge-za-' + name + connections;
     })
@@ -167,7 +174,7 @@ function renderEdges(g, data, ref, layerId) {
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
       }
-      var name = d.name.replaceAll(" ", "-");
+      var name = sanitizeName(d.name);
 
       pathCrawl(this, "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
       pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
@@ -189,6 +196,7 @@ function renderEdges(g, data, ref, layerId) {
       pathCrawl(this, "dash-over", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
 
       d3.select(this).classed("animated-edge", true);
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       var text =
         `<p><b>From:</b>  ${d.nodeZ}</p>
         <p><b>To:</b>  ${d.nodeA}</p>
@@ -392,7 +400,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       return d.controlPointPath;
     })
     .attr('class', function (d) {
-      var name = d.name.replaceAll(" ", "-");
+      var name = sanitizeName(d.name);
       var connections = " control-for-"+name.split("--").join(" control-for-");
       return 'control controlEddge edge-az-' + name + connections;
     })
@@ -653,7 +661,10 @@ export class EsMap {
       },
       this.svg.node())
       PubSub.subscribe("hideTooltip",function(){
-        document.querySelector("#tooltip-hover").remove();
+        var elems = document.querySelectorAll("#tooltip-hover");
+        elems.forEach((elem)=>{
+          elem.remove();
+        })
       },
       this.svg.node())
     }
