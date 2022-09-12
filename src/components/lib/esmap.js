@@ -122,12 +122,12 @@ function renderEdges(g, data, ref, layerId) {
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseout', function (event, d) {
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       d3.select(this).attr('stroke', d.azColor ? d.azColor : defaultEdgeColor);
       var dashes = document.querySelectorAll(".dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
       }
-      PubSub.publish("hideTooltip", null, ref.svg.node());
       // don't stop animating if this component is selected
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
@@ -196,12 +196,12 @@ function renderEdges(g, data, ref, layerId) {
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseout', function (event, d) {
+      PubSub.publish("hideTooltip", null, ref.svg.node());
       d3.select(this).attr('stroke', d.zaColor ? d.zaColor : defaultEdgeColor);
       var dashes = document.querySelectorAll(".dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
       }
-      PubSub.publish("hideTooltip", null, ref.svg.node());
       if(d3.select(this).classed("selected")){ return }
       d3.select(this).classed("animated-edge", false);
     });
