@@ -136,27 +136,23 @@ export default class NetworkMap {
     if(this.g1) this.g1.remove();
     if(this.g2) this.g2.remove();
     if(this.g3) this.g3.remove();
-    try {
-      // Draw the map json topology data!!! Currently supports up to 3 layers
-      let emptyLayer = { "nodes": [], "edges": [] };
-      let layer1 = emptyLayer;
-      let layer2 = emptyLayer;
-      let layer3 = emptyLayer;
-      if(this.mapCanvas.options.layer1 && this.mapCanvas.topology.layer1){
-        layer1 = this.mapCanvas.topology.layer1;
-      }
-      if(this.mapCanvas.options.layer2 && this.mapCanvas.topology.layer2){
-        layer2 = this.mapCanvas.topology.layer2;
-      }
-      if(this.mapCanvas.options.layer3 && this.mapCanvas.topology.layer3){
-        layer3 = this.mapCanvas.topology.layer3;
-      }
-      this.g1 = this.esmap.addNetLayer('layer1', layer1);
-      this.g2 = this.esmap.addNetLayer('layer2', layer2);
-      this.g3 = this.esmap.addNetLayer('layer3', layer3);
-    } catch(e) {
-      console.error("had an issue rendering map layers...")
+    // Draw the map json topology data!!! Currently supports up to 3 layers
+    let emptyLayer = { "nodes": [], "edges": [] };
+    let layer1 = emptyLayer;
+    let layer2 = emptyLayer;
+    let layer3 = emptyLayer;
+    if(this.mapCanvas.options.layer1 && this.mapCanvas.topology.layer1){
+      layer1 = this.mapCanvas.topology.layer1;
     }
+    if(this.mapCanvas.options.layer2 && this.mapCanvas.topology.layer2){
+      layer2 = this.mapCanvas.topology.layer2;
+    }
+    if(this.mapCanvas.options.layer3 && this.mapCanvas.topology.layer3){
+      layer3 = this.mapCanvas.topology.layer3;
+    }
+    this.g1 = this.esmap.addNetLayer('layer1', layer1);
+    this.g2 = this.esmap.addNetLayer('layer2', layer2);
+    this.g3 = this.esmap.addNetLayer('layer3', layer3);
   }
 
   renderMap() {
