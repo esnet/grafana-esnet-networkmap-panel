@@ -34,6 +34,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
+    this.legendMinimized = false;
 
     new PrivateMessageBus(this);
 
@@ -150,7 +151,13 @@ export class MapCanvas extends BindableHTMLElement {
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
     }
-
+    if( wasChanged('showLegend', changed) || 
+        wasChanged('thresholds', changed) ||
+        wasChanged('legendColumnLength', changed) ||
+        wasChanged('legendPosition', changed)
+      ){
+      this.renderLegend();
+    }
     if(
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
@@ -173,7 +180,10 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
       this.map && this.map.renderMap();
     }
-    if(wasChanged('background', changed)){
+    if(
+      wasChanged('background', changed) ||
+      wasChanged('enableAnimations', changed)
+    ){
       this.renderStyle();
     }
     this.sideBar && this.sideBar.render();
@@ -183,10 +193,18 @@ export class MapCanvas extends BindableHTMLElement {
     if(this.editingInterface){
       this.editingInterface._topology = newTopology;
     }
-    this.jsonResults = { 
-      "layer1": testJsonSchema(this.topology.layer1),
-      "layer2": testJsonSchema(this.topology.layer2),
-      "layer3": testJsonSchema(this.topology.layer3),
+    if(this.topology){
+      this.jsonResults = { 
+        "layer1": testJsonSchema(this.topology.layer1),
+        "layer2": testJsonSchema(this.topology.layer2),
+        "layer3": testJsonSchema(this.topology.layer3),
+      }
+    } else {
+      this.jsonResults = {
+        "layer1": {"valid": false, "errorDetails": "No Topology data available."},
+        "layer2": {"valid": false, "errorDetails": "No Topology data available."},
+        "layer3": {"valid": false, "errorDetails": "No Topology data available."}
+      }
     }
     this.sideBar && this.sideBar.render();
     this.map && this.map.renderMap();    
@@ -217,7 +235,6 @@ export class MapCanvas extends BindableHTMLElement {
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options.startLat, this.startlng || this._options.startLng];
-      console.log('centerCoords', centerCoords);
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
@@ -266,10 +283,19 @@ export class MapCanvas extends BindableHTMLElement {
         edgeEditMode = this.editingInterface.edgeEditMode;
         nodeEditMode = this.editingInterface.nodeEditMode;
       }
-      this.jsonResults = { 
-        "layer1": testJsonSchema(this.topology.layer1),
-        "layer2": testJsonSchema(this.topology.layer2),
-        "layer3": testJsonSchema(this.topology.layer3),
+      if(this.topology){
+        this.jsonResults = { 
+          "layer1": testJsonSchema(this.topology.layer1),
+          "layer2": testJsonSchema(this.topology.layer2),
+          "layer3": testJsonSchema(this.topology.layer3),
+        }
+      } else {
+        this.jsonResults = {
+          "layer1": {"valid": false, "errorDetails": "No Topology data available."},
+          "layer2": {"valid": false, "errorDetails": "No Topology data available."},
+          "layer3": {"valid": false, "errorDetails": "No Topology data available."}
+        }
+        return;
       }
       this.sideBar && this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
@@ -294,8 +320,112 @@ export class MapCanvas extends BindableHTMLElement {
             position: relative;
             display: inline-block;
           }
+
+          ${ this.options.enableAnimations ? `
+          g.dash-over polygon {
+            animation-name: crawl;
+            animation-duration: 0.5s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+          }
+
+          g.dash-selected polygon {
+            animation-name: crawl;
+            animation-duration: 0.5s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+          }
+
+          @keyframes crawl {
+            0% {transform:translate(0,0);}
+            100% {transform:translate(12px,0); }
+          }` : '' }
       </style>
     `;
+  }
+
+  valueFormat(bytes, unit){
+    if(unit === null || unit === undefined){ unit = 'b' }
+    bytes = parseInt(bytes, 10)
+    if(bytes === 0){ return "0" }
+    // calculate the 1024-based log of the bytes value
+    let log1024 = Math.floor(Math.log(bytes) / Math.log(1024));
+    const unit_prefixes = ['', 'K', 'M', 'G', 'T', 'P', 'E', 'Z', 'Y'];
+    let unit_prefix = unit_prefixes[log1024];
+    return {"text": (bytes/Math.pow(1024, log1024)).toFixed(2), "suffix": unit_prefix + unit}
+  }
+
+  legendFormatter(thisValue, nextValue){
+    if(thisValue === -Infinity){
+      thisValue = null;
+    }
+    var value = this.valueFormat(!!thisValue ? thisValue : nextValue)
+    if(!thisValue){
+      return `${ value.text } ${ value.suffix } or below`
+    }
+    return `≥ ${ value.text } ${ value.suffix }`
+  }
+
+  toggleMinimizeLegend(){
+    this.legendMinimized = !this.legendMinimized;
+    this.renderLegend()
+  }
+
+  renderLegend(){
+    let legendContainer = this.shadow.querySelector("#legend-container");
+    let output = "";
+    if(!this.options.showLegend){
+      legendContainer.innerHTML = output;
+      return;      
+    } 
+    let columns = [];
+    let columnLength = this.options.legendColumnLength ? this.options.legendColumnLength : 3;
+    let thresholds = this.options.thresholds;
+    output = `<div class='legend ${this.options.legendPosition}'>
+      <div class='heading'>
+        <h4>Legend</h4>
+        <svg class='minimize' version="1.1" xmlns="http://www.w3.org/2000/svg" height="16" width="16">
+          <g transform='scale(1.4) translate(0 0.5)'>
+          <circle class='circle-background' cx="5" cy="5" r="5" />
+          <polyline points="${ this.legendMinimized ? "3,6.5 5,3.5 7,6.5" : "3,3.5 5,6.5 7,3.5" }" fill="#FFFFFF" stroke="#FFFFFF" />
+          </g>
+        </svg>
+      </div>`;
+    if(this.legendMinimized){
+      output += `</div>`;
+      legendContainer.innerHTML = output;
+      this.bindEvents({
+        ".minimize@onclick": this.toggleMinimizeLegend,
+      })
+      return;
+    }
+    for(var i=0; i<thresholds.length; i++){
+      if(i % columnLength == 0){
+        columns.push([]);
+      }
+      var lastColumn = columns.length - 1;
+      var thisValue = thresholds[i].value;
+      var nextValue = thresholds[i+1] ? thresholds[i+1].value : null;
+      columns[lastColumn].push(`<div class='legend-entry'>
+        <p>
+          <span class='color-sample' style='background-color: ${thresholds[i].color}'></span>
+          ${this.legendFormatter(thisValue, nextValue)}
+        </p>
+      </div>`)
+    }
+    columns.forEach((column)=>{
+      output += `<div class='legend-column'>`;
+      column.forEach((row)=>{
+        output += row;
+      });
+      output += `</div>`
+    })
+    output += `</div>`
+    legendContainer.innerHTML = output;
+    this.bindEvents({
+      ".minimize@onclick": this.toggleMinimizeLegend,
+    })
+    return;
   }
 
   render(){
@@ -319,6 +449,10 @@ export class MapCanvas extends BindableHTMLElement {
               🏠
             </div>
         </div>
+        <div class='legend-overlay'>
+          <div id='legend-container'>
+          </div>
+        </div>
         ${ this.options.enableEditing ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
       </div>
       ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
@@ -337,6 +471,7 @@ export class MapCanvas extends BindableHTMLElement {
       }
     }
     this.renderStyle();
+    this.renderLegend();
     if(this.height){
       this.mapContainer.style.height = this.height + 'px';
     }
@@ -364,6 +499,9 @@ export class MapCanvas extends BindableHTMLElement {
     }
     if(!this.options && this.getAttribute("options")){
       this.options = JSON.parse(this.getAttribute("options"));
+    }
+    if(this.options && this.options.legendDefaultBehavior){
+      this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
     this.render();
   }
