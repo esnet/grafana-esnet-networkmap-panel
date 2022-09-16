@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView } from '@grafana/data';
+import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
 import { MapOptions } from 'types';
 import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
@@ -56,8 +56,13 @@ export class MapPanel extends Component<Props> {
       'labelLayer',
       'showSidebar',
       'showViewControls',
+      'showLegend',
+      'legendColumnLength',
+      'legendPosition',
+      'thresholds',
       'enableScrolling',
       'enableEditing',
+      'enableAnimations',
 
       'layer1',
       'color1',
@@ -170,11 +175,14 @@ export class MapPanel extends Component<Props> {
   }
 
   updateMap() {
-    const { options, data, width, height, replaceVariables } = this.props;
+    const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
     this.mapCanvas.current.updateTopology = this.updateMapJson;
+    if (fieldConfig.defaults?.unit) {
+      this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
+    }
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
@@ -272,7 +280,18 @@ export class MapPanel extends Component<Props> {
   }
 
   render() {
-    const { options, width, height, data, replaceVariables } = this.props;
+    const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
+
+    var thresholds: any[];
+    thresholds = [];
+    fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
+      thresholds.push({
+        color: this.theme.visualization.getColorByName(threshold.color),
+        value: threshold.value,
+      });
+    });
+    options.thresholds = thresholds;
+
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
     return React.createElement('esnet-map-canvas', {
       options: JSON.stringify(options),
