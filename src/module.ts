@@ -6,6 +6,7 @@ import { CoordinateButton } from './components/CoordinateButton';
 
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
+const SidebarCategory = ['Sidebar options'];
 const LegendCategory = ['Legend options'];
 const ViewCategory = ['View options'];
 const QueryCategory = ['Ad-hoc Query Variable Bindings'];
@@ -125,6 +126,7 @@ plugin.setPanelOptions((builder) => {
       step: 0.5,
     },
   });
+
   builder.addColorPicker({
     path: 'background',
     name: 'Map Background Color',
@@ -220,13 +222,6 @@ plugin.setPanelOptions((builder) => {
   });
 
   builder.addBooleanSwitch({
-    path: 'showSidebar',
-    name: 'Show Map Sidebar',
-    description: 'Show sidebar. If hidden, tooltips will appear on hover.',
-    category: ViewCategory,
-    defaultValue: true,
-  });
-  builder.addBooleanSwitch({
     path: 'showViewControls',
     name: 'Show View Controls',
     description: 'show zoom in/out and "home" button',
@@ -244,6 +239,13 @@ plugin.setPanelOptions((builder) => {
     path: 'enableEditing',
     name: 'Enable Map Editing',
     description: 'Enable map editing controls in edit mode',
+    category: ViewCategory,
+    defaultValue: true,
+  });
+  builder.addBooleanSwitch({
+    path: 'enableAnimations',
+    name: 'Enable Traffic Direction Animations',
+    description: 'Enable animations for traffic direction on edges. May be CPU/GPU intensive in some browsers.',
     category: ViewCategory,
     defaultValue: true,
   });
@@ -697,42 +699,122 @@ plugin.setPanelOptions((builder) => {
     defaultValue: 'meta.remote.loc_name',
   });
 
-  // -------------------- Legend Options --------------------
+  // -------------------- Sidebar Options --------------------
+  builder.addBooleanSwitch({
+    path: 'showSidebar',
+    name: 'Show Map Sidebar',
+    description: 'Show sidebar. If hidden, tooltips will appear on hover.',
+    category: SidebarCategory,
+    defaultValue: true,
+  });
   builder.addBooleanSwitch({
     path: 'legendL1',
     name: 'Show Layer 1 toggle',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: true,
   });
   builder.addTextInput({
     path: 'layerName1',
     name: 'Layer 1 Display Name',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 1',
   });
   builder.addBooleanSwitch({
     path: 'legendL2',
     name: 'Show Layer 2 toggle',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: true,
   });
   builder.addTextInput({
     path: 'layerName2',
     name: 'Layer 2 Display Name',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 2',
   });
   builder.addBooleanSwitch({
     path: 'legendL3',
     name: 'Show Layer 3 toggle',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: true,
   });
   builder.addTextInput({
     path: 'layerName3',
     name: 'Layer 3 Display Name',
-    category: LegendCategory,
+    category: SidebarCategory,
+    showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 3',
+  });
+
+  // -------------------- Legend Options --------------------
+  builder.addBooleanSwitch({
+    path: 'showLegend',
+    name: 'Show Map Legend',
+    description: 'show a traffic levels legend at the bottom of the map',
+    category: LegendCategory,
+    defaultValue: true,
+  });
+  builder.addSliderInput({
+    path: 'legendColumnLength',
+    name: 'Legend Items per Column',
+    category: LegendCategory,
+    showIf: checkBool('showLegend', true),
+    defaultValue: 3,
+    settings: {
+      min: 1,
+      max: 12,
+      step: 1,
+    },
+  });
+  builder.addSelect({
+    path: 'legendPosition',
+    name: 'Legend Position',
+    category: LegendCategory,
+    showIf: checkBool('showLegend', true),
+    description: 'position of the legend on the map',
+    defaultValue: 'bottomleft',
+    settings: {
+      allowCustomValue: false,
+      options: [
+        {
+          label: 'Bottom Right',
+          value: 'bottomright',
+        },
+        {
+          label: 'Bottom Left',
+          value: 'bottomleft',
+        },
+        {
+          label: 'Top Right',
+          value: 'topright',
+        },
+      ],
+    },
+  });
+  builder.addSelect({
+    path: 'legendDefaultBehavior',
+    name: 'Legend Default Behavior',
+    category: LegendCategory,
+    showIf: checkBool('showLegend', true),
+    description: 'should the legend be minimized or visible by default?',
+    defaultValue: 'visible',
+    settings: {
+      allowCustomValue: false,
+      options: [
+        {
+          label: 'Visible',
+          value: 'visible',
+        },
+        {
+          label: 'Minimized',
+          value: 'minimized',
+        },
+      ],
+    },
   });
 });
 

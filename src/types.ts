@@ -8,8 +8,10 @@ export interface MapOptions {
   longitudeVar: string;
   showSidebar: boolean;
   showViewControls: boolean;
+  showLegend: boolean;
   enableScrolling: boolean;
   enableEditing: boolean;
+  enableAnimations: boolean;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;
@@ -53,4 +55,8 @@ export interface MapOptions {
   pathOffsetL1: number;
   pathOffsetL2: number;
   pathOffsetL3: number;
+  thresholds: any[];
+  legendColumnLength: number;
+  legendPosition: string;
+  legendDefaultBehavior: string;
 }
