@@ -185,4 +185,76 @@ input:checked + .slider:before {
 .home-overlay > .button:hover {
     background: #EEE;
 }
+
+.legend {
+    position: absolute;
+    z-index: 600;
+    background: white;
+    padding: 1em 1em 0.3em 1em;
+    margin: 0.8em;
+    box-shadow: 0px 0px 2px rgb(0 0 0 / 50%);
+    border:1px solid #b3b3b3;
+    border-radius: 3px;
+}
+
+.legend.topright {
+  top: 0;
+  right: 0;
+}
+
+.legend.bottomright {
+  bottom: 0;
+  right: 0;
+  margin: 0.8em 0.8em 1.8em 0.8em;
+}
+
+.legend.bottomleft {
+  bottom: 0;
+  left: 0;
+}
+
+.color-sample {
+  height:1.5em;
+  width:1.5em;
+  margin-right:0.5em;
+  border:1px solid rgba(0,0,0,0.2);
+  display: inline-block;
+  vertical-align: middle;
+  border-radius: 2px;
+}
+
+.legend p {
+    vertical-align: text-top;
+    margin-bottom: 0.6em;
+}
+
+.legend h4 {
+  font-weight:600;
+  font-size:1.1em;
+  padding: 0;
+  margin: 0 0.4em 0.4em 0;
+  display: inline-block;
+}
+
+.legend .minimize {
+  float:right;
+}
+
+.legend .minimize .circle-background {
+  fill: #AAA; cursor: pointer;
+}
+
+.legend .minimize .circle-background:hover {
+  fill: #888;
+}
+
+.legend-column {
+    display: inline-block;
+    vertical-align: top;
+    margin-right: 10px;
+}
+
+.legend-column:last-child {
+  margin-right:0;
+}
 `
