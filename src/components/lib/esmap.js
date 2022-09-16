@@ -30,30 +30,34 @@ function bearingAngle(src, dest){
 
 function pathCrawl(path, klass, color, edgeWidth){
     var svgns = "http://www.w3.org/2000/svg";
-    //path.setAttribute("stroke", "transparent");
-    var totalDashWidth = 10;
-    for(var i=0; i<(path.getTotalLength() / totalDashWidth); i++){
-        var animStart = i/(path.getTotalLength()/totalDashWidth);
-        var animEnd = (i+1)/(path.getTotalLength()/totalDashWidth);
-        if(animStart >= 0 && animEnd < 1){
-          var value = path.getAttribute("d");
-          var dashWidth = edgeWidth * 1.2; // this will vary with the stroke width for the line
-          var rect = document.createElementNS(svgns, "polygon");
-          rect.setAttributeNS(null, "points", `${(totalDashWidth / 5 * 4)-(dashWidth/3)*2},${dashWidth} -${(dashWidth/3) * 2},${dashWidth} 0,0 -${(dashWidth/3) * 2},-${dashWidth} ${(totalDashWidth / 5 * 4)-(dashWidth/3)*2},-${dashWidth} ${(totalDashWidth / 5 * 4)},0`)
-          rect.setAttributeNS(null, "fill", color);
-          rect.setAttributeNS(null, "class", klass);
-          var anim = document.createElementNS(svgns, "animateMotion");
-          anim.setAttributeNS(null, "dur", "0.5s");
-          anim.setAttributeNS(null, "path", value);
-          anim.setAttributeNS(null, "class", "animation");
-          anim.setAttributeNS(null, "repeatCount", "indefinite");
-          anim.setAttributeNS(null, "keyPoints", `${animStart};${animEnd}`);
-          anim.setAttributeNS(null, "keyTimes", "0;1");
-          anim.setAttributeNS(null, "calcMode", "linear");
-          anim.setAttributeNS(null, "rotate", "auto");
-          rect.appendChild(anim);
-          path.parentElement.insertBefore(rect, path);
-        }
+    
+    var totalDashWidth = 12;
+    for(var i=0; i<Math.floor(path.getTotalLength() / totalDashWidth); i++){
+      var value = path.getAttribute("d");
+      var dashWidth = edgeWidth * 1.2; // this will vary with the stroke width for the line
+      var g = document.createElementNS(svgns, 'g');
+      g.setAttributeNS(null, "class", klass);
+      var rect = document.createElementNS(svgns, "polygon");
+      rect.setAttributeNS(null, "points", `
+        ${(totalDashWidth / 5 * 3)-(dashWidth/3)*2},${dashWidth}
+        -${(dashWidth/3) * 2},${dashWidth}
+        0,0
+        -${(dashWidth/3) * 2},-${dashWidth}
+        ${(totalDashWidth / 5 * 3)-(dashWidth/3)*2},-${dashWidth}
+        ${(totalDashWidth / 5 * 3)},0`)
+      rect.setAttributeNS(null, "fill", color);
+      var pointOnPath = i * totalDashWidth;
+      var nextPointOnPath = ((i+1) * totalDashWidth) > path.getTotalLength() ? path.getTotalLength() : ((i+1) * totalDashWidth);
+      var point = path.getPointAtLength(pointOnPath);
+      console.log("i is", i, "totalDashWidth is", totalDashWidth, "getting point at", pointOnPath, "of total", path.getTotalLength());
+      var nextPoint = path.getPointAtLength(nextPointOnPath);
+      console.log("i+1 is", i+1, "totalDashWidth is", totalDashWidth, "getting point at", nextPointOnPath, "of total", path.getTotalLength());
+      var vector = { dx: nextPoint.x - point.x, dy: nextPoint.y - point.y}
+      var rotationInRads = Math.atan2(vector.dy, vector.dx);
+      var rotationInDegs = rotationInRads * (180 / Math.PI);
+      g.setAttributeNS(null, "transform", `translate(${point.x} ${point.y}) rotate(${rotationInDegs})`);
+      g.appendChild(rect);
+      path.parentElement.insertBefore(g, path);
     }
 }
 
@@ -68,6 +72,43 @@ function renderEdges(g, data, ref, layerId) {
   const edgeWidth = ref.options["edgeWidthL"+layerId];
   const defaultEdgeColor = ref.options["color"+layerId];
   var azLines = g.selectAll('path.edge-az').data(data.edges);
+
+  const doEdgeMouseOver = (event, d) => {
+    var start = new Date();
+    pathCrawl(event.target, "dash-over", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
+
+    var thisEdge = d3.select(event.target)
+
+    thisEdge.classed("animated-edge", true);
+    const isAZ = thisEdge.classed("edge-az");
+
+    PubSub.publish("hideTooltip", null, ref.svg.node());
+    var text = `<p><b>From:</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
+      <p><b>To:</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
+      <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
+    PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
+    console.log("over end. Timing: ", (new Date()).getTime() - start);
+  }
+
+  const doEdgeMouseOut = (event, d) => {
+    var start = new Date();
+    PubSub.publish("hideTooltip", null, ref.svg.node());
+
+    const thisEdge = d3.select(event.target);
+    var color = d.azColor ? d.azColor : defaultEdgeColor // assume it's an A-Z edge by default, and get the a-z color
+    if(thisEdge.classed("edge-za")){
+      color = d.zaColor ? d.zaColor : defaultEdgeColor // but if it's really a Z-A edge, get that color
+    } 
+    thisEdge.attr('stroke', color);
+    var dashes = document.querySelectorAll(".dash-over");
+    for(var i=0; i<dashes.length; i++){
+        dashes[i].remove();
+    }
+    if(thisEdge.classed("selected")){ return }
+    thisEdge.classed("animated-edge", false);
+    console.log("out end. Timing: ", (new Date()).getTime() - start);
+  }
+
   azLines
     .enter()
     //-- A to Z path
@@ -117,28 +158,8 @@ function renderEdges(g, data, ref, layerId) {
         .classed('edge', false)
         .classed('animated-edge', true);
     })
-    .on('mouseover', function (event, d) {
-
-      pathCrawl(this, "dash-over", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
-
-      d3.select(this).classed("animated-edge", true);
-      PubSub.publish("hideTooltip", null, ref.svg.node());
-      var text = `<p><b>From:</b> ${ d.nodeA }</p>
-        <p><b>To:</b>  ${ d.nodeZ }</p>
-        <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
-      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
-    })
-    .on('mouseout', function (event, d) {
-      PubSub.publish("hideTooltip", null, ref.svg.node());
-      d3.select(this).attr('stroke', d.azColor ? d.azColor : defaultEdgeColor);
-      var dashes = document.querySelectorAll(".dash-over");
-      for(var i=0; i<dashes.length; i++){
-          dashes[i].remove();
-      }
-      // don't stop animating if this component is selected
-      if(d3.select(this).classed("selected")){ return }
-      d3.select(this).classed("animated-edge", false);
-    });
+    .on('mouseover', doEdgeMouseOver)
+    .on('mouseout', doEdgeMouseOut);
   azLines.exit().remove();
 
   var zaLines = g.selectAll('path.edge-za').data(data.edges);
@@ -180,7 +201,8 @@ function renderEdges(g, data, ref, layerId) {
       pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
 
       PubSub.publish("setVariables", d, ref.svg.node());
-      PubSub.publish("setSelection", d, ref.svg.node());
+      PubSub.publish("setSelection", d, ref.svg.node()); // send signal locally
+      PubSub.publish("setSelection", d); // send signal globally
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -192,27 +214,8 @@ function renderEdges(g, data, ref, layerId) {
         .classed('selected', true)
         .classed('animated-edge', true);
     })
-    .on('mouseover', function (event, d) {
-      pathCrawl(this, "dash-over", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
-
-      d3.select(this).classed("animated-edge", true);
-      PubSub.publish("hideTooltip", null, ref.svg.node());
-      var text =
-        `<p><b>From:</b>  ${d.nodeZ}</p>
-        <p><b>To:</b>  ${d.nodeA}</p>
-        <p><b>Volume:</b> ${d.ZAdisplayValue}</p>`;
-      PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
-    })
-    .on('mouseout', function (event, d) {
-      PubSub.publish("hideTooltip", null, ref.svg.node());
-      d3.select(this).attr('stroke', d.zaColor ? d.zaColor : defaultEdgeColor);
-      var dashes = document.querySelectorAll(".dash-over");
-      for(var i=0; i<dashes.length; i++){
-          dashes[i].remove();
-      }
-      if(d3.select(this).classed("selected")){ return }
-      d3.select(this).classed("animated-edge", false);
-    });
+    .on('mouseover', doEdgeMouseOver)
+    .on('mouseout', doEdgeMouseOut);
   zaLines.exit().remove();
 }
 
