@@ -320,8 +320,20 @@ export class MapCanvas extends BindableHTMLElement {
             position: relative;
             display: inline-block;
           }
-
           ${ this.options.enableAnimations ? `
+          .animated-node { 
+            animation-name: throb;
+            animation-duration: 1.5s;
+            animation-iteration-count: infinite;
+            animation-timing-function: linear;
+          }
+
+          @keyframes throb {
+            0% {transform:scale(1.5, 1.5);}
+            50% {transform:scale(1.0, 1.0); }
+            100% {transform:scale(1.5, 1.5); }
+          }
+
           g.dash-over polygon {
             animation-name: crawl;
             animation-duration: 0.5s;
@@ -433,14 +445,14 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       this.shadow.innerHTML = `
-      <div id='mapstyle'>
-      </div>
       <style>
         ${esmapCss}
       </style>
       <style>
         ${leafletCss}
       </style>
+      <div id='mapstyle'>
+      </div>
 
 
       <div id='map'>
