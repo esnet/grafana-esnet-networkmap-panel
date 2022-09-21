@@ -80,17 +80,16 @@ function renderEdges(g, data, ref, layerId) {
       color = d.zaColor ? d.zaColor : defaultEdgeColor
     }
 
-    pathCrawl(event.target, "dash-over", color, edgeWidth);
-
-
-    thisEdge.classed("animated-edge", true);
-
+    if(!thisEdge.classed('animated-edge')){
+      pathCrawl(event.target, "dash-over", color, edgeWidth);
+      thisEdge.classed("animated-edge", true);
+    }
+  
     PubSub.publish("hideTooltip", null, ref.svg.node());
     var text = `<p><b>From:</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
       <p><b>To:</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
-      <p><b>Volume: </b>  ${ d.AZdisplayValue }</p>`;
+      <p><b>Volume: </b>  ${ isAZ ? d.AZdisplayValue : d.ZAdisplayValue }</p>`;
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
-    console.log("over end. Timing: ", (new Date()).getTime() - start);
   }
 
   const doEdgeMouseOut = (event, d) => {
@@ -109,7 +108,6 @@ function renderEdges(g, data, ref, layerId) {
     }
     if(thisEdge.classed("selected")){ return }
     thisEdge.classed("animated-edge", false);
-    console.log("out end. Timing: ", (new Date()).getTime() - start);
   }
 
   azLines
