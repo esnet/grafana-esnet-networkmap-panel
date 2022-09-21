@@ -1,6 +1,6 @@
 {
   "name": "esnet-networkmap-panel",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Network Map Panel",
   "repository": "https://github.com/esnet/grafana-esnet-networkmap-panel",
   "scripts": {
@@ -25,6 +25,7 @@
     "karma-should": "^1.0.0",
     "mocha": "^10.0.0",
     "should": "^2.0.2"
+    "grafana-plugin-support": "latest",
   },
   "main": "index.js",
   "engines": {
@@ -32,7 +33,6 @@
   },
   "dependencies": {
     "d3": "^7.0.0",
-    "grafana-plugin-support": "latest",
     "leaflet": "^1.7.1"
   }
 }
