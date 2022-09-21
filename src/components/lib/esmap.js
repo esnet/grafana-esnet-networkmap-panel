@@ -49,9 +49,7 @@ function pathCrawl(path, klass, color, edgeWidth){
       var pointOnPath = i * totalDashWidth;
       var nextPointOnPath = ((i+1) * totalDashWidth) > path.getTotalLength() ? path.getTotalLength() : ((i+1) * totalDashWidth);
       var point = path.getPointAtLength(pointOnPath);
-      console.log("i is", i, "totalDashWidth is", totalDashWidth, "getting point at", pointOnPath, "of total", path.getTotalLength());
       var nextPoint = path.getPointAtLength(nextPointOnPath);
-      console.log("i+1 is", i+1, "totalDashWidth is", totalDashWidth, "getting point at", nextPointOnPath, "of total", path.getTotalLength());
       var vector = { dx: nextPoint.x - point.x, dy: nextPoint.y - point.y}
       var rotationInRads = Math.atan2(vector.dy, vector.dx);
       var rotationInDegs = rotationInRads * (180 / Math.PI);
@@ -75,12 +73,17 @@ function renderEdges(g, data, ref, layerId) {
 
   const doEdgeMouseOver = (event, d) => {
     var start = new Date();
-    pathCrawl(event.target, "dash-over", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
-
     var thisEdge = d3.select(event.target)
+    const isAZ = thisEdge.classed("edge-az");
+    var color = d.azColor ? d.azColor : defaultEdgeColor;
+    if(!isAZ){
+      color = d.zaColor ? d.zaColor : defaultEdgeColor
+    }
+
+    pathCrawl(event.target, "dash-over", color, edgeWidth);
+
 
     thisEdge.classed("animated-edge", true);
-    const isAZ = thisEdge.classed("edge-az");
 
     PubSub.publish("hideTooltip", null, ref.svg.node());
     var text = `<p><b>From:</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
@@ -657,7 +660,7 @@ export class EsMap {
       PubSub.subscribe("showTooltip",function(data){
         var elem = document.createElement("div");
         elem.setAttribute("id", "tooltip-hover");
-        elem.setAttribute("class", "tooltip-hover");
+        elem.setAttribute("class", "tight-form-func tooltip-hover");
         elem.innerHTML = data.text;
         elem.setAttribute("style", `top:${data.event.clientY+10}px; left:${data.event.clientX+10}px;`);
         document.body.appendChild(elem);
