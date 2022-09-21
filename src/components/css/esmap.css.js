@@ -260,6 +260,5 @@ div:where(.tight-form-func) { background: #FFF; }
 
 .animated-node { 
   transform: scale(1.5, 1.5);
-  stroke-width:0.7px;
 }
 `
