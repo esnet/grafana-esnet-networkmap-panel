@@ -136,21 +136,21 @@ function renderEdges(g, data, ref, layerId) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      var dashes = document.querySelectorAll(".dash-selected");
-      for(var i=0; i<dashes.length; i++){
-          dashes[i].remove();
-      }
+      PubSub.publish("clearSelection", null, ref.svg.node())
 
       var name = sanitizeName(d.name);
       pathCrawl(this, "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
       pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
 
+      const selectionData = {
+        selection: d,
+        event: event,
+        layer: layerId,
+        type: "edge",
+      }
       PubSub.publish("setVariables", d, ref.svg.node());
-      PubSub.publish("setSelection", d, ref.svg.node());
-      d3.selectAll(".selected")
-        .classed('selected', false)
-        .classed('animated-edge', false)
-        .classed('edge', true);
+      PubSub.publish("setSelection", selectionData, ref.svg.node());
+      PubSub.publish("setSelection", selectionData);
       d3.select(".edge-za-"+name)
         .classed('selected', true)
         .classed('animated-edge', true);
@@ -192,18 +192,21 @@ function renderEdges(g, data, ref, layerId) {
     })
     .attr('pointer-events', 'visiblePainted')
     .on('click', function(event, d){
-      var dashes = document.querySelectorAll(".dash-selected");
-      for(var i=0; i<dashes.length; i++){
-          dashes[i].remove();
-      }
+      PubSub.publish("clearSelection", null, ref.svg.node())
       var name = sanitizeName(d.name);
 
       pathCrawl(this, "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
       pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
 
+      const selectionData = {
+        selection: d,
+        event: event,
+        layer: layerId,
+        type: "edge",
+      }
       PubSub.publish("setVariables", d, ref.svg.node());
-      PubSub.publish("setSelection", d, ref.svg.node()); // send signal locally
-      PubSub.publish("setSelection", d); // send signal globally
+      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
+      PubSub.publish("setSelection", selectionData); // send signal globally
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
@@ -540,6 +543,21 @@ function renderNodes(g, data, ref, layerId) {
       d3.select(event.target.parentElement).attr("transform", "scale(1.0, 1.0)")
       PubSub.publish("hideTooltip", null, ref.svg.node());
     })
+    .on('click', function(event, d){
+      PubSub.publish("clearSelection", null, ref.svg.node())
+      d3.select(this)
+        .classed('selected', true)
+        .classed('node', false)
+        .classed('animated-node', true);
+      const selectionData = {
+        selection: d,
+        event: event,
+        layer: layerId,
+        type: "node",
+      }
+      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
+      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
+    })
     .select(function(d){
       return this.childNodes[0];
     })
@@ -688,14 +706,18 @@ export class EsMap {
     PubSub.subscribe("updateOptions", updateOptions, this.svg.node());
 
     function clearSelection(){
-      var dashes = document.querySelectorAll(".dash-selected");
+      var dashes = document.querySelectorAll(".dash-selected, .dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
       }
       d3.selectAll(".selected")
         .classed('selected', false)
+      d3.selectAll(".animated-edge")
         .classed('animated-edge', false)
         .classed('edge', true)
+      d3.selectAll(".animated-node")
+        .classed('animated-node', false)
+        .classed('node', true)
     }
     PubSub.subscribe("clearSelection", clearSelection, this.svg.node());
 
