@@ -72,7 +72,6 @@ svg circle.controlPoint {
 div.tooltip-hover {
   position:absolute;
   z-index:10000;
-  background: white;
   border-radius:4px;
   padding:10px;
   margin:10px;
@@ -189,11 +188,9 @@ input:checked + .slider:before {
 .legend {
     position: absolute;
     z-index: 600;
-    background: white;
     padding: 1em 1em 0.3em 1em;
     margin: 0.8em;
     box-shadow: 0px 0px 2px rgb(0 0 0 / 50%);
-    border:1px solid #b3b3b3;
     border-radius: 3px;
 }
 
@@ -241,11 +238,11 @@ input:checked + .slider:before {
 }
 
 .legend .minimize .circle-background {
-  fill: #AAA; cursor: pointer;
+  fill: rgba(128,128,128,0.3); cursor: pointer;
 }
 
 .legend .minimize .circle-background:hover {
-  fill: #888;
+  fill: rgba(128,128,128,0.5);
 }
 
 .legend-column {
@@ -257,4 +254,8 @@ input:checked + .slider:before {
 .legend-column:last-child {
   margin-right:0;
 }
+
+/* a 0-specificity class selector. Allows override for background elements by grafana's version of this class */
+div:where(.tight-form-func) { background: #FFF; }
+
 `
