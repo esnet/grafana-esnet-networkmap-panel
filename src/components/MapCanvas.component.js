@@ -31,6 +31,7 @@ export class MapCanvas extends BindableHTMLElement {
     super();
     this._topology = null;
     this._options = null;
+    this._selection = false;
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
@@ -46,6 +47,12 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
     PubSub.subscribe('updateTopology', () => { this.updateTopology(this.topology) }, this);
+    PubSub.subscribe("setSelection", function(d){
+        this.selection = true;
+    }, this);
+    PubSub.subscribe("clearSelection", function(){
+        this.selection = false;
+    }, this);
     PubSub.subscribe('getMapCenterAndZoom', (() => {
       var self = this;
       return () => {
@@ -129,6 +136,14 @@ export class MapCanvas extends BindableHTMLElement {
     this.newMap();
     return newValue;
   }
+  set selection(newValue){
+      this._selection = newValue;
+      this.renderStyle();
+  }
+  get selection(){
+      return this._selection;
+  }
+
 
   // "propattribute" helper functions
   static get observedAttributes() {
@@ -140,6 +155,10 @@ export class MapCanvas extends BindableHTMLElement {
     }
   }
 
+  clearSelection(){
+      PubSub.publish('setVariables', null, this);
+      PubSub.publish('clearSelection', null, this);
+  }
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
@@ -312,6 +331,8 @@ export class MapCanvas extends BindableHTMLElement {
 
   renderStyle(){
     let mapstyle = this.shadow.querySelector("#mapstyle");
+    let selectedOnlyButtonDisplay = this._selection && "inline-block" || "none";
+
     mapstyle.innerHTML = `
       <style>
           #map { 
@@ -319,6 +340,9 @@ export class MapCanvas extends BindableHTMLElement {
             background: ${this.options.background};
             position: relative;
             display: inline-block;
+          }
+          .home-overlay > .button.selected-only {
+              display: ${ selectedOnlyButtonDisplay }
           }
           ${ this.options.enableAnimations ? `
           .animated-node { 
@@ -460,6 +484,9 @@ export class MapCanvas extends BindableHTMLElement {
             <div class="button" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠
             </div>
+            <div class='button selected-only' id='clear_selection'">
+              &times; Clear Selection
+            </div>
         </div>
         <div class='legend-overlay'>
           <div id='legend-container'>
@@ -501,6 +528,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.map && this.map.renderMap();
     this.bindEvents({
       "#home_map@onclick": this.newMap,
+      "#clear_selection@onclick": this.clearSelection,
     })
   }
 

@@ -14,12 +14,6 @@ class EditingInterface extends BindableHTMLElement {
         this._dialog = false;
         this._selectedLayer = "layer1";
         this._spliceNodeIndex = null;
-        PubSub.subscribe("setSelection", (d)=>{ 
-            this.selection = true;
-        }, this);
-        PubSub.subscribe("clearSelection", ()=>{ 
-            this.selection = false;
-        }, this)
         PubSub.subscribe("toggleNodeEdit", (value)=>{
             if(value === null || value === undefined){
                 this._edgeEditMode = false;
@@ -76,13 +70,6 @@ class EditingInterface extends BindableHTMLElement {
     get nodeEditMode(){
         return this._nodeEditMode;
     }
-    set selection(newValue){
-        this._selection = newValue;
-        this.render()
-    }
-    get selection(){
-        return this._selection;
-    }
     set dialog(newValue){
         this._dialog = newValue;
         this.render();
@@ -116,10 +103,6 @@ class EditingInterface extends BindableHTMLElement {
 
     ///////////////////////////
     // event bindings
-    clearSelection(){
-        PubSub.publish('setVariables', null, this);
-        PubSub.publish('clearSelection', null, this);
-    }
     toggleNodeEdit(){
         PubSub.publish("toggleNodeEdit", null, this);
     }
@@ -294,7 +277,6 @@ class EditingInterface extends BindableHTMLElement {
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
         let editModeOnlyToolsDisplay = this._editMode && "block" || "none";
-        let selectedOnlyButtonDisplay = this._selection && "inline-block" || "none";
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -340,9 +322,6 @@ class EditingInterface extends BindableHTMLElement {
                 }
                 .tools-overlay > .button.edit-mode-only {
                     display: ${ editModeOnlyToolsDisplay }
-                }
-                .button-overlay > .button.selected-only {
-                    display: ${ selectedOnlyButtonDisplay }
                 }
                 .dialog {
                   position: absolute;
@@ -507,9 +486,6 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class='button selected-only' id='clear_selection'">
-                &times; Clear Selection
-              </div>
               <div class='button edit-mode-only' id='edge_edit_mode'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
@@ -527,7 +503,6 @@ class EditingInterface extends BindableHTMLElement {
             </div>
             `;
           this.bindEvents({
-            "#clear_selection@onclick": this.clearSelection,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
