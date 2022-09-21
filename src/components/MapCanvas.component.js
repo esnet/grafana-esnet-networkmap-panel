@@ -381,7 +381,7 @@ export class MapCanvas extends BindableHTMLElement {
     let columns = [];
     let columnLength = this.options.legendColumnLength ? this.options.legendColumnLength : 3;
     let thresholds = this.options.thresholds;
-    output = `<div class='legend ${this.options.legendPosition}'>
+    output = `<div class='tight-form-func legend ${this.options.legendPosition}'>
       <div class='heading'>
         <h4>Legend</h4>
         <svg class='minimize' version="1.1" xmlns="http://www.w3.org/2000/svg" height="16" width="16">
