@@ -29,6 +29,7 @@ export class MapCanvas extends BindableHTMLElement {
 
   constructor() {
     super();
+    this.instanceId = Math.random().toString(16).substr(2, 8);
     this._topology = null;
     this._options = null;
     this._selection = false;
@@ -335,13 +336,13 @@ export class MapCanvas extends BindableHTMLElement {
 
     mapstyle.innerHTML = `
       <style>
-          #map { 
+          #map-${this.instanceId} { 
             font-family: sans-serif;
             background: ${this.options.background};
             position: relative;
             display: inline-block;
           }
-          .home-overlay > .button.selected-only {
+          #map-${this.instanceId} > .home-overlay > .button.selected-only {
               display: ${ selectedOnlyButtonDisplay }
           }
           ${ this.options.enableAnimations ? `
@@ -479,12 +480,12 @@ export class MapCanvas extends BindableHTMLElement {
       </div>
 
 
-      <div id='map'>
+      <div id='map-${this.instanceId}'>
         <div class='home-overlay'>
-            <div class="button" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
+            <div class="button tight-form-func" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠
             </div>
-            <div class='button selected-only' id='clear_selection'">
+            <div class='button selected-only tight-form-func' id='clear_selection'">
               &times; Clear Selection
             </div>
         </div>
@@ -495,7 +496,7 @@ export class MapCanvas extends BindableHTMLElement {
         ${ this.options.enableEditing ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
       </div>
       ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
-      this.mapContainer = this.shadow.querySelector("#map");
+      this.mapContainer = this.shadow.querySelector(`#map-${this.instanceId}`);
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
       if(this.editingInterface){
