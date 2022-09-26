@@ -283,7 +283,8 @@ class EditingInterface extends BindableHTMLElement {
                     position: absolute;
                     z-index: 600;
                     margin-top: 12px;
-                    margin-left: 109px;
+                    margin-right: 12px;
+                    right: 0;
                 }
                 .button-overlay > .button {
                    background: white;
