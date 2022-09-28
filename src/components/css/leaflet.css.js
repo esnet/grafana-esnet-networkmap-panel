@@ -638,4 +638,6 @@ svg.leaflet-image-layer.leaflet-interactive path {
     margin-left: -12px;
     border-right-color: #fff;
     }
+.leaflet-tile-container img { will-change: transform; outline: 1px solid transparent; }
+
 `

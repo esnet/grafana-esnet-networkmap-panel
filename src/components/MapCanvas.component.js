@@ -30,8 +30,8 @@ if(typeof require !== "undefined"){
 
             var tileSize = this.getTileSize();
 
-            tile.style.width = tileSize.x + 2 + 'px';
-            tile.style.height = tileSize.y + 2 + 'px';
+            tile.style.width = tileSize.x + 0.5 + 'px';
+            tile.style.height = tileSize.y + 0.5 + 'px';
             tile.style.imageRendering = "crisp-edges";
         }
     });
