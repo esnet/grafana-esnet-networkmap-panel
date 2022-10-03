@@ -256,4 +256,18 @@ div:where(.tight-form-func) { background: #FFF; }
 .animated-node { 
   transform: scale(1.5, 1.5);
 }
+
+svg .control.control-selected { 
+  animation-name: pulse;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+  animation-timing-function: step-end;
+}
+
+@keyframes pulse {
+  0% { opacity:1.0 }
+  80% { opacity:0.0 }
+  100% { opacity:1.0 }
+}
+
 `

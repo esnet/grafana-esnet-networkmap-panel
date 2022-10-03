@@ -280,7 +280,6 @@ function renderNodeControl(g, data, ref, layerId){
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
     PubSub.publish("dragStarted", evt);
-    PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, mapDiv);
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     pointData['latLng'][0] = ll.lat;
@@ -350,6 +349,8 @@ function renderNodeControl(g, data, ref, layerId){
     .append('circle')
     .attr('r', 6)
     .attr('class', 'control controlPoint')
+    .attr("data-layer", layerId)
+    .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
     .on('dblclick', function(evt, pointData){
       pointData.layer = "layer" + layerId;
@@ -361,7 +362,6 @@ function renderNodeControl(g, data, ref, layerId){
         }
         i++;
       })
-      PubSub.publish("updateLastInteractedObject", null, ref.svg.node());
       PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.svg.node());
     })
     .on('mouseover', function (event, d) {
@@ -384,7 +384,15 @@ function renderNodeControl(g, data, ref, layerId){
       ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
-      PubSub.publish("updateLastInteractedObject", {"object": pointData, "type": "nodes"}, ref.svg.node());
+      d3.selectAll(".control-selected")
+        .classed("control-selected", false);
+      d3.select(evt.target).classed("control-selected", true);
+      PubSub.publish("setEditSelection", {
+        "object": pointData,
+        "index": evt.target.getAttribute("data-index"),
+        "layer": evt.target.getAttribute("data-layer"),
+        "type": "nodes"
+      }, ref.svg.node());
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
@@ -406,15 +414,27 @@ function renderEdgeControl(g, data, ref, layerId) {
     .attr('d', function (d) {
       return d.controlPointPath;
     })
+    .attr('data-layer', layerId)
+    .attr('data-index', function(d, idx){
+      return idx;
+    })
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
       var connections = " control-for-"+name.split("--").join(" control-for-");
-      return 'control controlEddge edge-az-' + name + connections;
+      return 'control controlEdge edge-az-' + name + connections;
     })
-
     // still need to figure out how to not zoom when doubleclicking here
     .on('dblclick', function (d) {
       addControlPoint(d, this, ref);
+    })
+    .on('mousedown', function(evt, edgeData){
+      d3.selectAll(".control-selected")
+        .classed("control-selected", false);
+      d3.select(evt.target).classed("control-selected", true);
+      console.log('this happened', evt.target);
+      var idx = evt.target.getAttribute("data-index");
+      var layer = evt.target.getAttribute("data-layer");
+      PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layer}, ref.svg.node());
     })
     //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
     .on('mouseenter', function () {
@@ -428,9 +448,9 @@ function renderEdgeControl(g, data, ref, layerId) {
 
   g.selectAll('g').remove();
 
-  function dragged(evt, d, edgeData) {
+  function dragged(evt, d, edgeData, idx, layerId) {
     PubSub.publish("dragStarted", evt);
-    PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
+    PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layerId}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -440,7 +460,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     ref.update();
   }
 
-  function endDrag(evt, d, edgeData) {
+  function endDrag(evt, d) {
     if(!PubSub.last("dragStarted")){
       // if the drag start event never fired,
       // we have a no-op, and should return early
@@ -463,7 +483,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     });
   }
 
-  data.edges.forEach(function (edgeData) {
+  data.edges.forEach(function (edgeData, idx) {
     var my_g = g.append('g');
     var feature = my_g.selectAll('circle').data(edgeData.latLngs);
 
@@ -476,8 +496,8 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .merge(feature)
       .call(d3.drag()
-        .on('drag', function(evt, d){ dragged(evt, d, edgeData); })
-        .on('end', function(evt, d){ endDrag(evt, d, edgeData); }));
+        .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
+        .on('end', function(evt, d){ endDrag(evt, d); }));
 
     my_g
       .selectAll('circle')
@@ -496,8 +516,17 @@ function renderEdgeControl(g, data, ref, layerId) {
       .on('dblclick', function (evt, d) {
         deleteControlPoint(evt, d, this, edgeData, ref);
       })
-      .on('mousedown', function(evt, d){
-        PubSub.publish("updateLastInteractedObject", {"object": edgeData, "type": "edges"}, ref.svg.node());
+      .on('click', function(evt, d){
+        d3.selectAll(".control-selected")
+          .classed("control-selected", false);
+        d3.select(".controlEdge.edge-az-"+edgeData.name)
+          .classed("control-selected", true);
+        PubSub.publish("setEditSelection", {
+          "object": edgeData,
+          "index": idx,
+          "layer": layerId,
+          "type": "edges"
+        }, ref.svg.node());
       });
 
     feature.exit().remove();
@@ -733,6 +762,8 @@ export class EsMap {
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
     function deleteObject(object, type){
+      console.log('delete', object, type);
+      return;
       if(object === null || type === null) return;
       for(var i=1; i<=3; i++){
         if(!self.data["layer"+i]){

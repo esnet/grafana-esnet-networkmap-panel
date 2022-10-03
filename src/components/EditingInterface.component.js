@@ -13,7 +13,7 @@ class EditingInterface extends BindableHTMLElement {
         this._selection = false;
         this._dialog = false;
         this._selectedLayer = "layer1";
-        this._spliceNodeIndex = null;
+        this._spliceIndex = null;
         PubSub.subscribe("toggleNodeEdit", (value)=>{
             if(value === null || value === undefined){
                 this._edgeEditMode = false;
@@ -31,11 +31,25 @@ class EditingInterface extends BindableHTMLElement {
             }
         }, this)
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
-            this._selectedNode = evtData['object'];
-            this._spliceNodeIndex = evtData['index'];
-            this.selectedLayer = evtData['layer'];
+            this._selectedObject = evtData['object'];
+            this._spliceIndex = evtData['index'];
+            this._selectedLayer = evtData['layer'];
             this.dialog = "node";
         }, this)
+        PubSub.subscribe('setEditSelection', (evtData)=>{
+            if(!evtData){
+                this._selectedObject = null;
+                this._spliceIndex = null;
+                this._selectedLayer = null;
+                this._selectedType = null;
+                return
+            }
+            this._selectedObject = evtData['object'];
+            this._spliceIndex = evtData['index'];
+            this._selectedLayer = evtData['layer'];
+            this._selectedType = evtData['type'];
+            this.render();
+        }, this);
     }
     
     //////////////////////////////////////
@@ -113,22 +127,22 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.publish('recalcPaths', null, this);
     }
     showAddNodeDialog(){
-        this.selectedLayer = "layer1";
-        this._selectedNode = null;
-        this._spliceNodeIndex = null;
+        this._selectedLayer = "layer1";
+        this._selectedObject = null;
+        this._spliceIndex = null;
         this.dialog = "node";
     }
     showAddEdgeDialog(){
-        this.selectedLayer = "layer1";
-        this._selectedNode = null;
-        this._spliceNodeIndex = null;
+        this._selectedLayer = "layer1";
+        this._selectedObject = null;
+        this._spliceIndex = null;
         this.dialog = "edge";
     }
     hideDialogs(){
         this.dialog = false;
     }
     showSrcDst(event){
-        this.selectedLayer = event.target.value;
+        this._selectedLayer = event.target.value;
     }
 
     updateMapNodes(){
@@ -151,7 +165,7 @@ class EditingInterface extends BindableHTMLElement {
           children: [],
         }
 
-        this.updateLayerNodes(nodeLayer, newNode, this._spliceNodeIndex);
+        this.updateLayerNodes(nodeLayer, newNode, this._spliceIndex);
     }
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
@@ -166,8 +180,6 @@ class EditingInterface extends BindableHTMLElement {
             "layer3": this._topology.layer3 || defaultLayer,
         }
         PubSub.publish("updateTopology", mapJson, this);
-
-        console.log('in updateLayerNodes. this.updateTopology:', this.updateTopology)
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
@@ -234,13 +246,26 @@ class EditingInterface extends BindableHTMLElement {
         }, 100);
     }
 
+    deleteSelection(){
+        var topology = this.mapCanvas.topology;
+        topology['layer'+this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
+        PubSub.publish("updateMapTopology", topology, this);
+        PubSub.publish("refresh", null, this);
+        PubSub.publish("updateTopologyData", null, this);
+        this._selectedLayer = null;
+        this._selectedType = null;
+        this._spliceIndex = null;
+        this._selectedObject = null;
+        this.render();
+    }
+
     // end eventbindings
     /////////////////////////////
 
     setSrcDstOptions(){
         let json = { nodes: [] };
         try {
-          json = this._topology[this.selectedLayer];
+          json = this._topology[this._selectedLayer];
         } catch (e) {
           console.debug(e);
         }
@@ -276,7 +301,7 @@ class EditingInterface extends BindableHTMLElement {
             this.shadow = this.attachShadow({"mode": "open"})
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
-        let editModeOnlyToolsDisplay = this._editMode && "block" || "none";
+        let editModeOnlyToolsDisplay = this._editMode && "inline-block" || "none";
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -304,6 +329,7 @@ class EditingInterface extends BindableHTMLElement {
                     z-index: 600;
                     margin-top: 84px;
                     margin-left: 10px;
+                    max-width:120px;
                 }
                 .tools-overlay > .button {
                     background: white;
@@ -312,7 +338,7 @@ class EditingInterface extends BindableHTMLElement {
                     margin-bottom: 10px;
                     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
                     border: 1px solid #b3b3b3;
-                    display: block;
+                    display: inline-block;
                     cursor: pointer;
                 }
                 .tools-overlay > .button:hover {
@@ -384,7 +410,7 @@ class EditingInterface extends BindableHTMLElement {
                 <!-- add node dialog -->
                 <div class="dialog-form" id="add_node_dialog">
                   <form id='add_node_form'>
-                    <h2>${this._selectedNode ? "Edit Node" : "Add a Node" }</h2>
+                    <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
                     <table>
                       <tr>
                         <td>
@@ -392,9 +418,9 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="node_layer">
-                            <option value='layer1' ${ this.selectedLayer == "layer1" && "selected"}>Layer 1</option>
-                            <option value='layer2' ${ this.selectedLayer == "layer2" && "selected"}>Layer 2</option>
-                            <option value='layer3' ${ this.selectedLayer == "layer3" && "selected"}>Layer 3</option>
+                            <option value='layer1' ${ this._selectedLayer == "layer1" && "selected"}>Layer 1</option>
+                            <option value='layer2' ${ this._selectedLayer == "layer2" && "selected"}>Layer 2</option>
+                            <option value='layer3' ${ this._selectedLayer == "layer3" && "selected"}>Layer 3</option>
                           </select>
                         </td>
                       </tr>
@@ -403,7 +429,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_name' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.name+"'" : "" }></input>
+                          <input class='text-input' id='node_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.name+"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -411,7 +437,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Display Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_display_name' type='text' ${ this._selectedNode ? "value='"+ (this._selectedNode.meta.display_name || "") +"'" : "" }></input>
+                          <input class='text-input' id='node_display_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+ (this._selectedObject.meta.display_name || "") +"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -419,7 +445,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.latLng[0].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lat' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.latLng[0].toFixed(3)+"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -427,7 +453,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='text' ${ this._selectedNode ? "value='"+this._selectedNode.latLng[1].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lng' type='text' ${this._selectedType == 'nodes' &&  this._selectedObject ? "value='"+this._selectedObject.latLng[1].toFixed(3)+"'" : "" }></input>
                         </td>
                       </tr>
                       <tr>
@@ -435,13 +461,13 @@ class EditingInterface extends BindableHTMLElement {
                           <label>SVG Icon:</label>
                         </td>
                         <td>
-                          <textarea class='text-input' id='node_svg'>${ this._selectedNode && this._selectedNode.meta.svg || "" }</textarea>
+                          <textarea class='text-input' id='node_svg'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.svg || "" }</textarea>
                         </td>
                       </tr>
                       <tr>
                         <td colspan="2">
                           <input class='button' type='button' id='create_node_cancel' value='Cancel' />
-                          <input class='button' type='button' id='create_node' value='${this._selectedNode ? "Update Node" : "Add Node" }' />
+                          <input class='button' type='button' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
                         </td>
                       </tr>
                     </table>
@@ -458,9 +484,9 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="edge_layer">
-                            <option value="layer1" ${ this.selectedLayer == "layer1" && "selected"}>Layer 1</option>
-                            <option value="layer2" ${ this.selectedLayer == "layer2" && "selected"}>Layer 2</option>
-                            <option value="layer3" ${ this.selectedLayer == "layer3" && "selected"}>Layer 3</option>
+                            <option value="layer1" ${ this._selectedLayer == "layer1" && "selected"}>Layer 1</option>
+                            <option value="layer2" ${ this._selectedLayer == "layer2" && "selected"}>Layer 2</option>
+                            <option value="layer3" ${ this._selectedLayer == "layer3" && "selected"}>Layer 3</option>
                           </select>
                         </td>
                       </tr>
@@ -501,6 +527,10 @@ class EditingInterface extends BindableHTMLElement {
               <div class='button edit-mode-only' id='add_edge'>
                 + Edge
               </div>
+              <div class='button edit-mode-only' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: inline-block" : "display: none" }'>
+                Delete<br>
+                ${this._selectedObject && this._selectedObject.name}
+              </div>
             </div>
             `;
           this.bindEvents({
@@ -516,6 +546,8 @@ class EditingInterface extends BindableHTMLElement {
             "#create_edge@onclick": this.createMapEdge,
             "#create_edge_cancel@onclick": this.hideDialogs,
             "#edge_layer@onchange": this.showSrcDst,
+
+            "#delete_selection@onclick": this.deleteSelection,
           });
     }
   // connect component
