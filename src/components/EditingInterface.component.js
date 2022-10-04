@@ -33,7 +33,7 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.subscribe("showEditNodeDialog", (evtData)=>{
             this._selectedObject = evtData['object'];
             this._spliceIndex = evtData['index'];
-            this._selectedLayer = evtData['layer'];
+            this.selectedLayer = evtData['layer'];
             this.dialog = "node";
         }, this)
         PubSub.subscribe('setEditSelection', (evtData)=>{
@@ -144,7 +144,7 @@ class EditingInterface extends BindableHTMLElement {
         this.dialog = false;
     }
     showSrcDst(event){
-        this._selectedLayer = event.target.value;
+        this.selectedLayer = event.target.value;
     }
 
     updateMapNodes(){

@@ -7,6 +7,14 @@ interface Props extends StandardEditorProps<string, StringFieldConfigSettings> {
   suffix?: ReactNode;
 }
 
+function unescape(str) {
+  return String(str)
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"');
+}
+
 export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix }) => {
   var textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -17,12 +25,12 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
         // handling keyboard event
         const evt = e as React.KeyboardEvent<HTMLInputElement>;
         if (evt.key === 'Enter' && !item.settings?.useTextarea) {
-          nextValue = evt.currentTarget.value.trim();
+          nextValue = unescape(evt.currentTarget.value.trim());
         }
       } else {
         // handling form event
         const evt = e as React.FormEvent<HTMLInputElement>;
-        nextValue = evt.currentTarget.value.trim();
+        nextValue = unescape(evt.currentTarget.value.trim());
       }
       if (nextValue === value) {
         return; // no change

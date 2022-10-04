@@ -503,7 +503,7 @@ function renderEdgeControl(g, data, ref, layerId) {
         return 'control controlPoint control-point-for-edge-' + edgeData.name;
       })
       .merge(feature)
-      .on('mousedown', function(evt, d){
+      /*.on('mousedown', function(evt, d){
         d3.selectAll(".control-selected")
           .classed("control-selected", false);
         d3.select(".controlEdge.edge-az-"+edgeData.name)
@@ -514,7 +514,7 @@ function renderEdgeControl(g, data, ref, layerId) {
           "layer": layerId,
           "type": "edges"
         }, ref.svg.node());
-      })
+      })*/
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
         .on('end', function(evt, d){ endDrag(evt, edgeData); }));
@@ -542,8 +542,9 @@ function renderEdgeControl(g, data, ref, layerId) {
 }
 
 function renderNodes(g, data, ref, layerId) {
+  console.log("renderNodes", data.nodes.length);
   const defaultNodeColor = ref.options["color"+layerId];
-  var feature = g.selectAll('circle').data(data.nodes);
+  var feature = g.selectAll('g.node').data(data.nodes);
   var div = ref.div;
   feature
     .enter()
@@ -556,6 +557,9 @@ function renderNodes(g, data, ref, layerId) {
     .attr('transform', "scale(1.0, 1.0)")
     .html(function(d){
       var circle = `<circle r='${ref.options["nodeWidthL"+layerId]}' />`
+      if(d.name == 'KCNSC-NM'){
+        console.log(d.name, d);
+      }
       return d.meta.svg || circle;
     })
     .attr('text', function (d) {
@@ -592,7 +596,6 @@ function renderNodes(g, data, ref, layerId) {
         layer: layerId,
         type: "node",
       }
-      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
       PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
     })
     .select(function(d){
