@@ -321,6 +321,8 @@ function renderNodeControl(g, data, ref, layerId){
     //
     //--- rerender stuff
     ref.update();
+    g.select(".control-point-for-node-"+pointData.name)
+      .classed("control-selected", true);
   }
 
   function endDrag(evt, d) {
@@ -342,13 +344,15 @@ function renderNodeControl(g, data, ref, layerId){
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
+    d3.select(".control-point-for-node-"+d.name)
+      .classed("control-selected", true);
   }
 
   feature
     .enter()
     .append('circle')
     .attr('r', 6)
-    .attr('class', 'control controlPoint')
+    .attr('class', function(d){ return 'control controlPoint control-point-for-node-'+d.name; })
     .attr("data-layer", layerId)
     .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
@@ -431,7 +435,6 @@ function renderEdgeControl(g, data, ref, layerId) {
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
       d3.select(evt.target).classed("control-selected", true);
-      console.log('this happened', evt.target);
       var idx = evt.target.getAttribute("data-index");
       var layer = evt.target.getAttribute("data-layer");
       PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layer}, ref.svg.node());
@@ -499,7 +502,6 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .merge(feature)
       .on('mousedown', function(evt, d){
-        console.log('mousedown');
         d3.selectAll(".control-selected")
           .classed("control-selected", false);
         d3.select(".controlEdge.edge-az-"+edgeData.name)
@@ -765,31 +767,6 @@ export class EsMap {
     }
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
-    function deleteObject(object, type){
-      console.log('delete', object, type);
-      return;
-      if(object === null || type === null) return;
-      for(var i=1; i<=3; i++){
-        if(!self.data["layer"+i]){
-          continue;
-        }
-        var idx = -1;
-        var length = self.data && self.data['layer'+i] && self.data['layer'+i][type].length || 0;
-        for(var j=0; j<length; j++){
-          if(self.data["layer"+i][type][j].name == object.name){
-            idx = j;
-            break;
-          }
-        }
-        if(idx > -1){
-          self.data["layer"+i][type].splice(idx, 1);
-          PubSub.publish("updateMapTopology", self.data, self.svg.node());
-          PubSub.publish("refresh", null, self.svg.node());
-          PubSub.publish("updateTopologyData", null, self.svg.node());
-          return;
-        }
-      }
-    }
     function nudge(latOrLng, amount){
       if (self.lastInteractedType === null || self.lastInteractedObject === null) return;
       if (self.lastInteractedType == "nodes"){
@@ -819,10 +796,6 @@ export class EsMap {
 
     d3.select("body").on("keydown", function(event, d){
       switch(event.key){
-        case 'Backspace':
-        case 'Delete':
-          deleteObject(self.lastInteractedObject, self.lastInteractedType);
-          break;
         case 'ArrowLeft':
           nudge("longitude", -0.05)
           break;
