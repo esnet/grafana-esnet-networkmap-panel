@@ -152,6 +152,7 @@ class EditingInterface extends BindableHTMLElement {
         var nodeName = this.shadow.getElementById('node_name').value;
         var nodeDisplayName = this.shadow.getElementById('node_display_name').value;
         var nodeSvg = this.shadow.getElementById('node_svg').value;
+        var nodeTooltip = this.shadow.getElementById('node_tooltip').value;
         var nodeLat = this.shadow.getElementById('node_lat').value;
         var nodeLng = this.shadow.getElementById('node_lng').value;
         var lavender = "rgb(202, 149, 229)";
@@ -161,7 +162,8 @@ class EditingInterface extends BindableHTMLElement {
           color: lavender,
           meta: {
             display_name: nodeDisplayName,
-            svg: nodeSvg
+            svg: nodeSvg,
+            template: nodeTooltip,
           },
           latLng: [parseFloat(nodeLat), parseFloat(nodeLng)],
           children: [],
@@ -464,6 +466,14 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <textarea class='text-input' id='node_svg'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.svg || "" }</textarea>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>
+                          <label>Custom Tooltip:</label>
+                        </td>
+                        <td>
+                          <textarea class='text-input' id='node_tooltip'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.template || "" }</textarea>
                         </td>
                       </tr>
                       <tr>
