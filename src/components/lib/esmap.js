@@ -466,7 +466,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       .classed("control-selected", true);
   }
 
-  function endDrag(evt, d) {
+  function endDrag(evt, edgeData) {
     if(!PubSub.last("dragStarted")){
       // if the drag start event never fired,
       // we have a no-op, and should return early
@@ -487,6 +487,8 @@ function renderEdgeControl(g, data, ref, layerId) {
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
+    d3.select(".controlEdge.edge-az-"+edgeData.name)
+      .classed("control-selected", true);
   }
 
   data.edges.forEach(function (edgeData, idx) {
@@ -515,7 +517,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
-        .on('end', function(evt, d){ endDrag(evt, d); }));
+        .on('end', function(evt, d){ endDrag(evt, edgeData); }));
 
     my_g
       .selectAll('circle')
