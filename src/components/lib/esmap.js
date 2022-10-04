@@ -458,6 +458,9 @@ function renderEdgeControl(g, data, ref, layerId) {
     d[1] = ll.lng;
     //--- rerender stuff
     ref.update();
+    //--- ensure that this edge plays selection animation
+    d3.select(".controlEdge.edge-az-"+edgeData.name)
+      .classed("control-selected", true);
   }
 
   function endDrag(evt, d) {
@@ -495,6 +498,19 @@ function renderEdgeControl(g, data, ref, layerId) {
         return 'control controlPoint control-point-for-edge-' + edgeData.name;
       })
       .merge(feature)
+      .on('mousedown', function(evt, d){
+        console.log('mousedown');
+        d3.selectAll(".control-selected")
+          .classed("control-selected", false);
+        d3.select(".controlEdge.edge-az-"+edgeData.name)
+          .classed("control-selected", true);
+        PubSub.publish("setEditSelection", {
+          "object": edgeData,
+          "index": idx,
+          "layer": layerId,
+          "type": "edges"
+        }, ref.svg.node());
+      })
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
         .on('end', function(evt, d){ endDrag(evt, d); }));
@@ -515,18 +531,6 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .on('dblclick', function (evt, d) {
         deleteControlPoint(evt, d, this, edgeData, ref);
-      })
-      .on('click', function(evt, d){
-        d3.selectAll(".control-selected")
-          .classed("control-selected", false);
-        d3.select(".controlEdge.edge-az-"+edgeData.name)
-          .classed("control-selected", true);
-        PubSub.publish("setEditSelection", {
-          "object": edgeData,
-          "index": idx,
-          "layer": layerId,
-          "type": "edges"
-        }, ref.svg.node());
       });
 
     feature.exit().remove();

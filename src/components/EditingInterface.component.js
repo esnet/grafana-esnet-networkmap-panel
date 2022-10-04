@@ -118,9 +118,11 @@ class EditingInterface extends BindableHTMLElement {
     ///////////////////////////
     // event bindings
     toggleNodeEdit(){
+        PubSub.publish("setEditSelection", null, this);
         PubSub.publish("toggleNodeEdit", null, this);
     }
     toggleEdgeEdit(){
+        PubSub.publish("setEditSelection", null, this);
         PubSub.publish("toggleEdgeEdit", null, this);
     }
     recalcPaths(){
