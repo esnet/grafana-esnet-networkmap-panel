@@ -503,7 +503,7 @@ function renderEdgeControl(g, data, ref, layerId) {
         return 'control controlPoint control-point-for-edge-' + edgeData.name;
       })
       .merge(feature)
-      /*.on('mousedown', function(evt, d){
+      .on('mousedown', function(evt, d){
         d3.selectAll(".control-selected")
           .classed("control-selected", false);
         d3.select(".controlEdge.edge-az-"+edgeData.name)
@@ -514,7 +514,7 @@ function renderEdgeControl(g, data, ref, layerId) {
           "layer": layerId,
           "type": "edges"
         }, ref.svg.node());
-      })*/
+      })
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
         .on('end', function(evt, d){ endDrag(evt, edgeData); }));
