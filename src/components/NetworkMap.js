@@ -141,13 +141,13 @@ export default class NetworkMap {
     let layer1 = emptyLayer;
     let layer2 = emptyLayer;
     let layer3 = emptyLayer;
-    if(this.mapCanvas.options.layer1 && this.mapCanvas.topology.layer1){
+    if(this.mapCanvas.topology.layer1){
       layer1 = this.mapCanvas.topology.layer1;
     }
-    if(this.mapCanvas.options.layer2 && this.mapCanvas.topology.layer2){
+    if(this.mapCanvas.topology.layer2){
       layer2 = this.mapCanvas.topology.layer2;
     }
-    if(this.mapCanvas.options.layer3 && this.mapCanvas.topology.layer3){
+    if(this.mapCanvas.topology.layer3){
       layer3 = this.mapCanvas.topology.layer3;
     }
     this.g1 = this.esmap.addNetLayer('layer1', layer1);

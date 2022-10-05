@@ -162,7 +162,7 @@ describe( "Class MapCanvas", () => {
       var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
       // using window.getComputedStyle, get the full computed style including cascading upstream styles
       var style = window.getComputedStyle(toolOverlayButton);
-      style.display.should.equal("block");
+      style.display.should.equal("inline-block");
     });
     it("should show a tooltip in the sidebar when a user hovers over a node", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -182,7 +182,7 @@ describe( "Class MapCanvas", () => {
       var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
       // using window.getComputedStyle, get the full computed style including cascading upstream styles
       var style = window.getComputedStyle(toolOverlayButton);
-      style.display.should.equal("block");
+      style.display.should.equal("inline-block");
     });
     it("should allow users to change the map layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");

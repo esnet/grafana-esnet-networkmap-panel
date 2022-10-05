@@ -1,6 +1,9 @@
 export const esmapCss = `
-.leaflet-pane > svg path {
-    pointer-events: all;
+.leaflet-pane svg path.edge {
+    pointer-events: stroke;
+}
+.leaflet-pane svg path.control {
+    pointer-events: stroke;
 }
 
 .map-panel {

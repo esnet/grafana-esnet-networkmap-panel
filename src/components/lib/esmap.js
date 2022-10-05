@@ -134,7 +134,7 @@ function renderEdges(g, data, ref, layerId) {
     .attr('text', function (d) {
       return d.AZname;
     })
-    .attr('pointer-events', 'visiblePainted')
+    .attr('pointer-events', 'stroke')
     .on('click', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
 
@@ -190,7 +190,7 @@ function renderEdges(g, data, ref, layerId) {
     .attr('text', function (d) {
       return d.ZAname;
     })
-    .attr('pointer-events', 'visiblePainted')
+    .attr('pointer-events', 'stroke')
     .on('click', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
       var name = sanitizeName(d.name);
@@ -388,6 +388,7 @@ function renderNodeControl(g, data, ref, layerId){
       ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
     })
     .on('mousedown', function(evt, pointData){
+      evt.stopPropagation();
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
       d3.select(evt.target).classed("control-selected", true);
@@ -432,6 +433,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       addControlPoint(d, this, ref);
     })
     .on('mousedown', function(evt, edgeData){
+      evt.stopPropagation();
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
       d3.select(evt.target).classed("control-selected", true);
@@ -504,6 +506,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       })
       .merge(feature)
       .on('mousedown', function(evt, d){
+        evt.stopPropagation();
         d3.selectAll(".control-selected")
           .classed("control-selected", false);
         d3.select(".controlEdge.edge-az-"+edgeData.name)
@@ -542,7 +545,6 @@ function renderEdgeControl(g, data, ref, layerId) {
 }
 
 function renderNodes(g, data, ref, layerId) {
-  console.log("renderNodes", data.nodes.length);
   const defaultNodeColor = ref.options["color"+layerId];
   var feature = g.selectAll('g.node').data(data.nodes);
   var div = ref.div;
@@ -557,9 +559,6 @@ function renderNodes(g, data, ref, layerId) {
     .attr('transform', "scale(1.0, 1.0)")
     .html(function(d){
       var circle = `<circle r='${ref.options["nodeWidthL"+layerId]}' />`
-      if(d.name == 'KCNSC-NM'){
-        console.log(d.name, d);
-      }
       return d.meta.svg || circle;
     })
     .attr('text', function (d) {
@@ -916,7 +915,9 @@ export class EsMap {
     var layerId = 0;
     for (const [name, g] of Object.entries(this.mapLayers)) {
       layerId++;
-
+      if(!this.options['layer' + layerId]){
+        continue;
+      }
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
       var controlpoint_g = g.select('g.cp');
