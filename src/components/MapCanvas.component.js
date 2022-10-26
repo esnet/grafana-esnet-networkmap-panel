@@ -83,6 +83,14 @@ export class MapCanvas extends BindableHTMLElement {
         })
       } 
     })());
+    PubSub.subscribe("getMapViewport", (() => {
+      var self = this;
+      return () => {
+        PubSub.publish("returnMapViewport", {
+          coordinates: self.map.leafletMap.getBounds()
+        })
+      } 
+    })());
   }
 
   get topology() {
@@ -254,6 +262,15 @@ export class MapCanvas extends BindableHTMLElement {
     this.width = newDimensions.width;
     this.height = newDimensions.height;
     this.leafletMap && this.leafletMap.invalidateSize();
+    if(this.leafletMap && this._options.initialViewStrategy === 'viewport'){
+      this.leafletMap.fitBounds(L.latLngBounds(L.latLng(
+        this._options.viewportTopLeftLat,
+        this._options.viewportTopLeftLng),
+      L.latLng(
+        this._options.viewportBottomRightLat,
+        this._options.viewportBottomRightLng)
+      ))
+    }
     this.render();
     this.sideBar && this.sideBar.render();
   }
@@ -300,6 +317,15 @@ export class MapCanvas extends BindableHTMLElement {
           L.tileLayer(
             maplayers.LABELS[this._options.labelLayer].url, 
             maplayers.LABELS[this._options.labelLayer].attributes).addTo(this.leafletMap);
+        }
+        if(this._options.initialViewStrategy === 'viewport'){
+          this.leafletMap.fitBounds(L.latLngBounds(L.latLng(
+            this._options.viewportTopLeftLat,
+            this._options.viewportTopLeftLng),
+          L.latLng(
+            this._options.viewportBottomRightLat,
+            this._options.viewportBottomRightLng)
+          ))
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }

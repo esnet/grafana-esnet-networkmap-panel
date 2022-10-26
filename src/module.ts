@@ -3,6 +3,7 @@ import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
 import { CoordinateButton } from './components/CoordinateButton';
+import { ViewportCoordinateButton } from './components/ViewportCoordinateButton';
 
 const FieldsCategory = ['Choose Fields'];
 const LayersCategory = ['Layer options'];
@@ -13,9 +14,19 @@ const QueryCategory = ['Ad-hoc Query Variable Bindings'];
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
-function checkBool(settingName: string, value: boolean) {
+function checkBool(settingName: string, value: any) {
   return function (config: MapOptions) {
     return config[settingName] === value;
+  };
+}
+function checkInArray(settingName: string, values: any[]) {
+  return function (config: MapOptions) {
+    for (var i = 0; i < values.length; i++) {
+      if (values[i] === config[settingName]) {
+        return true;
+      }
+    }
+    return false;
   };
 }
 
@@ -59,16 +70,39 @@ async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
 
 // -------------------- Network Map Panel Options --------------------
 plugin.setPanelOptions((builder) => {
-  builder.addBooleanSwitch({
-    path: 'mapCenterFromVars',
-    name: 'Set Map Center from Variables',
-    defaultValue: false,
+  builder.addSelect({
+    path: 'initialViewStrategy',
+    name: 'Map Initial View Strategy',
+    description: 'Strategy to set the initial center and zoom level of the map',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: async (context: FieldOverrideContext) => {
+        return Promise.resolve([
+          {
+            label: 'Specify Static Center, No zoom on resize',
+            value: 'static',
+          },
+          {
+            label: 'Specify Lat/Lng Viewport, Zoom to fit on resize',
+            value: 'viewport',
+          },
+          {
+            label: 'Set Map Center from Variables, No Zoom on resize',
+            value: 'variables',
+          },
+        ]);
+      },
+    },
   });
+  //////////////
+  // Variables for center and zoom level options
+  //////////////
   builder.addSelect({
     path: 'latitudeVar',
     name: 'Latitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: checkBool('mapCenterFromVars', true),
+    showIf: checkBool('initialViewStrategy', 'variables'),
     settings: {
       allowCustomValue: false,
       options: [],
@@ -79,20 +113,23 @@ plugin.setPanelOptions((builder) => {
     path: 'longitudeVar',
     name: 'Longitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: checkBool('mapCenterFromVars', true),
+    showIf: checkBool('initialViewStrategy', 'variables'),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoicesWithSuggestions,
     },
   });
+  //////////////
+  // Static center and zoom level options
+  //////////////
   builder.addCustomEditor({
     id: 'setLatLngZoom',
     path: 'setLatLngZoom',
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
-    showIf: checkBool('mapCenterFromVars', false),
+    showIf: checkBool('initialViewStrategy', 'static'),
     settings: { label: 'Set Lat/Lng & Zoom' },
     editor: CoordinateButton,
   });
@@ -101,7 +138,7 @@ plugin.setPanelOptions((builder) => {
     path: 'startLat',
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
-    showIf: checkBool('mapCenterFromVars', false),
+    showIf: checkBool('initialViewStrategy', 'static'),
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
     editor: CustomTextArea,
@@ -111,7 +148,7 @@ plugin.setPanelOptions((builder) => {
     path: 'startLng',
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads. (numbers only)',
-    showIf: checkBool('mapCenterFromVars', false),
+    showIf: checkBool('initialViewStrategy', 'static'),
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
     editor: CustomTextArea,
@@ -119,12 +156,61 @@ plugin.setPanelOptions((builder) => {
   builder.addSliderInput({
     path: 'startZoom',
     name: 'Starting zoom level of map',
+    showIf: checkInArray('initialViewStrategy', ['static', 'variables']),
     defaultValue: 5,
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
+  });
+  //////////////
+  // "Viewport" top-left, bottom-right and auto-resize options
+  //////////////
+  builder.addCustomEditor({
+    id: 'setViewport',
+    path: 'setViewport',
+    name: 'Set Zoom Viewport to Current Map View',
+    description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
+    showIf: checkBool('initialViewStrategy', 'viewport'),
+    settings: { label: 'Set Viewport Coordinates' },
+    editor: ViewportCoordinateButton,
+  });
+  builder.addCustomEditor({
+    id: 'viewportTopLeftLat',
+    path: 'viewportTopLeftLat',
+    name: 'Initial viewport: Top Left: Latitude',
+    description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
+    showIf: checkBool('initialViewStrategy', 'viewport'),
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
+  });
+  builder.addCustomEditor({
+    id: 'viewportTopLeftLng',
+    path: 'viewportTopLeftLng',
+    name: 'Initial viewport: Top Left: Longitude',
+    description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
+    showIf: checkBool('initialViewStrategy', 'viewport'),
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
+  });
+  builder.addCustomEditor({
+    id: 'viewportBottomRightLat',
+    path: 'viewportBottomRightLat',
+    name: 'Initial viewport: Bottom Right: Latitude',
+    description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
+    showIf: checkBool('initialViewStrategy', 'viewport'),
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
+  });
+  builder.addCustomEditor({
+    id: 'viewportBottomRightLng',
+    path: 'viewportBottomRightLng',
+    name: 'Initial viewport: Bottom Right: Longitude',
+    description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
+    showIf: checkBool('initialViewStrategy', 'viewport'),
+    settings: { useTextarea: true, rows: 1 },
+    editor: CustomTextArea,
   });
 
   builder.addColorPicker({

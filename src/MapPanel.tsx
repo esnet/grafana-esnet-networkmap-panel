@@ -19,6 +19,7 @@ export class MapPanel extends Component<Props> {
     this.lastOptions = this.props.options;
     this.theme = createTheme();
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
+    PubSub.subscribe('returnMapViewport', this.updateMapViewport);
   }
 
   updateCenter = (centerData) => {
@@ -26,6 +27,21 @@ export class MapPanel extends Component<Props> {
     const startLng = centerData.center.lng;
     const startZoom = centerData.zoom;
     this.props.onOptionsChange({ ...this.props.options, startLat, startLng, startZoom });
+  };
+
+  updateMapViewport = (viewportData) => {
+    const coordinates = viewportData.coordinates;
+    const viewportTopLeftLat = coordinates.getNorth().toFixed(2);
+    const viewportTopLeftLng = coordinates.getWest().toFixed(2);
+    const viewportBottomRightLat = coordinates.getSouth().toFixed(2);
+    const viewportBottomRightLng = coordinates.getEast().toFixed(2);
+    this.props.onOptionsChange({
+      ...this.props.options,
+      viewportTopLeftLat,
+      viewportTopLeftLng,
+      viewportBottomRightLat,
+      viewportBottomRightLng,
+    });
   };
 
   // A function to update the map jsons in the Edit panel based on the current map state
@@ -133,7 +149,7 @@ export class MapPanel extends Component<Props> {
       resolvedLat: 0,
       resolvedLng: 0,
     };
-    if (this.props.options.mapCenterFromVars) {
+    if (this.props.options.initialViewStrategy === 'variables') {
       var frames: any[];
       frames = data.series.map((series) => {
         return new DataFrameView(series);

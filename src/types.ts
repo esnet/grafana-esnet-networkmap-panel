@@ -3,9 +3,22 @@ export interface MapOptions {
   color1: string;
   color2: string;
   color3: string;
-  mapCenterFromVars: boolean;
+
+  initialViewStrategy: string;
+
   latitudeVar: string;
   longitudeVar: string;
+
+  startLat: number;
+  startLng: number;
+  startZoom: number;
+
+  viewportTopLeftLat: number;
+  viewportTopLeftLng: number;
+  viewportBottomRightLat: number;
+  viewportBottomRightLng: number;
+  viewportZoom: boolean;
+
   showSidebar: boolean;
   showViewControls: boolean;
   showLegend: boolean;
@@ -36,9 +49,6 @@ export interface MapOptions {
   inboundValueFieldL3: string;
   outboundValueFieldL3: string;
   endpointIdL3: string;
-  startLat: number;
-  startLng: number;
-  startZoom: number;
   editMode: boolean;
   legendL1: boolean;
   legendL2: boolean;
