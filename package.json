@@ -1,6 +1,6 @@
 {
   "name": "esnet-networkmap-panel",
-  "version": "1.3.0",
+  "version": "1.3.1",
   "description": "Network Map Panel",
   "repository": "https://github.com/esnet/grafana-esnet-networkmap-panel",
   "scripts": {
