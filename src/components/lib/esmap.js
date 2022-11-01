@@ -279,7 +279,7 @@ function renderNodeControl(g, data, ref, layerId){
 
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", evt);
+    PubSub.publish("dragStarted", evt, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     pointData['latLng'][0] = ll.lat;
@@ -326,14 +326,14 @@ function renderNodeControl(g, data, ref, layerId){
   }
 
   function endDrag(evt, d) {
-    if(!PubSub.last("dragStarted")){
+    if(!PubSub.last("dragStarted", ref.svg.node())){
       // if the drag start event never fired,
       // we have a no-op, and should return early
       // to allow other downstream event handlers
       // to run.
       return
     }
-    PubSub.clearLast("dragStarted");
+    PubSub.clearLast("dragStarted", ref.svg.node());
     PubSub.publish("updateTopology", {
       "layer1": ref.data["layer1"],
       "layer2": ref.data["layer2"],
@@ -454,7 +454,7 @@ function renderEdgeControl(g, data, ref, layerId) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData, idx, layerId) {
-    PubSub.publish("dragStarted", evt);
+    PubSub.publish("dragStarted", evt, ref.svg.node());
     PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layerId}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
@@ -469,14 +469,14 @@ function renderEdgeControl(g, data, ref, layerId) {
   }
 
   function endDrag(evt, edgeData) {
-    if(!PubSub.last("dragStarted")){
+    if(!PubSub.last("dragStarted", ref.svg.node())){
       // if the drag start event never fired,
       // we have a no-op, and should return early
       // to allow other downstream event handlers
       // to run.
       return
     }
-    PubSub.clearLast("dragStarted");
+    PubSub.clearLast("dragStarted", ref.svg.node());
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
     PubSub.publish("updateTopology", {

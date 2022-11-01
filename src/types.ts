@@ -17,7 +17,6 @@ export interface MapOptions {
   viewportTopLeftLng: number;
   viewportBottomRightLat: number;
   viewportBottomRightLng: number;
-  viewportZoom: boolean;
 
   showSidebar: boolean;
   showViewControls: boolean;

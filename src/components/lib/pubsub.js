@@ -27,10 +27,7 @@ const doSubscription = function(topic, callback, context, messageBus) {
 }
 
 const doPublish = function(topic, eventData, messageBus) {
-    var scopeMessage = "scoped to PrivateMessageBus #"+messageBus.instanceId;
-    if(messageBus.instanceId === this.instanceId){
-        scopeMessage = "on the global bus with ID #"+messageBus.instanceId;
-    }
+    var scopeMessage = "scoped to bus with id #" + messageBus.instanceId;
     if(messageBus.debug){
         console.debug("publishing event on topic", topic, scopeMessage);
     }
@@ -78,6 +75,7 @@ const clearLastValue = (topic, messageBus)=>{
 
 export class PrivateMessageBus {
     constructor(busScope, debug){
+        this.instanceId = Math.random().toString(16).substr(2, 8);
         const self = this;
         this.debug = false;
         if(debug){ this.debug = !!debug; }
@@ -99,11 +97,13 @@ export class PrivateMessageBus {
             },
             clearLast: function(topic){
                 return clearLastValue(topic, self);
+            },
+            setDebug: function(debug){
+                self.debug = debug;
             }
         };
         this.topics = {};
         this.lastEvents = {};
-        this.instanceId = Math.random().toString(16).substr(2, 8);
         if(this.debug){
             console.debug("instantiating bus with ID #"+this.instanceId);
         }
@@ -140,7 +140,7 @@ PrivateMessageBus.prototype.clearTopicCallbacks = function(topic, context) {
 // returns the last eventData value for a particular topic
 PrivateMessageBus.prototype.last = function(topic, context){
     var messageBus = discoverBusAbove(context, this);
-    getLastValue(topic, messageBus);
+    return getLastValue(topic, messageBus);
 }
 // clears the last eventData value for a particular topic
 PrivateMessageBus.prototype.clearLast = function(topic, context){
@@ -148,15 +148,16 @@ PrivateMessageBus.prototype.clearLast = function(topic, context){
     clearLastValue(topic, messageBus);
     return messageBus.lastEvents[topic] = null;
 }
+PrivateMessageBus.prototype.setDebug = function(debug, context){
+    var messageBus = discoverBusAbove(context, this);
+    messageBus.debug = debug;
+}
 
 var messageBus = null;
 
-export function getInstance(debug) {
+export function getInstance() {
     if(!messageBus){
         messageBus = new PrivateMessageBus();
-    }
-    if(debug){
-        messageBus.debug = true;
     }
     return messageBus;
 }

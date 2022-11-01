@@ -567,6 +567,8 @@ export class MapCanvas extends BindableHTMLElement {
       } else {
         this.mapContainer.style.width = this.width + "px";
       }
+    } else {
+      this.mapContainer.style.width = "100%";
     }
     if(!this.map && this.options && this.topology){
       this.newMap();
