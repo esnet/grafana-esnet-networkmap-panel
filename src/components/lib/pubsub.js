@@ -1,3 +1,12 @@
+function sumChars(s) {
+  var acc = 0;
+  for (var i = 0; i < s.length; i++) {
+    acc += s.charCodeAt(i);
+      s.charCodeAt(i);
+  }
+  return acc;
+}
+
 function discoverBusAbove(context, defaultBus){
     var messageBus = defaultBus;
 
@@ -31,7 +40,8 @@ const doPublish = function(topic, eventData, messageBus) {
     if(messageBus.debug){
         console.debug("publishing event on topic", topic, scopeMessage);
     }
-    messageBus.lastEvents[topic] = eventData;
+    //messageBus.lastEvents[topic] = ;
+    localStorage.setItem(`${messageBus.instanceId}.lastEvents.${topic}`, JSON.stringify(eventData));
     var subscriberData = messageBus.topics[topic];
     if (!subscriberData) return;
     var subscribers = Object.values(subscriberData);
@@ -63,19 +73,19 @@ const getLastValue = (topic, messageBus)=>{
     if(messageBus.debug){
         console.debug("returning last value for", topic, "from bus with id #", messageBus.instanceId);
     }
-    return messageBus.lastEvents[topic];
+    return JSON.parse(localStorage.getItem(`${messageBus.instanceId}.lastEvents.${topic}`));
 }
 
 const clearLastValue = (topic, messageBus)=>{
     if(messageBus.debug){
         console.debug("clearing last value for", topic, "from bus with id #", messageBus.instanceId);
     }
-    return messageBus.lastEvents[topic] = null;
+    localStorage.removeItem(`${messageBus.instanceId}.lastEvents.${topic}`);
 }
 
 export class PrivateMessageBus {
     constructor(busScope, debug){
-        this.instanceId = Math.random().toString(16).substr(2, 8);
+        this.instanceId = "global";
         const self = this;
         this.debug = false;
         if(debug){ this.debug = !!debug; }
@@ -107,7 +117,32 @@ export class PrivateMessageBus {
         if(this.debug){
             console.debug("instantiating bus with ID #"+this.instanceId);
         }
+        function setID(busScope){
+            //debugger;
+            if(!busScope.isConnected){
+                window.setTimeout(()=>{ setID(busScope) }, 100);
+                return
+            }
+            var currNode = busScope;
+            var path = "";
+            while(currNode.parentNode.parentNode != null){
+                for(var i=0; i<currNode.parentNode.children.length; i++){
+                    if(currNode.parentNode.children[i] == currNode){
+                        path = `[${i}]` + path;
+                        break;
+                    }
+                }
+                path = currNode.parentNode.tagName + path
+                currNode = currNode.parentNode;
+            }
+            this.instanceId = sumChars(path).toString(4).substr(0,16);
+        }
         if(busScope){
+            if(!!busScope.isConnected){ // if our html element to be used as a bus is connected to the dom
+                setID(busScope);
+            } else {
+                window.setTimeout(()=>{ setID.call(this, busScope) }, 100)
+            }
             busScope.__privatemessagebus__ = this;
             busScope.addEventListener("$SCOPE.DISCOVERY$", (event)=>{
                 event.callback && event.callback(busScope.__privatemessagebus__);
@@ -145,8 +180,7 @@ PrivateMessageBus.prototype.last = function(topic, context){
 // clears the last eventData value for a particular topic
 PrivateMessageBus.prototype.clearLast = function(topic, context){
     var messageBus = discoverBusAbove(context, this);
-    clearLastValue(topic, messageBus);
-    return messageBus.lastEvents[topic] = null;
+    return clearLastValue(topic, messageBus);
 }
 PrivateMessageBus.prototype.setDebug = function(debug, context){
     var messageBus = discoverBusAbove(context, this);
