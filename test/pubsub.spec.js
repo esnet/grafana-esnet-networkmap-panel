@@ -71,4 +71,28 @@ describe( "PubSub Module", () => {
         (String(privateTestValue)).should.equal("null");
         (String(globalTestValue)).should.equal("value");
     });
+    it("should return the 'last' value for an event on the local bus", ()=>{
+        var elem = document.createElement("div");
+        new PrivateMessageBus(elem, true);
+        PubSub.publish("test", "value", elem);
+        PubSub.last("test", elem).should.equal("value");
+    })
+    it("should return the 'last' value for an event on the global bus", ()=>{
+        PubSub.global.publish("test", "value");
+        PubSub.global.last("test").should.equal("value");
+    })
+    it("should allow users to clear the 'last' value for an event on a local bus", ()=>{
+        var elem = document.createElement("div");
+        new PrivateMessageBus(elem, true);
+        PubSub.publish("test", "value", elem);
+        PubSub.last("test", elem).should.equal("value");
+        PubSub.clearLast("test", elem);
+        String(PubSub.last("test", elem)).should.equal("null");
+    })
+    it("should allow users to clear the 'last' value for an event on the global bus", ()=>{
+        PubSub.global.publish("test", "value");
+        PubSub.global.last("test").should.equal("value");
+        PubSub.global.clearLast("test");
+        String(PubSub.global.last("test")).should.equal("null");        
+    })
 })
