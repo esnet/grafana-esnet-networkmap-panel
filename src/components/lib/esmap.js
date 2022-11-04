@@ -584,7 +584,11 @@ function renderNodes(g, data, ref, layerId) {
   feature
     .enter()
     .append('g')
-    .attr('class', 'node')
+    .attr('class', function(d){
+      // sanitize name from the node
+      var name = sanitizeName(d.name);
+      return 'node node-'+name;
+    })
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")
     .append('g')
@@ -618,10 +622,6 @@ function renderNodes(g, data, ref, layerId) {
     })
     .on('click', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
-      d3.select(this)
-        .classed('selected', true)
-        .classed('node', false)
-        .classed('animated-node', true);
       const selectionData = {
         selection: d,
         event: event,
@@ -645,6 +645,26 @@ function renderNodes(g, data, ref, layerId) {
     .attr("y", function(d){
       return ref.options["nodeWidthL"+layerId] * -1;
     })
+
+
+  function selectNode(selectionData){
+      console.log("selectNode", selectionData)
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-edge', false)
+        .classed('node', true)
+
+      d3.select('.node-' + sanitizeName(selectionData.selection.name) + " .scale-container")
+        .classed('selected', true)
+        .classed('node', false)
+        .classed('animated-node', true);
+  }
+
+  PubSub.subscribe("setSelection", selectNode, ref.svg.node());
+  var selection = PubSub.last("setSelection", ref.svg.node());
+  if(selection && selection.type=="node"){
+    selectNode(selection);
+  }
 
 
   g.selectAll('g.node').attr('transform', function (d) {
