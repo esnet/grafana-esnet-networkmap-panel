@@ -108,10 +108,14 @@ export class MapCanvas extends BindableHTMLElement {
     }
 
     const params = utils.getUrlSearchParams();
-    if (params.editPanel === null || !this.options.enableEditing) {
+    if (
+      params.editPanel === null || 
+      params.editPanel === undefined || 
+      !this.options.enableEditing
+    ) {
       this.disableEditing();
     } else {
-      this.enableEditing();
+        this.enableEditing();
     }
 
     this.render();
