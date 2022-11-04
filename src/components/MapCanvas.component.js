@@ -7,6 +7,7 @@ import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
 import { types, BindableHTMLElement } from './lib/rubbercement.js'
+import * as utils from './lib/utils.js';
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -57,8 +58,12 @@ export class MapCanvas extends BindableHTMLElement {
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
     this.legendMinimized = false;
+  }
 
-    new PrivateMessageBus(this);
+  // connect component
+  connectedCallback() {
+    var bus = new PrivateMessageBus(this);
+    bus.setID(this.id, this);
 
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('newMap', this.newMap, this);
@@ -91,6 +96,25 @@ export class MapCanvas extends BindableHTMLElement {
         })
       } 
     })());
+
+    if(!this.topology && this.getAttribute("topology")){
+      this.topology = JSON.parse(this.getAttribute("topology"));
+    }
+    if(!this.options && this.getAttribute("options")){
+      this.options = JSON.parse(this.getAttribute("options"));
+    }
+    if(this.options && this.options.legendDefaultBehavior){
+      this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
+    }
+
+    const params = utils.getUrlSearchParams();
+    if (params.editPanel === null || !this.options.enableEditing) {
+      this.disableEditing();
+    } else {
+      this.enableEditing();
+    }
+
+    this.render();
   }
 
   get topology() {
@@ -189,6 +213,21 @@ export class MapCanvas extends BindableHTMLElement {
       PubSub.publish('clearSelection', null, this);
   }
 
+  disableEditing(){
+    PubSub.publish("updateEditMode", false, this);
+    if(!!PubSub.last("setEditMode", this)){
+      PubSub.publish("setEditMode", null, this);
+    }
+    if(!!PubSub.last("setEditSelection", this)){
+      PubSub.publish("setEditSelection", null, this);
+    }
+  }
+
+  enableEditing(){
+    PubSub.publish("updateEditMode", true, this);
+  }
+
+
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
     var keys = Object.keys(options);
@@ -206,10 +245,20 @@ export class MapCanvas extends BindableHTMLElement {
       ){
       this.renderLegend();
     }
+    if(wasChanged('enableEditing', changed)){
+      if(!options.enableEditing){
+        this.disableEditing();
+      } else {
+        this.enableEditing();
+      }
+      this.shadow.remove();
+      this.shadow = null;
+      this.render();
+      this.newMap();
+    }
     if(
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
-        wasChanged('enableEditing', changed) ||
         wasChanged('enableScrolling', changed) ||
         wasChanged('resolveLat', changed) || 
         wasChanged('resolveLng', changed)
@@ -345,10 +394,6 @@ export class MapCanvas extends BindableHTMLElement {
   newMap(){
       var edgeEditMode = false;
       var nodeEditMode = false;
-      if(this.editingInterface){
-        edgeEditMode = this.editingInterface.edgeEditMode;
-        nodeEditMode = this.editingInterface.nodeEditMode;
-      }
       if(this.topology){
         this.jsonResults = { 
           "layer1": testJsonSchema(this.topology.layer1),
@@ -367,13 +412,9 @@ export class MapCanvas extends BindableHTMLElement {
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this);
-      if(edgeEditMode){
-        PubSub.publish("toggleEdgeEdit", edgeEditMode, this);
-      }
-      if(nodeEditMode){
-        PubSub.publish("toggleNodeEdit", nodeEditMode, this);
-      }
       this.map.renderMap();
+      var lastEditMode = PubSub.last('setEditMode', this);
+      PubSub.publish('setEditMode', lastEditMode, this);
   }
 
   renderStyle(){
@@ -513,6 +554,7 @@ export class MapCanvas extends BindableHTMLElement {
 
   render(){
     if(!this.shadow){
+      this._selection = !!PubSub.last("setSelection", this);
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       this.shadow.innerHTML = `
@@ -579,20 +621,6 @@ export class MapCanvas extends BindableHTMLElement {
       "#home_map@onclick": this.newMap,
       "#clear_selection@onclick": this.clearSelection,
     })
-  }
-
-  // connect component
-  connectedCallback() {
-    if(!this.topology && this.getAttribute("topology")){
-      this.topology = JSON.parse(this.getAttribute("topology"));
-    }
-    if(!this.options && this.getAttribute("options")){
-      this.options = JSON.parse(this.getAttribute("options"));
-    }
-    if(this.options && this.options.legendDefaultBehavior){
-      this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
-    }
-    this.render();
   }
   
 }

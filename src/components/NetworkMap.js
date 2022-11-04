@@ -1,7 +1,6 @@
 import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
 const PubSub = pubsub.PubSub;
-import * as utils from './lib/utils.js';
 
 // these imports are the result of very significant trial and error.
 // they allow ES6 browser imports to propagate, but also use static import
@@ -64,8 +63,7 @@ export default class NetworkMap {
       d3.curveNatural);
 
     PubSub.subscribe("setVariables", this.setDashboardVariables, this)
-    PubSub.subscribe("toggleEdgeEdit", this.toggleEdgeEdit, this);
-    PubSub.subscribe("toggleNodeEdit", this.toggleNodeEdit, this);
+    PubSub.subscribe("setEditMode", this.setEditMode, this);
     PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
 
@@ -103,12 +101,19 @@ export default class NetworkMap {
       this.esmap.editNodeMode(bool);
   }
 
-  toggleEdgeEdit() {
-    this.setEdgeEdit(!this.esmap.editEdges);
-  }
-
-  toggleNodeEdit() {
-    this.setNodeEdit(!this.esmap.editNodes);
+  setEditMode(mode) {
+    if(mode == "edge"){
+      this.setEdgeEdit(false);
+      this.setEdgeEdit(!this.esmap.editEdges);
+    }
+    if(mode=="node"){
+      this.setEdgeEdit(false);
+      this.setNodeEdit(!this.esmap.editNodes);
+    }
+    if(mode === null || mode === undefined){
+      this.setEdgeEdit(false);
+      this.setNodeEdit(false);
+    }
   }
 
   renderMapLayers() {
@@ -159,17 +164,6 @@ export default class NetworkMap {
     if (!this.mapCanvas.options || !this.mapCanvas.topology) {
       return;
     }
-
-    const params = utils.getUrlSearchParams();
-    // don't bother resetting edit mode if it's already set
-    if (params.editPanel != null) {
-      if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = true;
-    } else {
-      if(this.mapCanvas.editingInterface) this.mapCanvas.editingInterface.editMode = false;
-    }
-
-    d3.selectAll('#edge_edit_mode').on('click', this.toggleEdgeEdit);
-    d3.selectAll('#node_edit_mode').on('click', this.toggleNodeEdit);
 
     this.renderMapLayers();
 

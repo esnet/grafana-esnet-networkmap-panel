@@ -22,6 +22,10 @@ function discoverBusAbove(context, defaultBus){
 }
 
 const doSubscription = function(topic, callback, context, messageBus) {
+    if(messageBus.debug){
+        var scopeMessage = "for bus with id #" + messageBus.instanceId;
+        console.debug("Received subscription to topic", topic, scopeMessage);
+    }
     // use toLocaleString as a (good) approximation of a unique hash so we don't
     // resubscribe to the same topic on code load over and over.
     var hash = callback.toLocaleString();
@@ -36,8 +40,8 @@ const doSubscription = function(topic, callback, context, messageBus) {
 }
 
 const doPublish = function(topic, eventData, messageBus) {
-    var scopeMessage = "scoped to bus with id #" + messageBus.instanceId;
     if(messageBus.debug){
+        var scopeMessage = "scoped to bus with id #" + messageBus.instanceId;
         console.debug("publishing event on topic", topic, scopeMessage);
     }
     //messageBus.lastEvents[topic] = ;
@@ -85,7 +89,7 @@ const clearLastValue = (topic, messageBus)=>{
 
 export class PrivateMessageBus {
     constructor(busScope, debug){
-        this.instanceId = "global";
+        this.instanceId = Math.random().toString(16).substr(2, 8);
         const self = this;
         this.debug = false;
         if(debug){ this.debug = !!debug; }
@@ -114,42 +118,23 @@ export class PrivateMessageBus {
         };
         this.topics = {};
         this.lastEvents = {};
-        if(this.debug){
-            console.debug("instantiating bus with ID #"+this.instanceId);
-        }
-        function setID(busScope){
-            //debugger;
-            if(!busScope.isConnected){
-                window.setTimeout(()=>{ setID(busScope) }, 100);
-                return
-            }
-            var currNode = busScope;
-            var path = "";
-            while(currNode.parentNode.parentNode != null){
-                for(var i=0; i<currNode.parentNode.children.length; i++){
-                    if(currNode.parentNode.children[i] == currNode){
-                        path = `[${i}]` + path;
-                        break;
-                    }
-                }
-                path = currNode.parentNode.tagName + path
-                currNode = currNode.parentNode;
-            }
-            this.instanceId = sumChars(path).toString(4).substr(0,16);
-        }
         if(busScope){
-            if(!!busScope.isConnected){ // if our html element to be used as a bus is connected to the dom
-                setID(busScope);
-            } else {
-                window.setTimeout(()=>{ setID.call(this, busScope) }, 100)
-            }
             busScope.__privatemessagebus__ = this;
             busScope.addEventListener("$SCOPE.DISCOVERY$", (event)=>{
                 event.callback && event.callback(busScope.__privatemessagebus__);
                 event.stopPropagation();
             })
         }
+        if(this.debug){
+            console.debug("instantiating bus with ID #"+this.instanceId);
+        }
     }
+}
+
+PrivateMessageBus.prototype.setID = function(id, context){
+    var messageBus = discoverBusAbove(context, this)
+if(messageBus.debug) console.debug(`resetting bus id from #${messageBus.instanceId} to #${id}`);
+    messageBus.instanceId = id;
 }
 
 PrivateMessageBus.prototype.subscribe = function(topic, callback, context){
@@ -192,6 +177,7 @@ var messageBus = null;
 export function getInstance() {
     if(!messageBus){
         messageBus = new PrivateMessageBus();
+        messageBus.setID("global");
     }
     return messageBus;
 }

@@ -30,7 +30,7 @@ function bearingAngle(src, dest){
 
 function pathCrawl(path, klass, color, edgeWidth){
     var svgns = "http://www.w3.org/2000/svg";
-    
+
     var totalDashWidth = 12;
     for(var i=0; i<Math.floor(path.getTotalLength() / totalDashWidth); i++){
       var value = path.getAttribute("d");
@@ -84,7 +84,7 @@ function renderEdges(g, data, ref, layerId) {
       pathCrawl(event.target, "dash-over", color, edgeWidth);
       thisEdge.classed("animated-edge", true);
     }
-  
+
     PubSub.publish("hideTooltip", null, ref.svg.node());
     var text = `<p><b>From:</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
       <p><b>To:</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
@@ -100,7 +100,7 @@ function renderEdges(g, data, ref, layerId) {
     var color = d.azColor ? d.azColor : defaultEdgeColor // assume it's an A-Z edge by default, and get the a-z color
     if(thisEdge.classed("edge-za")){
       color = d.zaColor ? d.zaColor : defaultEdgeColor // but if it's really a Z-A edge, get that color
-    } 
+    }
     thisEdge.attr('stroke', color);
     var dashes = document.querySelectorAll(".dash-over");
     for(var i=0; i<dashes.length; i++){
@@ -137,11 +137,6 @@ function renderEdges(g, data, ref, layerId) {
     .attr('pointer-events', 'stroke')
     .on('click', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
-
-      var name = sanitizeName(d.name);
-      pathCrawl(this, "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
-      pathCrawl(d3.select(".edge-za-"+name).node(), "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
-
       const selectionData = {
         selection: d,
         event: event,
@@ -150,18 +145,12 @@ function renderEdges(g, data, ref, layerId) {
       }
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", selectionData, ref.svg.node());
-      PubSub.publish("setSelection", selectionData);
-      d3.select(".edge-za-"+name)
-        .classed('selected', true)
-        .classed('animated-edge', true);
-      d3.select(this)
-        .classed('selected', true)
-        .classed('edge', false)
-        .classed('animated-edge', true);
+      PubSub.global.publish("setSelection", selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
     .on('mouseout', doEdgeMouseOut);
   azLines.exit().remove();
+
 
   var zaLines = g.selectAll('path.edge-za').data(data.edges);
   zaLines
@@ -193,11 +182,6 @@ function renderEdges(g, data, ref, layerId) {
     .attr('pointer-events', 'stroke')
     .on('click', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
-      var name = sanitizeName(d.name);
-
-      pathCrawl(this, "dash-selected", d.zaColor ? d.zaColor : defaultEdgeColor, edgeWidth);
-      pathCrawl(d3.select(".edge-az-"+name).node(), "dash-selected", d.azColor ? d.azColor : defaultEdgeColor, edgeWidth);
-
       const selectionData = {
         selection: d,
         event: event,
@@ -206,21 +190,55 @@ function renderEdges(g, data, ref, layerId) {
       }
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
-      PubSub.publish("setSelection", selectionData); // send signal globally
-      d3.selectAll(".selected")
-        .classed('selected', false)
-        .classed('animated-edge', false)
-        .classed('edge', true);
-      d3.select(".edge-az-"+name)
-        .classed('selected', true)
-        .classed('animated-edge', true);
-      d3.select(this)
-        .classed('selected', true)
-        .classed('animated-edge', true);
+      PubSub.global.publish("setSelection", selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
     .on('mouseout', doEdgeMouseOut);
   zaLines.exit().remove();
+
+  function selectEdge(selectionData){
+      var dashes = document.querySelectorAll(".dash-selected, .dash-over");
+      for(var i=0; i<dashes.length; i++){
+          dashes[i].remove();
+      }
+      // deselect old edges
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-edge', false)
+        .classed('edge', true);
+      // sanitize name from the edge
+      var name = sanitizeName(selectionData.selection.name);
+      // assemble edge names to select
+      var edgeNames = [
+        `.edge-az-${name}`,
+        `.edge-za-${name}`
+      ]
+      // do the selection and path crawl activities
+      edgeNames.forEach((edgeName)=>{
+          // select edge
+          var edge = d3.select(edgeName);
+          // crawl edge
+          pathCrawl(edge.node(),
+            "dash-selected",
+            selectionData.selection.azColor ? selectionData.selection.azColor : defaultEdgeColor,
+            edgeWidth);
+          // hide "real" edge in favor of the crawling edge
+          edge
+            .classed('selected', true)
+            .classed('animated-edge', true);
+      })
+  }
+
+  PubSub.subscribe("setSelection", selectEdge, ref.svg.node());
+  PubSub.subscribe("clearSelection", function(){
+    PubSub.clearLast("setSelection", ref.svg.node());
+    PubSub.global.clearLast("setSelection");
+  }, ref.svg.node())
+  var selection = PubSub.last("setSelection", ref.svg.node());
+  if(selection && selection.type=="edge"){
+    selectEdge(selection);
+  }
+
 }
 
 function deleteControlPoint(evt, d, obj, edgeData, ref){
@@ -277,6 +295,15 @@ function addControlPoint(evt, obj, ref) {
 function renderNodeControl(g, data, ref, layerId){
   var feature = g.selectAll('circle').data(data.nodes);
 
+  const setNodeEditSelection = (evtData)=>{
+    if(evtData && evtData['type'] == "nodes"){
+      d3.selectAll(".control-selected")
+        .classed("control-selected", false);
+      d3.select(".controlPoint.control-point-for-node-" + evtData["object"].name)
+          .classed("control-selected", true);
+    }
+  }
+
   function dragged(evt, pointData) {
     var mapDiv = ref.leafletMap.getContainer();
     PubSub.publish("dragStarted", evt, ref.svg.node());
@@ -321,8 +348,7 @@ function renderNodeControl(g, data, ref, layerId){
     //
     //--- rerender stuff
     ref.update();
-    g.select(".control-point-for-node-"+pointData.name)
-      .classed("control-selected", true);
+    setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
   }
 
   function endDrag(evt, d) {
@@ -389,9 +415,6 @@ function renderNodeControl(g, data, ref, layerId){
     })
     .on('mousedown', function(evt, pointData){
       evt.stopPropagation();
-      d3.selectAll(".control-selected")
-        .classed("control-selected", false);
-      d3.select(evt.target).classed("control-selected", true);
       PubSub.publish("setEditSelection", {
         "object": pointData,
         "index": evt.target.getAttribute("data-index"),
@@ -401,6 +424,9 @@ function renderNodeControl(g, data, ref, layerId){
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
+  setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
+  PubSub.subscribe("setEditSelection", setNodeEditSelection, ref.svg.node());
+
   g.selectAll('circle').attr('transform', function (d) {
     var ll = L.latLng(d.latLng);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
@@ -408,6 +434,8 @@ function renderNodeControl(g, data, ref, layerId){
   });
  feature.exit().remove();
 }
+
+
 
 function renderEdgeControl(g, data, ref, layerId) {
   var lines = g.selectAll('path').data(data.edges);
@@ -434,9 +462,6 @@ function renderEdgeControl(g, data, ref, layerId) {
     })
     .on('mousedown', function(evt, edgeData){
       evt.stopPropagation();
-      d3.selectAll(".control-selected")
-        .classed("control-selected", false);
-      d3.select(evt.target).classed("control-selected", true);
       var idx = evt.target.getAttribute("data-index");
       var layer = evt.target.getAttribute("data-layer");
       PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layer}, ref.svg.node());
@@ -448,6 +473,17 @@ function renderEdgeControl(g, data, ref, layerId) {
     .on('mouseout', function () {
       ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
     });
+
+  const setEditSelection = (evtData) => {
+    if(evtData && evtData['type'] == "edges"){
+      d3.selectAll(".control-selected")
+        .classed("control-selected", false);
+      d3.select(".controlEdge.edge-az-" + evtData["object"].name)
+          .classed("control-selected", true);
+    }
+  }
+  setEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
+  PubSub.subscribe("setEditSelection", setEditSelection, ref.svg.node());
 
   lines.exit().remove();
 
@@ -507,10 +543,6 @@ function renderEdgeControl(g, data, ref, layerId) {
       .merge(feature)
       .on('mousedown', function(evt, d){
         evt.stopPropagation();
-        d3.selectAll(".control-selected")
-          .classed("control-selected", false);
-        d3.select(".controlEdge.edge-az-"+edgeData.name)
-          .classed("control-selected", true);
         PubSub.publish("setEditSelection", {
           "object": edgeData,
           "index": idx,
@@ -927,11 +959,15 @@ export class EsMap {
         renderNodeControl(controlpoint_g, data, this, layerId);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
+      } else {
+        controlpoint_g.selectAll('.controlPoint').remove();
       }
       if (this.editEdges == 1) {
         renderEdgeControl(controlpoint_g, data, this, layerId);
         var zoom = this.leafletMap.getZoom();
         var center = L.latLng(this.leafletMap.getCenter());
+      } else {
+        controlpoint_g.selectAll('.controlEdge').remove();
       }
       if (!this.editEdges && !this.editNodes) {
         //  delete all the control point g children

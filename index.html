@@ -1926,6 +1926,7 @@
         var optionsElem = document.createElement('textarea');
         var dataElem = document.createElement('textarea');
 
+        canvas.setAttribute('id', "demonstration-element");
         canvas.setAttribute('height', 400);
         canvas.topology = topology;
         canvas.options = options;
@@ -1942,6 +1943,7 @@
             dataElem.value = JSON.stringify(cleanTopology);
         }
         document.getElementById("mapContainer").append(canvas);
+
 
         dataElem.value = JSON.stringify(topology);
         dataElem.style = "height: 300px; width: 100%;";

@@ -18,6 +18,7 @@ describe( "Class MapCanvas", () => {
         var elem = document.createElement("esnet-map-canvas");
         elem.setAttribute('width', 800);
         elem.setAttribute('height', 400);
+        elem.setAttribute("id", "testing-element");
 
         const lavender = "rgb(202, 149, 229)";
 
@@ -141,7 +142,7 @@ describe( "Class MapCanvas", () => {
       var map_coords = document.querySelector("esnet-map-canvas").getBoundingClientRect();
       // find the first circle in a "g.node". This should be the "A" node from topology
       var nodes = document.querySelectorAll("g.node > g.scale-container > circle");
-      console.log(nodes);
+      // console.log(nodes);
       var node_coords = nodes[0].getBoundingClientRect();
 
       // at 800x400 canvas size, we expect the offset (from the esnet-map-canvas top-left) of the first node to be 262, 194
@@ -156,9 +157,9 @@ describe( "Class MapCanvas", () => {
       expected_circle.tagName.should.equal("circle");
       // we bother with all of this work because we'll need to simulate click/drag/etc events on the nodes in other test
     });
-    it("should enter edit mode when we set a boolean", ()=>{
+    it("should enter edit mode when we publish a signal", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
       // using window.getComputedStyle, get the full computed style including cascading upstream styles
       var style = window.getComputedStyle(toolOverlayButton);
@@ -178,7 +179,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should have an edit mode characterized by edit buttons", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       var toolOverlayButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > .button.edit-mode-only");
       // using window.getComputedStyle, get the full computed style including cascading upstream styles
       var style = window.getComputedStyle(toolOverlayButton);
@@ -266,7 +267,7 @@ describe( "Class MapCanvas", () => {
     it("should have an edge edit mode characterized by control points on edges", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // run a query selector for control points
       var controlPoints = document.querySelectorAll("circle.control");
       // expect a specific count of control points
@@ -275,7 +276,7 @@ describe( "Class MapCanvas", () => {
     it("should show a UI for adding a node", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // create a click event
       var clickEvent = new Event('click', { bubbles: true })
       // fire click event on add node button
@@ -341,7 +342,7 @@ describe( "Class MapCanvas", () => {
     it("should show a UI for adding an edge", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // create a click event
       var clickEvent = new Event('click', { bubbles: true })
       // fire click event on add edge button
@@ -354,7 +355,7 @@ describe( "Class MapCanvas", () => {
     it("should allow users to add an edge control point on double-click", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // create a (double) click event
       var dblClickEvent = new MouseEvent('dblclick', { bubbles: true, clientX: 200, clientY: 200 })
       // fire double click event on edge
@@ -389,7 +390,7 @@ describe( "Class MapCanvas", () => {
       // get canvas
       var canvas = document.querySelector("esnet-map-canvas");
       // turn on editing mode
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // double click control point to remove
       var beforeAllCps = canvas.querySelectorAll(".control.controlPoint")
       var cp = canvas.querySelector(".control.controlPoint")
@@ -397,17 +398,17 @@ describe( "Class MapCanvas", () => {
       cp.dispatchEvent(clickEvent);
       // edge should have 2 control points
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       var afterAllCps = canvas.querySelectorAll(".control.controlPoint")
       afterAllCps.length.should.be.lessThan(beforeAllCps.length)
     })
     it("should evenly space edge control points after node drag", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // edge edit mode. Do some work adding vertices to the edge.
       var edgeAC = document.querySelector(".control-for-A.control-for-C")
-      console.log("edgeAC is ", edgeAC);
+      // console.log("edgeAC is ", edgeAC);
       var edgeACPos = edgeAC.getBoundingClientRect();
       var clickEvents = [
         new MouseEvent('dblclick', { bubbles: true, clientX: edgeACPos.x, clientY: edgeACPos.y, view: window }),
@@ -417,8 +418,8 @@ describe( "Class MapCanvas", () => {
       var beforeAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
       for(var i=0; i<clickEvents.length; i++){
           edgeAC = document.querySelector(".control-for-A.control-for-C");
-          console.log(edgeAC);
-          console.log("dispatching ", clickEvents[0]);
+          // console.log(edgeAC);
+          // console.log("dispatching ", clickEvents[0]);
           edgeAC.dispatchEvent(clickEvents[i]);
       }
       var afterAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
@@ -430,7 +431,7 @@ describe( "Class MapCanvas", () => {
       }
 
       // throw the signal for node edit mode
-      PubSub.publish("toggleNodeEdit", null, canvas);
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
       var nodes = document.querySelectorAll("circle.control");
       var nodeA = nodes[0];
       var nodeC = nodes[2];
@@ -458,7 +459,7 @@ describe( "Class MapCanvas", () => {
       (newPos.y).should.be.approximately(originalNodeAPos.y + 10, 4);
 
 
-      PubSub.publish("toggleEdgeEdit", null, canvas);
+      PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
       var afterAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
       afterAllCps.length.should.be.greaterThan(beforeAllCps.length)
       var positionsAfterDrag = [];
@@ -488,7 +489,7 @@ describe( "Class MapCanvas", () => {
       // get canvas
       var canvas = document.querySelector("esnet-map-canvas");
       // turn on editing mode
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // toggle node editing mode
       // create hover event
       // fire hover event on a control point
@@ -534,9 +535,9 @@ describe( "Class MapCanvas", () => {
     it("should have a node edit mode characterized by control points on nodes", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
-      // throw the signal for edge edit mode
-      PubSub.publish("toggleNodeEdit", null, canvas);
+      PubSub.publish("updateEditMode", true, canvas);
+      // throw the signal for node edit mode
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
       // run a query selector for control points
       var controlPoints = document.querySelectorAll("circle.control");
       // expect a specific count of control points
@@ -545,9 +546,9 @@ describe( "Class MapCanvas", () => {
     it("should allow users to drag node edit control points", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // throw the signal for node edit mode
-      PubSub.publish("toggleNodeEdit", null, canvas);
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
       var node = document.querySelector("circle.control");
       var originalPos = node.getBoundingClientRect();
       // compensate for radius
@@ -577,9 +578,9 @@ describe( "Class MapCanvas", () => {
       canvas.updateTopology = () => { closureVar = "called"; }
 
       // enter editing mode
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       // throw the signal for node edit mode
-      PubSub.publish("toggleNodeEdit", null, canvas);
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
       var node = document.querySelector("circle.control");
       var originalPos = node.getBoundingClientRect();
       // compensate for radius
@@ -607,13 +608,13 @@ describe( "Class MapCanvas", () => {
     it("should allow users to drag edge edit control points", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       var cPoint = canvas.querySelector("circle.control");
 
       var originalPos = cPoint.getBoundingClientRect();
       // compensate for radius
       originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
-      console.log(originalPos.x, originalPos.y);
+      //console.log(originalPos.x, originalPos.y);
       // create mouse event for down
       var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
       // create mouse event for drag
@@ -629,7 +630,7 @@ describe( "Class MapCanvas", () => {
       // check edge control point moved
       var cPoint = canvas.querySelector("circle.control");
       var newPos = cPoint.getBoundingClientRect()
-      console.log(newPos.x);
+      //console.log(newPos.x);
       newPos = {x: newPos.x + 4, y: newPos.y + 4};
       (newPos.x).should.approximately(originalPos.x + 10, 4);
       (newPos.y).should.approximately(originalPos.y + 10, 4);
@@ -641,7 +642,7 @@ describe( "Class MapCanvas", () => {
       canvas.updateTopology = () => { closureVar = "called"; }
 
       // enter editing mode
-      canvas.editingInterface.editMode = true;
+      PubSub.publish("updateEditMode", true, canvas);
       var cPoint = document.querySelector("circle.control");
       var originalPos = cPoint.getBoundingClientRect();
       // compensate for radius
