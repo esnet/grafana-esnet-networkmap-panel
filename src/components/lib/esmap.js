@@ -29,6 +29,7 @@ function bearingAngle(src, dest){
 }
 
 function pathCrawl(path, klass, color, edgeWidth){
+    if(!path) return;
     var svgns = "http://www.w3.org/2000/svg";
 
     var totalDashWidth = 12;
