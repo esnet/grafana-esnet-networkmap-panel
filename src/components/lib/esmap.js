@@ -210,18 +210,22 @@ function renderEdges(g, data, ref, layerId) {
       // sanitize name from the edge
       var name = sanitizeName(selectionData.selection.name);
       // assemble edge names to select
-      var edgeNames = [
-        `.edge-az-${name}`,
-        `.edge-za-${name}`
-      ]
-      // do the selection and path crawl activities
-      edgeNames.forEach((edgeName)=>{
+      var edgeNameToColor = {
+        `.edge-az-${name}`: selectionData.selection.azColor,
+        `.edge-za-${name}`: selectionData.selection.zaColor
+      }
+      // do steps for path crawl and selection
+      Object.keys(edgeNameToColor).forEach((edgeName)=>{
+          var edgeColor = defaultEdgeColor;
+          if(edgeNameToColor['edgeName']){ // this can be nully
+            edgeColor = edgeNameToColor['edgeName'];
+          }
           // select edge
           var edge = d3.select(edgeName);
           // crawl edge
           pathCrawl(edge.node(),
             "dash-selected",
-            selectionData.selection.azColor ? selectionData.selection.azColor : defaultEdgeColor,
+            edgeColor,
             edgeWidth);
           // hide "real" edge in favor of the crawling edge
           edge
