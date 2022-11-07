@@ -198,6 +198,7 @@ function renderEdges(g, data, ref, layerId) {
   zaLines.exit().remove();
 
   function selectEdge(selectionData){
+      console.log("selectEdge", selectionData);
       var dashes = document.querySelectorAll(".dash-selected, .dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
@@ -209,21 +210,21 @@ function renderEdges(g, data, ref, layerId) {
         .classed('edge', true);
       // sanitize name from the edge
       var name = sanitizeName(selectionData.selection.name);
-      var azname = ".edge-az-"+name;
-      var zaname = ".edge-za-"+name;
       // assemble edge names to select
-      var edgeNameToColor = {
-        azname: selectionData.selection.azColor,
-        zaname: selectionData.selection.zaColor
+      var edgeDirectionToColor = {
+        "az": { "selector": `.edge-az-${name}`, "color": selectionData.selection.azColor },
+        "za": { "selector": `.edge-za-${name}`, "color": selectionData.selection.zaColor }
       }
       // do steps for path crawl and selection
-      Object.keys(edgeNameToColor).forEach((edgeName)=>{
+      Object.keys(edgeDirectionToColor).forEach((direction)=>{
           var edgeColor = defaultEdgeColor;
-          if(edgeNameToColor['edgeName']){ // this can be nully
-            edgeColor = edgeNameToColor['edgeName'];
+          var color = edgeDirectionToColor[direction]["color"];
+          var selector = edgeDirectionToColor[direction]["selector"];
+          if(color){ // this can be nully
+            edgeColor = color;
           }
           // select edge
-          var edge = d3.select(edgeName);
+          var edge = d3.select(selector);
           // crawl edge
           pathCrawl(edge.node(),
             "dash-selected",
@@ -654,7 +655,6 @@ function renderNodes(g, data, ref, layerId) {
 
 
   function selectNode(selectionData){
-      console.log("selectNode", selectionData)
       d3.selectAll(".selected")
         .classed('selected', false)
         .classed('animated-edge', false)
