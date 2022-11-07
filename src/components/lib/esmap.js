@@ -209,10 +209,12 @@ function renderEdges(g, data, ref, layerId) {
         .classed('edge', true);
       // sanitize name from the edge
       var name = sanitizeName(selectionData.selection.name);
+      var azname = ".edge-az-"+name;
+      var zaname = ".edge-za-"+name;
       // assemble edge names to select
       var edgeNameToColor = {
-        `.edge-az-${name}`: selectionData.selection.azColor,
-        `.edge-za-${name}`: selectionData.selection.zaColor
+        azname: selectionData.selection.azColor,
+        zaname: selectionData.selection.zaColor
       }
       // do steps for path crawl and selection
       Object.keys(edgeNameToColor).forEach((edgeName)=>{
