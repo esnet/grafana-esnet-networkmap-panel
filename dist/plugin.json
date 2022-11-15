@@ -32,8 +32,8 @@
         "path": "img/slopegraph.png"
       }
     ],
-    "version": "1.4.5",
-    "updated": "2022-11-07"
+    "version": "1.4.6",
+    "updated": "2022-11-15"
   },
   "dependencies": {
     "grafanaDependency": ">=7.0.0",
