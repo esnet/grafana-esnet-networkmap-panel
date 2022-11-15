@@ -150,7 +150,7 @@ function renderEdges(g, data, ref, layerId, options) {
       return d.AZname;
     })
     .attr('pointer-events', 'stroke')
-    .on('click', function(event, d){
+    .on('mousedown', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
       const selectionData = {
         selection: d,
@@ -196,7 +196,7 @@ function renderEdges(g, data, ref, layerId, options) {
       return d.ZAname;
     })
     .attr('pointer-events', 'stroke')
-    .on('click', function(event, d){
+    .on('mousedown', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
       const selectionData = {
         selection: d,
@@ -226,8 +226,8 @@ function renderEdges(g, data, ref, layerId, options) {
       var name = sanitizeName(selectionData.selection.name);
       // assemble edge names to select
       var edgeDirectionToColor = {
-        "az": { "selector": `.edge-az-${name}`, "color": selectionData.selection.azColor },
-        "za": { "selector": `.edge-za-${name}`, "color": selectionData.selection.zaColor }
+        "az": { "selector": `.l${selectionData.layer}.edge-az-${name}`, "color": selectionData.selection.azColor },
+        "za": { "selector": `.l${selectionData.layer}.edge-za-${name}`, "color": selectionData.selection.zaColor }
       }
       // do steps for path crawl and selection
       Object.keys(edgeDirectionToColor).forEach((direction)=>{

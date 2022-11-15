@@ -790,7 +790,7 @@ describe( "Class MapCanvas", () => {
       // click layer 1, edge A--B, ensure that it's selected
       var edgeABlayer1 = canvas.querySelector(".controlEdge.l1.edge-az-A--B");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
-      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer1.dispatchEvent(downEvent);
       edgeABlayer1.dispatchEvent(upEvent);
       edgeABlayer1.getAttribute("class").should.contain("control-selected");
@@ -798,11 +798,39 @@ describe( "Class MapCanvas", () => {
       // click layer 2, edge A--B, ensure that it's selected
       var edgeABlayer2 = canvas.querySelector(".controlEdge.l2.edge-az-A--B");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
-      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer2.dispatchEvent(downEvent);
       edgeABlayer2.dispatchEvent(upEvent);
       edgeABlayer2.getAttribute("class").should.contain("control-selected");
       edgeABlayer1.getAttribute("class").should.not.contain("control-selected");
+      // turn off editing mode
+      PubSub.publish("updateEditMode", false, canvas);
+      var closureVar = null;
+      PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
+      var edgeABlayer1 = canvas.querySelector(".edge.l1.edge-az.edge-az-A--B");
+      var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
+      var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
+      edgeABlayer1.dispatchEvent(mouseDown);
+      edgeABlayer1.dispatchEvent(mouseUp);
+      closureVar.should.equal("called");
+      // ensure we see chevrons
+      canvas.querySelectorAll("polygon").length.should.be.greaterThan(0);
+      // ensure selection class on our edge
+      edgeABlayer1.getAttribute("class").should.contain("animated-edge");
+      // click edge on other layer
+      var closureVar = null;
+      PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
+      var edgeABlayer2 = canvas.querySelector(".edge.l2.edge-az.edge-az-A--B");
+      var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
+      var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
+      edgeABlayer2.dispatchEvent(mouseDown);
+      edgeABlayer2.dispatchEvent(mouseUp);
+      closureVar.should.equal("called");
+      // ensure we see chevrons
+      canvas.querySelectorAll("polygon").length.should.be.greaterThan(0);
+      // ensure selection class on our edge
+      edgeABlayer2.getAttribute("class").should.contain("animated-edge");
+      edgeABlayer1.getAttribute("class").should.not.contain("animated-edge");
     })
     it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
