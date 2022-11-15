@@ -89,6 +89,9 @@ export class MapPanel extends Component<Props> {
       'pathOffsetL1',
       'layerName1',
       'legendL1',
+      'dstFieldLabelL1',
+      'srcFieldLabelL1',
+      'dataFieldLabelL1',
 
       'layer2',
       'color2',
@@ -99,6 +102,9 @@ export class MapPanel extends Component<Props> {
       'pathOffsetL2',
       'layerName2',
       'legendL2',
+      'dstFieldLabelL2',
+      'srcFieldLabelL2',
+      'dataFieldLabelL2',
 
       'layer3',
       'color3',
@@ -109,6 +115,9 @@ export class MapPanel extends Component<Props> {
       'pathOffsetL3',
       'layerName3',
       'legendL3',
+      'dstFieldLabelL3',
+      'srcFieldLabelL3',
+      'dataFieldLabelL3',
 
       'resolvedLat',
       'resolvedLng',
