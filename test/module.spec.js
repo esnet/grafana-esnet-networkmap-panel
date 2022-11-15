@@ -831,6 +831,37 @@ describe( "Class MapCanvas", () => {
       // ensure selection class on our edge
       edgeABlayer2.getAttribute("class").should.contain("animated-edge");
       edgeABlayer1.getAttribute("class").should.not.contain("animated-edge");
+
+      var closureVar = null;
+      PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
+      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A circle");
+      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A circle");
+      var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
+      var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
+      nodeAlayer1.dispatchEvent(mouseDown);
+      nodeAlayer1.dispatchEvent(mouseUp);
+      "called".should.equal(closureVar);
+      // ensure selection class on our edge
+      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A .scale-container");
+      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A .scale-container");
+      nodeAlayer1.getAttribute("class").should.contain("animated-node");
+      nodeAlayer2.getAttribute("class").should.not.contain("animated-node");
+
+      var closureVar = null;
+      PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
+      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A circle");
+      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A circle");
+      var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
+      var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
+      nodeAlayer2.dispatchEvent(mouseDown);
+      nodeAlayer2.dispatchEvent(mouseUp);
+      "called".should.equal(closureVar);
+      // ensure selection class on our edge
+      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A .scale-container");
+      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A .scale-container");
+      nodeAlayer2.getAttribute("class").should.contain("animated-node");
+      nodeAlayer1.getAttribute("class").should.not.contain("animated-node");
+
     })
     it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");

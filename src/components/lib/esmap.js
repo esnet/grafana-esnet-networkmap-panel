@@ -612,7 +612,8 @@ function renderNodes(g, data, ref, layerId) {
     .attr('class', function(d){
       // sanitize name from the node
       var name = sanitizeName(d.name);
-      return 'node node-'+name;
+      var layerClass = ` l${layerId}`;
+      return 'node node-' + name + layerClass;
     })
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")
@@ -645,7 +646,7 @@ function renderNodes(g, data, ref, layerId) {
       d3.select(event.target.parentElement).attr("transform", "scale(1.0, 1.0)")
       PubSub.publish("hideTooltip", null, ref.svg.node());
     })
-    .on('click', function(event, d){
+    .on('mousedown', function(event, d){
       PubSub.publish("clearSelection", null, ref.svg.node())
       const selectionData = {
         selection: d,
@@ -675,10 +676,10 @@ function renderNodes(g, data, ref, layerId) {
   function selectNode(selectionData){
       d3.selectAll(".selected")
         .classed('selected', false)
-        .classed('animated-edge', false)
+        .classed('animated-node', false)
         .classed('node', true)
 
-      d3.select('.node-' + sanitizeName(selectionData.selection.name) + " .scale-container")
+      d3.select(`.l${selectionData.layer}.node-${sanitizeName(selectionData.selection.name)} .scale-container`)
         .classed('selected', true)
         .classed('node', false)
         .classed('animated-node', true);
