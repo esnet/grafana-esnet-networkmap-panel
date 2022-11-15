@@ -61,8 +61,11 @@ function pathCrawl(path, klass, color, edgeWidth){
 }
 
 function sanitizeName(name){
-  var sanitized = name.replaceAll(" ", "-"); // replace all spaces with hyphens
+  const separator = "S_S_E_E_P_P_A_A_R_R_A_A_T_T_O_O_R_R"
+  var sanitized = name.replaceAll("--", separator) // deal with the edge name separator first
+  sanitized = sanitized.replaceAll(/[ -]+/g, "-"); // replace all spaces with hyphens
   sanitized = sanitized.replaceAll(/[^\w-]/g, ''); // replace anything other than alphanum and hyphen with empty string
+  sanitized = sanitized.replaceAll(separator, "--") // deal with the edge name separator first
   return sanitized;
 }
 
@@ -186,7 +189,8 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
       var connections = " connects-to-"+name.split("--").join(" connects-to-");
-      return 'edge edge-za edge-za-' + name + connections;
+      var layerClass = ' l'+layerId;
+      return 'edge edge-za edge-za-' + name + connections + layerClass;
     })
     .attr('text', function (d) {
       return d.ZAname;
@@ -209,7 +213,6 @@ function renderEdges(g, data, ref, layerId, options) {
   zaLines.exit().remove();
 
   function selectEdge(selectionData){
-      console.log("selectEdge", selectionData);
       var dashes = document.querySelectorAll(".dash-selected, .dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
@@ -318,8 +321,9 @@ function renderNodeControl(g, data, ref, layerId){
     if(evtData && evtData['type'] == "nodes"){
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
-      d3.select(".controlPoint.control-point-for-node-" + sanitizeName(evtData["object"].name))
-          .classed("control-selected", true);
+      var selector = `.controlPoint.control-point-layer${evtData["layer"]}.control-point-for-node-${sanitizeName(evtData["object"].name)}`;
+      d3.select(selector)
+        .classed("control-selected", true);
     }
   }
 
@@ -332,7 +336,8 @@ function renderNodeControl(g, data, ref, layerId){
     pointData['latLng'][1] = ll.lng;
     // procedure for updating the edge:
     // get all edges that have "d.name" as a node
-    d3.selectAll(".connects-to-"+sanitizeName(pointData.name))
+    var selector = `.l${layerId}.connects-to-${sanitizeName(pointData.name)}`;
+    d3.selectAll(selector)
         // for each edge that we select:
         .attr('d', function (d) {
           // if we are manipulating the "A" end
@@ -389,7 +394,7 @@ function renderNodeControl(g, data, ref, layerId){
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
-    d3.select(".control-point-for-node-"+sanitizeName(d.name))
+    d3.select(`.control-point-layer${layerId}.control-point-for-node-${sanitizeName(d.name)}`)
       .classed("control-selected", true);
   }
 
@@ -397,7 +402,8 @@ function renderNodeControl(g, data, ref, layerId){
     .enter()
     .append('circle')
     .attr('r', 6)
-    .attr('class', function(d){ return 'control controlPoint control-point-for-node-'+sanitizeName(d.name); })
+    .attr('class', function(d){ 
+      return `control controlPoint control-point-layer${layerId} control-point-for-node-${sanitizeName(d.name)}`; })
     .attr("data-layer", layerId)
     .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
@@ -473,7 +479,8 @@ function renderEdgeControl(g, data, ref, layerId) {
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
       var connections = " control-for-"+name.split("--").join(" control-for-");
-      return 'control controlEdge edge-az-' + name + connections;
+      var layerClass = ' l'+layerId;
+      return 'control controlEdge edge-az-' + name + connections + layerClass;
     })
     // still need to figure out how to not zoom when doubleclicking here
     .on('dblclick', function (d) {
@@ -497,7 +504,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     if(evtData && evtData['type'] == "edges"){
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
-      d3.select(".controlEdge.edge-az-" + evtData["object"].name)
+      d3.select(`.controlEdge.l${evtData["layer"]}.edge-az-${evtData["object"].name}`)
           .classed("control-selected", true);
     }
   }
@@ -519,7 +526,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     //--- rerender stuff
     ref.update();
     //--- ensure that this edge plays selection animation
-    d3.select(".controlEdge.edge-az-"+edgeData.name)
+    d3.select(`.controlEdge.l${layerId}.edge-az-${edgeData.name}`)
       .classed("control-selected", true);
   }
 
@@ -544,7 +551,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
-    d3.select(".controlEdge.edge-az-"+edgeData.name)
+    d3.select(`.controlEdge.l${layerId}.edge-az-${edgeData.name}`)
       .classed("control-selected", true);
   }
 

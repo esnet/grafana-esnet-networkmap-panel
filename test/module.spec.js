@@ -725,6 +725,11 @@ describe( "Class MapCanvas", () => {
         },
       }
       PubSub.publish("updateMapTopology", newTopology, canvas);
+      var newOptions = canvas.options;
+      newOptions['layer2'] = true;
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: [
+        'layer2',
+      ]}, canvas);
       // enter editing mode
       PubSub.publish("updateEditMode", true, canvas);
       // enter Node editing mode
@@ -732,7 +737,11 @@ describe( "Class MapCanvas", () => {
       // select edges that attach to node with this name, record positions
       // toggle layers such that we have two layers with same-named nodes
       // select the control point we want to work on
-      var cPoint = canvas.querySelector("circle.control");
+      var cPoint = canvas.querySelector("circle.control.control-point-layer1");
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var beforeCoords1 = edgeABlayer1.getBoundingClientRect();
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l2.connects-to-A");
+      var beforeCoords2 = edgeABlayer2.getBoundingClientRect();
       var originalPos = cPoint.getBoundingClientRect();
       // create mouse event for down
       var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
@@ -748,8 +757,52 @@ describe( "Class MapCanvas", () => {
       cPoint = canvas.querySelector("circle.control");
       cPoint.dispatchEvent(upEvent);
       // select attached edges after, record positions
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var afterCoords1 = edgeABlayer1.getBoundingClientRect();
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l2.connects-to-A");
+      var afterCoords2 = edgeABlayer2.getBoundingClientRect();
       // positions for attached edges should have changed
+      beforeCoords1.x.should.not.equal(afterCoords1.x);
+      beforeCoords1.y.should.not.equal(afterCoords1.y);
       // positions for "other layer" non-attached edges should be the same
+      beforeCoords2.x.should.equal(afterCoords2.x);
+      beforeCoords2.y.should.equal(afterCoords2.y);
+      // click layer 1 copy of "A"
+      var nodeAlayer1 = canvas.querySelector("circle.control.control-point-layer1");
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      nodeAlayer1.dispatchEvent(downEvent);
+      nodeAlayer1.dispatchEvent(upEvent);
+      // layer 1 "A" node should be selected
+      var classValue = nodeAlayer1.getAttribute("class");
+      classValue.should.contain("control-selected");
+      // click layer 2 copy of "A"
+      var nodeAlayer2 = canvas.querySelector("circle.control.control-point-layer2");
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      nodeAlayer2.dispatchEvent(downEvent);
+      nodeAlayer2.dispatchEvent(upEvent);
+      // layer 1 "A" node should be selected
+      var classValue = nodeAlayer2.getAttribute("class");
+      classValue.should.contain("control-selected");
+      // enter Edge editing mode
+      PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
+      // click layer 1, edge A--B, ensure that it's selected
+      var edgeABlayer1 = canvas.querySelector(".controlEdge.l1.edge-az-A--B");
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      edgeABlayer1.dispatchEvent(downEvent);
+      edgeABlayer1.dispatchEvent(upEvent);
+      edgeABlayer1.getAttribute("class").should.contain("control-selected");
+      PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
+      // click layer 2, edge A--B, ensure that it's selected
+      var edgeABlayer2 = canvas.querySelector(".controlEdge.l2.edge-az-A--B");
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
+      edgeABlayer2.dispatchEvent(downEvent);
+      edgeABlayer2.dispatchEvent(upEvent);
+      edgeABlayer2.getAttribute("class").should.contain("control-selected");
+      edgeABlayer1.getAttribute("class").should.not.contain("control-selected");
     })
     it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -853,8 +906,7 @@ describe( "Class MapCanvas", () => {
                     "meta":{
                       "endpoint_identifiers":{
                         "pops":["Node A, Inc.","Node B - Inc."]
-                      },
-                      "template": "ABCDEF"
+                      }
                     },
                     "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
@@ -879,14 +931,15 @@ describe( "Class MapCanvas", () => {
         },
       }
       // set topology with weird names for both edges and nodes
-      PubSub.publish("updateTopology", newTopology, canvas);
+      PubSub.publish("updateMapTopology", newTopology, canvas);
       // enter editing mode
       PubSub.publish("updateEditMode", true, canvas);
       // enter Node editing mode
       PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
       // measure edge endpoints
-
-      var cPoint = canvas.querySelector("circle.control");
+      var edgeAB = canvas.querySelector(".edge-az");
+      var beforeCoords = edgeAB.getBoundingClientRect();
+      var cPoint = canvas.querySelector("circle.control.control-point-for-node-Node-A-Inc");
       var originalPos = cPoint.getBoundingClientRect();
       // create mouse event for down
       var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
@@ -900,7 +953,29 @@ describe( "Class MapCanvas", () => {
       // drag a node with weird name. 
       cPoint.dispatchEvent(upEvent);
       // do edges move?
+      var edgeAB = canvas.querySelector(".edge-az");
+      var afterCoords = edgeAB.getBoundingClientRect();
+      beforeCoords.x.should.not.equal(afterCoords.x);
+      beforeCoords.y.should.not.equal(afterCoords.y);
 
       // drag a control point for edge with weird name. All good?
+      var cPoint = canvas.querySelector("circle.control.control-point-for-node-Node-B-Inc");
+      var edgeAB = canvas.querySelector(".edge-az");
+      var beforeCoords = edgeAB.getBoundingClientRect();
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      cPoint.dispatchEvent(downEvent);
+      cPoint.dispatchEvent(dragEvent);
+      cPoint = canvas.querySelector("circle.control");
+      // drag a node with weird name. 
+      cPoint.dispatchEvent(upEvent);
+      var edgeAB = canvas.querySelector(".edge-az");
+      var afterCoords = edgeAB.getBoundingClientRect();
+      beforeCoords.x.should.not.equal(afterCoords.x);
+      beforeCoords.y.should.not.equal(afterCoords.y);
     })
 } );
