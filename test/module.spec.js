@@ -8,6 +8,7 @@ In Volume: undefined
 
 Out Volume: undefined`;
 
+const lavender = "rgb(202, 149, 229)";
 
 describe( "Class MapCanvas", () => {
     afterEach(async function(){
@@ -20,7 +21,6 @@ describe( "Class MapCanvas", () => {
         elem.setAttribute('height', 400);
         elem.setAttribute("id", "testing-element");
 
-        const lavender = "rgb(202, 149, 229)";
 
         elem.topology = {
             "layer1":{
@@ -670,4 +670,237 @@ describe( "Class MapCanvas", () => {
       // check callback fired
       closureVar.should.equal("called");
     });
+    it("should allow for editing of same-name nodes in different layers", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      // create test map topology
+      var newTopology = { 
+        "layer1": {
+            "edges": [
+                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "children":[],
+                    "azColor":lavender,
+                    "zaColor":lavender,
+                }
+            ],
+            "nodes": [
+                {
+                  "name":"A",
+                  "meta":{},
+                  "latLng":[39.02,-105.99],
+                  "color":lavender,
+                },
+                {
+                  "name":"B",
+                  "meta":{},
+                  "latLng":[34.59,-96.06],
+                  "color":lavender,
+                }
+            ]
+        },
+        "layer2": {
+            "edges": [
+                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                    "latLngs":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
+                    "children":[],
+                    "azColor":lavender,
+                    "zaColor":lavender,
+                }
+            ],
+            "nodes": [
+                {
+                  "name":"A",
+                  "meta":{},
+                  "latLng":[49.02,-115.99],
+                  "color":lavender,
+                },
+                {
+                  "name":"B",
+                  "meta":{},
+                  "latLng":[44.59,-106.06],
+                  "color":lavender,
+                }
+            ]
+
+        },
+      }
+      PubSub.publish("updateMapTopology", newTopology, canvas);
+      // enter editing mode
+      PubSub.publish("updateEditMode", true, canvas);
+      // enter Node editing mode
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
+      // select edges that attach to node with this name, record positions
+      // toggle layers such that we have two layers with same-named nodes
+      // select the control point we want to work on
+      var cPoint = canvas.querySelector("circle.control");
+      var originalPos = cPoint.getBoundingClientRect();
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // fire down
+      cPoint.dispatchEvent(downEvent);
+      // fire drag
+      cPoint.dispatchEvent(dragEvent);
+      // fire up
+      cPoint = canvas.querySelector("circle.control");
+      cPoint.dispatchEvent(upEvent);
+      // select attached edges after, record positions
+      // positions for attached edges should have changed
+      // positions for "other layer" non-attached edges should be the same
+    })
+    it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      // create mouseover for edge with template
+      var newTopology = { 
+        "layer1": {
+            "edges": [
+                {
+                    "name":"Z--L",
+                    "meta":{
+                      "endpoint_identifiers":{
+                        "pops":["Z","L"]
+                      },
+                      "template": "${labels.src} ABCDEF ${labels.dst} GHIJKL"
+                    },
+                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "children":[],
+                    "azColor":lavender,
+                    "zaColor":lavender,
+                },
+                {
+                    "name":"A--Z",
+                    "meta":{
+                      "endpoint_identifiers":{
+                        "pops":["A","Z"]
+                      }
+                    },
+                    "latLngs":[[30.02,-105.99],[34.52,-105.99],[39.02,-105.99]],
+                    "children":[],
+                    "azColor":lavender,
+                    "zaColor":lavender,
+                }
+            ],
+            "nodes": [
+                {
+                  "name":"A",
+                  "meta":{},
+                  "latLng":[30.02,-105.99],
+                  "color":lavender,                  
+                },
+                {
+                  "name":"Z",
+                  "meta":{},
+                  "latLng":[39.02,-105.99],
+                  "color":lavender,
+                },
+                {
+                  "name":"L",
+                  "meta":{},
+                  "latLng":[34.59,-96.06],
+                  "color":lavender,
+                }
+            ]
+        },
+      }
+      PubSub.publish("updateMapTopology", newTopology, canvas);
+      var edgeLZ = canvas.querySelector(".connects-to-Z.connects-to-L")
+      var edgeAZ = canvas.querySelector(".connects-to-Z.connects-to-A")
+
+      var closureVar = "";
+      PubSub.subscribe("showTooltip", (value)=>{ closureVar = value.text; }, canvas);
+      // fire mouseover
+      let mouseoverEvent = new Event('mouseover', { bubbles: true });
+      edgeLZ.dispatchEvent(mouseoverEvent);
+      // check tooltip text
+      "From: ABCDEF To: GHIJKL".should.equal(closureVar);
+
+      edgeAZ.dispatchEvent(mouseoverEvent);
+      var expectedString = "<p><b>From:</b> A</p>\n        <p><b>To:</b>  Z</p>\n        <p><b>Volume:</b>  undefined</p>";
+      // check tooltip text for edge with no template
+      expectedString.should.equal(closureVar);
+      // set options for field labels
+      var newOptions = canvas.options;
+      newOptions['srcFieldLabelL1'] = 'Source:';
+      newOptions['dstFieldLabelL1'] = 'Dest:';
+      newOptions['dataFieldLabelL1'] = 'Data:';
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: [
+        'srcFieldLabelL1',
+        'dstFieldLabelL1',
+        'dataFieldLabelL1',
+      ]}, canvas);
+      // fire mouseover for edge with no template
+      edgeLZ.dispatchEvent(mouseoverEvent);
+      // check tooltip text
+      "Source: ABCDEF Dest: GHIJKL".should.equal(closureVar);
+      // create mouseover for edge with a template
+      // fire mouseover
+      edgeAZ.dispatchEvent(mouseoverEvent);
+      // check tooltip text
+      expectedString = "<p><b>Source:</b> A</p>\n        <p><b>Dest:</b>  Z</p>\n        <p><b>Data:</b>  undefined</p>";
+      // check tooltip text for edge with no template
+      expectedString.should.equal(closureVar);
+    })
+    it("should santize names with non-alphanum characters", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      var newTopology = { 
+        "layer1": {
+            "edges": [
+                {
+                    "name":"Node A, Inc.--Node B - Inc.",
+                    "meta":{
+                      "endpoint_identifiers":{
+                        "pops":["Node A, Inc.","Node B - Inc."]
+                      },
+                      "template": "ABCDEF"
+                    },
+                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "children":[],
+                    "azColor":lavender,
+                    "zaColor":lavender,
+                }
+            ],
+            "nodes": [
+                {
+                  "name":"Node A, Inc.",
+                  "meta":{},
+                  "latLng":[39.02,-105.99],
+                  "color":lavender,
+                },
+                {
+                  "name":"Node B - Inc.",
+                  "meta":{},
+                  "latLng":[34.59,-96.06],
+                  "color":lavender,
+                }
+            ]
+        },
+      }
+      // set topology with weird names for both edges and nodes
+      PubSub.publish("updateTopology", newTopology, canvas);
+      // enter editing mode
+      PubSub.publish("updateEditMode", true, canvas);
+      // enter Node editing mode
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
+      // measure edge endpoints
+
+      var cPoint = canvas.querySelector("circle.control");
+      var originalPos = cPoint.getBoundingClientRect();
+      // create mouse event for down
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      // create mouse event for drag
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      // create mouse event for up
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      cPoint.dispatchEvent(downEvent);
+      cPoint.dispatchEvent(dragEvent);
+      cPoint = canvas.querySelector("circle.control");
+      // drag a node with weird name. 
+      cPoint.dispatchEvent(upEvent);
+      // do edges move?
+
+      // drag a control point for edge with weird name. All good?
+    })
 } );

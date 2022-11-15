@@ -576,6 +576,14 @@ plugin.setPanelOptions((builder) => {
   });
 
   // -------------------- Choose Fields --------------------
+  builder.addTextInput({
+    path: 'srcFieldLabelL1',
+    name: 'Layer 1 Source Field Label',
+    description: "Label to be used in edge tooltips for the 'Source' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer1', true),
+    defaultValue: 'From:',
+  });
   builder.addSelect({
     path: 'srcFieldL1',
     name: 'Layer 1 Source Field',
@@ -588,6 +596,14 @@ plugin.setPanelOptions((builder) => {
       getOptions: buildChoices,
     },
   });
+  builder.addTextInput({
+    path: 'dstFieldLabelL1',
+    name: 'Layer 1 Destination Field Label',
+    description: "Label to be used in edge tooltips for the 'Destination' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer1', true),
+    defaultValue: 'To:',
+  });
   builder.addSelect({
     path: 'dstFieldL1',
     name: 'Layer 1 Destination Field',
@@ -599,6 +615,14 @@ plugin.setPanelOptions((builder) => {
       options: [],
       getOptions: buildChoices,
     },
+  });
+  builder.addTextInput({
+    path: 'dataFieldLabelL1',
+    name: 'Layer 1 Data Field Label',
+    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
+    category: FieldsCategory,
+    showIf: checkBool('layer1', true),
+    defaultValue: 'Volume:',
   });
   builder.addSelect({
     path: 'inboundValueFieldL1',
@@ -624,6 +648,14 @@ plugin.setPanelOptions((builder) => {
       getOptions: buildChoices,
     },
   });
+  builder.addTextInput({
+    path: 'srcFieldLabelL2',
+    name: 'Layer 2 Source Field Label',
+    description: "Label to be used in edge tooltips for the 'Source' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer2', true),
+    defaultValue: 'From:',
+  });
   builder.addSelect({
     path: 'srcFieldL2',
     name: 'Layer 2 Source Field',
@@ -636,6 +668,14 @@ plugin.setPanelOptions((builder) => {
       getOptions: buildChoices,
     },
   });
+  builder.addTextInput({
+    path: 'dstFieldLabelL2',
+    name: 'Layer 2 Destination Field Label',
+    description: "Label to be used in edge tooltips for the 'Destination' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer2', true),
+    defaultValue: 'To:',
+  });
   builder.addSelect({
     path: 'dstFieldL2',
     name: 'Layer 2 Destination Field',
@@ -647,6 +687,14 @@ plugin.setPanelOptions((builder) => {
       options: [],
       getOptions: buildChoices,
     },
+  });
+  builder.addTextInput({
+    path: 'dataFieldLabelL2',
+    name: 'Layer 2 Data Field Label',
+    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
+    category: FieldsCategory,
+    showIf: checkBool('layer2', true),
+    defaultValue: 'Volume:',
   });
   builder.addSelect({
     path: 'inboundValueFieldL2',
@@ -672,6 +720,14 @@ plugin.setPanelOptions((builder) => {
       getOptions: buildChoices,
     },
   });
+  builder.addTextInput({
+    path: 'srcFieldLabelL3',
+    name: 'Layer 3 Source Field Label',
+    description: "Label to be used in edge tooltips for the 'Source' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer3', true),
+    defaultValue: 'From:',
+  });
   builder.addSelect({
     path: 'srcFieldL3',
     name: 'Layer 3 Source Field',
@@ -684,6 +740,14 @@ plugin.setPanelOptions((builder) => {
       getOptions: buildChoices,
     },
   });
+  builder.addTextInput({
+    path: 'dstFieldLabelL3',
+    name: 'Layer 3 Destination Field Label',
+    description: "Label to be used in edge tooltips for the 'Destination' field",
+    category: FieldsCategory,
+    showIf: checkBool('layer3', true),
+    defaultValue: 'To:',
+  });
   builder.addSelect({
     path: 'dstFieldL3',
     name: 'Layer 3 Destination Field',
@@ -695,6 +759,14 @@ plugin.setPanelOptions((builder) => {
       options: [],
       getOptions: buildChoices,
     },
+  });
+  builder.addTextInput({
+    path: 'dataFieldLabelL3',
+    name: 'Layer 3 Data Field Label',
+    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
+    category: FieldsCategory,
+    showIf: checkBool('layer3', true),
+    defaultValue: 'Volume:',
   });
   builder.addSelect({
     path: 'inboundValueFieldL3',

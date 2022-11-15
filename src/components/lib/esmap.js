@@ -66,7 +66,7 @@ function sanitizeName(name){
   return sanitized;
 }
 
-function renderEdges(g, data, ref, layerId) {
+function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
   const edgeWidth = ref.options["edgeWidthL"+layerId];
   const defaultEdgeColor = ref.options["color"+layerId];
@@ -87,9 +87,20 @@ function renderEdges(g, data, ref, layerId) {
     }
 
     PubSub.publish("hideTooltip", null, ref.svg.node());
-    var text = `<p><b>From:</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
-      <p><b>To:</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
-      <p><b>Volume: </b>  ${ isAZ ? d.AZdisplayValue : d.ZAdisplayValue }</p>`;
+
+    var labels = {
+      "src": options["srcFieldLabelL"+layerId] ? options["srcFieldLabelL"+layerId] : "From:",
+      "dst": options["dstFieldLabelL"+layerId] ? options["dstFieldLabelL"+layerId] : "To:",
+      "data": options["dataFieldLabelL"+layerId] ? options["dataFieldLabelL"+layerId] : "Volume:",
+    }
+
+    if(d.meta.template){
+        var text = renderTemplate(d.meta.template, {"d": d, "self": d, "labels": labels });
+    } else {
+        var text = `<p><b>${labels.src}</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
+        <p><b>${labels.dst}</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
+        <p><b>${labels.data}</b>  ${ isAZ ? d.AZdisplayValue : d.ZAdisplayValue }</p>`;
+    }
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
 
@@ -307,7 +318,7 @@ function renderNodeControl(g, data, ref, layerId){
     if(evtData && evtData['type'] == "nodes"){
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
-      d3.select(".controlPoint.control-point-for-node-" + evtData["object"].name)
+      d3.select(".controlPoint.control-point-for-node-" + sanitizeName(evtData["object"].name))
           .classed("control-selected", true);
     }
   }
@@ -321,7 +332,7 @@ function renderNodeControl(g, data, ref, layerId){
     pointData['latLng'][1] = ll.lng;
     // procedure for updating the edge:
     // get all edges that have "d.name" as a node
-    d3.selectAll(".connects-to-"+pointData.name)
+    d3.selectAll(".connects-to-"+sanitizeName(pointData.name))
         // for each edge that we select:
         .attr('d', function (d) {
           // if we are manipulating the "A" end
@@ -378,7 +389,7 @@ function renderNodeControl(g, data, ref, layerId){
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
-    d3.select(".control-point-for-node-"+d.name)
+    d3.select(".control-point-for-node-"+sanitizeName(d.name))
       .classed("control-selected", true);
   }
 
@@ -386,7 +397,7 @@ function renderNodeControl(g, data, ref, layerId){
     .enter()
     .append('circle')
     .attr('r', 6)
-    .attr('class', function(d){ return 'control controlPoint control-point-for-node-'+d.name; })
+    .attr('class', function(d){ return 'control controlPoint control-point-for-node-'+sanitizeName(d.name); })
     .attr("data-layer", layerId)
     .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
@@ -546,7 +557,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       .append('circle')
       .attr('r', 4)
       .attr('class', function(d){
-        return 'control controlPoint control-point-for-edge-' + edgeData.name;
+        return 'control controlPoint control-point-for-edge-' + sanitizeName(edgeData.name);
       })
       .merge(feature)
       .on('mousedown', function(evt, d){
@@ -839,7 +850,7 @@ export class EsMap {
         }
         self.lastInteractedObject.latLng[idx] += amount;
         var ll = self.lastInteractedObject.latLng;
-        d3.selectAll(".connects-to-"+self.lastInteractedObject.name)
+        d3.selectAll(".connects-to-"+sanitizeName(self.lastInteractedObject.name))
             // for each edge that we select:
             .attr('d', function (d) {
               // if we are manipulating the "A" end
@@ -1001,7 +1012,7 @@ export class EsMap {
         controlpoint_g.selectAll('*').remove();
       }
       renderNodes(node_g, data, this, layerId);
-      renderEdges(edge_g, data, this, layerId);
+      renderEdges(edge_g, data, this, layerId, this.mapCanvas.options);
     }
   }
 
