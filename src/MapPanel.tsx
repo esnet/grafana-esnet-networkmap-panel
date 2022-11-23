@@ -5,6 +5,7 @@ import { parseData } from 'components/lib/dataParser';
 import { sanitizeTopology } from 'components/lib/topologyTools';
 import 'components/MapCanvas.component.js';
 import { PubSub } from 'components/lib/pubsub.js';
+import { locationService } from '@grafana/runtime';
 
 interface Props extends PanelProps<MapOptions> {}
 
@@ -20,6 +21,27 @@ export class MapPanel extends Component<Props> {
     this.theme = createTheme();
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
+  }
+
+  setDashboardVariables() {
+    var self = this;
+    return function (event) {
+      const l1var = 'var-' + self.props.options['dashboardVarL1'];
+      const l2var = 'var-' + self.props.options['dashboardVarL2'];
+      const l3var = 'var-' + self.props.options['dashboardVarL3'];
+      var setLocation = {};
+      setLocation[l1var] = null;
+      setLocation[l2var] = null;
+      setLocation[l3var] = null;
+      if (event && event.nodeA && event.nodeZ) {
+        const dashboardVariable = 'var-' + self.props.options['dashboardVarL' + event.layer];
+        const srcVariable = self.props.options['srcVarL' + event.layer];
+        const dstVariable = self.props.options['dstVarL' + event.layer];
+        setLocation[dashboardVariable] = [srcVariable + '|=|' + event.nodeA, dstVariable + '|=|' + event.nodeZ];
+      }
+
+      locationService.partial(setLocation, false);
+    };
   }
 
   updateCenter = (centerData) => {
@@ -276,6 +298,7 @@ export class MapPanel extends Component<Props> {
       layer2: mapDataL2,
       layer3: mapDataL3,
     };
+    PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
     PubSub.subscribe(
       'updateTopologyData',
       () => {

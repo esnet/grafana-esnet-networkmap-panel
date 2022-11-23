@@ -34,12 +34,16 @@ class SideBar extends BindableHTMLElement {
   showTooltip(data){
     var tooltip = data.text;
     var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");
-    tooltipTarget.style.opacity = 1; // this gets set incorrectly at times.
-    tooltipTarget.innerHTML = tooltip;
+    if(tooltipTarget){
+      tooltipTarget.style.opacity = 1; // this gets set incorrectly at times.
+      tooltipTarget.innerHTML = tooltip;
+    }
   }
   hideTooltip(){
     var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");
-    tooltipTarget.innerHTML = "";
+    if(tooltipTarget){
+      tooltipTarget.innerHTML = "";
+    }
   }
 
   render(){
