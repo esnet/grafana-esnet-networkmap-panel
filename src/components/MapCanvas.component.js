@@ -283,7 +283,8 @@ export class MapCanvas extends BindableHTMLElement {
     }
     if(
       wasChanged('background', changed) ||
-      wasChanged('enableAnimations', changed)
+      wasChanged('enableNodeAnimation', changed) ||
+      wasChanged('enableEdgeAnimation', changed)
     ){
       this.renderStyle();
     }
@@ -425,8 +426,35 @@ export class MapCanvas extends BindableHTMLElement {
     let mapstyle = this.shadow.querySelector("#mapstyle");
     let selectedOnlyButtonDisplay = this._selection && "inline-block" || "none";
 
+    let zIndexBase = this.options.zIndexBase ? this.options.zIndexBase : 50;
+    let zIndexLayers = [];
+    for(var i=0; i<=10; i++){
+      zIndexLayers.push(zIndexBase + (i * 10));
+    }
+
     mapstyle.innerHTML = `
       <style>
+
+        /* this is to bring grafana panel header on top leaflet layers */
+        .panel-header:hover { z-index: ${zIndexLayers[10]}; }
+        div.tooltip-hover { z-index: ${zIndexLayers[10]}; }
+        .home-overlay { z-index: ${zIndexLayers[8]}; }
+        .legend {  z-index: ${zIndexLayers[8]}; }
+        .leaflet-zoom-box { z-index: ${zIndexLayers[8]}; }
+        .leaflet-pane         { z-index: ${zIndexLayers[4]}; }
+
+        .leaflet-tile-pane    { z-index: ${zIndexLayers[1]}; }
+        .leaflet-overlay-pane { z-index: ${zIndexLayers[3]}; }
+        .leaflet-shadow-pane  { z-index: ${zIndexLayers[4]}; }
+        .leaflet-marker-pane  { z-index: ${zIndexLayers[5]}; }
+        .leaflet-tooltip-pane   { z-index: ${zIndexLayers[6]}; }
+        .leaflet-popup-pane   { z-index: ${zIndexLayers[7]}; }
+
+        .leaflet-map-pane canvas { z-index: ${zIndexLayers[0]}; }
+        .leaflet-map-pane svg    { z-index: ${zIndexLayers[1]}; }
+        .leaflet-control { z-index: ${zIndexLayers[8]}; }
+        .leaflet-bottom { z-index: ${zIndexLayers[10]}; }
+
           #map-${this.instanceId} { 
             font-family: sans-serif;
             background: ${this.options.background};
@@ -436,7 +464,7 @@ export class MapCanvas extends BindableHTMLElement {
           #map-${this.instanceId} > .home-overlay > .button.selected-only {
               display: ${ selectedOnlyButtonDisplay }
           }
-          ${ this.options.enableAnimations ? `
+          ${ this.options.enableNodeAnimation ? `
           .animated-node { 
             animation-name: throb;
             animation-duration: 1.5s;
@@ -449,7 +477,8 @@ export class MapCanvas extends BindableHTMLElement {
             50% {transform:scale(1.0, 1.0); }
             100% {transform:scale(1.5, 1.5); }
           }
-
+          ` : `` }
+          ${ this.options.enableEdgeAnimation ? `
           g.dash-over polygon {
             animation-name: crawl;
             animation-duration: 0.5s;

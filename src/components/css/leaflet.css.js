@@ -87,24 +87,11 @@ export const leafletCss = `/* required styles */
     height: 0;
     -moz-box-sizing: border-box;
          box-sizing: border-box;
-    z-index: 800;
     }
 /* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
 .leaflet-overlay-pane svg {
     -moz-user-select: none;
     }
-
-.leaflet-pane         { z-index: 400; }
-
-.leaflet-tile-pane    { z-index: 200; }
-.leaflet-overlay-pane { z-index: 400; }
-.leaflet-shadow-pane  { z-index: 500; }
-.leaflet-marker-pane  { z-index: 600; }
-.leaflet-tooltip-pane   { z-index: 650; }
-.leaflet-popup-pane   { z-index: 700; }
-
-.leaflet-map-pane canvas { z-index: 100; }
-.leaflet-map-pane svg    { z-index: 200; }
 
 .leaflet-vml-shape {
     width: 1px;
@@ -121,14 +108,12 @@ export const leafletCss = `/* required styles */
 
 .leaflet-control {
     position: relative;
-    z-index: 800;
     pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
     pointer-events: auto;
     }
 .leaflet-top,
 .leaflet-bottom {
     position: absolute;
-    z-index: 1000;
     pointer-events: none;
     }
 .leaflet-top {

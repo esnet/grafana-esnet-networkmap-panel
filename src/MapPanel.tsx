@@ -100,7 +100,8 @@ export class MapPanel extends Component<Props> {
       'thresholds',
       'enableScrolling',
       'enableEditing',
-      'enableAnimations',
+      'enableNodeAnimation',
+      'enableEdgeAnimation',
 
       'layer1',
       'color1',
@@ -339,6 +340,7 @@ export class MapPanel extends Component<Props> {
       });
     });
     options.thresholds = thresholds;
+    options.zIndexBase = 200;
 
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
     return React.createElement('esnet-map-canvas', {

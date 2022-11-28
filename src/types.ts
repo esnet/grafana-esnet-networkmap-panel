@@ -23,7 +23,8 @@ export interface MapOptions {
   showLegend: boolean;
   enableScrolling: boolean;
   enableEditing: boolean;
-  enableAnimations: boolean;
+  enableNodeAnimation: boolean;
+  enableEdgeAnimation: boolean;
   layer1: boolean;
   mapjsonL1: string;
   nodeHighlightL1: string;
@@ -68,4 +69,5 @@ export interface MapOptions {
   legendColumnLength: number;
   legendPosition: string;
   legendDefaultBehavior: string;
+  zIndexBase: number;
 }

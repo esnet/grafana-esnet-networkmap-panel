@@ -74,7 +74,6 @@ svg circle.controlPoint {
 
 div.tooltip-hover {
   position:absolute;
-  z-index:10000;
   border-radius:4px;
   padding:10px;
   margin:10px;
@@ -163,14 +162,8 @@ input:checked + .slider:before {
   transform: translateX(18px);
 }
 
-/* this is to bring grafana panel header on top leaflet layers */
-.panel-header:hover {
-  z-index: 1000;
-}
-
 .home-overlay {
     position: absolute;
-    z-index: 600;
     margin-top: 12px;
     margin-left: 57px;
 }
@@ -185,7 +178,6 @@ input:checked + .slider:before {
 
 .legend {
     position: absolute;
-    z-index: 600;
     padding: 1em 1em 0.3em 1em;
     margin: 0.8em;
     box-shadow: 0px 0px 2px rgb(0 0 0 / 50%);

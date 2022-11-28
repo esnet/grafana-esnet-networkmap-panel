@@ -329,8 +329,15 @@ plugin.setPanelOptions((builder) => {
     defaultValue: true,
   });
   builder.addBooleanSwitch({
-    path: 'enableAnimations',
-    name: 'Enable Traffic Direction Animations',
+    path: 'enableNodeAnimation',
+    name: 'Enable Node Selection Animations',
+    description: 'Enable throb animation for nodes. May be CPU/GPU intensive in some browsers.',
+    category: ViewCategory,
+    defaultValue: true,
+  });
+  builder.addBooleanSwitch({
+    path: 'enableEdgeAnimation',
+    name: 'Enable Edge Traffic Direction Animations',
     description: 'Enable animations for traffic direction on edges. May be CPU/GPU intensive in some browsers.',
     category: ViewCategory,
     defaultValue: true,
