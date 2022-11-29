@@ -79,6 +79,8 @@ describe( "Class MapCanvas", () => {
             "showViewControls": true,
             "enableScrolling": true,
             "enableEditing": true,
+            "enableNodeAnimation": true,
+            "enableEdgeAnimation": true,
             "tileSetLayer":"esri.shaded",
             "boundaryLayer":null,
             "labelLayer":null,
@@ -1036,5 +1038,26 @@ describe( "Class MapCanvas", () => {
       var afterCoords = edgeAB.getBoundingClientRect();
       beforeCoords.x.should.not.equal(afterCoords.x);
       beforeCoords.y.should.not.equal(afterCoords.y);
+    })
+    it("should not animate nodes if the appropriate option is set", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      var node = canvas.querySelector(".node-A circle");
+      var style = window.getComputedStyle(node);
+      var originalPos = node.getBoundingClientRect();
+      var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+      node.dispatchEvent(downEvent);
+      node.dispatchEvent(upEvent);
+      var node = canvas.querySelector(".animated-node");
+      var style = window.getComputedStyle(node);
+      var animationWhileTrue = style.animation;
+      var newOptions = canvas.options;
+      newOptions['enableNodeAnimation'] = false;
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['enableNodeAnimation']}, canvas);
+      var node = canvas.querySelector(".animated-node");
+      var style = window.getComputedStyle(node);
+      var animationWhileFalse = style.animation;
+      animationWhileTrue.should.contain("throb");
+      animationWhileFalse.should.not.equal(animationWhileTrue);
     })
 } );
