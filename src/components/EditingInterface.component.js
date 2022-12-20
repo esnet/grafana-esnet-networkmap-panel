@@ -286,6 +286,7 @@ class EditingInterface extends BindableHTMLElement {
     deleteSelection(){
         var topology = this.mapCanvas.topology;
         topology['layer'+this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
+        PubSub.publish("updateTopology", topology, this);
         PubSub.publish("updateMapTopology", topology, this);
         PubSub.publish("refresh", null, this);
         PubSub.publish("updateTopologyData", null, this);
