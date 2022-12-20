@@ -9,7 +9,9 @@ function sumChars(s) {
 
 function discoverBusAbove(context, defaultBus){
     var messageBus = defaultBus;
-
+    if(context && context.__privatemessagebus__){
+        return context.__privatemessagebus__;
+    }
     if(context && context.dispatchEvent){
         var discoveryEvent = new CustomEvent("$SCOPE.DISCOVERY$", {bubbles: true, cancelable: true, composed: true});
         discoveryEvent.callback = function(bus){
@@ -17,7 +19,6 @@ function discoverBusAbove(context, defaultBus){
         }
         context.dispatchEvent(discoveryEvent);
     }
-
     return messageBus;
 }
 
@@ -44,8 +45,8 @@ const doPublish = function(topic, eventData, messageBus) {
         var scopeMessage = "scoped to bus with id #" + messageBus.instanceId;
         console.debug("publishing event on topic", topic, scopeMessage);
     }
-    //messageBus.lastEvents[topic] = ;
-    localStorage.setItem(`${messageBus.instanceId}.lastEvents.${topic}`, JSON.stringify(eventData));
+    var accessor = `${messageBus.instanceId}.lastEvents.${topic}`;
+    localStorage.setItem(accessor, JSON.stringify(eventData));
     var subscriberData = messageBus.topics[topic];
     if (!subscriberData) return;
     var subscribers = Object.values(subscriberData);
@@ -74,17 +75,19 @@ const doClearTopicCallbacks = (topic, messageBus)=>{
 }
 
 const getLastValue = (topic, messageBus)=>{
+    var accessor = `${messageBus.instanceId}.lastEvents.${topic}`
     if(messageBus.debug){
         console.debug("returning last value for", topic, "from bus with id #", messageBus.instanceId);
     }
-    return JSON.parse(localStorage.getItem(`${messageBus.instanceId}.lastEvents.${topic}`));
+    return JSON.parse(localStorage.getItem(accessor));
 }
 
 const clearLastValue = (topic, messageBus)=>{
     if(messageBus.debug){
         console.debug("clearing last value for", topic, "from bus with id #", messageBus.instanceId);
     }
-    localStorage.removeItem(`${messageBus.instanceId}.lastEvents.${topic}`);
+    var accessor = `${messageBus.instanceId}.lastEvents.${topic}`;
+    localStorage.removeItem(accessor);
 }
 
 export class PrivateMessageBus {
