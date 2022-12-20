@@ -30,8 +30,6 @@ var locationService = { "partial": function(query){
 var L = window['L'];
 try {
   var L = require('./lib/leaflet.js');
-  /*const m = require('@grafana/runtime');
-  locationService = m.locationService;*/
 } catch (e) {
   console.log(e);
 }
@@ -52,7 +50,8 @@ export default class NetworkMap {
     this.leafletMap = this.mapCanvas.getCurrentLeafletMap();
 
     //--- Initialize the SVG layer
-    const overlay = d3.select(this.leafletMap.getPanes().overlayPane);
+    var overlayPane = this.leafletMap.getPanes().overlayPane;
+    const overlay = d3.select(overlayPane);
     this.svgLayer = overlay.select('svg').attr('pointer-events', 'all');
     this.sideBar = d3.selectAll('#sidebar-tooltip');
 
@@ -62,7 +61,6 @@ export default class NetworkMap {
       this.sideBar,
       d3.curveNatural);
 
-    PubSub.subscribe("setVariables", this.setDashboardVariables, this)
     PubSub.subscribe("setEditMode", this.setEditMode, this);
     PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
@@ -71,26 +69,6 @@ export default class NetworkMap {
     return this.mapCanvas.dispatchEvent(event);
   }
 
-  setDashboardVariables(event){
-    const l1var = "var-"+this.mapCanvas.options["dashboardVarL1"];
-    const l2var = "var-"+this.mapCanvas.options["dashboardVarL2"];
-    const l3var = "var-"+this.mapCanvas.options["dashboardVarL3"];
-    var setLocation = { }
-    setLocation[l1var] = null;
-    setLocation[l2var] = null;
-    setLocation[l3var] = null;
-    if(event && event.nodeA && event.nodeZ){
-      const dashboardVariable = "var-"+this.mapCanvas.options["dashboardVarL" + event.layer];
-      const srcVariable = this.mapCanvas.options["srcVarL" + event.layer];
-      const dstVariable = this.mapCanvas.options["dstVarL" + event.layer];
-      setLocation[dashboardVariable] = [
-          srcVariable + "|=|" + event.nodeA,
-          dstVariable + "|=|" + event.nodeZ
-      ]
-    }
-
-    locationService.partial(setLocation, false)
-  }
 
   setEdgeEdit(bool){
       this.esmap.editNodeMode(false);
