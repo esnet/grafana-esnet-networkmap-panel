@@ -72,7 +72,7 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
-    PubSub.subscribe('updateTopology', () => { this.updateTopology(this.topology) }, this);
+    PubSub.subscribe('updateTopology', () => { this.updateTopology && this.updateTopology(this.topology) }, this);
     PubSub.subscribe("setSelection", function(d){
         this.selection = true;
     }, this);
@@ -436,8 +436,8 @@ export class MapCanvas extends BindableHTMLElement {
       <style>
 
         /* this is to bring grafana panel header on top leaflet layers */
-        .panel-header:hover { z-index: ${zIndexLayers[10]}; }
-        div.tooltip-hover { z-index: ${zIndexLayers[10]}; }
+        .panel-header:hover { z-index: ${zIndexLayers[9]}; }
+        div.tooltip-hover { z-index: 1000; position:absolute; }
         .home-overlay { z-index: ${zIndexLayers[8]}; }
         .legend {  z-index: ${zIndexLayers[8]}; }
         .leaflet-zoom-box { z-index: ${zIndexLayers[8]}; }
@@ -453,12 +453,12 @@ export class MapCanvas extends BindableHTMLElement {
         .leaflet-map-pane canvas { z-index: ${zIndexLayers[0]}; }
         .leaflet-map-pane svg    { z-index: ${zIndexLayers[1]}; }
         .leaflet-control { z-index: ${zIndexLayers[8]}; }
-        .leaflet-bottom { z-index: ${zIndexLayers[10]}; }
+        .leaflet-bottom { z-index: ${zIndexLayers[9]}; }
 
           #map-${this.instanceId} { 
             font-family: sans-serif;
+            position:relative;
             background: ${this.options.background};
-            position: relative;
             display: inline-block;
           }
           #map-${this.instanceId} > .home-overlay > .button.selected-only {
@@ -643,7 +643,11 @@ export class MapCanvas extends BindableHTMLElement {
         this.mapContainer.style.width = this.width + "px";
       }
     } else {
-      this.mapContainer.style.width = "100%";
+      if(this.options.showSidebar){
+        this.mapContainer.style.width = "77%";
+      } else {
+        this.mapContainer.style.width = "100%";
+      }
     }
     if(!this.map && this.options && this.topology){
       this.newMap();
