@@ -63,7 +63,7 @@ function pathCrawl(path, klass, color, edgeWidth){
 function sanitizeName(name){
   const separator = "S_S_E_E_P_P_A_A_R_R_A_A_T_T_O_O_R_R"
   var sanitized = name.replaceAll("--", separator) // deal with the edge name separator first
-  sanitized = sanitized.replaceAll(/[ -]+/g, "-"); // replace all spaces with hyphens
+  sanitized = sanitized.replaceAll(/[ \-\/\\]+/g, "-"); // replace series of spaces, hyphens, / and \ characters with -
   sanitized = sanitized.replaceAll(/[^\w-]/g, ''); // replace anything other than alphanum and hyphen with empty string
   sanitized = sanitized.replaceAll(separator, "--") // deal with the edge name separator first
   return sanitized;
@@ -157,6 +157,7 @@ function renderEdges(g, data, ref, layerId, options) {
         event: event,
         layer: layerId,
         type: "edge",
+        instance: ref.mapCanvas.id,
       }
       PubSub.publish("setVariables", d, ref.svg.node());
       PubSub.publish("setSelection", selectionData, ref.svg.node());
@@ -224,10 +225,11 @@ function renderEdges(g, data, ref, layerId, options) {
         .classed('edge', true);
       // sanitize name from the edge
       var name = sanitizeName(selectionData.selection.name);
+      var mapId = "map-" + ref.mapCanvas.instanceId;
       // assemble edge names to select
       var edgeDirectionToColor = {
-        "az": { "selector": `.l${selectionData.layer}.edge-az-${name}`, "color": selectionData.selection.azColor },
-        "za": { "selector": `.l${selectionData.layer}.edge-za-${name}`, "color": selectionData.selection.zaColor }
+        "az": { "selector": `#${mapId} .l${selectionData.layer}.edge-az-${name}`, "color": selectionData.selection.azColor },
+        "za": { "selector": `#${mapId} .l${selectionData.layer}.edge-za-${name}`, "color": selectionData.selection.zaColor }
       }
       // do steps for path crawl and selection
       Object.keys(edgeDirectionToColor).forEach((direction)=>{
@@ -336,7 +338,9 @@ function renderNodeControl(g, data, ref, layerId){
     pointData['latLng'][1] = ll.lng;
     // procedure for updating the edge:
     // get all edges that have "d.name" as a node
-    var selector = `.l${layerId}.connects-to-${sanitizeName(pointData.name)}`;
+    var mapId = "map-" + ref.mapCanvas.instanceId;
+    var layerSelector = !ref.mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
+    var selector = `#${mapId} ${layerSelector}.connects-to-${sanitizeName(pointData.name)}`;
     d3.selectAll(selector)
         // for each edge that we select:
         .attr('d', function (d) {
@@ -504,7 +508,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     if(evtData && evtData['type'] == "edges"){
       d3.selectAll(".control-selected")
         .classed("control-selected", false);
-      d3.select(`.controlEdge.l${evtData["layer"]}.edge-az-${evtData["object"].name}`)
+      d3.select(`.controlEdge.l${evtData["layer"]}.edge-az-${sanitizeName(evtData["object"].name)}`)
           .classed("control-selected", true);
     }
   }
@@ -526,7 +530,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     //--- rerender stuff
     ref.update();
     //--- ensure that this edge plays selection animation
-    d3.select(`.controlEdge.l${layerId}.edge-az-${edgeData.name}`)
+    d3.select(`.controlEdge.l${layerId}.edge-az-${sanitizeName(edgeData.name)}`)
       .classed("control-selected", true);
   }
 
@@ -551,7 +555,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       "layer2": ref.data["layer2"],
       "layer3": ref.data["layer3"],
     });
-    d3.select(`.controlEdge.l${layerId}.edge-az-${edgeData.name}`)
+    d3.select(`.controlEdge.l${layerId}.edge-az-${sanitizeName(edgeData.name)}`)
       .classed("control-selected", true);
   }
 
@@ -795,8 +799,10 @@ export class EsMap {
         elem.setAttribute("id", "tooltip-hover");
         elem.setAttribute("class", "tight-form-func tooltip-hover");
         elem.innerHTML = data.text;
-        elem.setAttribute("style", `top:${data.event.clientY+10}px; left:${data.event.clientX+10}px;`);
-        document.body.appendChild(elem);
+        var bounds = mapCanvas.getBoundingClientRect();
+        elem.setAttribute("style", `top:${(data.event.clientY - bounds.top)}px; left:${(data.event.clientX - bounds.left)}px;`);
+        var elemId = "#map-" + mapCanvas.instanceId;
+        mapCanvas.querySelector(elemId).appendChild(elem);
       },
       this.svg.node())
       PubSub.subscribe("hideTooltip",function(){
@@ -805,7 +811,7 @@ export class EsMap {
           elem.remove();
         })
       },
-      this.svg.node())
+      this.mapCanvas)
     }
     //
     let self = this;
