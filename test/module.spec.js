@@ -10,19 +10,7 @@ Out Volume: undefined`;
 
 const lavender = "rgb(202, 149, 229)";
 
-describe( "Class MapCanvas", () => {
-    afterEach(async function(){
-        var canvas = document.querySelector("esnet-map-canvas");
-        canvas.remove();
-    })
-    beforeEach(async function(){  
-        var elem = document.createElement("esnet-map-canvas");
-        elem.setAttribute('width', 800);
-        elem.setAttribute('height', 400);
-        elem.setAttribute("id", "testing-element");
-
-
-        elem.topology = {
+var TOPOLOGY = {
             "layer1":{
                 "edges":[
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
@@ -69,7 +57,21 @@ describe( "Class MapCanvas", () => {
                             "color":lavender,
                         }
                 ],"aTest":0}
-        };
+        }
+
+describe( "Class MapCanvas", () => {
+    afterEach(async function(){
+        var canvas = document.querySelector("esnet-map-canvas");
+        canvas.remove();
+    })
+    beforeEach(async function(){  
+        var elem = document.createElement("esnet-map-canvas");
+        elem.setAttribute('width', 800);
+        elem.setAttribute('height', 400);
+        elem.setAttribute("id", "testing-element");
+
+
+        elem.topology = TOPOLOGY;
 
         elem.options = {
             "startLat":38.68,
@@ -1059,5 +1061,105 @@ describe( "Class MapCanvas", () => {
       var animationWhileFalse = style.animation;
       animationWhileTrue.should.contain("throb");
       animationWhileFalse.should.not.equal(animationWhileTrue);
+    })
+    it("should append tooltips to the correct DOM element in a context with multiple instances", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+        var newOptions = JSON.parse(JSON.stringify(canvas.options));
+        newOptions.showSidebar = false;
+
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ['showSidebar']}, canvas);
+
+        var elem2 = document.createElement("esnet-map-canvas");
+        elem2.setAttribute('width', 800);
+        elem2.setAttribute('height', 400);
+        elem2.setAttribute("id", "testing-element2");
+        elem2.topology = TOPOLOGY;
+        elem2.options = newOptions;
+        document.body.appendChild(elem2);
+  
+        var edge = elem2.querySelector('.edge.edge-az');
+        let mouseoverEvent = new Event('mouseover', { bubbles: true });
+        edge.dispatchEvent(mouseoverEvent);
+        var tooltip = document.querySelector("#tooltip-hover")
+        tooltip.parentElement.id.should.equal(`map-${elem2.instanceId}`);
+        tooltip.parentElement.id.should.not.equal(`map-${canvas.instanceId}`);
+    })
+    it("should perform selection path crawl animations properly in a context with multiple instances", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+
+        var elem2 = document.createElement("esnet-map-canvas");
+        elem2.setAttribute('width', 800);
+        elem2.setAttribute('height', 400);
+        elem2.setAttribute("id", "testing-element2");
+        elem2.topology = JSON.parse(JSON.stringify(TOPOLOGY));
+        elem2.options = JSON.parse(JSON.stringify(canvas.options));;
+        document.body.insertBefore(elem2, canvas);
+
+        var selectionListenerFired = false;
+        PubSub.subscribe('setSelection', function(){ 
+          selectionListenerFired = true;
+          elem2.querySelectorAll(".dash-selected").length.should.not.equal(0);
+        }, elem2)
+
+        var edge = elem2.querySelector('.edge.edge-az');
+        var originalPos = edge.getBoundingClientRect();
+        var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+        var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+        edge.dispatchEvent(downEvent);
+        edge.dispatchEvent(upEvent);
+        selectionListenerFired.should.equal(true);
+    })
+    it("should allow edge 'grabbing' between layers on node move, if an option is set", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+
+        var newOptions = JSON.parse(JSON.stringify(canvas.options));
+        newOptions.multiLayerNodeSnap = true;
+        newOptions.layer2 = true;
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ['multiLayerNodeSnap', 'layer2']}, canvas);
+
+        PubSub.publish("updateEditMode", true, canvas);
+        PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
+
+        var nodes = document.querySelectorAll("circle.control");
+
+        var nodeA = nodes[0];
+        var nodeC = nodes[2];
+
+        var originalNodeAPos = nodeA.getBoundingClientRect();
+        // compensate for radius
+        originalNodeAPos = {x: originalNodeAPos.x + 4, y: originalNodeAPos.y + 4};
+        // create mouse event for down
+        var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalNodeAPos.x, clientY: originalNodeAPos.y, view: window })
+        // create mouse event for drag
+        var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalNodeAPos.x + 50, clientY: originalNodeAPos.y + 50, view: window })
+        // create mouse event for up
+        var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalNodeAPos.x + 50, clientY: originalNodeAPos.y + 50, view: window })
+        // fire down
+        nodeA.dispatchEvent(downEvent);
+        // fire drag
+        nodeA.dispatchEvent(dragEvent);
+        // fire up
+        nodeA.dispatchEvent(upEvent);
+        // check node moved
+        var newPos = nodeA.getBoundingClientRect()
+        newPos = {x: newPos.x + 4, y: newPos.y + 4};
+        (newPos.x).should.be.approximately(originalNodeAPos.x + 50, 4);
+        (newPos.y).should.be.approximately(originalNodeAPos.y + 50, 4);
+
+        PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
+        // nodeA has moved, check that edgeAB in layer1 and edgeAB in layer2 have an endpoint that matches lat-lng.
+        nodes = canvas.querySelectorAll("circle.control.control-point-for-edge-A--B")
+        function within(num, a, b) {
+            return num >= a && num <= b;
+        };
+        var node_matches = 0;
+        for(var i=0; i<nodes.length; i++){
+          var rect = nodes[i].getBoundingClientRect();
+          if(within(rect.x, newPos.x - 10, newPos.x + 10) && 
+             within(rect.y, newPos.y - 10, newPos.y + 10)){
+            node_matches++;
+          }
+        }
+        (node_matches).should.equal(2);
     })
 } );
