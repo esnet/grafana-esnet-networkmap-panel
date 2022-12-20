@@ -59,9 +59,9 @@ class SideBar extends BindableHTMLElement {
             font-family: sans-serif;
             padding: 0 1em;
             vertical-align: top;
-            ${this.mapCanvas.height && "height: "+this.mapCanvas.height + "px;" }
-            ${this.mapCanvas.width && ("width: "+ (this.mapCanvas.width * 0.20) + "px;") }
             display: inline-block;
+            ${this.mapCanvas.height && "height: "+this.mapCanvas.height + "px;" }
+            ${(this.mapCanvas && this.mapCanvas.width) ? `width: ${this.mapCanvas.width * 0.20}px;` : `width: 19%;`}
           }
           .toggle.container {
             display: block;
