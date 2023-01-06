@@ -83,7 +83,7 @@ export class MapCanvas extends BindableHTMLElement {
       var self = this;
       return () => {
         PubSub.publish("returnMapCenterAndZoom", {
-          center: self.map.leafletMap.getBounds().getCenter(),
+          center: self.map.leafletMap.getCenter(),
           zoom: self.map.leafletMap.getZoom()
         })
       } 
@@ -346,6 +346,13 @@ export class MapCanvas extends BindableHTMLElement {
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options.startLat, this.startlng || this._options.startLng];
+      var startZoom = this._options.startZoom;
+      if(window[this.id + "mapPosition"] && window[this.id + "mapPosition"].center){
+        centerCoords = window[this.id + "mapPosition"].center;
+      }
+      if(window[this.id + "mapPosition"] && window[this.id + "mapPosition"].zoom){
+        startZoom = window[this.id + "mapPosition"].zoom;
+      }
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
@@ -356,7 +363,7 @@ export class MapCanvas extends BindableHTMLElement {
           keyboard: false,
           dragging: this._options.enableScrolling,
           zoomControl: this._options.showViewControls,
-        }).setView(centerCoords, this._options.startZoom);
+        }).setView(centerCoords, startZoom);
         if(this._options.tileSetLayer){
           L.tileLayer(
             maplayers.TILESETS[this._options.tileSetLayer].url,
@@ -383,6 +390,14 @@ export class MapCanvas extends BindableHTMLElement {
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }
+    this.leafletMap.on("zoomend", ()=>{
+        if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
+        window[this.id + "mapPosition"].zoom = this.leafletMap.getZoom();
+    })
+    this.leafletMap.on("moveend", ()=>{
+        if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
+        window[this.id + "mapPosition"].center = this.leafletMap.getCenter();
+    })
     return this.leafletMap;
   }
 
@@ -394,6 +409,11 @@ export class MapCanvas extends BindableHTMLElement {
     }
     // needs research
     PubSub.clearTopicCallbacks('');
+  }
+
+  homeMap(){
+    window[this.id + "mapPosition"] = null;
+    this.newMap();
   }
 
   newMap(){
@@ -416,7 +436,7 @@ export class MapCanvas extends BindableHTMLElement {
       this.sideBar && this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
-      this.map = new NetworkMap(this);
+      this.map = new NetworkMap(this); // implicitly calls getCurrentLeafletMap()
       this.map.renderMap();
       var lastEditMode = PubSub.last('setEditMode', this);
       PubSub.publish('setEditMode', lastEditMode, this);
@@ -655,7 +675,7 @@ export class MapCanvas extends BindableHTMLElement {
 
     this.map && this.map.renderMap();
     this.bindEvents({
-      "#home_map@onclick": this.newMap,
+      "#home_map@onclick": this.homeMap,
       "#clear_selection@onclick": this.clearSelection,
     })
   }
