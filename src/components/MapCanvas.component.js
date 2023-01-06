@@ -379,7 +379,7 @@ export class MapCanvas extends BindableHTMLElement {
             maplayers.LABELS[this._options.labelLayer].url, 
             maplayers.LABELS[this._options.labelLayer].attributes).addTo(this.leafletMap);
         }
-        if(this._options.initialViewStrategy === 'viewport'){
+        if(!window[this.id + "mapPosition"] && this._options.initialViewStrategy === 'viewport'){
           this.leafletMap.fitBounds(L.latLngBounds(L.latLng(
             this._options.viewportTopLeftLat,
             this._options.viewportTopLeftLng),
