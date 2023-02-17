@@ -19,6 +19,21 @@ function checkBool(settingName: string, value: any) {
     return config[settingName] === value;
   };
 }
+
+function checkBools(settings: object) {
+  return function (config: MapOptions) {
+    var keys = Object.keys(settings);
+    for (var i = 0; i < keys.length; i++) {
+      var settingName = keys[i];
+      var value = settings[settingName];
+      if (config[settingName] !== value) {
+        return false;
+      }
+    }
+    return true;
+  };
+}
+
 function checkInArray(settingName: string, values: any[]) {
   return function (config: MapOptions) {
     for (var i = 0; i < values.length; i++) {
@@ -350,12 +365,27 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: true,
   });
+  builder.addBooleanSwitch({
+    path: 'jsonFromUrlL1',
+    name: 'Fetch Layer 1 JSON from URL',
+    showIf: checkBool('layer1', true),
+    category: LayersCategory,
+    defaultValue: false,
+  });
+  builder.addTextInput({
+    path: 'mapjsonUrlL1',
+    name: 'Layer 1 Map data (URL)',
+    category: LayersCategory,
+    showIf: checkBools({ layer1: true, jsonFromUrlL1: true }),
+    description: 'URL that returns JSON with edges and nodes of network map',
+    defaultValue: '',
+  });
   builder.addCustomEditor({
     id: 'mapjsonL1',
     path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
     category: LayersCategory,
-    showIf: checkBool('layer1', true),
+    showIf: checkBools({ layer1: true, jsonFromUrlL1: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -429,12 +459,27 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: false,
   });
+  builder.addBooleanSwitch({
+    path: 'jsonFromUrlL2',
+    name: 'Fetch Layer 2 JSON from URL',
+    showIf: checkBool('layer2', true),
+    category: LayersCategory,
+    defaultValue: false,
+  });
+  builder.addTextInput({
+    path: 'mapjsonUrlL2',
+    name: 'Layer 2 Map data (URL)',
+    category: LayersCategory,
+    showIf: checkBools({ layer2: true, jsonFromUrlL2: true }),
+    description: 'URL that returns JSON with edges and nodes of network map',
+    defaultValue: '',
+  });
   builder.addCustomEditor({
     id: 'mapjsonL2',
     path: 'mapjsonL2',
     name: 'Layer 2 Map data (json)',
     category: LayersCategory,
-    showIf: checkBool('layer2', true),
+    showIf: checkBools({ layer2: true, jsonFromUrlL2: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -509,12 +554,27 @@ plugin.setPanelOptions((builder) => {
     category: LayersCategory,
     defaultValue: false,
   });
+  builder.addBooleanSwitch({
+    path: 'jsonFromUrlL3',
+    name: 'Fetch Layer 3 JSON from URL',
+    showIf: checkBool('layer3', true),
+    category: LayersCategory,
+    defaultValue: false,
+  });
+  builder.addTextInput({
+    path: 'mapjsonUrlL3',
+    name: 'Layer 3 Map data (URL)',
+    category: LayersCategory,
+    showIf: checkBools({ layer3: true, jsonFromUrlL3: true }),
+    description: 'URL that returns JSON with edges and nodes of network map',
+    defaultValue: '',
+  });
   builder.addCustomEditor({
     id: 'mapjsonL3',
     path: 'mapjsonL3',
     name: 'Layer 3 Map data (json)',
     category: LayersCategory,
-    showIf: checkBool('layer3', true),
+    showIf: checkBools({ layer3: true, jsonFromUrlL3: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },

@@ -13,10 +13,16 @@ export class MapPanel extends Component<Props> {
   mapCanvas: any;
   lastOptions: any;
   theme: any;
+  mapjsonCache: any;
 
   constructor(props: Props) {
     super(props);
     this.mapCanvas = React.createRef();
+    this.mapjsonCache = {
+      L1: {},
+      L2: {},
+      L3: {},
+    };
     this.lastOptions = this.props.options;
     this.theme = createTheme();
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
@@ -38,6 +44,10 @@ export class MapPanel extends Component<Props> {
         const srcVariable = self.props.options['srcVarL' + event.layer];
         const dstVariable = self.props.options['dstVarL' + event.layer];
         setLocation[dashboardVariable] = [srcVariable + '|=|' + event.nodeA, dstVariable + '|=|' + event.nodeZ];
+      }
+      if (event && event.type === 'node') {
+        const dashboardVariable = 'var-' + self.props.options['dashboardVarL' + event.layer];
+        setLocation[dashboardVariable] = event.selection.name;
       }
 
       locationService.partial(setLocation, false);
@@ -222,6 +232,33 @@ export class MapPanel extends Component<Props> {
     return output;
   }
 
+  resolveMapData(layer: string, replaceVariables) {
+    const { options } = this.props;
+    // if we want to fetch from a url, check the cache or return a live response
+    if (options['jsonFromUrl' + layer]) {
+      let jsonUrl = replaceVariables(options['mapjsonUrl' + layer]);
+      if (this.mapjsonCache[layer][jsonUrl]) {
+        // if we have a cached copy of the response, return it wrapped in a promise
+        return new Promise((resolve) => {
+          resolve(this.mapjsonCache[layer][jsonUrl]);
+        });
+      }
+      // otherwise return a promise from `fetch`
+      return fetch(jsonUrl).then((response) => {
+        this.mapjsonCache[layer][jsonUrl] = response.text();
+        return this.mapjsonCache[layer][jsonUrl];
+      });
+    }
+    // in the case that we don't want to fetch from a url, return a promise with local data
+    return new Promise((resolve) => {
+      if (options['mapjson' + layer]) {
+        resolve(options['mapjson' + layer]); // if local data is set, return it
+      } else {
+        resolve({ nodes: [], edges: [] }); // default value: empty layer
+      }
+    });
+  }
+
   updateMap() {
     const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
@@ -271,34 +308,40 @@ export class MapPanel extends Component<Props> {
     var parsedDataL1 = {};
     var parsedDataL2 = {};
     var parsedDataL3 = {};
-    var mapDataL1;
-    var mapDataL2;
-    var mapDataL3;
+
+    let topology = {
+      layer1: { nodes: [], edges: [] },
+      layer2: { nodes: [], edges: [] },
+      layer3: { nodes: [], edges: [] },
+    };
 
     try {
       if (data) {
-        if (options.mapjsonL1) {
-          parsedDataL1 = parseData(data, options.mapjsonL1, colorsL1, fieldsL1, 1);
-          mapDataL1 = parsedDataL1[3];
-        }
-        if (options.mapjsonL2) {
-          parsedDataL2 = parseData(data, options.mapjsonL2, colorsL2, fieldsL2, 2);
-          mapDataL2 = parsedDataL2[3];
-        }
-        if (options.mapjsonL3) {
-          parsedDataL3 = parseData(data, options.mapjsonL3, colorsL3, fieldsL3, 3);
-          mapDataL3 = parsedDataL3[3];
-        }
+        this.resolveMapData('L1', replaceVariables).then((topologyData) => {
+          parsedDataL1 = parseData(data, topologyData, colorsL1, fieldsL1, 1);
+          topology['layer1'] = parsedDataL1[3];
+          this.mapCanvas.current.updateMapTopology(topology);
+          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
+        });
+
+        this.resolveMapData('L2', replaceVariables).then((topologyData) => {
+          parsedDataL2 = parseData(data, topologyData, colorsL2, fieldsL2, 1);
+          topology['layer2'] = parsedDataL2[3];
+          this.mapCanvas.current.updateMapTopology(topology);
+          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
+        });
+
+        this.resolveMapData('L3', replaceVariables).then((topologyData) => {
+          parsedDataL3 = parseData(data, topologyData, colorsL3, fieldsL3, 1);
+          topology['layer3'] = parsedDataL3[3];
+          this.mapCanvas.current.updateMapTopology(topology);
+          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
+        });
       }
     } catch (error) {
       console.error('Parsing error : ', error);
     }
 
-    const topology = {
-      layer1: mapDataL1,
-      layer2: mapDataL2,
-      layer3: mapDataL3,
-    };
     PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
     PubSub.subscribe(
       'updateTopologyData',

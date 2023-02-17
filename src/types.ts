@@ -26,6 +26,8 @@ export interface MapOptions {
   enableNodeAnimation: boolean;
   enableEdgeAnimation: boolean;
   layer1: boolean;
+  jsonFromUrlL1: boolean;
+  mapjsonUrlL1: string;
   mapjsonL1: string;
   nodeHighlightL1: string;
   srcFieldL1: string;
@@ -34,6 +36,8 @@ export interface MapOptions {
   outboundValueFieldL1: string;
   endpointIdL1: string;
   layer2: boolean;
+  jsonFromUrlL2: boolean;
+  mapjsonUrlL2: string;
   mapjsonL2: string;
   nodeHighlightL2: string;
   srcFieldL2: string;
@@ -42,6 +46,8 @@ export interface MapOptions {
   outboundValueFieldL2: string;
   endpointIdL2: string;
   layer3: boolean;
+  jsonFromUrlL3: boolean;
+  mapjsonUrlL3: string;
   mapjsonL3: string;
   nodeHighlightL3: string;
   srcFieldL3: string;
