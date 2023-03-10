@@ -1,0 +1,7 @@
+# emacs backups
+*~
+.travis.yml
+README-JAMES.md
+.prettierrc.js
+*/*/old/*
+docs/*
