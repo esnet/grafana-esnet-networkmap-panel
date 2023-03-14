@@ -744,7 +744,7 @@ function getBisectAngle(pointA, pointB, pointC) {
 */
 function rotate(cx, cy, x, y, angle, anticlock_wise = false) {
   if (angle == 0) {
-    return { x: parseFloat(x), y: parseFloat(y) };
+    return [parseFloat(x), parseFloat(y)];
   }
   if (anticlock_wise) {
     var radians = (Math.PI / 180) * angle;
