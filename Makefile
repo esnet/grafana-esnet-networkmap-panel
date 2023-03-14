@@ -45,4 +45,4 @@ push:
 	npm publish
 
 .PHONY: publish
-publish: test testignore confirm check_version push
+publish: check_version prod testignore confirm push
