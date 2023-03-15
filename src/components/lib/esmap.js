@@ -797,14 +797,33 @@ export class EsMap {
 
     if(!this.mapCanvas.options.showSidebar){
       PubSub.subscribe("showTooltip",function(data){
+        var elemId = "#map-" + mapCanvas.instanceId;
+
+        var mapBounds = mapCanvas.getBoundingClientRect();
+        var offsetY = data.event.clientY - mapBounds.top;
+        var offsetX = data.event.clientX - mapBounds.left;
+
         var elem = document.createElement("div");
         elem.setAttribute("id", "tooltip-hover");
         elem.setAttribute("class", "tight-form-func tooltip-hover");
         elem.innerHTML = data.text;
-        var bounds = mapCanvas.getBoundingClientRect();
-        elem.setAttribute("style", `top:${(data.event.clientY - bounds.top)}px; left:${(data.event.clientX - bounds.left)}px;`);
-        var elemId = "#map-" + mapCanvas.instanceId;
+
         mapCanvas.querySelector(elemId).appendChild(elem);
+
+        var tooltipBounds = elem.getBoundingClientRect()
+        var leftOrRight = "left";
+        if(offsetX + tooltipBounds.right > mapBounds.right){
+          leftOrRight = "right";
+          offsetX = (mapBounds.right - data.event.clientX);
+        }
+        var topOrBottom = "top";
+        if(offsetY + tooltipBounds.bottom > mapBounds.bottom){
+          topOrBottom = "bottom";
+          offsetY = (mapBounds.bottom - data.event.clientY);
+        }
+        var evaluatedStyle = `${topOrBottom}:${offsetY}px; ${leftOrRight}:${offsetX}px;`;
+        elem.setAttribute("style", evaluatedStyle);
+
       },
       this.svg.node())
       PubSub.subscribe("hideTooltip",function(){
