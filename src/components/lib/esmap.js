@@ -10,16 +10,16 @@ import { render as renderTemplate } from "./rubbercement.js"
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
-function toRadians(degrees) {
+export function toRadians(degrees) {
   return degrees * Math.PI / 180;
 };
 
 // Converts from radians to degrees.
-function toDegrees(radians) {
+export function toDegrees(radians) {
   return radians * 180 / Math.PI;
 }
 
-function bearingAngle(src, dest){
+export function bearingAngle(src, dest){
   const deltaX = dest[0] - src[0];
   const deltaY = dest[1] - src[1];
 
@@ -712,7 +712,7 @@ function calcTranslation(distance, targetPoint, pointA, pointB) {
   return [targetPoint[0] + Math.sin(segmentAngle) * distance, targetPoint[1] + -Math.cos(segmentAngle) * distance];
 }
 
-function angle(cx, cy, ex, ey) {
+export function angle(cx, cy, ex, ey) {
   var dy = ey - cy;
   var dx = ex - cx;
   var theta = Math.atan2(dy, dx); // range (-PI, PI]
@@ -721,7 +721,7 @@ function angle(cx, cy, ex, ey) {
   return theta;
 }
 
-function getBisectAngle(pointA, pointB, pointC) {
+export function getBisectAngle(pointA, pointB, pointC) {
   var angle1 = angle(...pointB, ...pointA);
   var angle2 = angle(...pointB, ...pointC);
   var relativeAngle = angle1 - angle2;
@@ -742,9 +742,9 @@ function getBisectAngle(pointA, pointB, pointC) {
  anticlock_wise @ to rotate point in clockwise direction or anticlockwise , default clockwise
  return @ {x,y}
 */
-function rotate(cx, cy, x, y, angle, anticlock_wise = false) {
+export function rotate(cx, cy, x, y, angle, anticlock_wise = false) {
   if (angle == 0) {
-    return { x: parseFloat(x), y: parseFloat(y) };
+    return [parseFloat(x), parseFloat(y)];
   }
   if (anticlock_wise) {
     var radians = (Math.PI / 180) * angle;
