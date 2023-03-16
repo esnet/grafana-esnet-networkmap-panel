@@ -96,6 +96,9 @@ export class MapCanvas extends BindableHTMLElement {
         })
       } 
     })());
+    window.addEventListener("resize", ()=>{
+      this.recalculateMapZoom();
+    })
 
     if(!this.topology && this.getAttribute("topology")){
       this.topology = JSON.parse(this.getAttribute("topology"));
@@ -117,7 +120,6 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
         this.enableEditing();
     }
-
     this.render();
   }
 
@@ -315,15 +317,20 @@ export class MapCanvas extends BindableHTMLElement {
   updateMapDimensions(newDimensions){
     this.width = newDimensions.width;
     this.height = newDimensions.height;
-    this.leafletMap && this.leafletMap.invalidateSize();
+    this.recalculateMapZoom();
+  }
+
+  recalculateMapZoom(){
     if(this.leafletMap && this._options.initialViewStrategy === 'viewport'){
-      this.leafletMap.fitBounds(L.latLngBounds(L.latLng(
+      this.leafletMap && this.leafletMap.invalidateSize();
+      var bounds = L.latLngBounds(L.latLng(
         this._options.viewportTopLeftLat,
         this._options.viewportTopLeftLng),
       L.latLng(
         this._options.viewportBottomRightLat,
         this._options.viewportBottomRightLng)
-      ))
+      )
+      this.leafletMap.fitBounds(bounds)
     }
     this.render();
     this.sideBar && this.sideBar.render();
@@ -356,8 +363,8 @@ export class MapCanvas extends BindableHTMLElement {
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
-          zoomSnap: 0.25,
-          zoomDelta: 0.25,
+          zoomSnap: 0.125,
+          zoomDelta: 0.125,
           scrollWheelZoom: false,
           doubleClickZoom: false,
           keyboard: false,
