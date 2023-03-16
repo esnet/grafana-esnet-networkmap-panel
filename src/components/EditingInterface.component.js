@@ -444,7 +444,7 @@ class EditingInterface extends BindableHTMLElement {
                   padding-bottom:10px;
                 }
             </style>
-            <div class="dialog">
+            <div id="dialog" class="dialog">
                 <!-- add node dialog -->
                 <div class="dialog-form" id="add_node_dialog">
                   <form id='add_node_form'>
@@ -580,6 +580,7 @@ class EditingInterface extends BindableHTMLElement {
             </div>
             `;
           this.bindEvents({
+            "#dialog@onmousedown": (evt)=>evt.stopPropagation(),
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
