@@ -174,6 +174,7 @@ class EditingInterface extends BindableHTMLElement {
         this._selectedLayer = "layer1";
         this._selectedObject = null;
         this._spliceIndex = null;
+        this.setSrcDstOptions();
         this.dialog = "edge";
     }
     hideDialogs(){
@@ -183,7 +184,9 @@ class EditingInterface extends BindableHTMLElement {
         this.selectedLayer = event.target.value;
     }
 
-    updateMapNodes(){
+    updateMapNodes(event){
+        event.preventDefault(); // this is triggered on form submit. Prevent normal form submission.
+
         var nodeLayer = this.shadow.getElementById('node_layer').value;
         var nodeName = this.shadow.getElementById('node_name').value;
         var nodeDisplayName = this.shadow.getElementById('node_display_name').value;
@@ -206,6 +209,7 @@ class EditingInterface extends BindableHTMLElement {
         }
 
         this.updateLayerNodes(nodeLayer, newNode, this._spliceIndex);
+        this._dirty = false;
     }
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
@@ -267,13 +271,14 @@ class EditingInterface extends BindableHTMLElement {
           latLngs: latLngs,
           children: [],
         });
-
+        var defaultLayer = {"nodes":[], "edges": []};
         var mapJson = {
-            "layer1": optionsJson.layer1,
-            "layer2": optionsJson.layer2,
-            "layer3": optionsJson.layer3
+            "layer1": this._topology.layer1 || defaultLayer,
+            "layer2": this._topology.layer2 || defaultLayer,
+            "layer3": this._topology.layer3 || defaultLayer,
         }
         PubSub.publish("updateTopology", mapJson, this);
+        PubSub.publish('updateMapTopology', mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
@@ -498,7 +503,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_name' type='text' value='${this.getFieldValue("nodes", "name")}'></input>
+                          <input class='text-input' id='node_name' type='text' required='required' value='${this.getFieldValue("nodes", "name")}'></input>
                         </td>
                       </tr>
                       <tr>
@@ -514,7 +519,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='text' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
+                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -522,7 +527,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='text' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
+                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -544,7 +549,7 @@ class EditingInterface extends BindableHTMLElement {
                       <tr>
                         <td colspan="2">
                           <input class='button' type='button' id='create_node_cancel' value='Cancel' />
-                          <input class='button' type='button' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
+                          <input class='button' type='submit' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
                         </td>
                       </tr>
                     </table>
@@ -619,7 +624,7 @@ class EditingInterface extends BindableHTMLElement {
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
             "#add_node@onclick": this.showAddNodeDialog,
-            "#create_node@onclick": this.updateMapNodes,
+            "#add_node_form@onsubmit": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,
             "#node_layer@onchange": this.showSrcDst,
 
