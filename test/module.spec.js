@@ -1204,4 +1204,64 @@ describe( "Class MapCanvas", () => {
         bottomRightStyle.should.contain("bottom");
         bottomRightStyle.should.contain("right");
     })
+    it("should have a 'viewport' mode that will zoom to a pre-deterimined lat-lng viewport", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+
+        var newTopology = {
+          "layer1": {
+            "edges": [],
+            "nodes": [
+              {"name": "A", "latLng": [ 80,  80], "meta": {} },
+              {"name": "B", "latLng": [ 80, -80], "meta": {} },
+              {"name": "C", "latLng": [-80, -80], "meta": {} },
+              {"name": "D", "latLng": [-80,  80], "meta": {} },
+              {"name": "visible", "latLng": [38.68, -96.96], "meta": {} },
+            ]
+          }
+        }
+        PubSub.publish("updateMapTopology", newTopology, canvas);
+
+        // helper function to see if rect named "child" is in rect named "parent"
+        function inside(child, parent){
+          if(child.left > parent.left &&
+            child.right < parent.right &&
+            child.top > parent.top &&
+            child.bottom < parent.bottom){
+              return true
+          }
+          return false;
+        }
+        // check the positions of each of the nodes. most should be outside of map bounding box.
+        var nodes = canvas.querySelectorAll(".node.l1");
+        var canvasBounds = canvas.getBoundingClientRect();
+        var results = []
+        for(var elem of nodes){
+          var rect = elem.getBoundingClientRect();
+          results.push(inside(rect, canvasBounds));
+        }
+        // we should find at least one "false" result (should be 4 actually)
+        results.indexOf(false).should.not.equal(-1);
+
+        var newOptions = JSON.parse(JSON.stringify(canvas.options));
+        newOptions.initialViewStrategy = 'viewport';
+        newOptions.viewportTopLeftLat = 110;
+        newOptions.viewportTopLeftLng = -90;
+        newOptions.viewportBottomRightLat = -90;
+        newOptions.viewportBottomRightLng = 110;
+        // set bounding box strategy to 'viewport' and set the viewport coords
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ["initialViewStrategy", "viewportTopLeftLat", "viewportTopLeftLng", "viewportBottomRightLng", "viewportBottomRightLat"]}, canvas);
+        // dispatch a resize event so the window thinks it has been resized. this should trigger viewport zoom logic.
+        var resize = new Event('resize');
+        window.dispatchEvent(resize);
+
+        // check the positions of each of the nodes. All should be inside of map bounding box.        
+        var nodes = canvas.querySelectorAll(".node.l1");
+        var canvasBounds = canvas.getBoundingClientRect();
+        var results = []
+        for(var elem of nodes){
+          results.push(inside(rect, canvasBounds));
+        }
+        // we should find at no "false" results
+        results.indexOf(false).should.equal(-1)
+    })
 } );
