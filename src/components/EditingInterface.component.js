@@ -308,12 +308,12 @@ class EditingInterface extends BindableHTMLElement {
     disableScrolling(evt){
         evt.stopPropagation();
         PubSub.publish("disableScrolling", null, this);
-    },
+    }
 
     enableScrolling(evt){
         evt.stopPropagation();
         PubSub.publish("enableScrolling", null, this);
-    },
+    }
     // end eventbindings
     /////////////////////////////
 
