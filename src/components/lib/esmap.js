@@ -388,16 +388,19 @@ function renderNodeControl(g, data, ref, layerId){
       return
     }
     PubSub.clearLast("dragStarted", ref.svg.node());
-    PubSub.publish("updateTopology", {
-      "layer1": ref.data["layer1"],
-      "layer2": ref.data["layer2"],
-      "layer3": ref.data["layer3"],
-    }, ref.svg.node());
-    ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
-      "layer1": ref.data["layer1"],
-      "layer2": ref.data["layer2"],
-      "layer3": ref.data["layer3"],
-    });
+    if(ref.mapCanvas.updateTopology){
+      ref.mapCanvas.updateTopology({
+        "layer1": ref.data["layer1"],
+        "layer2": ref.data["layer2"],
+        "layer3": ref.data["layer3"],
+      })
+    } else {
+      PubSub.publish("updateTopology", {
+        "layer1": ref.data["layer1"],
+        "layer2": ref.data["layer2"],
+        "layer3": ref.data["layer3"],
+      }, ref.svg.node());
+    }
     d3.select(`.control-point-layer${layerId}.control-point-for-node-${sanitizeName(d.name)}`)
       .classed("control-selected", true);
   }
@@ -545,16 +548,19 @@ function renderEdgeControl(g, data, ref, layerId) {
     PubSub.clearLast("dragStarted", ref.svg.node());
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
-    PubSub.publish("updateTopology", {
-      "layer1": ref.data["layer1"],
-      "layer2": ref.data["layer2"],
-      "layer3": ref.data["layer3"],
-    }, ref.svg.node());
-    ref.mapCanvas.updateTopology && ref.mapCanvas.updateTopology({
-      "layer1": ref.data["layer1"],
-      "layer2": ref.data["layer2"],
-      "layer3": ref.data["layer3"],
-    });
+    if(ref.mapCanvas.updateTopology){
+      ref.mapCanvas.updateTopology({
+        "layer1": ref.data["layer1"],
+        "layer2": ref.data["layer2"],
+        "layer3": ref.data["layer3"],
+      })
+    } else {
+      PubSub.publish("updateTopology", {
+        "layer1": ref.data["layer1"],
+        "layer2": ref.data["layer2"],
+        "layer3": ref.data["layer3"],
+      }, ref.svg.node());
+    }
     d3.select(`.controlEdge.l${layerId}.edge-az-${sanitizeName(edgeData.name)}`)
       .classed("control-selected", true);
   }
