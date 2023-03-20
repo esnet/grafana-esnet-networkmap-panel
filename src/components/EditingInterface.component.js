@@ -297,6 +297,15 @@ class EditingInterface extends BindableHTMLElement {
         this.render();
     }
 
+    disableScrolling(evt){
+        evt.stopPropagation();
+        PubSub.publish("disableScrolling", null, this);
+    }
+
+    enableScrolling(evt){
+        evt.stopPropagation();
+        PubSub.publish("enableScrolling", null, this);
+    }
     // end eventbindings
     /////////////////////////////
 
@@ -444,7 +453,7 @@ class EditingInterface extends BindableHTMLElement {
                   padding-bottom:10px;
                 }
             </style>
-            <div class="dialog">
+            <div id="dialog" class="dialog">
                 <!-- add node dialog -->
                 <div class="dialog-form" id="add_node_dialog">
                   <form id='add_node_form'>
@@ -580,6 +589,8 @@ class EditingInterface extends BindableHTMLElement {
             </div>
             `;
           this.bindEvents({
+            "#dialog@onmousedown": this.disableScrolling,
+            "#dialog@onmouseup": this.enableScrolling,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
