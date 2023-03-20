@@ -14,7 +14,7 @@ class EditingInterface extends BindableHTMLElement {
         this._dialog = false;
         this._selectedLayer = "layer1";
         this._spliceIndex = null;
-        this._dirty = false;
+        this._formTouched = false;
     }
 
     // connect component
@@ -84,14 +84,14 @@ class EditingInterface extends BindableHTMLElement {
 
     setEditSelection(evtData){
         if(!evtData){
-            this._dirty = false;
+            this._formTouched = false;
             this._selectedObject = null;
             this._spliceIndex = null;
             this._selectedLayer = null;
             this._selectedType = null;
             return
         }
-        this._dirty = false;
+        this._formTouched = false;
         this._selectedObject = evtData['object'];
         this._spliceIndex = evtData['index'];
         this._selectedLayer = evtData['layer'];
@@ -359,7 +359,7 @@ class EditingInterface extends BindableHTMLElement {
         return this.toString(target);
     }
     markDirty(){
-        this._dirty = true;
+        this._formTouched = true;
     }
 
     render(){
@@ -368,7 +368,7 @@ class EditingInterface extends BindableHTMLElement {
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
         let editModeOnlyToolsDisplay = this._editMode && "inline-block" || "none";
-        if(this._dirty){
+        if(this._formTouched){
             var dirtyForm = this.shadow.querySelector("#add_node_form");
         }
         this.shadow.innerHTML = `
@@ -610,7 +610,7 @@ class EditingInterface extends BindableHTMLElement {
               </div>
             </div>
             `;
-          if(this._dirty){
+          if(this._formTouched){
               this.shadow.querySelector("#add_node_form").replaceWith(dirtyForm);
           }
           this.bindEvents({

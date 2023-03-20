@@ -1162,4 +1162,25 @@ describe( "Class MapCanvas", () => {
         }
         (node_matches).should.equal(2);
     })
+    it("should have a node editing form that persists values between edits", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+        PubSub.publish("updateEditMode", true, canvas);
+        var add_node = canvas.editingInterface.shadow.querySelector("#add_node");
+        console.log(add_node);
+        var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
+        var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
+        add_node.dispatchEvent(mouseDown);
+        add_node.dispatchEvent(mouseUp);
+        var nodeNameInput = canvas.editingInterface.shadow.querySelector("#node_name");
+        nodeNameInput.setAttribute("value", "ABCD");
+        nodeNameInput.value.should.equal("ABCD");
+        nodeNameInput.getAttribute("value").should.equal("ABCD");
+        var keyUp = new Event("keyup", {bubbles:true});
+        nodeNameInput.dispatchEvent(keyUp);
+        canvas.render();
+        canvas.editingInterface.render();
+        var nodeNameInput = canvas.editingInterface.shadow.querySelector("#node_name");
+        nodeNameInput.value.should.equal("ABCD");
+        nodeNameInput.getAttribute("value").should.equal("ABCD");
+    })
 } );
