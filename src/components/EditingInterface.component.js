@@ -222,7 +222,8 @@ class EditingInterface extends BindableHTMLElement {
         PubSub.publish("showEditNodeDialog", null, this)
 
         setTimeout(()=>{
-          PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
+            PubSub.publish("snapEdges", {"node": node, "layer": layer.replace("layer", "") }, this);
+            PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
         }, 10);
     }
     createMapEdge(){
