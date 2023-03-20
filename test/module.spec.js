@@ -1162,4 +1162,46 @@ describe( "Class MapCanvas", () => {
         }
         (node_matches).should.equal(2);
     })
+    it("should show tooltips that render inside the DOM element when the sidebar is disabled", ()=>{
+        var canvas = document.querySelector("esnet-map-canvas");
+
+        var newOptions = JSON.parse(JSON.stringify(canvas.options));
+        newOptions.showSidebar = false;
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ["showSidebar"]}, canvas);
+
+        var node = document.querySelector("g.node > g.scale-container > circle");
+        var originalNodePos = node.getBoundingClientRect();
+        let mouseoverEvent = new MouseEvent('mouseover', { bubbles: true, clientX: originalNodePos.x, clientY: originalNodePos.y, view: window });
+        // fire the mouseover event on our demonstration node
+        node.dispatchEvent(mouseoverEvent);
+        // get the sidebar tooltip text
+        var centerStyle = canvas.querySelector(".tooltip-hover").getAttribute("style");
+        let mouseoutEvent = new MouseEvent('mouseout', { bubbles: true })
+        node.dispatchEvent(mouseoutEvent);
+
+        var map = canvas.querySelector(".leaflet-tile-pane");
+        var mapBox = canvas.getBoundingClientRect();
+        var deltaX = (mapBox.right - originalNodePos.x) - 10;
+        var deltaY = (mapBox.bottom - originalNodePos.y) - 10;
+        // create mouse event for down
+        var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalNodePos.x, clientY: originalNodePos.y, view: window })
+        // create mouse event for drag
+        var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalNodePos.x + deltaX, clientY: originalNodePos.y + deltaY, view: window })
+        // create mouse event for up
+        var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalNodePos.x + deltaX, clientY: originalNodePos.y + deltaY, view: window })
+        map.dispatchEvent(downEvent);
+        map.dispatchEvent(dragEvent);
+        map.dispatchEvent(upEvent);
+        var afterNodePos = node.getBoundingClientRect();
+
+        var node = document.querySelector("g.node > g.scale-container > circle");
+        mouseoverEvent = new MouseEvent('mouseover', { bubbles: true, clientX: originalNodePos.x + deltaX, clientY: originalNodePos.y + deltaY, view: window });
+        node.dispatchEvent(mouseoverEvent);
+        // get the sidebar tooltip text
+        var bottomRightStyle = canvas.querySelector(".tooltip-hover").getAttribute("style");
+        centerStyle.should.contain("top");
+        centerStyle.should.contain("left");
+        bottomRightStyle.should.contain("bottom");
+        bottomRightStyle.should.contain("right");
+    })
 } );
