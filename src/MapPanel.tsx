@@ -341,7 +341,6 @@ export class MapPanel extends Component<Props> {
       },
       this.mapCanvas.current
     );
-
   }
   componentDidMount() {
     this.updateMap();

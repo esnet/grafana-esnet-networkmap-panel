@@ -5,3 +5,5 @@ README-JAMES.md
 .prettierrc.js
 */*/old/*
 docs/*
+jest.config.js
+src/components/lib/.pnpm-debug.log
