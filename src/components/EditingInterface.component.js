@@ -14,6 +14,7 @@ class EditingInterface extends BindableHTMLElement {
         this._dialog = false;
         this._selectedLayer = "layer1";
         this._spliceIndex = null;
+        this._formTouched = false;
     }
 
     // connect component
@@ -83,12 +84,14 @@ class EditingInterface extends BindableHTMLElement {
 
     setEditSelection(evtData){
         if(!evtData){
+            this._formTouched = false;
             this._selectedObject = null;
             this._spliceIndex = null;
             this._selectedLayer = null;
             this._selectedType = null;
             return
         }
+        this._formTouched = false;
         this._selectedObject = evtData['object'];
         this._spliceIndex = evtData['index'];
         this._selectedLayer = evtData['layer'];
@@ -343,12 +346,40 @@ class EditingInterface extends BindableHTMLElement {
         return `<select id="${name}">${optionsList}</select>`;
     };
 
+    toString(value){
+        if(typeof(value) === "number" && !Number.isInteger(value)){
+            return value.toFixed(3);
+        }
+        if(value){
+            return value;
+        }
+        return "";
+    }
+    getFieldValue(objType, fieldName){
+        var target = null;
+        if(this._selectedType == objType && !!this._selectedObject){
+            target = this._selectedObject
+        }
+        var fields = fieldName.split(".");
+        for (var field of fields){
+            if(!target) return this.toString(target);
+            target = target[field]
+        }
+        return this.toString(target);
+    }
+    markFormTouched(){
+        this._formTouched = true;
+    }
+
     render(){
         if(!this.shadow){
             this.shadow = this.attachShadow({"mode": "open"})
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
         let editModeOnlyToolsDisplay = this._editMode && "inline-block" || "none";
+        if(this._formTouched){
+            var dirtyForm = this.shadow.querySelector("#add_node_form");
+        }
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -476,7 +507,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.name+"'" : "" }></input>
+                          <input class='text-input' id='node_name' type='text' value='${this.getFieldValue("nodes", "name")}'></input>
                         </td>
                       </tr>
                       <tr>
@@ -484,7 +515,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Display Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_display_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+ (this._selectedObject.meta.display_name || "") +"'" : "" }></input>
+                          <input class='text-input' id='node_display_name' type='text' value='${ this.getFieldValue("nodes", "display_name") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -492,7 +523,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.latLng[0].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lat' type='text' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -500,7 +531,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='text' ${this._selectedType == 'nodes' &&  this._selectedObject ? "value='"+this._selectedObject.latLng[1].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lng' type='text' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -508,7 +539,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>SVG Icon:</label>
                         </td>
                         <td>
-                          <textarea class='text-input' id='node_svg'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.svg || "" }</textarea>
+                          <textarea class='text-input' id='node_svg'>${ this.getFieldValue("nodes", "meta.svg") }</textarea>
                         </td>
                       </tr>
                       <tr>
@@ -516,7 +547,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Custom Tooltip:</label>
                         </td>
                         <td>
-                          <textarea class='text-input' id='node_tooltip'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.template || "" }</textarea>
+                          <textarea class='text-input' id='node_tooltip'>${ this.getFieldValue("nodes", "meta.template") }</textarea>
                         </td>
                       </tr>
                       <tr>
@@ -588,6 +619,9 @@ class EditingInterface extends BindableHTMLElement {
               </div>
             </div>
             `;
+          if(this._formTouched){
+              this.shadow.querySelector("#add_node_form").replaceWith(dirtyForm);
+          }
           this.bindEvents({
             "#dialog@onmousedown": this.disableScrolling,
             "#dialog@onmouseup": this.enableScrolling,
@@ -605,6 +639,8 @@ class EditingInterface extends BindableHTMLElement {
             "#edge_layer@onchange": this.showSrcDst,
 
             "#delete_selection@onclick": this.deleteSelection,
+
+            "input.text-input@onkeyup": this.markFormTouched,
           });
     }
 
