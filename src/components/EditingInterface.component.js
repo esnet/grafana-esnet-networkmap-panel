@@ -358,7 +358,7 @@ class EditingInterface extends BindableHTMLElement {
         }
         return this.toString(target);
     }
-    markDirty(){
+    markFormTouched(){
         this._formTouched = true;
     }
 
@@ -629,12 +629,7 @@ class EditingInterface extends BindableHTMLElement {
 
             "#delete_selection@onclick": this.deleteSelection,
 
-            "#node_name@onkeyup": this.markDirty,
-            "#node_display_name@onkeyup": this.markDirty,
-            "#node_lat@onkeyup": this.markDirty,
-            "#node_lng@onkeyup": this.markDirty,
-            "#node_svg@onkeyup": this.markDirty,
-            "#node_tooltip@onkeyup": this.markDirty,
+            "input.text-input@onkeyup": this.markFormTouched,
           });
     }
 

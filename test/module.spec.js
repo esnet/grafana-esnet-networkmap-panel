@@ -1166,7 +1166,6 @@ describe( "Class MapCanvas", () => {
         var canvas = document.querySelector("esnet-map-canvas");
         PubSub.publish("updateEditMode", true, canvas);
         var add_node = canvas.editingInterface.shadow.querySelector("#add_node");
-        console.log(add_node);
         var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
         var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
         add_node.dispatchEvent(mouseDown);
