@@ -305,10 +305,6 @@ export class MapPanel extends Component<Props> {
       outboundValueField: options.outboundValueFieldL3,
       endpointId: options.endpointIdL3,
     };
-    var parsedDataL1 = {};
-    var parsedDataL2 = {};
-    var parsedDataL3 = {};
-
     let topology = {
       layer1: { nodes: [], edges: [] },
       layer2: { nodes: [], edges: [] },
@@ -317,24 +313,19 @@ export class MapPanel extends Component<Props> {
 
     try {
       if (data) {
-        this.resolveMapData('L1', replaceVariables).then((topologyData) => {
-          parsedDataL1 = parseData(data, topologyData, colorsL1, fieldsL1, 1);
+        Promise.all([
+          this.resolveMapData('L1', replaceVariables),
+          this.resolveMapData('L2', replaceVariables),
+          this.resolveMapData('L3', replaceVariables),
+        ]).then((topologyData) => {
+          var parsedDataL1 = parseData(data, topologyData[0], colorsL1, fieldsL1, 1);
+          var parsedDataL2 = parseData(data, topologyData[1], colorsL2, fieldsL2, 1);
+          var parsedDataL3 = parseData(data, topologyData[2], colorsL3, fieldsL3, 1);
           topology['layer1'] = parsedDataL1[3];
-          this.mapCanvas.current.updateMapTopology(topology);
-          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
-        });
-
-        this.resolveMapData('L2', replaceVariables).then((topologyData) => {
-          parsedDataL2 = parseData(data, topologyData, colorsL2, fieldsL2, 1);
           topology['layer2'] = parsedDataL2[3];
-          this.mapCanvas.current.updateMapTopology(topology);
-          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
-        });
-
-        this.resolveMapData('L3', replaceVariables).then((topologyData) => {
-          parsedDataL3 = parseData(data, topologyData, colorsL3, fieldsL3, 1);
           topology['layer3'] = parsedDataL3[3];
           this.mapCanvas.current.updateMapTopology(topology);
+          this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
           PubSub.publish('hideTooltip', null, this.mapCanvas.current);
         });
       }
@@ -350,12 +341,7 @@ export class MapPanel extends Component<Props> {
       },
       this.mapCanvas.current
     );
-    this.mapCanvas.current &&
-      this.mapCanvas.current.updateMapTopology &&
-      this.mapCanvas.current.updateMapTopology(topology);
-    this.mapCanvas.current &&
-      this.mapCanvas.current.updateMapDimensions &&
-      this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+
   }
   componentDidMount() {
     this.updateMap();
