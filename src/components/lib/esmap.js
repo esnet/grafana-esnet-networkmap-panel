@@ -10,16 +10,16 @@ import { render as renderTemplate } from "./rubbercement.js"
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
-function toRadians(degrees) {
+export function toRadians(degrees) {
   return degrees * Math.PI / 180;
 };
 
 // Converts from radians to degrees.
-function toDegrees(radians) {
+export function toDegrees(radians) {
   return radians * 180 / Math.PI;
 }
 
-function bearingAngle(src, dest){
+export function bearingAngle(src, dest){
   const deltaX = dest[0] - src[0];
   const deltaY = dest[1] - src[1];
 
@@ -712,7 +712,7 @@ function calcTranslation(distance, targetPoint, pointA, pointB) {
   return [targetPoint[0] + Math.sin(segmentAngle) * distance, targetPoint[1] + -Math.cos(segmentAngle) * distance];
 }
 
-function angle(cx, cy, ex, ey) {
+export function angle(cx, cy, ex, ey) {
   var dy = ey - cy;
   var dx = ex - cx;
   var theta = Math.atan2(dy, dx); // range (-PI, PI]
@@ -721,7 +721,7 @@ function angle(cx, cy, ex, ey) {
   return theta;
 }
 
-function getBisectAngle(pointA, pointB, pointC) {
+export function getBisectAngle(pointA, pointB, pointC) {
   var angle1 = angle(...pointB, ...pointA);
   var angle2 = angle(...pointB, ...pointC);
   var relativeAngle = angle1 - angle2;
@@ -742,9 +742,9 @@ function getBisectAngle(pointA, pointB, pointC) {
  anticlock_wise @ to rotate point in clockwise direction or anticlockwise , default clockwise
  return @ {x,y}
 */
-function rotate(cx, cy, x, y, angle, anticlock_wise = false) {
+export function rotate(cx, cy, x, y, angle, anticlock_wise = false) {
   if (angle == 0) {
-    return { x: parseFloat(x), y: parseFloat(y) };
+    return [parseFloat(x), parseFloat(y)];
   }
   if (anticlock_wise) {
     var radians = (Math.PI / 180) * angle;
@@ -797,14 +797,33 @@ export class EsMap {
 
     if(!this.mapCanvas.options.showSidebar){
       PubSub.subscribe("showTooltip",function(data){
+        var elemId = "#map-" + mapCanvas.instanceId;
+
+        var mapBounds = mapCanvas.getBoundingClientRect();
+        var offsetY = data.event.clientY - mapBounds.top;
+        var offsetX = data.event.clientX - mapBounds.left;
+
         var elem = document.createElement("div");
         elem.setAttribute("id", "tooltip-hover");
         elem.setAttribute("class", "tight-form-func tooltip-hover");
         elem.innerHTML = data.text;
-        var bounds = mapCanvas.getBoundingClientRect();
-        elem.setAttribute("style", `top:${(data.event.clientY - bounds.top)}px; left:${(data.event.clientX - bounds.left)}px;`);
-        var elemId = "#map-" + mapCanvas.instanceId;
+
         mapCanvas.querySelector(elemId).appendChild(elem);
+
+        var tooltipBounds = elem.getBoundingClientRect()
+        var leftOrRight = "left";
+        if(offsetX + tooltipBounds.right > mapBounds.right){
+          leftOrRight = "right";
+          offsetX = (mapBounds.right - data.event.clientX);
+        }
+        var topOrBottom = "top";
+        if(offsetY + tooltipBounds.bottom > mapBounds.bottom){
+          topOrBottom = "bottom";
+          offsetY = (mapBounds.bottom - data.event.clientY);
+        }
+        var evaluatedStyle = `${topOrBottom}:${offsetY}px; ${leftOrRight}:${offsetX}px;`;
+        elem.setAttribute("style", evaluatedStyle);
+
       },
       this.svg.node())
       PubSub.subscribe("hideTooltip",function(){
