@@ -73,6 +73,8 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
     PubSub.subscribe('updateTopology', () => { this.updateTopology && this.updateTopology(this.topology) }, this);
+    PubSub.subscribe('disableScrolling', ()=>{ this.disableScrolling() }, this);
+    PubSub.subscribe('enableScrolling', ()=>{ this.enableScrolling() }, this);
     PubSub.subscribe("setSelection", function(d){
         this.selection = true;
     }, this);
@@ -233,6 +235,13 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.publish("updateEditMode", true, this);
   }
 
+  enableScrolling(){
+    this.leafletMap && this.leafletMap.dragging.enable();
+  }
+
+  disableScrolling(){
+    this.leafletMap && this.leafletMap.dragging.disable();
+  }
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
