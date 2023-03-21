@@ -209,7 +209,7 @@ class EditingInterface extends BindableHTMLElement {
         }
 
         this.updateLayerNodes(nodeLayer, newNode, this._spliceIndex);
-        this._dirty = false;
+        this._formTouched = false;
     }
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
