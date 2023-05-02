@@ -282,7 +282,7 @@ describe( "Class MapCanvas", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       PubSub.publish("updateEditMode", true, canvas);
       // create a click event
-      var clickEvent = new Event('click', { bubbles: true })
+      var clickEvent = new MouseEvent('click', { bubbles: false })
       // fire click event on add node button
       var addNodeButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > #add_node");
       addNodeButton.dispatchEvent(clickEvent)
@@ -348,7 +348,7 @@ describe( "Class MapCanvas", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       PubSub.publish("updateEditMode", true, canvas);
       // create a click event
-      var clickEvent = new Event('click', { bubbles: true })
+      var clickEvent = new Event('click', { bubbles: false })
       // fire click event on add edge button
       var addNodeButton = canvas.editingInterface.shadow.querySelector(".tools-overlay > #add_edge");
       addNodeButton.dispatchEvent(clickEvent)

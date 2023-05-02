@@ -406,6 +406,8 @@ export class MapCanvas extends BindableHTMLElement {
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }
+    this.querySelector(".leaflet-control-zoom-in").classList.add("tight-form-func");
+    this.querySelector(".leaflet-control-zoom-out").classList.add("tight-form-func");
     this.leafletMap.on("zoomend", ()=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
         window[this.id + "mapPosition"].zoom = this.leafletMap.getZoom();

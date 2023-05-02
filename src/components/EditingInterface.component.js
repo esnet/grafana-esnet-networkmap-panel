@@ -187,13 +187,13 @@ class EditingInterface extends BindableHTMLElement {
     updateMapNodes(event){
         event.preventDefault(); // this is triggered on form submit. Prevent normal form submission.
 
-        var nodeLayer = this.shadow.getElementById('node_layer').value;
-        var nodeName = this.shadow.getElementById('node_name').value;
-        var nodeDisplayName = this.shadow.getElementById('node_display_name').value;
-        var nodeSvg = this.shadow.getElementById('node_svg').value;
-        var nodeTooltip = this.shadow.getElementById('node_tooltip').value;
-        var nodeLat = this.shadow.getElementById('node_lat').value;
-        var nodeLng = this.shadow.getElementById('node_lng').value;
+        var nodeLayer = this.shadow.querySelector('#node_layer').value;
+        var nodeName = this.shadow.querySelector('#node_name').value;
+        var nodeDisplayName = this.shadow.querySelector('#node_display_name').value;
+        var nodeSvg = this.shadow.querySelector('#node_svg').value;
+        var nodeTooltip = this.shadow.querySelector('#node_tooltip').value;
+        var nodeLat = this.shadow.querySelector('#node_lat').value;
+        var nodeLng = this.shadow.querySelector('#node_lng').value;
         var lavender = "rgb(202, 149, 229)";
 
         var newNode = {
@@ -233,9 +233,9 @@ class EditingInterface extends BindableHTMLElement {
         }, 10);
     }
     createMapEdge(){
-        var edge_layer = this.shadow.getElementById('edge_layer').value;
-        var node_source = this.shadow.getElementById('node_source').value;
-        var node_destination = this.shadow.getElementById('node_destination').value;
+        var edge_layer = this.shadow.querySelector('#edge_layer').value;
+        var node_source = this.shadow.querySelector('#node_source').value;
+        var node_destination = this.shadow.querySelector('#node_destination').value;
 
         var optionsJson = {};
 
@@ -378,7 +378,8 @@ class EditingInterface extends BindableHTMLElement {
 
     render(){
         if(!this.shadow){
-            this.shadow = this.attachShadow({"mode": "open"})
+            this.shadow = document.createElement("div");
+            this.append(this.shadow);
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
         let editModeOnlyToolsDisplay = this._editMode && "inline-block" || "none";
@@ -395,17 +396,12 @@ class EditingInterface extends BindableHTMLElement {
                     right: 0;
                 }
                 .button-overlay > .button {
-                   background: white;
                    border-radius: 4px;
                    padding: 5px 10px;
                    margin-right: 5px;
                    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-                   border: 1px solid #b3b3b3;
                    display: inline-block;
                    cursor: pointer;
-                }
-                .button-overlay > .button:hover {
-                    background: #EEE;
                 }
                 .tools-overlay { 
                     position: absolute;
@@ -415,17 +411,13 @@ class EditingInterface extends BindableHTMLElement {
                     max-width:120px;
                 }
                 .tools-overlay > .button {
-                    background: white;
                     border-radius: 4px;
                     padding: 5px 10px;
                     margin-bottom: 10px;
                     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-                    border: 1px solid #b3b3b3;
                     display: inline-block;
                     cursor: pointer;
-                }
-                .tools-overlay > .button:hover {
-                    background: #EEE;
+                    width: min-content;
                 }
                 .button-overlay > .button.edit-mode-only {
                     display: ${ editModeOnlyButtonDisplay }
@@ -443,7 +435,6 @@ class EditingInterface extends BindableHTMLElement {
                 }
 
                 .dialog .dialog-form {
-                  background: white;
                   border-radius: 5px;
                   padding:20px;
                   margin: 20px 20%;
@@ -481,7 +472,7 @@ class EditingInterface extends BindableHTMLElement {
                 }
 
                 .dialog .dialog-form input.button {
-                  background: #ccc;
+                  background: rgba(200, 200, 200, 0.5);
                   margin: 1em 0.5em 0 0;
                 }
 
@@ -491,7 +482,7 @@ class EditingInterface extends BindableHTMLElement {
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
-                <div class="dialog-form" id="add_node_dialog">
+                <div class="dialog-form tight-form-func" id="add_node_dialog">
                   <form id='add_node_form'>
                     <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
                     <table>
@@ -565,7 +556,7 @@ class EditingInterface extends BindableHTMLElement {
                   </form>
                 </div>
                 <!-- add edge dialog -->
-                <div class='dialog-form' id="add_edge_dialog">
+                <div class='dialog-form tight-form-func' id="add_edge_dialog">
                   <form>
                     <h2>Add an Edge</h2>
                     <table>
@@ -604,21 +595,21 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class='button edit-mode-only' id='edge_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='edge_edit_mode'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
-              <div class='button edit-mode-only' id='node_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='node_edit_mode'>
                 Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }
               </div>
             </div>
             <div class="tools-overlay">
-              <div class='button edit-mode-only' id='add_node'>
-                + Node
+              <div class='button edit-mode-only tight-form-func' id='add_node'>
+                +&nbsp;Node
               </div>
-              <div class='button edit-mode-only' id='add_edge'>
-                + Edge
+              <div class='button edit-mode-only tight-form-func' id='add_edge'>
+                +&nbsp;Edge
               </div>
-              <div class='button edit-mode-only' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: inline-block" : "display: none" }'>
+              <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: block" : "display: none" }'>
                 Delete<br>
                 ${this._selectedObject && this._selectedObject.name}
               </div>
