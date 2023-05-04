@@ -1954,7 +1954,7 @@
         document.getElementById("mapContainer").append(canvas);
 
 
-        dataElem.value = JSON.stringify(topology);
+        canvas.updateTopology(topology);
         dataElem.style = "height: 300px; width: 100%;";
         dataElem.onChange = function(event){
             canvas.topology = JSON.parse(event.target.value);
