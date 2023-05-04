@@ -1,15 +1,17 @@
 {
   "name": "esnet-networkmap-panel",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "Network Map Panel",
   "repository": "https://github.com/esnet/grafana-esnet-networkmap-panel",
   "scripts": {
-    "build": "grafana-toolkit plugin:build",
-    "dev": "grafana-toolkit plugin:dev",
-    "watch": "grafana-toolkit plugin:dev --watch",
-    "sign": "grafana-toolkit plugin:sign",
-    "start": "yarn watch",
-    "test": "karma start --single-run --browsers ChromeHeadless"
+      "build_plugin": "grafana-toolkit plugin:build",
+      "build_dts": "tsc -d --declarationDir dist --declarationMap --emitDeclarationOnly",
+      "build": "npm run build_plugin && npm run build_dts",
+      "dev": "grafana-toolkit plugin:dev",
+      "watch": "grafana-toolkit plugin:dev --watch",
+      "sign": "grafana-toolkit plugin:sign",
+      "start": "yarn watch",
+      "test": "karma start --single-run --browsers ChromeHeadless"
   },
   "author": "ESnet",
   "email": "khturner2@es.net",
@@ -20,13 +22,13 @@
     "@grafana/toolkit": "8.0.6",
     "@grafana/ui": "8.3.0",
     "emotion": "10.0.27",
+    "grafana-plugin-support": "latest",
     "karma": "^6.4.0",
     "karma-chrome-launcher": "^3.1.1",
     "karma-mocha": "^2.0.1",
     "karma-should": "^1.0.0",
     "mocha": "^10.0.0",
-    "should": "^2.0.2",
-    "grafana-plugin-support": "latest"
+    "should": "^2.0.2"
   },
   "main": "index.js",
   "engines": {
