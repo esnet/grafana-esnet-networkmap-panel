@@ -417,7 +417,7 @@ class EditingInterface extends BindableHTMLElement {
                     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
                     display: inline-block;
                     cursor: pointer;
-                    width: min-content;
+                    width: max-content;
                 }
                 .button-overlay > .button.edit-mode-only {
                     display: ${ editModeOnlyButtonDisplay }
