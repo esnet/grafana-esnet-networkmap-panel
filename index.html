@@ -17,7 +17,7 @@
         import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
         var parsedData = {};
         var lavender = "rgb(202, 149, 229)"
-        var topology = {
+        /*var topology = {
             "layer1":{
                 "name": "ES.net Layer 1: Core Circuits",
                 "layer": "core",
@@ -1870,7 +1870,61 @@
                             "meta":{},
                             "latLng":[52.16340342422403,-93.95507812500001],
                         }
-                ]}};
+                ]}};*/
+        // simpler topology for more limited-domain testing
+        var topology = {
+            "layer1":{
+                "edges":[
+                    {
+                        "name":"A--B",
+                        "meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                        "latLngs":[
+                            [39.60403118938273,-104.70426736692384],
+                            [39.447203351313256,-91.48854471755403]
+                        ],
+                        "children":[]
+                    },
+                    {
+                        "name":"A--C",
+                        "meta":{"endpoint_identifiers":{"pops":["A","C"]}},
+                        "latLngs":[
+                            [39.60403118938273,-104.70426736692384],
+                            [32.83222129767267,-97.72365489059004]
+                        ],
+                        "children":[]
+                    },
+                    {
+                        "name":"B--C",
+                        "meta":{"endpoint_identifiers":{"pops":["B","C"]}},
+                        "latLngs":[
+                            [39.447203351313256,-91.48854471755403],
+                            [32.83222129767267,-97.72365489059004]
+                        ],
+                        "children":[]
+                    }
+                ],
+                "nodes":[
+                    {
+                        "name":"A",
+                        "meta":{"display_name":"","svg":"","template":""},
+                        "latLng":[39.60403118938273,-104.70426736692384]
+                    },
+                    {
+                        "name":"B",
+                        "meta":{"display_name":"","svg":"","template":""},
+                        "latLng":[39.447203351313256,-91.48854471755403]
+                    },
+                    {
+                        "name":"C",
+                        "meta":{"display_name":"","svg":"","template":""},
+                        "latLng":[32.83222129767267,-97.72365489059004]
+                    }
+                ]
+            },
+        "layer2":{"edges":[],"nodes":[]},
+        "layer3":{"edges":[],"nodes":[]}
+    }
+
         var options = {
             "initialViewStrategy": "viewport",
 
@@ -1931,9 +1985,13 @@
             "layerName3":"Peer Topology",
             "legendL3":true,
         };
+        var overrides = {
+
+        };
         var canvas = document.createElement("esnet-map-canvas");
         var optionsElem = document.createElement('textarea');
         var dataElem = document.createElement('textarea');
+        var overridesElem = document.createElement('textarea');
 
         canvas.setAttribute('id', "demonstration-element");
         canvas.setAttribute('height', 400);
@@ -1956,9 +2014,11 @@
 
         canvas.updateTopology(topology);
         dataElem.style = "height: 300px; width: 100%;";
-        dataElem.onChange = function(event){
-            canvas.topology = JSON.parse(event.target.value);
-        }
+        dataElem.addEventListener("change", function(event){
+            console.log("onChange");
+            let topology = JSON.parse(event.target.value);
+            canvas.updateMapTopology(topology);
+        })
         document.getElementById("mapDataContainer").append(dataElem);
 
         optionsElem.value = JSON.stringify(options);
@@ -1968,6 +2028,12 @@
         }
         document.getElementById("mapOptionsContainer").append(optionsElem);
 
+        overridesElem.value = JSON.stringify(overrides);
+        overridesElem.style = "height:300px; width:100%";
+        overridesElem.onChange = function(event){
+            canvas.overrides = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapOverridesContainer").append(overridesElem);
     </script>
 
 </head>
@@ -1996,6 +2062,12 @@
         <tr>
             <td id='mapDataContainer'></td>
             <td id='mapOptionsContainer'></td>
+        </tr>
+        <tr>
+            <td colspan='2'>Overrides</td>
+        </tr>
+        <tr>
+            <td colspan='2' id='mapOverridesContainer'></td>
         </tr>
     </table>
 </body>
