@@ -254,6 +254,8 @@ export class MapCanvas extends BindableHTMLElement {
       return changes.indexOf(option) >= 0;
     }
     if( wasChanged('showLegend', changed) || 
+        wasChanged('customLegend', changed) || 
+        wasChanged('customLegendValue', changed) || 
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
@@ -594,27 +596,31 @@ export class MapCanvas extends BindableHTMLElement {
       })
       return;
     }
-    for(var i=0; i<thresholds.length; i++){
-      if(i % columnLength == 0){
-        columns.push([]);
+    if(this.options.customLegend){
+      output += this.options.customLegendValue;
+    } else {
+      for(var i=0; i<thresholds.length; i++){
+        if(i % columnLength == 0){
+          columns.push([]);
+        }
+        var lastColumn = columns.length - 1;
+        var thisValue = thresholds[i].value;
+        var nextValue = thresholds[i+1] ? thresholds[i+1].value : null;
+        columns[lastColumn].push(`<div class='legend-entry'>
+          <p>
+            <span class='color-sample' style='background-color: ${thresholds[i].color}'></span>
+            ${this.legendFormatter(thisValue, nextValue)}
+          </p>
+        </div>`)
       }
-      var lastColumn = columns.length - 1;
-      var thisValue = thresholds[i].value;
-      var nextValue = thresholds[i+1] ? thresholds[i+1].value : null;
-      columns[lastColumn].push(`<div class='legend-entry'>
-        <p>
-          <span class='color-sample' style='background-color: ${thresholds[i].color}'></span>
-          ${this.legendFormatter(thisValue, nextValue)}
-        </p>
-      </div>`)
+      columns.forEach((column)=>{
+        output += `<div class='legend-column'>`;
+        column.forEach((row)=>{
+          output += row;
+        });
+        output += `</div>`
+      })
     }
-    columns.forEach((column)=>{
-      output += `<div class='legend-column'>`;
-      column.forEach((row)=>{
-        output += row;
-      });
-      output += `</div>`
-    })
     output += `</div>`
     legendContainer.innerHTML = output;
     this.bindEvents({

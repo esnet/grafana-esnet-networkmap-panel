@@ -694,7 +694,9 @@ function renderNodes(g, data, ref, layerId) {
         .classed('node', false)
         .classed('animated-node', true);
 
-      PubSub.publish("setVariables", selectionData, ref.svg.node());
+      if(selectionData && selectionData.type=='node'){
+        PubSub.publish("setVariables", selectionData, ref.svg.node());
+      }
   }
 
   PubSub.subscribe("setSelection", selectNode, ref.svg.node());

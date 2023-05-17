@@ -30,23 +30,25 @@ export class MapPanel extends Component<Props> {
   }
 
   setDashboardVariables() {
-    var self = this;
+    let self = this;
     return function (event) {
-      const l1var = 'var-' + self.props.options['dashboardVarL1'];
-      const l2var = 'var-' + self.props.options['dashboardVarL2'];
-      const l3var = 'var-' + self.props.options['dashboardVarL3'];
-      var setLocation = {};
-      setLocation[l1var] = null;
-      setLocation[l2var] = null;
-      setLocation[l3var] = null;
+      let setLocation = {};
+      for (let i = 1; i < 3; i++) {
+        const srcVar = 'var-' + self.props.options['dashboardEdgeSrcVarL' + i];
+        const dstVar = 'var-' + self.props.options['dashboardEdgeDstVarL' + i];
+        const nodeVar = 'var-' + self.props.options['dashboardNodeVarL' + i];
+        setLocation[srcVar] = null;
+        setLocation[dstVar] = null;
+        setLocation[nodeVar] = null;
+      }
       if (event && event.nodeA && event.nodeZ) {
-        const dashboardVariable = 'var-' + self.props.options['dashboardVarL' + event.layer];
-        const srcVariable = self.props.options['srcVarL' + event.layer];
-        const dstVariable = self.props.options['dstVarL' + event.layer];
-        setLocation[dashboardVariable] = [srcVariable + '|=|' + event.nodeA, dstVariable + '|=|' + event.nodeZ];
+        const srcVariable = 'var-' + self.props.options['dashboardEdgeSrcVarL' + event.layer];
+        setLocation[srcVariable] = event.nodeA;
+        const dstVariable = 'var-' + self.props.options['dashboardEdgeDstVarL' + event.layer];
+        setLocation[dstVariable] = event.nodeZ;
       }
       if (event && event.type === 'node') {
-        const dashboardVariable = 'var-' + self.props.options['dashboardVarL' + event.layer];
+        const dashboardVariable = 'var-' + self.props.options['dashboardNodeVarL' + event.layer];
         setLocation[dashboardVariable] = event.selection.name;
       }
 
@@ -94,7 +96,7 @@ export class MapPanel extends Component<Props> {
   };
 
   calculateOptionsChanges = () => {
-    var changed: string[];
+    let changed: string[];
     changed = [];
 
     const optionsToWatch = [
@@ -105,6 +107,8 @@ export class MapPanel extends Component<Props> {
       'showSidebar',
       'showViewControls',
       'showLegend',
+      'customLegend',
+      'customLegendValue',
       'legendColumnLength',
       'legendPosition',
       'thresholds',
@@ -187,12 +191,12 @@ export class MapPanel extends Component<Props> {
 
   resolveLatLngFromVars(options, data, replaceVariables) {
     // set a sensible default output: 0,0 in case we can't resolve.
-    var output = {
+    let output = {
       resolvedLat: 0,
       resolvedLng: 0,
     };
     if (this.props.options.initialViewStrategy === 'variables') {
-      var frames: any[];
+      let frames: any[];
       frames = data.series.map((series) => {
         return new DataFrameView(series);
       });
@@ -203,7 +207,7 @@ export class MapPanel extends Component<Props> {
 
       Object.keys(toResolve).forEach((variableName) => {
         const resolvedName = toResolve[variableName];
-        var fieldName = options[variableName];
+        let fieldName = options[variableName];
         // if the latitudeVar contains the string "__data.fields"
         if (options[variableName].indexOf('__data.fields') >= 0) {
           // we're trying to get the field name from the interior of the string,
@@ -211,7 +215,7 @@ export class MapPanel extends Component<Props> {
           fieldName = this.props.options[variableName].split('"')[1];
         }
         // this block attempts to resolve "template level" i.e. dashboard vars
-        var candidateVal = parseFloat(replaceVariables(fieldName));
+        let candidateVal = parseFloat(replaceVariables(fieldName));
         if (!isNaN(candidateVal)) {
           output[resolvedName] = candidateVal;
         } else {
@@ -244,10 +248,16 @@ export class MapPanel extends Component<Props> {
         });
       }
       // otherwise return a promise from `fetch`
-      return fetch(jsonUrl).then((response) => {
-        this.mapjsonCache[layer][jsonUrl] = response.text();
-        return this.mapjsonCache[layer][jsonUrl];
-      });
+      return fetch(jsonUrl)
+        .then((response) => {
+          this.mapjsonCache[layer][jsonUrl] = response.text();
+          return this.mapjsonCache[layer][jsonUrl];
+        })
+        .catch((error) => {
+          // Handle the error
+          console.error('Failed to fetch JSON from URL: ', encodeURI(jsonUrl));
+          return JSON.stringify({ nodes: [], edges: [] });
+        });
     }
     // in the case that we don't want to fetch from a url, return a promise with local data
     return new Promise((resolve) => {
@@ -272,33 +282,33 @@ export class MapPanel extends Component<Props> {
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
 
-    var colorsL1 = {
+    let colorsL1 = {
       defaultColor: options.color1,
       nodeHighlight: options.nodeHighlightL1,
     };
-    var fieldsL1 = {
+    let fieldsL1 = {
       srcField: options.srcFieldL1,
       dstField: options.dstFieldL1,
       inboundValueField: options.inboundValueFieldL1,
       outboundValueField: options.outboundValueFieldL1,
       endpointId: options.endpointIdL1,
     };
-    var colorsL2 = {
+    let colorsL2 = {
       defaultColor: options.color2,
       nodeHighlight: options.nodeHighlightL2,
     };
-    var fieldsL2 = {
+    let fieldsL2 = {
       srcField: options.srcFieldL2,
       dstField: options.dstFieldL2,
       inboundValueField: options.inboundValueFieldL2,
       outboundValueField: options.outboundValueFieldL2,
       endpointId: options.endpointIdL2,
     };
-    var colorsL3 = {
+    let colorsL3 = {
       defaultColor: options.color3,
       nodeHighlight: options.nodeHighlightL3,
     };
-    var fieldsL3 = {
+    let fieldsL3 = {
       srcField: options.srcFieldL3,
       dstField: options.dstFieldL3,
       inboundValueField: options.inboundValueFieldL3,
@@ -318,9 +328,9 @@ export class MapPanel extends Component<Props> {
           this.resolveMapData('L2', replaceVariables),
           this.resolveMapData('L3', replaceVariables),
         ]).then((topologyData) => {
-          var parsedDataL1 = parseData(data, topologyData[0], colorsL1, fieldsL1, 1);
-          var parsedDataL2 = parseData(data, topologyData[1], colorsL2, fieldsL2, 1);
-          var parsedDataL3 = parseData(data, topologyData[2], colorsL3, fieldsL3, 1);
+          let parsedDataL1 = parseData(data, topologyData[0], colorsL1, fieldsL1, 1);
+          let parsedDataL2 = parseData(data, topologyData[1], colorsL2, fieldsL2, 1);
+          let parsedDataL3 = parseData(data, topologyData[2], colorsL3, fieldsL3, 1);
           topology['layer1'] = parsedDataL1[3];
           topology['layer2'] = parsedDataL2[3];
           topology['layer3'] = parsedDataL3[3];
@@ -349,7 +359,7 @@ export class MapPanel extends Component<Props> {
   componentDidUpdate() {
     this.updateMap();
 
-    var changed = this.calculateOptionsChanges();
+    let changed = this.calculateOptionsChanges();
 
     if (changed.length > 0) {
       this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
@@ -359,7 +369,7 @@ export class MapPanel extends Component<Props> {
   render() {
     const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
 
-    var thresholds: any[];
+    let thresholds: any[];
     thresholds = [];
     fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
       thresholds.push({
