@@ -22,10 +22,10 @@ function checkBool(settingName: string, value: any) {
 
 function checkBools(settings: object) {
   return function (config: MapOptions) {
-    var keys = Object.keys(settings);
-    for (var i = 0; i < keys.length; i++) {
-      var settingName = keys[i];
-      var value = settings[settingName];
+    let keys = Object.keys(settings);
+    for (let i = 0; i < keys.length; i++) {
+      let settingName = keys[i];
+      let value = settings[settingName];
       if (config[settingName] !== value) {
         return false;
       }
@@ -36,7 +36,7 @@ function checkBools(settings: object) {
 
 function checkInArray(settingName: string, values: any[]) {
   return function (config: MapOptions) {
-    for (var i = 0; i < values.length; i++) {
+    for (let i = 0; i < values.length; i++) {
       if (values[i] === config[settingName]) {
         return true;
       }

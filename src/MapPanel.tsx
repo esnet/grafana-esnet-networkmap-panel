@@ -255,6 +255,7 @@ export class MapPanel extends Component<Props> {
         })
         .catch((error) => {
           // Handle the error
+          // this is important logging for end users.
           console.error('Failed to fetch JSON from URL: ', encodeURI(jsonUrl));
           return JSON.stringify({ nodes: [], edges: [] });
         });
@@ -340,7 +341,6 @@ export class MapPanel extends Component<Props> {
         });
       }
     } catch (error) {
-      console.error('Parsing error : ', error);
     }
 
     PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);

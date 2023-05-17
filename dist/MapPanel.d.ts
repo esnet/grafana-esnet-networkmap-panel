@@ -20,7 +20,7 @@ export declare class MapPanel extends Component<Props> {
         resolvedLat: number;
         resolvedLng: number;
     };
-    resolveMapData(layer: string, replaceVariables: any): Promise<unknown>;
+    resolveMapData(layer: string, replaceVariables: any): Promise<any>;
     updateMap(): void;
     componentDidMount(): void;
     componentDidUpdate(): void;

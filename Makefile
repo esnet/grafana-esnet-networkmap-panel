@@ -7,13 +7,13 @@ CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
 .PHONY: prod
 prod:
 	yarn test
-	$(NODE) $(GRAFANA_PATH) "plugin:build"
-	$(NODE) $(GRAFANA_PATH) "plugin:sign" "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
-	$(NPM) run "build_dts"
+	yarn build
+	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
+	yarn run "build_dts"
 
 .PHONY: dev
 dev:
-	$(NODE) $(GRAFANA_PATH) "plugin:dev"
+	yarn dev
 
 .PHONY: restart
 restart:

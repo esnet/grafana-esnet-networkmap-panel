@@ -117,7 +117,7 @@ describe( "Class MapCanvas", () => {
             "legendL3":true,
         };
 
-        elem.updateTopology = function(){ console.log("updateTopology"); }
+        elem.updateTopology = function(){ return }
         document.body.appendChild(elem);
     }); 
     it( "should append a esnet-map-canvas element", () => {
@@ -146,7 +146,6 @@ describe( "Class MapCanvas", () => {
       var map_coords = document.querySelector("esnet-map-canvas").getBoundingClientRect();
       // find the first circle in a "g.node". This should be the "A" node from topology
       var nodes = document.querySelectorAll("g.node > g.scale-container > circle");
-      // console.log(nodes);
       var node_coords = nodes[0].getBoundingClientRect();
 
       // at 800x400 canvas size, we expect the offset (from the esnet-map-canvas top-left) of the first node to be 262, 194
@@ -412,7 +411,6 @@ describe( "Class MapCanvas", () => {
       PubSub.publish("updateEditMode", true, canvas);
       // edge edit mode. Do some work adding vertices to the edge.
       var edgeAC = document.querySelector(".control-for-A.control-for-C")
-      // console.log("edgeAC is ", edgeAC);
       var edgeACPos = edgeAC.getBoundingClientRect();
       var clickEvents = [
         new MouseEvent('dblclick', { bubbles: true, clientX: edgeACPos.x, clientY: edgeACPos.y, view: window }),
@@ -422,8 +420,6 @@ describe( "Class MapCanvas", () => {
       var beforeAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
       for(var i=0; i<clickEvents.length; i++){
           edgeAC = document.querySelector(".control-for-A.control-for-C");
-          // console.log(edgeAC);
-          // console.log("dispatching ", clickEvents[0]);
           edgeAC.dispatchEvent(clickEvents[i]);
       }
       var afterAllCps = canvas.querySelectorAll(".control-point-for-edge-A--C")
@@ -618,7 +614,6 @@ describe( "Class MapCanvas", () => {
       var originalPos = cPoint.getBoundingClientRect();
       // compensate for radius
       originalPos = {x: originalPos.x + 4, y: originalPos.y + 4};
-      //console.log(originalPos.x, originalPos.y);
       // create mouse event for down
       var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
       // create mouse event for drag
@@ -634,7 +629,6 @@ describe( "Class MapCanvas", () => {
       // check edge control point moved
       var cPoint = canvas.querySelector("circle.control");
       var newPos = cPoint.getBoundingClientRect()
-      //console.log(newPos.x);
       newPos = {x: newPos.x + 4, y: newPos.y + 4};
       (newPos.x).should.approximately(originalPos.x + 10, 4);
       (newPos.y).should.approximately(originalPos.y + 10, 4);

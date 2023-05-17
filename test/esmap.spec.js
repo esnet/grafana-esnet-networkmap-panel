@@ -20,7 +20,6 @@ describe( "Module esmap", () => {
     })
     it("should export a 'rotate' function that returns [x, y] when angle != 0", ()=>{
         var output = esmap.rotate(0, 0, 10, 20, 180);
-        console.log(output);
         output.should.be.an.Array;
         output.length.should.equal(2);
         output[0].should.not.equal(10);

@@ -33,7 +33,7 @@
       }
     ],
     "version": "1.5.2",
-    "updated": "2023-05-04"
+    "updated": "2023-05-17"
   },
   "dependencies": {
     "grafanaDependency": ">=7.0.0",

@@ -31,7 +31,6 @@ var L = window['L'];
 try {
   var L = require('./lib/leaflet.js');
 } catch (e) {
-  console.log(e);
 }
 
 export default class NetworkMap {
