@@ -10,7 +10,7 @@ const LayersCategory = ['Layer options'];
 const SidebarCategory = ['Sidebar options'];
 const LegendCategory = ['Legend options'];
 const ViewCategory = ['View options'];
-const QueryCategory = ['Ad-hoc Query Variable Bindings'];
+const QueryCategory = ['Variable Bindings'];
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
@@ -861,67 +861,67 @@ plugin.setPanelOptions((builder) => {
   });
   // -------------------- Ad-Hoc Query Variable Bindings --------------------
   builder.addTextInput({
-    path: 'dashboardVarL1',
-    name: 'Layer 1 Dashboard Variable',
+    path: 'dashboardNodeVarL1',
+    name: 'Binding: Node Layer 1',
     showIf: checkBool('layer1', true),
     category: QueryCategory,
-    defaultValue: 'l1edge',
+    defaultValue: 'node',
   });
   builder.addTextInput({
-    path: 'srcVarL1',
+    path: 'dashboardEdgeSrcVarL1',
     name: 'Binding: Edge "Source" Layer 1',
     showIf: checkBool('layer1', true),
     category: QueryCategory,
-    defaultValue: 'meta.device_info.loc_name',
+    defaultValue: 'source',
   });
   builder.addTextInput({
-    path: 'dstVarL1',
+    path: 'dashboardEdgeDstVarL1',
     name: 'Binding: Edge "Destination" Layer 1',
     showIf: checkBool('layer1', true),
     category: QueryCategory,
-    defaultValue: 'meta.remote.loc_name',
+    defaultValue: 'dest',
   });
   builder.addTextInput({
-    path: 'dashboardVarL2',
-    name: 'Layer 2 Dashboard Variable',
+    path: 'dashboardNodeVarL2',
+    name: 'Binding: Node Layer 2',
     showIf: checkBool('layer2', true),
     category: QueryCategory,
-    defaultValue: 'l2edge',
+    defaultValue: 'node',
   });
   builder.addTextInput({
-    path: 'srcVarL2',
+    path: 'dashboardEdgeSrcVarL2',
     name: 'Binding: Edge "Source" Layer 2',
     showIf: checkBool('layer2', true),
     category: QueryCategory,
-    defaultValue: 'meta.device',
+    defaultValue: 'source',
   });
   builder.addTextInput({
-    path: 'dstVarL2',
+    path: 'dashboardEdgeDstVarL2',
     name: 'Binding: Edge "Destination" Layer 2',
     showIf: checkBool('layer2', true),
     category: QueryCategory,
-    defaultValue: 'meta.org.short_name',
+    defaultValue: 'dest',
   });
   builder.addTextInput({
-    path: 'dashboardVarL3',
-    name: 'Layer 3 Dashboard Variable',
+    path: 'dashboardNodeVarL3',
+    name: 'Binding: Node Layer 3',
     showIf: checkBool('layer3', true),
     category: QueryCategory,
-    defaultValue: 'l3edge',
+    defaultValue: 'node',
   });
   builder.addTextInput({
-    path: 'srcVarL3',
+    path: 'dashboardEdgeSrcVarL3',
     name: 'Binding: Edge "Source" Layer 3',
     showIf: checkBool('layer3', true),
     category: QueryCategory,
-    defaultValue: 'meta.device_info.loc_name',
+    defaultValue: 'src',
   });
   builder.addTextInput({
-    path: 'dstVarL3',
+    path: 'dashboardEdgeDstVarL3',
     name: 'Binding: Edge "Destination" Layer 3',
     showIf: checkBool('layer3', true),
     category: QueryCategory,
-    defaultValue: 'meta.remote.loc_name',
+    defaultValue: 'dest',
   });
 
   // -------------------- Sidebar Options --------------------

@@ -4,7 +4,7 @@
   "name": "Network Map Panel",
   "id": "esnet-networkmap-panel",
   "info": {
-    "description": "Network Map Panel",
+    "description": "Topology map of a network. Graphs network traffic between nodes",
     "author": {
       "name": "ESnet"
     },
