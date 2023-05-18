@@ -332,8 +332,8 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   recalculateMapZoom(){
+    this.leafletMap && this.leafletMap.invalidateSize();
     if(this.leafletMap && this._options.initialViewStrategy === 'viewport'){
-      this.leafletMap && this.leafletMap.invalidateSize();
       var bounds = L.latLngBounds(L.latLng(
         this._options.viewportTopLeftLat,
         this._options.viewportTopLeftLng),
@@ -408,8 +408,8 @@ export class MapCanvas extends BindableHTMLElement {
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }
-    this.querySelector(".leaflet-control-zoom-in").classList.add("tight-form-func");
-    this.querySelector(".leaflet-control-zoom-out").classList.add("tight-form-func");
+    this.querySelector(".leaflet-control-zoom-in")?.classList.add("tight-form-func");
+    this.querySelector(".leaflet-control-zoom-out")?.classList.add("tight-form-func");
     this.leafletMap.on("zoomend", ()=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
         window[this.id + "mapPosition"].zoom = this.leafletMap.getZoom();
@@ -674,6 +674,8 @@ export class MapCanvas extends BindableHTMLElement {
       if(this.sideBar){
         this.sideBar.mapCanvas = this;
       }
+      const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom.apply(this); });
+      resizeObserver.observe(this.shadow);
     }
     this.renderStyle();
     this.renderLegend();
