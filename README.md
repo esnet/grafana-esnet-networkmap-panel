@@ -10,6 +10,8 @@ The plugin will plot traffic information on the network topology, showing bi-dir
 
 ## Introductory Tutorial
 
+This (rather lengthy) tutorial will help you set up and color a map topology, and as a bonus step, show how it can be integrated with other plugins in your grafana dashboard.
+
 ### Setup:
 
 In a couple of places in this tutorial, we'll refer to this google sheet:
@@ -100,12 +102,12 @@ It also contains an example topology that will be used while setting up the Netw
 
 ### Configure the Visualization
 
-XX. Now we'll enter all of the options that make the Network Map Panel render a full network visualization.
+33. Now we'll enter all of the options that make the Network Map Panel render a full network visualization.
 Follow the list below to enter all of the various options to enter a topology and link it with the spreadsheet data.
 
 #### Visualization Options
 
-*Map Initial View Strategy*
+**Map Initial View Strategy**
 
 This option designates how the viewport for the map will be set on map load. There are 3 strategies:
 - Specify Static Center, No zoom on resize
@@ -116,159 +118,159 @@ For our demo, we'll select "Specify Static Center, No zoom on resize"
 
 This will give us an initial static center an zoom that reasonably fits the USA into the viewport.
 
-*Map Background Color*
+**Map Background Color**
 
 This option sets the map background color using the built-in grafana color picker. We'll leave this one alone.
 
-*Geographic Tileset*
+**Geographic Tileset**
 
 This renders the geographic tileset layer for the map. Select "USGS Satellite Imagery" for this introduction
 
-*Political Boundary Tileset*
+**Political Boundary Tileset**
 
 This will render political boundaries onto the map. Select "Toner Political Boundaries" for this demo.
 
-*Political Label Tileset*
+**Political Label Tileset**
 
 Political labels will label each political boundary. Select "[No Political Labels]" for this introduction.
 
-*Show View Controls*
+**Show View Controls**
 
 This will optionally hide and show the zoom controls in the map panel. Leave this set to "on"
 
-*Enable Map Scrolling on Drag*
+**Enable Map Scrolling on Drag**
 
 This enables allowing the end user to scroll the viewport. Leave this set to "on"
 
-*Enable Map Editing*
+**Enable Map Editing**
 
 This optionally disables the built-in topology editor. Leave this set to "on"
 
-*Enable Node Selection Animations*
+**Enable Node Selection Animations**
 
 This optionally disables node selection animations. Leave this set to "on"
 
-*Enable Edge Traffic Direction Animations*
+**Enable Edge Traffic Direction Animations**
 
 This optionally disables edge selection animations. Leave this set to "on"
 
-*Layer 1 on*
+**Layer 1 on**
 
 This optionally hides Layer 1 of the topology information. Leave this set to "on"
 
-*Fetch Layer 1 JSON from URL*
+**Fetch Layer 1 JSON from URL**
 
 This will optionally fetch Layer 1's JSON topology from a URL instead of the provided text area. Leave this set to "off"
 
-*Layer 1 Map Data (JSON)*
+**Layer 1 Map Data (JSON)**
 
 From the Google Sheet at https://docs.google.com/spreadsheets/d/1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc/edit#gid=0
 
-*Layer 1 Default Color*
+**Layer 1 Default Color**
 
 Leave this set to grey. It will help to show when we've correctly associated edge metadata.
 
-*Layer 1 Endpoint Identifier*
+**Layer 1 Endpoint Identifier**
 
 This input specifies the attribute of "endpoint_identifiers" of each of the "edges" objects in your JSON topology that
 
-*Layer 1 Node Highlight Color*
+**Layer 1 Node Highlight Color**
 
 When your metrics data shows a match for a particular node, it will be highlighted this color. Set this to medium blue ("blue") for this introduction.
 
-*Layer 1 Node Size*
+**Layer 1 Node Size**
 
 This changes the diameter of the nodes in this topology layer. Leave this set to the default, 5.
 
-*Layer 1 Edge Width*
+**Layer 1 Edge Width**
 
 This changes the width of all of the edges in this topology layer. Leave it set to the default, 3.
 
-*Layer 1 Edge Offset*
+**Layer 1 Edge Offset**
 
 This changes the space between the edges in this topology layer. Leave it set to the default, 3.
 
-*Layer 2 on*
+**Layer 2 on**
 
 This will show another topology layer. Leave it set to "off" for now.
 
-*Layer 3 on*
+**Layer 3 on**
 
 This will show another topology layer. Leave it set to "off" for now.
 
-*Layer 1 Source Field Label*
+**Layer 1 Source Field Label**
 
 This will change the "From:" label in the edge tooltips. Leave it set to "From:"
 
-*Layer 1 Source Field*
+**Layer 1 Source Field**
 
 This will specify the field from the query that we want to map to our edges. Choose "src" from the drop-down.
 
-*Layer 1 Destination Field Label*
+**Layer 1 Destination Field Label**
 
 This will change the "To:" label in the edge tooltips. Leave it set to "To:"
 
-*Layer 1 Destination Field*
+**Layer 1 Destination Field**
 
 This will specify the field from the query that we want to map to our destination. Choose "dst" from the drop-down.
 
-*Layer 1 Data Field Label*
+**Layer 1 Data Field Label**
 
 This will change the "Volume:" label in the edge tooltips. Leave it set to "Volume:"
 
-*Layer 1 Inbound Value Field*
+**Layer 1 Inbound Value Field**
 
 This will change the field from your query that represents traffic from the A end to the Z end of each edge. Select "in_bits" from the drop down.
 
-*Layer 1 Outbound Value Field*
+**Layer 1 Outbound Value Field**
 
 This will change the field from your query that represents traffic from the Z end to the A end of each edge. Select "out_bits" from the drop down.
 
-*Binding: Node Layer 1*
+**Binding: Node Layer 1**
 
 This will change the dashboard variable that is set when a node is selected. The default of "node" is fine for this introduction.
 
-*Binding: Edge "Source" Layer 1*
+**Binding: Edge "Source" Layer 1**
 
 This will change the dashboard variable that is set to the edge 'source' when an edge is selected. Set this to "source".
 
-*Binding: Edge "Destination" Layer 1*
+**Binding: Edge "Destination" Layer 1**
 
 This will change the dashboard variable that is set to the edge 'destination' when an edge is selected. Set this to "destination".
 
-*Show map sidebar*
+**Show map sidebar**
 
 This shows and hides the sidebar at the right side of the map. Set this to "off" for this introduction.
 
-*Show Map Legend*
+**Show Map Legend**
 
 This shows and hides the map legend. Set this to "on" for this introduction.
 
-*Legend Items per Column*
+**Legend Items per Column**
 
 This is the maximum number of legend entries per legend column. Leave this set to the default, 3, for this introduction.
 
-*Legend Position*
+**Legend Position**
 
 This sets the position of the legend. Leave this set to the default, "Bottom Left" for this introduction.
 
-*Legend Default Behavior*
+**Legend Default Behavior**
 
 This sets whether the legend is minimized or visible at page load time. Leave this set to the default, "visible" for this introduction.
 
-*Unit*
+**Unit**
 
 This sets the units in a variety of places, including the legend and tooltips. Choose Data Rate > Bits / sec (SI)
 
-*Decimals*
+**Decimals**
 
 Leave this set to "auto"
 
-*Color Scheme*
+**Color Scheme**
 
 This should be set to "From thresholds (by value)"
 
-*Thresholds*
+**Thresholds**
 
 This will set the color thresholds for different rates for your map. Add these entries:
 
@@ -294,7 +296,7 @@ You should now be looking at the main dashboard view. Let's add another panel:
 
 - Select "Time Series" from the visualization drop down at the top right.
 
-*Query*
+**Query**
 
 - Select "Google Sheets" as the datasource
 
@@ -304,7 +306,7 @@ You should now be looking at the main dashboard view. Let's add another panel:
 
 - Check "Use time filter"
 
-*Transform*
+**Transform**
 
 - Select "Group by"
 
@@ -318,7 +320,7 @@ You should now be looking at the main dashboard view. Let's add another panel:
 
 - out_bits: Calculate: Total
 
-*Visualization Options*
+**Visualization Options**
 
 - Select Data Rate > Bits / Sec (SI) from the Unit pull-down
 
