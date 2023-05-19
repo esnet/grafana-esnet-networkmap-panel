@@ -274,11 +274,11 @@ This should be set to "From thresholds (by value)"
 
 This will set the color thresholds for different rates for your map. Add these entries:
 
-1e10 (10 Gb/s)
-5e10 (50 Gb/s)
-1e11 (100 Gb/s)
-4e11 (400 Gb/s)
-8e11 (800 Gb/s)
+- 1e10 (10 Gb/s)
+- 5e10 (50 Gb/s)
+- 1e11 (100 Gb/s)
+- 4e11 (400 Gb/s)
+- 8e11 (800 Gb/s)
 
 You should see edges appropriately colored.
 
