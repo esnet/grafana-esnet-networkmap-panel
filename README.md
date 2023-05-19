@@ -1,7 +1,8 @@
 [![Build Status](https://api.travis-ci.com/esnet/grafana-esnet-networkmap-panel.svg?branch=main)](https://app.travis-ci.com/github/esnet/grafana-esnet-networkmap-panel)
 
 # Network Map Panel
-This panel displays a computer network topology.
+
+This panel displays a network topology.
 
 The topology can be either geographically referenced against a geographic tileset, or purely logical.
 
@@ -24,88 +25,86 @@ It also contains an example topology that will be used while setting up the Netw
 
 ### Open Grafana
 
-1. Open an instance of Grafana in a browser
+### 1. Setup a Google Sheets Data Source
 
-### Setup a Google Sheets Data Source
+- If not yet selected, click the tab labeled Data Sources.
 
-2. If not yet selected, click the tab labeled Data Sources.
+- Click the Add New Data Source button.
 
-3. Click the Add New Data Source button.
+- Type in Google Sheet in the search bar.
 
-4. Type in Google Sheet in the search bar.
+- Install the Google Sheet datasource
 
-5. Install the Google Sheet datasource
+- Click the [Create a Google Sheets data source] button
 
-6. Click the [Create a Google Sheets data source] button
+- Get a Google Sheets API key (google this if you don't have one)
 
-7. Get a Google Sheets API key (google this if you don't have one)
+- Input your Google Sheets API key into the "API Key" input
 
-8. Input your Google Sheets API key into the "API Key" input
+- Click [Test + Save] 
 
-9. Click [Test + Save] 
+### 2. Setup a Test Dashboard
 
-### Setup a Test Dashboard
+- Create a new Dashboard
 
-10. Create a new Dashboard
+- Save your dashboard as "Test Dashboard"
 
-11. Save your dashboard as "Test Dashboard"
+### 3. Add the Network Map Panel
 
-### Add the Network Map Panel
+- Click [Add Visualization]
 
-12. Click [Add Visualization]
+- In the visualization selector at the top right of the screen, search for and select "Network Map Panel"
 
-13. In the visualization selector at the top right of the screen, search for and select "Network Map Panel"
+- You'll now see a blank network map visualization
 
-14. You'll now see a blank network map visualization
+### 4. Set up the Visualization
 
-### Set up the Visualization
+- Now let's configure the options for the panel. There are many options.
 
-15. Now let's configure the options for the panel. There are many options.
+### 5. Set up the Data Source Query
 
-### Set up the Data Source Query
+- At the bottom of the screen, select "Google Sheets"
 
-16. At the bottom of the screen, select "Google Sheets"
+- Into the Spreadsheet ID blank, enter "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc"
 
-17. Into the Spreadsheet ID blank, enter "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc"
+- Leave "Range" blank
 
-18. Leave "Range" blank
+- Leave Cache Time set to 5m
 
-19. Leave Cache Time set to 5m
+- Turn "Use Time Filter" on
 
-20. Turn "Use Time Filter" on
+### 6. Create Dashboard Variables
 
-### Create Dashboard Variables
+- Near the top right, select the Gear icon: "Dashboard settings"
 
-21. Near the top right, select the Gear icon: "Dashboard settings"
+- From the list at left, select "Variables"
 
-22. From the list at left, select "Variables"
+- Click [Add Variable]
 
-23. Click [Add Variable]
+- From "Select Variable Type," select "Text box"
 
-24. From "Select Variable Type," select "Text box"
+- Enter "source" into the "name" field
 
-25. Enter "source" into the "name" field
+- At the top right, click [Save Dashboard]
 
-26. At the top right, click [Save Dashboard]
+- From the list at left, select "Variables"
 
-27. From the list at left, select "Variables"
+- Click [Add Variable]
 
-28. Click [Add Variable]
+- From "Select Variable Type," select "Text box"
 
-29. From "Select Variable Type," select "Text box"
+- Enter "destination" into the "name" field
 
-30. Enter "destination" into the "name" field
+- At the top right, click [Save Dashboard]
 
-31. At the top right, click [Save Dashboard]
+- At the top right, click [Close]
 
-32. At the top right, click [Close]
+### 7. Configure the Visualization
 
-### Configure the Visualization
-
-33. Now we'll enter all of the options that make the Network Map Panel render a full network visualization.
+- Now we'll enter all of the options that make the Network Map Panel render a full network visualization.
 Follow the list below to enter all of the various options to enter a topology and link it with the spreadsheet data.
 
-#### Visualization Options
+#### 8. Visualization Options
 
 **Map Initial View Strategy**
 
@@ -284,7 +283,7 @@ You should see edges appropriately colored.
 
 ### Save your Dashboard
 
-#### Bonus: Dashboard Interaction via Variables
+#### 9. Bonus: Dashboard Interaction via Variables
 
 - Click [Apply]
 
