@@ -71,5 +71,14 @@ export interface MapOptions {
     legendPosition: string;
     legendDefaultBehavior: string;
     zIndexBase: number;
+    dashboardEdgeSrcVarL1: string;
+    dashboardEdgeDstVarL1: string;
+    dashboardNodeVarL1: string;
+    dashboardEdgeSrcVarL2: string;
+    dashboardEdgeDstVarL2: string;
+    dashboardNodeVarL2: string;
+    dashboardEdgeSrcVarL3: string;
+    dashboardEdgeDstVarL3: string;
+    dashboardNodeVarL3: string;
 }
 //# sourceMappingURL=types.d.ts.map

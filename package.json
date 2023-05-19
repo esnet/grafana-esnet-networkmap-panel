@@ -19,7 +19,7 @@
     "typecheck": "tsc --noEmit"
   },
   "author": "ESnet",
-  "email": "khturner2@es.net",
+  "email": "esnet-grafana-plugins@lbl.gov",
   "license": "Apache-2.0",
   "devDependencies": {
     "@babel/core": "^7.16.7",
