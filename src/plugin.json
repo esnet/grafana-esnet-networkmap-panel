@@ -29,14 +29,14 @@
     "screenshots": [
       {
         "name": "slopegraph-example",
-        "path": "img/slopegraph.png"
+        "path": "img/networkmap.png"
       }
     ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },
   "dependencies": {
-    "grafanaDependency": ">=7.0.0",
+    "grafanaDependency": ">=8.3.3",
     "plugins": []
   }
 }
