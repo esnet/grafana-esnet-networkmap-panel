@@ -2,7 +2,6 @@
 <head>
     <title>Embedded Map Demonstration Page</title>
     <!-- do imports in totally separate script tags to force resolution ordering -->
-    <script src="./src/components/lib/react.17.0.2.umd.js"></script>
     <script type="module">
         import "./src/components/lib/leaflet.global.js";
     </script>
@@ -1872,9 +1871,17 @@
                         }
                 ]}};
         var options = {
+            "initialViewStrategy": "viewport",
+
+            "viewportTopLeftLat": 33,
+            "viewportTopLeftLng": -141,
+            "viewportBottomRightLat": 43,
+            "viewportBottomRightLng": -41,
+
             "startLat":38.68,
             "startLng":-96.96,
             "startZoom":3.5,
+
             "showSidebar": false,
             "showViewControls": true,
             "enableEdgeAnimation": true,
@@ -1946,7 +1953,7 @@
         document.getElementById("mapContainer").append(canvas);
 
 
-        dataElem.value = JSON.stringify(topology);
+        canvas.updateTopology(topology);
         dataElem.style = "height: 300px; width: 100%;";
         dataElem.onChange = function(event){
             canvas.topology = JSON.parse(event.target.value);

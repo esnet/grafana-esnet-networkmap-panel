@@ -1,5 +1,5 @@
 {
-  "extends": "./node_modules/@grafana/toolkit/src/config/tsconfig.plugin.json",
+  "extends": "./.config/tsconfig.json",
   "include": ["src", "types"],
   "compilerOptions": {
     "jsx": "react",
@@ -10,5 +10,5 @@
     "allowJs": true,
     "outDir": "$$ts-jest$$"
   },
-  "exclude": ["public", "dist", "node_modules"]
+  "exclude": ["public", "dist", "node_modules", "src/components/lib"]
 }

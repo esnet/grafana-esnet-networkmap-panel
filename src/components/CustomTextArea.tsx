@@ -16,7 +16,7 @@ function unescape(str) {
 }
 
 export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix }) => {
-  var textareaRef = useRef<HTMLTextAreaElement>(null);
+  let textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const onValueChange = useCallback(
     (e: React.SyntheticEvent) => {

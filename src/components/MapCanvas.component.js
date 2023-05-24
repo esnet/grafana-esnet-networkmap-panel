@@ -98,6 +98,9 @@ export class MapCanvas extends BindableHTMLElement {
         })
       } 
     })());
+    window.addEventListener("resize", ()=>{
+      this.recalculateMapZoom();
+    })
 
     if(!this.topology && this.getAttribute("topology")){
       this.topology = JSON.parse(this.getAttribute("topology"));
@@ -119,7 +122,6 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
         this.enableEditing();
     }
-
     this.render();
   }
 
@@ -252,6 +254,8 @@ export class MapCanvas extends BindableHTMLElement {
       return changes.indexOf(option) >= 0;
     }
     if( wasChanged('showLegend', changed) || 
+        wasChanged('customLegend', changed) || 
+        wasChanged('customLegendValue', changed) || 
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
@@ -324,15 +328,20 @@ export class MapCanvas extends BindableHTMLElement {
   updateMapDimensions(newDimensions){
     this.width = newDimensions.width;
     this.height = newDimensions.height;
+    this.recalculateMapZoom();
+  }
+
+  recalculateMapZoom(){
     this.leafletMap && this.leafletMap.invalidateSize();
     if(this.leafletMap && this._options.initialViewStrategy === 'viewport'){
-      this.leafletMap.fitBounds(L.latLngBounds(L.latLng(
+      var bounds = L.latLngBounds(L.latLng(
         this._options.viewportTopLeftLat,
         this._options.viewportTopLeftLng),
       L.latLng(
         this._options.viewportBottomRightLat,
         this._options.viewportBottomRightLng)
-      ))
+      )
+      this.leafletMap.fitBounds(bounds)
     }
     this.render();
     this.sideBar && this.sideBar.render();
@@ -365,8 +374,8 @@ export class MapCanvas extends BindableHTMLElement {
       this.leafletMap = L.map(this.mapContainer, {
           zoomAnimation: false,
           fadeAnimation: false,
-          zoomSnap: 0.25,
-          zoomDelta: 0.25,
+          zoomSnap: 0.125,
+          zoomDelta: 0.125,
           scrollWheelZoom: false,
           doubleClickZoom: false,
           keyboard: false,
@@ -399,6 +408,8 @@ export class MapCanvas extends BindableHTMLElement {
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }
+    this.querySelector(".leaflet-control-zoom-in")?.classList.add("tight-form-func");
+    this.querySelector(".leaflet-control-zoom-out")?.classList.add("tight-form-func");
     this.leafletMap.on("zoomend", ()=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
         window[this.id + "mapPosition"].zoom = this.leafletMap.getZoom();
@@ -585,27 +596,31 @@ export class MapCanvas extends BindableHTMLElement {
       })
       return;
     }
-    for(var i=0; i<thresholds.length; i++){
-      if(i % columnLength == 0){
-        columns.push([]);
+    if(this.options.customLegend){
+      output += this.options.customLegendValue;
+    } else {
+      for(var i=0; i<thresholds.length; i++){
+        if(i % columnLength == 0){
+          columns.push([]);
+        }
+        var lastColumn = columns.length - 1;
+        var thisValue = thresholds[i].value;
+        var nextValue = thresholds[i+1] ? thresholds[i+1].value : null;
+        columns[lastColumn].push(`<div class='legend-entry'>
+          <p>
+            <span class='color-sample' style='background-color: ${thresholds[i].color}'></span>
+            ${this.legendFormatter(thisValue, nextValue)}
+          </p>
+        </div>`)
       }
-      var lastColumn = columns.length - 1;
-      var thisValue = thresholds[i].value;
-      var nextValue = thresholds[i+1] ? thresholds[i+1].value : null;
-      columns[lastColumn].push(`<div class='legend-entry'>
-        <p>
-          <span class='color-sample' style='background-color: ${thresholds[i].color}'></span>
-          ${this.legendFormatter(thisValue, nextValue)}
-        </p>
-      </div>`)
+      columns.forEach((column)=>{
+        output += `<div class='legend-column'>`;
+        column.forEach((row)=>{
+          output += row;
+        });
+        output += `</div>`
+      })
     }
-    columns.forEach((column)=>{
-      output += `<div class='legend-column'>`;
-      column.forEach((row)=>{
-        output += row;
-      });
-      output += `</div>`
-    })
     output += `</div>`
     legendContainer.innerHTML = output;
     this.bindEvents({
@@ -658,6 +673,11 @@ export class MapCanvas extends BindableHTMLElement {
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       if(this.sideBar){
         this.sideBar.mapCanvas = this;
+      }
+      // if we have ResizeObserver in our context, do some extra watching
+      if(typeof(ResizeObserver) != 'undefined'){
+        const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom.apply(this); });
+        resizeObserver.observe(this.shadow);
       }
     }
     this.renderStyle();

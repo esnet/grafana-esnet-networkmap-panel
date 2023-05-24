@@ -14,6 +14,7 @@ class EditingInterface extends BindableHTMLElement {
         this._dialog = false;
         this._selectedLayer = "layer1";
         this._spliceIndex = null;
+        this._formTouched = false;
     }
 
     // connect component
@@ -83,12 +84,14 @@ class EditingInterface extends BindableHTMLElement {
 
     setEditSelection(evtData){
         if(!evtData){
+            this._formTouched = false;
             this._selectedObject = null;
             this._spliceIndex = null;
             this._selectedLayer = null;
             this._selectedType = null;
             return
         }
+        this._formTouched = false;
         this._selectedObject = evtData['object'];
         this._spliceIndex = evtData['index'];
         this._selectedLayer = evtData['layer'];
@@ -171,6 +174,7 @@ class EditingInterface extends BindableHTMLElement {
         this._selectedLayer = "layer1";
         this._selectedObject = null;
         this._spliceIndex = null;
+        this.setSrcDstOptions();
         this.dialog = "edge";
     }
     hideDialogs(){
@@ -180,14 +184,16 @@ class EditingInterface extends BindableHTMLElement {
         this.selectedLayer = event.target.value;
     }
 
-    updateMapNodes(){
-        var nodeLayer = this.shadow.getElementById('node_layer').value;
-        var nodeName = this.shadow.getElementById('node_name').value;
-        var nodeDisplayName = this.shadow.getElementById('node_display_name').value;
-        var nodeSvg = this.shadow.getElementById('node_svg').value;
-        var nodeTooltip = this.shadow.getElementById('node_tooltip').value;
-        var nodeLat = this.shadow.getElementById('node_lat').value;
-        var nodeLng = this.shadow.getElementById('node_lng').value;
+    updateMapNodes(event){
+        event.preventDefault(); // this is triggered on form submit. Prevent normal form submission.
+
+        var nodeLayer = this.shadow.querySelector('#node_layer').value;
+        var nodeName = this.shadow.querySelector('#node_name').value;
+        var nodeDisplayName = this.shadow.querySelector('#node_display_name').value;
+        var nodeSvg = this.shadow.querySelector('#node_svg').value;
+        var nodeTooltip = this.shadow.querySelector('#node_tooltip').value;
+        var nodeLat = this.shadow.querySelector('#node_lat').value;
+        var nodeLng = this.shadow.querySelector('#node_lng').value;
         var lavender = "rgb(202, 149, 229)";
 
         var newNode = {
@@ -203,6 +209,7 @@ class EditingInterface extends BindableHTMLElement {
         }
 
         this.updateLayerNodes(nodeLayer, newNode, this._spliceIndex);
+        this._formTouched = false;
     }
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
@@ -227,9 +234,9 @@ class EditingInterface extends BindableHTMLElement {
         }, 10);
     }
     createMapEdge(){
-        var edge_layer = this.shadow.getElementById('edge_layer').value;
-        var node_source = this.shadow.getElementById('node_source').value;
-        var node_destination = this.shadow.getElementById('node_destination').value;
+        var edge_layer = this.shadow.querySelector('#edge_layer').value;
+        var node_source = this.shadow.querySelector('#node_source').value;
+        var node_destination = this.shadow.querySelector('#node_destination').value;
 
         var optionsJson = {};
 
@@ -265,13 +272,14 @@ class EditingInterface extends BindableHTMLElement {
           latLngs: latLngs,
           children: [],
         });
-
+        var defaultLayer = {"nodes":[], "edges": []};
         var mapJson = {
-            "layer1": optionsJson.layer1,
-            "layer2": optionsJson.layer2,
-            "layer3": optionsJson.layer3
+            "layer1": this._topology.layer1 || defaultLayer,
+            "layer2": this._topology.layer2 || defaultLayer,
+            "layer3": this._topology.layer3 || defaultLayer,
         }
         PubSub.publish("updateTopology", mapJson, this);
+        PubSub.publish('updateMapTopology', mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
@@ -315,7 +323,6 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this._selectedLayer];
         } catch (e) {
-          console.debug(e);
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }
@@ -344,12 +351,41 @@ class EditingInterface extends BindableHTMLElement {
         return `<select id="${name}">${optionsList}</select>`;
     };
 
+    toString(value){
+        if(typeof(value) === "number" && !Number.isInteger(value)){
+            return value.toFixed(3);
+        }
+        if(value){
+            return value;
+        }
+        return "";
+    }
+    getFieldValue(objType, fieldName){
+        var target = null;
+        if(this._selectedType == objType && !!this._selectedObject){
+            target = this._selectedObject
+        }
+        var fields = fieldName.split(".");
+        for (var field of fields){
+            if(!target) return this.toString(target);
+            target = target[field]
+        }
+        return this.toString(target);
+    }
+    markFormTouched(){
+        this._formTouched = true;
+    }
+
     render(){
         if(!this.shadow){
-            this.shadow = this.attachShadow({"mode": "open"})
+            this.shadow = document.createElement("div");
+            this.append(this.shadow);
         }
         let editModeOnlyButtonDisplay = this._editMode && "inline-block" || "none";
         let editModeOnlyToolsDisplay = this._editMode && "inline-block" || "none";
+        if(this._formTouched){
+            var dirtyForm = this.shadow.querySelector("#add_node_form");
+        }
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -360,17 +396,12 @@ class EditingInterface extends BindableHTMLElement {
                     right: 0;
                 }
                 .button-overlay > .button {
-                   background: white;
                    border-radius: 4px;
                    padding: 5px 10px;
                    margin-right: 5px;
                    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-                   border: 1px solid #b3b3b3;
                    display: inline-block;
                    cursor: pointer;
-                }
-                .button-overlay > .button:hover {
-                    background: #EEE;
                 }
                 .tools-overlay { 
                     position: absolute;
@@ -380,17 +411,13 @@ class EditingInterface extends BindableHTMLElement {
                     max-width:120px;
                 }
                 .tools-overlay > .button {
-                    background: white;
                     border-radius: 4px;
                     padding: 5px 10px;
                     margin-bottom: 10px;
                     box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.5);
-                    border: 1px solid #b3b3b3;
                     display: inline-block;
                     cursor: pointer;
-                }
-                .tools-overlay > .button:hover {
-                    background: #EEE;
+                    width: max-content;
                 }
                 .button-overlay > .button.edit-mode-only {
                     display: ${ editModeOnlyButtonDisplay }
@@ -408,7 +435,6 @@ class EditingInterface extends BindableHTMLElement {
                 }
 
                 .dialog .dialog-form {
-                  background: white;
                   border-radius: 5px;
                   padding:20px;
                   margin: 20px 20%;
@@ -446,7 +472,7 @@ class EditingInterface extends BindableHTMLElement {
                 }
 
                 .dialog .dialog-form input.button {
-                  background: #ccc;
+                  background: rgba(200, 200, 200, 0.5);
                   margin: 1em 0.5em 0 0;
                 }
 
@@ -456,7 +482,7 @@ class EditingInterface extends BindableHTMLElement {
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
-                <div class="dialog-form" id="add_node_dialog">
+                <div class="dialog-form tight-form-func" id="add_node_dialog">
                   <form id='add_node_form'>
                     <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
                     <table>
@@ -477,7 +503,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.name+"'" : "" }></input>
+                          <input class='text-input' id='node_name' type='text' required='required' value='${this.getFieldValue("nodes", "name")}'></input>
                         </td>
                       </tr>
                       <tr>
@@ -485,7 +511,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Display Name:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_display_name' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+ (this._selectedObject.meta.display_name || "") +"'" : "" }></input>
+                          <input class='text-input' id='node_display_name' type='text' value='${ this.getFieldValue("nodes", "display_name") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -493,7 +519,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='text' ${this._selectedType == 'nodes' && this._selectedObject ? "value='"+this._selectedObject.latLng[0].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -501,7 +527,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='text' ${this._selectedType == 'nodes' &&  this._selectedObject ? "value='"+this._selectedObject.latLng[1].toFixed(3)+"'" : "" }></input>
+                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -509,7 +535,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>SVG Icon:</label>
                         </td>
                         <td>
-                          <textarea class='text-input' id='node_svg'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.svg || "" }</textarea>
+                          <textarea class='text-input' id='node_svg'>${ this.getFieldValue("nodes", "meta.svg") }</textarea>
                         </td>
                       </tr>
                       <tr>
@@ -517,20 +543,20 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Custom Tooltip:</label>
                         </td>
                         <td>
-                          <textarea class='text-input' id='node_tooltip'>${this._selectedType == 'nodes' &&  this._selectedObject && this._selectedObject.meta.template || "" }</textarea>
+                          <textarea class='text-input' id='node_tooltip'>${ this.getFieldValue("nodes", "meta.template") }</textarea>
                         </td>
                       </tr>
                       <tr>
                         <td colspan="2">
                           <input class='button' type='button' id='create_node_cancel' value='Cancel' />
-                          <input class='button' type='button' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
+                          <input class='button' type='submit' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
                         </td>
                       </tr>
                     </table>
                   </form>
                 </div>
                 <!-- add edge dialog -->
-                <div class='dialog-form' id="add_edge_dialog">
+                <div class='dialog-form tight-form-func' id="add_edge_dialog">
                   <form>
                     <h2>Add an Edge</h2>
                     <table>
@@ -569,26 +595,29 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class='button edit-mode-only' id='edge_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='edge_edit_mode'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
-              <div class='button edit-mode-only' id='node_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='node_edit_mode'>
                 Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }
               </div>
             </div>
             <div class="tools-overlay">
-              <div class='button edit-mode-only' id='add_node'>
-                + Node
+              <div class='button edit-mode-only tight-form-func' id='add_node'>
+                +&nbsp;Node
               </div>
-              <div class='button edit-mode-only' id='add_edge'>
-                + Edge
+              <div class='button edit-mode-only tight-form-func' id='add_edge'>
+                +&nbsp;Edge
               </div>
-              <div class='button edit-mode-only' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: inline-block" : "display: none" }'>
+              <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: block" : "display: none" }'>
                 Delete<br>
                 ${this._selectedObject && this._selectedObject.name}
               </div>
             </div>
             `;
+          if(this._formTouched){
+              this.shadow.querySelector("#add_node_form").replaceWith(dirtyForm);
+          }
           this.bindEvents({
             "#dialog@onmousedown": this.disableScrolling,
             "#dialog@onmouseup": this.enableScrolling,
@@ -596,7 +625,7 @@ class EditingInterface extends BindableHTMLElement {
             "#node_edit_mode@onclick": this.toggleNodeEdit,
             //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
             "#add_node@onclick": this.showAddNodeDialog,
-            "#create_node@onclick": this.updateMapNodes,
+            "#add_node_form@onsubmit": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,
             "#node_layer@onchange": this.showSrcDst,
 
@@ -606,6 +635,8 @@ class EditingInterface extends BindableHTMLElement {
             "#edge_layer@onchange": this.showSrcDst,
 
             "#delete_selection@onclick": this.deleteSelection,
+
+            "input.text-input@onkeyup": this.markFormTouched,
           });
     }
 

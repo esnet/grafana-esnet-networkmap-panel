@@ -4,7 +4,7 @@
   "name": "Network Map Panel",
   "id": "esnet-networkmap-panel",
   "info": {
-    "description": "Network Map Panel",
+    "description": "Topology map of a network. Graphs network traffic between nodes",
     "author": {
       "name": "ESnet"
     },
@@ -29,14 +29,14 @@
     "screenshots": [
       {
         "name": "slopegraph-example",
-        "path": "img/slopegraph.png"
+        "path": "img/networkmap.png"
       }
     ],
     "version": "%VERSION%",
     "updated": "%TODAY%"
   },
   "dependencies": {
-    "grafanaDependency": ">=7.0.0",
+    "grafanaDependency": ">=9.0.0",
     "plugins": []
   }
 }

@@ -10,9 +10,6 @@ yarn-error.log*
 
 node_modules/
 
-# MANIFEST.txt: XXX: this line should be deleted before grafana release
-dist/MANIFEST.txt
-
 # Runtime data
 pids
 *.pid
@@ -35,3 +32,4 @@ e2e-results/
 # Editors
 .idea
 
+.DS_store

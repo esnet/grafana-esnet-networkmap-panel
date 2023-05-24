@@ -264,15 +264,13 @@ svg.leaflet-image-layer.leaflet-interactive path {
     }
 .leaflet-bar a,
 .leaflet-bar a:hover {
-    background-color: #fff;
-    border-bottom: 1px solid #ccc;
+    border-bottom: 1px solid rgba(128,128,128,0.3);
     width: 26px;
     height: 26px;
     line-height: 26px;
     display: block;
     text-align: center;
     text-decoration: none;
-    color: black;
     }
 .leaflet-bar a,
 .leaflet-control-layers-toggle {

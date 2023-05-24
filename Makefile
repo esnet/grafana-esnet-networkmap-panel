@@ -1,4 +1,5 @@
 NODE=/Users/seg/.nvm/versions/node/v14.17.6/bin/node
+NPM=/Users/seg/.nvm/versions/node/v14.17.6/bin/npm
 GRAFANA_PATH="node_modules/@grafana/toolkit/bin/grafana-toolkit.js"
 BREW=/usr/local/bin/brew
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
@@ -6,12 +7,13 @@ CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
 .PHONY: prod
 prod:
 	yarn test
-	$(NODE) $(GRAFANA_PATH) "plugin:build"
-	$(NODE) $(GRAFANA_PATH) "plugin:sign" "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
+	yarn build
+	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
+	yarn run "build_dts"
 
 .PHONY: dev
 dev:
-	$(NODE) $(GRAFANA_PATH) "plugin:dev"
+	yarn dev
 
 .PHONY: restart
 restart:
