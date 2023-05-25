@@ -31,5 +31,5 @@ e2e-results/
 
 # Editors
 .idea
-
+.vscode
 .DS_store

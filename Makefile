@@ -15,6 +15,10 @@ prod:
 dev:
 	yarn dev
 
+.PHONY: run
+run:
+	python3 -m http.server
+
 .PHONY: restart
 restart:
 	$(BREW) services restart grafana
