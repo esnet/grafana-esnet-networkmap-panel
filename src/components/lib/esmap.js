@@ -262,7 +262,7 @@ function renderEdges(g, data, ref, layerId, options) {
 
 }
 
-function deleteControlPoint(evt, d, obj, edgeData, ref){
+function deleteControlPoint(evt, d, edgeData, ref){
   for(var i=0; i<edgeData.latLngs.length; i++){
     if(edgeData.latLngs[i] == d){
       edgeData.latLngs.splice(i, 1);
@@ -313,31 +313,16 @@ function addControlPoint(evt, obj, ref) {
   }
 }
 
-function renderNodeControl(g, data, ref, layerId){
-  var feature = g.selectAll('circle').data(data.nodes);
+function doEdgeSnap(nodeData, layerId, mapCanvas){
+    var mapId = "map-" + mapCanvas.instanceId;
+    var layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
+    var ll = {};
+    ll.lat = nodeData['latLng'][0];
+    ll.lng = nodeData['latLng'][1];
 
-  const setNodeEditSelection = (evtData)=>{
-    if(evtData && evtData['type'] == "nodes"){
-      d3.selectAll(".control-selected")
-        .classed("control-selected", false);
-      var selector = `.controlPoint.control-point-layer${evtData["layer"]}.control-point-for-node-${sanitizeName(evtData["object"].name)}`;
-      d3.select(selector)
-        .classed("control-selected", true);
-    }
-  }
-
-  function dragged(evt, pointData) {
-    var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", evt, ref.svg.node());
-    //--- set the control points to the new Lat lng
-    var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
-    pointData['latLng'][0] = ll.lat;
-    pointData['latLng'][1] = ll.lng;
     // procedure for updating the edge:
-    // get all edges that have "d.name" as a node
-    var mapId = "map-" + ref.mapCanvas.instanceId;
-    var layerSelector = !ref.mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
-    var selector = `#${mapId} ${layerSelector}.connects-to-${sanitizeName(pointData.name)}`;
+    // get all edges that have "nodeData.name" as a node
+    var selector = `#${mapId} ${layerSelector}.connects-to-${sanitizeName(nodeData.name)}`;
     d3.selectAll(selector)
         // for each edge that we select:
         .attr('d', function (d) {
@@ -346,7 +331,7 @@ function renderNodeControl(g, data, ref, layerId){
           var idx = 0;
           var step = 1;
           var end = d.latLngs.length - 1;
-          if(d.nodeZ == pointData.name){
+          if(d.nodeZ == nodeData.name){
             // if we are manipulating the "Z" end
             // the index of the point we want is the last one
             idx = d.latLngs.length - 1;
@@ -370,7 +355,30 @@ function renderNodeControl(g, data, ref, layerId){
             }
           }
         })
-    //
+}
+
+
+function renderNodeControl(g, data, ref, layerId){
+  var feature = g.selectAll('circle').data(data.nodes);
+
+  const setNodeEditSelection = (evtData)=>{
+    if(evtData && evtData['type'] == "nodes"){
+      d3.selectAll(".control-selected")
+        .classed("control-selected", false);
+      var selector = `.controlPoint.control-point-layer${evtData["layer"]}.control-point-for-node-${sanitizeName(evtData["object"].name)}`;
+      d3.select(selector)
+        .classed("control-selected", true);
+    }
+  }
+
+  function dragged(evt, nodeData) {
+    var mapDiv = ref.leafletMap.getContainer();
+    PubSub.publish("dragStarted", evt, ref.svg.node());
+    //--- set the control points to the new Lat lng
+    var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
+    nodeData['latLng'][0] = ll.lat;
+    nodeData['latLng'][1] = ll.lng;
+    doEdgeSnap(nodeData, layerId, ref.mapCanvas);
     //--- rerender stuff
     ref.update();
     setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
@@ -602,7 +610,7 @@ function renderEdgeControl(g, data, ref, layerId) {
         ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
       })
       .on('dblclick', function (evt, d) {
-        deleteControlPoint(evt, d, this, edgeData, ref);
+        deleteControlPoint(evt, d, edgeData, ref);
       });
 
     feature.exit().remove();
@@ -799,6 +807,10 @@ export class EsMap {
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
     this.lastInteractedType = null; // "nodes" or "edges"
+
+    PubSub.subscribe("snapEdges", (data)=>{
+      doEdgeSnap(data.node, data.layer, this.mapCanvas)
+    }, this.mapCanvas)
 
     if(!this.mapCanvas.options.showSidebar){
       PubSub.subscribe("showTooltip",function(data){
