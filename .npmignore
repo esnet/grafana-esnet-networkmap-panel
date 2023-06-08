@@ -7,3 +7,5 @@ README-JAMES.md
 docs/*
 jest.config.js
 src/components/lib/.pnpm-debug.log
+*/yarn-error.log
+yarn-error.log

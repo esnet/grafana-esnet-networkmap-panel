@@ -58,6 +58,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
     this.legendMinimized = false;
+    this.mapFrameChanged = false;
   }
 
   // connect component
@@ -333,7 +334,7 @@ export class MapCanvas extends BindableHTMLElement {
 
   recalculateMapZoom(){
     this.leafletMap && this.leafletMap.invalidateSize();
-    if(this.leafletMap && this._options.initialViewStrategy === 'viewport'){
+    if(this.leafletMap && !this.userChangedMapFrame && this._options.initialViewStrategy === 'viewport'){
       var bounds = L.latLngBounds(L.latLng(
         this._options.viewportTopLeftLat,
         this._options.viewportTopLeftLng),
@@ -408,11 +409,20 @@ export class MapCanvas extends BindableHTMLElement {
         }
         L.svg({ clickable: true }).addTo(this.leafletMap); // we have to make the svg layer clickable
     }
-    this.querySelector(".leaflet-control-zoom-in")?.classList.add("tight-form-func");
-    this.querySelector(".leaflet-control-zoom-out")?.classList.add("tight-form-func");
-    this.leafletMap.on("zoomend", ()=>{
+    let zoomIn = this.querySelector(".leaflet-control-zoom-in");
+    zoomIn?.classList.add("tight-form-func");
+    zoomIn?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
+    let zoomOut = this.querySelector(".leaflet-control-zoom-out")
+    zoomOut?.classList.add("tight-form-func");
+    zoomOut?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
+    this.leafletMap.on("zoomend", (event)=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
         window[this.id + "mapPosition"].zoom = this.leafletMap.getZoom();
+    })
+    this.leafletMap.on("move", (event)=>{
+      if(event.originalEvent){
+        this.userChangedMapFrame = true;
+      }
     })
     this.leafletMap.on("moveend", ()=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
