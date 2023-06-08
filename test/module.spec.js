@@ -120,16 +120,9 @@ describe( "Class MapCanvas", () => {
         elem.updateTopology = function(){ return }
         document.body.appendChild(elem);
     }); 
-
-
-    
     it( "should append a esnet-map-canvas element", () => {
       document.querySelector("esnet-map-canvas").should.be.an.instanceOf(HTMLElement);
     } );
-
-
-
-
     it( "should have a sidebar child element", () => {
       document.querySelector("esnet-map-canvas").querySelector("esnet-map-side-bar").should.be.an.instanceOf(HTMLElement);
     } );
@@ -1310,4 +1303,52 @@ describe( "Class MapCanvas", () => {
         // we should find at no "true" results (all )
         results.indexOf(true).should.equal(-1)
     })
+    it("should snap edges when the node is moved using the edit form", async () => {
+      var canvas = document.querySelector("esnet-map-canvas");
+      
+      // set edit mode
+      PubSub.publish("updateEditMode", true, canvas);
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
+      
+      // get a reference to a node
+      var node = document.querySelector(".control-point-for-node-A");
+
+      var nodeLocation = node.getBoundingClientRect();
+
+      var mouseDownEvent = new MouseEvent('mousedown', { bubbles: true, clientX: 200, clientY: 200, view: window });
+      var mouseUpEvent = new MouseEvent('mouseup', { bubbles: true, clientX: 200, clientY: 200, view: window });
+      // get position of edges of that node
+
+      var edgeClassName = `.connects-to-A`;
+      var edge = document.querySelector(edgeClassName);
+      var edgeLocation = edge.getBoundingClientRect();
+      
+      // get form to popup
+      
+      node.dispatchEvent(mouseDownEvent);
+      node.dispatchEvent(mouseUpEvent);
+      node.dispatchEvent(mouseDownEvent);
+      node.dispatchEvent(mouseUpEvent);
+
+      var nodeLatEl = document.querySelector('#node_lat');
+      nodeLatEl.value = parseFloat(nodeLatEl.value) - 1;
+
+      // update node location from form
+
+      // var updateNowBtn = document.querySelector('#create_node');
+      var nodeForm = document.querySelector('#add_node_form');
+      
+      var newVal = parseFloat(nodeLatEl.value) - 1;
+      nodeLatEl.setAttribute('value', newVal);
+      nodeLatEl.value = newVal;
+
+      nodeForm.onsubmit(new Event('submit'));
+
+      // compare before and after for edges and node
+
+      setTimeout(() => {
+        edge.getBoundingClientRect().y.should.not.equal(edgeLocation.y);
+        node.getBoundingClientRect().y.should.not.equal(nodeLocation.y);
+      }, 50);  // @see EditingInterface.updateLayerNodes: line 236, timeout of 10ms requires > 10ms wait time before validating results
+    });
 } );
