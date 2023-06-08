@@ -58,7 +58,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.leafletMap = null;
     this.jsonResults = { layer1: false, layer2: false, layer3: false };
     this.legendMinimized = false;
-    this.mapFrameChanged = false;
+    this.userChangedMapFrame = false;
   }
 
   // connect component
