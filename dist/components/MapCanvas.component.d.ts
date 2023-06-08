@@ -9,7 +9,7 @@ export class MapCanvas extends BindableHTMLElement {
     set jsonResults(arg: any);
     get jsonResults(): any;
     legendMinimized: boolean;
-    mapFrameChanged: boolean;
+    userChangedMapFrame: boolean;
     connectedCallback(): void;
     set topology(arg: any);
     get topology(): any;
@@ -50,7 +50,6 @@ export class MapCanvas extends BindableHTMLElement {
     updateCenter(centerData: any): void;
     toggleLayer(layerData: any): void;
     getCurrentLeafletMap(): any;
-    userChangedMapFrame: boolean | undefined;
     destroyMap(): void;
     homeMap(): void;
     newMap(): void;
