@@ -11,6 +11,7 @@ export class EsMap {
     svg: any;
     data: {};
     mapLayers: {};
+    curves: {};
     lineGen: any;
     editEdges: any;
     editNodes: any;

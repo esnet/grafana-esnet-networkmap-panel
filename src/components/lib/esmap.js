@@ -799,7 +799,8 @@ export class EsMap {
     this.svg = svg;
     this.data = {};
     this.mapLayers = {};
-    this.lineGen = d3.line().curve(curve);
+    this.curves = {}; // specific edge curves for each layer
+    this.lineGen = d3.line().curve(curve); // the default curve we'll use to render edges
     this.editEdges = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editEdgeMode;
     this.editNodes = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editNodeMode;
     this.div = div;
@@ -1016,10 +1017,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.lineGen(offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+layerId]));
+      d.azPath = ref.curves['layer'+layerId](offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+layerId]));
 
       //--- setup the zaPath
-      d.zaPath = ref.lineGen(offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+layerId]));
+      d.zaPath = ref.curves['layer'+layerId](offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+layerId]));
     });
 
     //---swap out edge list with the filtered list
@@ -1070,7 +1071,13 @@ export class EsMap {
 
   addNetLayer(name, data) {
     var ref = this;
-    ref.data[name] = data; //maybe use this to serialize
+    ref.data[name] = data;
+    let lineGen = ref.lineGen;
+    if (data?.pathLayout?.type && d3.hasOwnProperty(data?.pathLayout?.type)){
+      let linefunc = d3[data.pathLayout.type];
+      lineGen = d3.line().curve(linefunc);
+    }
+    ref.curves[name] = lineGen;
     var map_g = this.svg.append('g').attr('class', 'esmap');
     ref.mapLayers[name] = map_g;
 

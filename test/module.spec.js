@@ -1300,7 +1300,7 @@ describe( "Class MapCanvas", () => {
         for(var elem of nodes){
           results.push(inside(rect, canvasBounds));
         }
-        // we should find at no "true" results (all )
+        // we should find at no "true" results (all 'false')
         results.indexOf(true).should.equal(-1)
     })
     it("should snap edges when the node is moved using the edit form", async () => {
