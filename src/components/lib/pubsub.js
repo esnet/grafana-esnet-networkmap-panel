@@ -61,7 +61,7 @@ const doClearAllCallbacks = (messageBus)=>{
     if(messageBus.debug){
         console.debug("destroying all callbacks");
     }
-    var keys = Object.keys(this.topics);
+    var keys = Object.keys(messageBus.topics);
     for(var i=0; i<keys.length; i++){
         messageBus.topics[keys[i]] = {};
     }
@@ -71,7 +71,7 @@ const doClearTopicCallbacks = (topic, messageBus)=>{
     if(messageBus.debug){
         console.debug("destroying callbacks on topic '"+topic+"'");
     }
-    if(messageBus.topics[topic]) this.topics[topic] = {};
+    if(messageBus.topics[topic]) messageBus.topics[topic] = {};
 }
 
 const getLastValue = (topic, messageBus)=>{
