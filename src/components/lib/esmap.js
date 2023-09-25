@@ -4,6 +4,7 @@ import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
+import { SVG } from "./iconography.js";
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -66,6 +67,41 @@ function sanitizeName(name){
   return sanitized;
 }
 
+/**
+ * Returns the markup to render for a tooltip given edge.
+ * 
+ * @param {IEdge} edge                    The data for an edge
+ * @param {ILabels|undefined} labels      Optional. The data for a label. This is only utitlized if template is
+ *                                        defined under the edge's meta property.
+ * @returns 
+ */
+export const getTooltipRenderText = (edge, labels) => {
+  if (edge.meta && edge.meta.template) {
+    return renderTemplate(edge.meta.template, {"d": edge, "self": edge, "labels": labels });
+  } else {
+    return `
+    <div class="flow-direction-tooltip">
+      <strong>${edge.nodeA}</strong>
+      <strong>${SVG.arrowRight}</strong>
+      <strong>${edge.nodeZ}</strong>
+    </div>
+    <div class="flow-amount-element">
+      <strong>${SVG.gauge}</strong>
+      <strong>${edge.AZdisplayValue || "no data"}</strong>
+    </div>
+    <div class="flow-direction-tooltip">
+      <span>${edge.nodeA}</span>
+      <span>${SVG.arrowLeft}</span>
+      <span>${edge.nodeZ}</span>
+    </div>
+    <div class="flow-amount-element">
+      <span>${SVG.gauge}</span>
+      <span>${edge.ZAdisplayValue || "no data"}</span>
+    </div>
+  `;
+  }
+};
+
 function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
   const edgeWidth = ref.options["edgeWidthL"+layerId];
@@ -75,6 +111,16 @@ function renderEdges(g, data, ref, layerId, options) {
   const doEdgeMouseOver = (event, d) => {
     var start = new Date();
     var thisEdge = d3.select(event.target)
+    var thisEdgeClassName = [...event.target.classList].find(classListItem => /edge-(az|za)-(.*)/.test(classListItem));
+    var reverseEdgeClassName;
+    if (/edge-az-/.test(thisEdgeClassName)) {
+      reverseEdgeClassName = thisEdgeClassName.replace('edge-az', 'edge-za');
+    } else if (/edge-za-/.test(thisEdgeClassName)) {
+      reverseEdgeClassName = thisEdgeClassName.replace('edge-za', 'edge-az');
+    } else {
+      console.warn(`lib.esmap.doEdgeMouseOver: Could not resolve reverse edge from ${thisEdgeClassName}`);
+    }
+    var reverseEdge = d3.select(`.${reverseEdgeClassName}`);
     const isAZ = thisEdge.classed("edge-az");
     var color = d.azColor ? d.azColor : defaultEdgeColor;
     if(!isAZ){
@@ -93,14 +139,10 @@ function renderEdges(g, data, ref, layerId, options) {
       "dst": options["dstFieldLabelL"+layerId] ? options["dstFieldLabelL"+layerId] : "To:",
       "data": options["dataFieldLabelL"+layerId] ? options["dataFieldLabelL"+layerId] : "Volume:",
     }
+    const azVolume = d.AZdisplayValue;
+    const zaVolume = reverseEdge;
 
-    if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d, "labels": labels });
-    } else {
-        var text = `<p><b>${labels.src}</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
-        <p><b>${labels.dst}</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
-        <p><b>${labels.data}</b>  ${ isAZ ? d.AZdisplayValue : d.ZAdisplayValue }</p>`;
-    }
+    var text = getTooltipRenderText(d, labels).trim();
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
 

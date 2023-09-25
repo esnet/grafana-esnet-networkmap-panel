@@ -10,6 +10,16 @@ export const esmapCss = `
   position: relative;
 }
 
+.flow-direction-tooltip, .flow-amount-element {
+  display: flex;
+  align-items: center;
+  grid-gap: 8px;
+}
+.flow-direction-tooltip svg, .flow-amount-element svg {
+  height: 12px;
+  width: 12px;
+}
+
 svg path.edge-az {
   marker-start: url("#arrow");
 }
