@@ -1,16 +1,17 @@
-import { FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName } from '@grafana/data';
+import { standardEditorsRegistry, FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName } from '@grafana/data';
 import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
 import { CoordinateButton } from './components/CoordinateButton';
 import { ViewportCoordinateButton } from './components/ViewportCoordinateButton';
 
-const FieldsCategory = ['Choose Fields'];
-const LayersCategory = ['Layer options'];
-const SidebarCategory = ['Sidebar options'];
-const LegendCategory = ['Legend options'];
-const ViewCategory = ['View options'];
-const QueryCategory = ['Variable Bindings'];
+import { ViewStrategies, BaseTilesets, PoliticalBoundaryTilesets, PoliticalLabelTilesets, LegendPositionOptions, LegendBehaviorOptions } from './options'
+
+const customEditors = {
+  "CoordinateButton": CoordinateButton,
+  "CustomTextArea": CustomTextArea,
+  "ViewportCoordinateButton": ViewportCoordinateButton
+}
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
@@ -83,93 +84,105 @@ async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
   return Promise.resolve(options);
 }
 
-// -------------------- Network Map Panel Options --------------------
-plugin.setPanelOptions((builder) => {
-  builder.addSelect({
-    path: 'initialViewStrategy',
-    name: 'Map Initial View Strategy',
-    description: 'Strategy to set the initial center and zoom level of the map',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        return Promise.resolve([
-          {
-            label: 'Specify Static Center, No zoom on resize',
-            value: 'static',
-          },
-          {
-            label: 'Specify Lat/Lng Viewport, Zoom to fit on resize',
-            value: 'viewport',
-          },
-          {
-            label: 'Set Map Center from Variables, No Zoom on resize',
-            value: 'variables',
-          },
-        ]);
-      },
-    },
-  });
+function resolveSetting(path, setting){
+  let output = {...setting}
+  if(output.hasOwnProperty('editor')){
+    let editorName = output.editor;
+    console.log(editorName);
+    if(editorName in customEditors){
+      output.editor = customEditors[editorName];
+    } else {
+      output.editor = standardEditorsRegistry.get(editorName).editor
+    }
+  }
+  if(output.hasOwnProperty('category')){
+    output.category = categories[output.category];
+  }
+  output.path = path;
+  output.id = path;
+  return output
+}
+
+let layerOptions = {
+
+}
+
+/*`
+Name Remapping, so far:
+viewportTopLeftLat -> viewport.top
+viewportTopLeftLng -> viewport.left
+viewportBottomRightLat -> viewport.bottom
+viewportBottomRightLat -> viewport.right
+
+startLat -> viewport.center.lat
+startLng -> viewport.center.lng
+startZoom -> viewport.zoom
+
+tilesetLayer -> tileset.geographic
+boundaryLayer -> tileset.boundaries
+labelLayer -> tileset.labels
+`*/
+
+const options = {
+  "initialViewStrategy": {
+      editor: "select",
+      name: 'Map Initial View Strategy',
+      description: 'Strategy to set the initial center and zoom level of the map',
+      settings: { allowCustomValue: false, options: ViewStrategies, },
+  },
   //////////////
   // Variables for center and zoom level options
   //////////////
-  builder.addSelect({
-    path: 'latitudeVar',
+  "latitudeVar": {
+    editor: "select",
     name: 'Latitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
     showIf: checkBool('initialViewStrategy', 'variables'),
     settings: {
       allowCustomValue: false,
-      options: [],
       getOptions: buildChoicesWithSuggestions,
     },
-  });
-  builder.addSelect({
-    path: 'longitudeVar',
+  },
+  'longitudeVar': {
+    editor: "select",
     name: 'Longitude Variable',
-    description: 'Select a dashboard or query variable to set initial latitude of map',
+    description: 'Select a dashboard or query variable to set initial longitude of map',
     showIf: checkBool('initialViewStrategy', 'variables'),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoicesWithSuggestions,
     },
-  });
+  },
   //////////////
   // Static center and zoom level options
   //////////////
-  builder.addCustomEditor({
-    id: 'setLatLngZoom',
-    path: 'setLatLngZoom',
+  'setLatLngZoom': {
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
     showIf: checkBool('initialViewStrategy', 'static'),
     settings: { label: 'Set Lat/Lng & Zoom' },
-    editor: CoordinateButton,
-  });
-  builder.addCustomEditor({
-    id: 'startLat',
-    path: 'startLat',
+    editor: "CoordinateButton",
+  },
+  "viewport.center.lat": {
     name: 'Starting Latitude of map',
-    description: 'This will be the center of the map when it loads. (numbers only)',
+    description: 'This will be the center of the map when it loads',
     showIf: checkBool('initialViewStrategy', 'static'),
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-  builder.addCustomEditor({
-    id: 'startLng',
-    path: 'startLng',
+    editor: "CustomTextArea",
+  },
+  "viewport.center.lng": {
     name: 'Starting Longitude of map',
-    description: 'This will be the center of the map when it loads. (numbers only)',
+    description: 'This will be the center of the map when it loads',
     showIf: checkBool('initialViewStrategy', 'static'),
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-  builder.addSliderInput({
-    path: 'startZoom',
+    editor: "CustomTextArea",
+  },
+  'viewport.zoom': {
+    editor: "slider",
     name: 'Starting zoom level of map',
     showIf: checkInArray('initialViewStrategy', ['static', 'variables']),
     defaultValue: 5,
@@ -178,247 +191,177 @@ plugin.setPanelOptions((builder) => {
       max: 15,
       step: 0.5,
     },
-  });
+  },
   //////////////
   // "Viewport" top-left, bottom-right and auto-resize options
   //////////////
-  builder.addCustomEditor({
-    id: 'setViewport',
-    path: 'setViewport',
+  "setViewport": {
     name: 'Set Zoom Viewport to Current Map View',
     description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
     showIf: checkBool('initialViewStrategy', 'viewport'),
     settings: { label: 'Set Viewport Coordinates' },
-    editor: ViewportCoordinateButton,
-  });
-  builder.addCustomEditor({
-    id: 'viewportTopLeftLat',
-    path: 'viewportTopLeftLat',
+    editor: "ViewportCoordinateButton",
+  },
+  "viewport.top": {
     name: 'Initial viewport: Top Left: Latitude',
     description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
     showIf: checkBool('initialViewStrategy', 'viewport'),
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-  builder.addCustomEditor({
-    id: 'viewportTopLeftLng',
-    path: 'viewportTopLeftLng',
+    editor: "CustomTextArea",
+  },
+  "viewport.left": {
     name: 'Initial viewport: Top Left: Longitude',
     description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
     showIf: checkBool('initialViewStrategy', 'viewport'),
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-  builder.addCustomEditor({
-    id: 'viewportBottomRightLat',
-    path: 'viewportBottomRightLat',
+    editor: "CustomTextArea",
+  },
+  "viewport.bottom": {
     name: 'Initial viewport: Bottom Right: Latitude',
     description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
     showIf: checkBool('initialViewStrategy', 'viewport'),
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-  builder.addCustomEditor({
-    id: 'viewportBottomRightLng',
-    path: 'viewportBottomRightLng',
+    editor: "CustomTextArea",
+  },
+  "viewport.right": {
     name: 'Initial viewport: Bottom Right: Longitude',
     description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
     showIf: checkBool('initialViewStrategy', 'viewport'),
     settings: { useTextarea: true, rows: 1 },
-    editor: CustomTextArea,
-  });
-
-  builder.addColorPicker({
-    path: 'background',
+    editor: "CustomTextArea",
+  },
+  ///////////////
+  // Background layers & color
+  ///////////////
+  "background": {
+    editor: 'color',
     name: 'Map Background Color',
     description: 'The default color for the background, with no tileset',
     defaultValue: '#EDEDED',
-  });
-  builder.addSelect({
-    path: 'tileSetLayer',
+  },
+  "tileset.geographic": {
+    editor: "select",
     name: 'Geographic Tileset',
     description: 'Select a geographical tileset for the map.',
     settings: {
       allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        return Promise.resolve([
-          {
-            label: '[Blank Tileset]',
-            value: null,
-          },
-          {
-            label: 'ArcGIS Default Set',
-            value: 'arcgis',
-          },
-          {
-            label: 'Open Topography Map',
-            value: 'opentopomap',
-          },
-          {
-            label: 'USGS Satellite Imagery',
-            value: 'usgs',
-          },
-          {
-            label: 'ESRI World Shaded Relief',
-            value: 'esri.shaded',
-          },
-          {
-            label: 'Geoportail France',
-            value: 'geoportail',
-          },
-          {
-            label: 'CartoDB DarkMatter (Labeled)',
-            value: 'cartodb.labeled',
-          },
-          {
-            label: 'CartoDB DarkMatter (No Labels)',
-            value: 'cartodb.unlabeled',
-          },
-        ]);
-      },
+      options: BaseTilesets,
     },
-  });
-  builder.addSelect({
-    path: 'boundaryLayer',
+  },
+  "tileset.boundaries": {
+    editor: "select",
     name: 'Political Boundary Tileset',
     description: 'Select a political boundary tileset for the map.',
     settings: {
       allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        return Promise.resolve([
-          {
-            label: '[No Political Boundaries]',
-            value: null,
-          },
-          {
-            label: '"Toner" Political Boundaries (Unlabeled)',
-            value: 'toner.boundaries',
-          },
-        ]);
-      },
+      options: PoliticalBoundaryTilesets,
     },
-  });
-  builder.addSelect({
-    path: 'labelLayer',
+  },
+  "tileset.labels": {
+    editor: "select",
     name: 'Political Label Tileset',
     description: 'Select a political label tileset for the map.',
     settings: {
       allowCustomValue: false,
-      options: [],
-      getOptions: async (context: FieldOverrideContext) => {
-        return Promise.resolve([
-          {
-            label: '[No Political Labels]',
-            value: null,
-          },
-          {
-            label: '"Toner" Political Labels',
-            value: 'toner.labels',
-          },
-        ]);
-      },
+      options: PoliticalLabelTilesets,
     },
-  });
-
-  builder.addBooleanSwitch({
-    path: 'showViewControls',
+  },
+  "showViewControls": {
+    editor: "boolean",
     name: 'Show View Controls',
     description: 'show zoom in/out and "home" button',
-    category: ViewCategory,
+    category: "View Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'enableScrolling',
+  },
+  "enableScrolling": {
+    editor: "boolean",
     name: 'Enable Map Scrolling on Drag',
     description: 'allows user to scroll map on drag',
-    category: ViewCategory,
+    category: "View Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'enableEditing',
+  },
+  "enableEditing": {
+    editor: "boolean",
     name: 'Enable Map Editing',
     description: 'Enable map editing controls in edit mode',
-    category: ViewCategory,
+    category: "View Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'enableNodeAnimation',
+  },
+  "enableNodeAnimation": {
+    editor: "boolean",
     name: 'Enable Node Selection Animations',
     description: 'Enable throb animation for nodes. May be CPU/GPU intensive in some browsers.',
-    category: ViewCategory,
+    category: "View Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'enableEdgeAnimation',
+  },
+  "enableEdgeAnimation": {
+    editor: "boolean",
     name: 'Enable Edge Traffic Direction Animations',
     description: 'Enable animations for traffic direction on edges. May be CPU/GPU intensive in some browsers.',
-    category: ViewCategory,
+    category: "View Options",
     defaultValue: true,
-  });
+  },
 
   // -------------------- Layer Options -------------------
-  builder.addBooleanSwitch({
-    path: 'layer1',
+  "layer1": {
+    editor: "boolean",
     name: 'Layer 1 on',
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'jsonFromUrlL1',
+  },
+  "jsonFromUrlL1": {
+    editor: "boolean",
     name: 'Fetch Layer 1 JSON from URL',
     showIf: checkBool('layer1', true),
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: false,
-  });
-  builder.addTextInput({
-    path: 'mapjsonUrlL1',
+  },
+  "mapjsonUrlL1": {
+    editor: "text",
     name: 'Layer 1 Map data (URL)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer1: true, jsonFromUrlL1: true }),
     description: 'URL that returns JSON with edges and nodes of network map',
     defaultValue: '',
-  });
-  builder.addCustomEditor({
+  },
+  "mapjsonL1": {
     id: 'mapjsonL1',
-    path: 'mapjsonL1',
     name: 'Layer 1 Map data (json)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer1: true, jsonFromUrlL1: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
-    editor: CustomTextArea,
-  });
-  builder.addColorPicker({
-    path: 'color1',
+    editor: "CustomTextArea",
+  },
+  "color1": {
+    editor: "color",
     name: 'Layer 1 Default color',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     description: 'The default color for nodes and links on Layer 1',
     defaultValue: 'grey',
-  });
-  builder.addTextInput({
-    path: 'endpointIdL1',
+  },
+  "endpointIdL1": {
+    editor: "text",
     name: 'Layer 1 Endpoint Identifier',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     description: 'The endpoint identifier in the meta data to match to the query',
     defaultValue: 'pops',
-  });
-  builder.addColorPicker({
-    path: 'nodeHighlightL1',
+  },
+  "nodeHighlightL1": {
+    editor: "color",
     name: 'Layer 1 Node highlight color',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     description: 'The color to highlight nodes that match the query',
     defaultValue: 'red',
-  });
-  builder.addSliderInput({
-    path: 'nodeWidthL1',
+  },
+  "nodeWidthL1": {
+    editor: "slider",
     name: 'Layer 1 Node Size',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     defaultValue: 5,
     settings: {
@@ -426,93 +369,92 @@ plugin.setPanelOptions((builder) => {
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'edgeWidthL1',
+  },
+  "edgeWidthL1": {
+    editor: "slider",
     name: 'Layer 1 Edge Width',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'pathOffsetL1',
+  },
+  "pathOffsetL1": {
+    editor: "slider",
     name: 'Layer 1 Edge Offset',
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer1', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
+  },
 
-  builder.addBooleanSwitch({
-    path: 'layer2',
+  "layer2": {
+    editor: "boolean",
     name: 'Layer 2 on',
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: false,
-  });
-  builder.addBooleanSwitch({
-    path: 'jsonFromUrlL2',
+  },
+  "jsonFromUrlL2": {
+    editor: "boolean",
     name: 'Fetch Layer 2 JSON from URL',
     showIf: checkBool('layer2', true),
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: false,
-  });
-  builder.addTextInput({
-    path: 'mapjsonUrlL2',
+  },
+  "mapjsonUrlL2": {
+    editor: "text",
     name: 'Layer 2 Map data (URL)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer2: true, jsonFromUrlL2: true }),
     description: 'URL that returns JSON with edges and nodes of network map',
     defaultValue: '',
-  });
-  builder.addCustomEditor({
+  },
+  'mapjsonL2': {
     id: 'mapjsonL2',
-    path: 'mapjsonL2',
     name: 'Layer 2 Map data (json)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer2: true, jsonFromUrlL2: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
-    editor: CustomTextArea,
-  });
-  builder.addColorPicker({
-    path: 'color2',
+    editor: "CustomTextArea",
+  },
+  "color2": {
+    editor: "color",
     name: 'Layer 2 Default color',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer2', true),
     description: 'The default color for nodes and links on Layer 2',
     defaultValue: 'grey',
-  });
-  builder.addTextInput({
-    path: 'endpointIdL2',
+  },
+  "endpointIdL2": {
+    editor: "text",
     name: 'Layer 2 Endpoint Identifier',
-    category: LayersCategory,
+    category: "Layer Options",
     description: 'The endpoint identifier in the meta data to match to the query',
     showIf: checkBool('layer2', true),
     defaultValue: 'pops',
-  });
-  builder.addColorPicker({
-    path: 'nodeHighlightL2',
+  },
+  "nodeHighlightL2": {
+    editor: "color",
     name: 'Layer 2 Node highlight color',
-    category: LayersCategory,
+    category: "Layer Options",
     description: 'The color to highlight nodes that match the query',
     showIf: checkBool('layer2', true),
     defaultValue: 'red',
-  });
-  builder.addSliderInput({
-    path: 'nodeWidthL2',
+  },
+  "nodeWidthL2": {
+    editor: "slider",
     name: 'Layer 2 Node Size',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer2', true),
     defaultValue: 5,
     settings: {
@@ -520,94 +462,93 @@ plugin.setPanelOptions((builder) => {
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'edgeWidthL2',
+  },
+  "edgeWidthL2": {
+    editor: "slider",
     name: 'Layer 2 Edge Width',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer2', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'pathOffsetL2',
+  },
+  "pathOffsetL2": {
+    editor: "slider",
     name: 'Layer 2 Edge Offset',
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer2', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
+  },
 
   // Layer 3
-  builder.addBooleanSwitch({
-    path: 'layer3',
+  "layer3": {
+    editor: "boolean",
     name: 'Layer 3 on',
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: false,
-  });
-  builder.addBooleanSwitch({
-    path: 'jsonFromUrlL3',
+  },
+  "jsonFromUrlL3": {
+    editor: "boolean",
     name: 'Fetch Layer 3 JSON from URL',
     showIf: checkBool('layer3', true),
-    category: LayersCategory,
+    category: "Layer Options",
     defaultValue: false,
-  });
-  builder.addTextInput({
-    path: 'mapjsonUrlL3',
+  },
+  "mapjsonUrlL3": {
+    editor: "text",
     name: 'Layer 3 Map data (URL)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer3: true, jsonFromUrlL3: true }),
     description: 'URL that returns JSON with edges and nodes of network map',
     defaultValue: '',
-  });
-  builder.addCustomEditor({
+  },
+  'mapjsonL3': {
     id: 'mapjsonL3',
-    path: 'mapjsonL3',
     name: 'Layer 3 Map data (json)',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBools({ layer3: true, jsonFromUrlL3: false }),
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
-    editor: CustomTextArea,
-  });
-  builder.addColorPicker({
-    path: 'color3',
+    editor: "CustomTextArea",
+  },
+  "color3": {
+    editor: "color",
     name: 'Layer 3 Default color',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer3', true),
     description: 'The default color for nodes and links on Layer 3',
     defaultValue: 'grey',
-  });
-  builder.addTextInput({
-    path: 'endpointIdL3',
+  },
+  "endpointIdL3": {
+    editor: "text",
     name: 'Layer 3 Endpoint Identifier',
-    category: LayersCategory,
+    category: "Layer Options",
     description: 'The endpoint identifier in the meta data to match to the query',
     showIf: checkBool('layer3', true),
     defaultValue: 'pops',
-  });
-  builder.addColorPicker({
-    path: 'nodeHighlightL3',
+  },
+  "nodeHighlightL3": {
+    editor: "color",
     name: 'Layer 3 Node highlight color',
-    category: LayersCategory,
+    category: "Layer Options",
     description: 'The color to highlight nodes that match the query',
     showIf: checkBool('layer3', true),
     defaultValue: 'red',
-  });
-  builder.addSliderInput({
-    path: 'nodeWidthL3',
+  },
+  "nodeWidthL3": {
+    editor: "slider",
     name: 'Layer 3 Node Size',
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer3', true),
     defaultValue: 5,
     settings: {
@@ -615,378 +556,420 @@ plugin.setPanelOptions((builder) => {
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'edgeWidthL3',
+  },
+  "edgeWidthL3": {
+    editor: "slider",
     name: 'Layer 3 Edge Width',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer3', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
-  builder.addSliderInput({
-    path: 'pathOffsetL3',
+  },
+  "pathOffsetL3": {
+    editor: "slider",
     name: 'Layer 3 Edge Offset',
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
-    category: LayersCategory,
+    category: "Layer Options",
     showIf: checkBool('layer3', true),
     settings: {
       min: 1,
       max: 15,
       step: 0.5,
     },
-  });
+  },
+
+  // -------------------- Tooltip Category ---------------------
+  "srcFieldLabelL1": {
+    editor: "text",
+    name: 'Layer 1 "Source" Field Label',
+    description: 'Label for "source" datapoint for layer 1',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer1', true),
+    defaultValue: 'From:',
+  },
+  "dstFieldLabelL1": {
+    editor: "text",
+    name: 'Layer 1 "Destination" Field Label',
+    description: 'Label for "destination" datapoint for layer 1',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer1', true),
+    defaultValue: 'To:',
+  },
+  "dataFieldLabelL1": {
+    editor: "text",
+    name: 'Layer 1 "Data" Field Label',
+    description: 'Label for "Inbound/Outbound" field for layer 1',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer1', true),
+    defaultValue: 'Volume:',
+  },
+
+  "srcFieldLabelL2": {
+    editor: "text",
+    name: 'Layer 2 "Source" Field Label',
+    description: 'Label for "source" datapoint for layer 2',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer2', true),
+    defaultValue: 'From:',
+  },
+  "dstFieldLabelL2": {
+    editor: "text",
+    name: 'Layer 2 "Destination" Field Label',
+    description: 'Label for "destination" datapoint for layer 2',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer2', true),
+    defaultValue: 'To:',
+  },
+  "dataFieldLabelL2": {
+    editor: "text",
+    name: 'Layer 2 "Data" Field Label',
+    description: 'Label for "Inbound/Outbound" field for layer 2',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer2', true),
+    defaultValue: 'Volume:',
+  },
+
+  "srcFieldLabelL3": {
+    editor: "text",
+    name: 'Layer 3 "Source" Field Label',
+    description: 'Label for "source" datapoint for layer 3',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer3', true),
+    defaultValue: 'From:',
+  },
+  "dstFieldLabelL3": {
+    editor: "text",
+    name: 'Layer 3 "Destination" Field Label',
+    description: 'Label for "destination" datapoint for layer 3',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer3', true),
+    defaultValue: 'To:',
+  },
+  "dataFieldLabelL3": {
+    editor: "text",
+    name: 'Layer 3 "Data" Field Label',
+    description: 'Label for "Inbound/Outbound" field for layer 3',
+    category: 'Tooltip Options',
+    showIf: checkBool('layer3', true),
+    defaultValue: 'Volume:',
+  },
+
+
 
   // -------------------- Choose Fields --------------------
-  builder.addTextInput({
-    path: 'srcFieldLabelL1',
-    name: 'Layer 1 Source Field Label',
-    description: "Label to be used in edge tooltips for the 'Source' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer1', true),
-    defaultValue: 'From:',
-  });
-  builder.addSelect({
-    path: 'srcFieldL1',
+  "srcFieldL1": {
+    editor: "select",
     name: 'Layer 1 Source Field',
-    description: 'Select the field to match source nodes',
-    category: FieldsCategory,
+    description: 'Data field identifying the "source" for Layer 1',
+    category: 'Data Mappings',
     showIf: checkBool('layer1', true),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dstFieldLabelL1',
-    name: 'Layer 1 Destination Field Label',
-    description: "Label to be used in edge tooltips for the 'Destination' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer1', true),
-    defaultValue: 'To:',
-  });
-  builder.addSelect({
-    path: 'dstFieldL1',
+  },
+  "dstFieldL1": {
+    editor: "select",
     name: 'Layer 1 Destination Field',
-    description: 'Select the field to match destination nodes',
-    category: FieldsCategory,
+    description: 'Data field identifying the "destination" for Layer 1',
+    category: 'Data Mappings',
     showIf: checkBool('layer1', true),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dataFieldLabelL1',
-    name: 'Layer 1 Data Field Label',
-    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
-    category: FieldsCategory,
-    showIf: checkBool('layer1', true),
-    defaultValue: 'Volume:',
-  });
-  builder.addSelect({
-    path: 'inboundValueFieldL1',
+  },
+  "inboundValueFieldL1": {
+    editor: "select",
     name: 'Layer 1 Inbound Value Field',
-    description: 'Select the field to use for A-Z traffic values',
+    description: 'Data field showing traffic from "destination" to "source" for Layer 1',
     showIf: checkBool('layer1', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addSelect({
-    path: 'outboundValueFieldL1',
+  },
+  "outboundValueFieldL1": {
+    editor: "select",
     name: 'Layer 1 Outbound Value Field',
-    description: 'Select the field to use for Z-A traffic values',
+    description: 'Data field showing traffic from "source" to "destination" for Layer 1',
     showIf: checkBool('layer1', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'srcFieldLabelL2',
-    name: 'Layer 2 Source Field Label',
-    description: "Label to be used in edge tooltips for the 'Source' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer2', true),
-    defaultValue: 'From:',
-  });
-  builder.addSelect({
-    path: 'srcFieldL2',
+  },
+  "nodeFieldL1": {
+    editor: "select",
+    name: 'Layer 1 Node Color Field',
+    description: 'Data field mapped to node color for Layer 1',
+    category: 'Data Mappings',
+    showIf: checkBool('layer1', true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "srcFieldL2": {
+    editor: "select",
     name: 'Layer 2 Source Field',
-    description: 'Select the field to match source nodes',
+    description: 'Data field identifying the "source" for Layer 2',
     showIf: checkBool('layer2', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dstFieldLabelL2',
-    name: 'Layer 2 Destination Field Label',
-    description: "Label to be used in edge tooltips for the 'Destination' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer2', true),
-    defaultValue: 'To:',
-  });
-  builder.addSelect({
-    path: 'dstFieldL2',
+  },
+  "dstFieldL2": {
+    editor: "select",
     name: 'Layer 2 Destination Field',
-    description: 'Select the field to match destination nodes',
+    description: 'Data field identifying the "destination" for Layer 2',
     showIf: checkBool('layer2', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dataFieldLabelL2',
-    name: 'Layer 2 Data Field Label',
-    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
-    category: FieldsCategory,
-    showIf: checkBool('layer2', true),
-    defaultValue: 'Volume:',
-  });
-  builder.addSelect({
-    path: 'inboundValueFieldL2',
+  },
+  "inboundValueFieldL2": {
+    editor: "select",
     name: 'Layer 2 Inbound Value Field',
-    description: 'Select the field to use for A-Z traffic values',
+    description: 'Data field showing traffic from "destination" to "source" for Layer 2',
     showIf: checkBool('layer2', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addSelect({
-    path: 'outboundValueFieldL2',
+  },
+  "outboundValueFieldL2": {
+    editor: "select",
     name: 'Layer 2 Outbound Value Field',
-    description: 'Select the field to use for Z-A traffic values',
+    description: 'Data field showing traffic from "source" to "destination" for Layer 2',
     showIf: checkBool('layer2', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'srcFieldLabelL3',
-    name: 'Layer 3 Source Field Label',
-    description: "Label to be used in edge tooltips for the 'Source' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer3', true),
-    defaultValue: 'From:',
-  });
-  builder.addSelect({
-    path: 'srcFieldL3',
+  },
+  "nodeFieldL2": {
+    editor: "select",
+    name: 'Layer 2 Node Color Field',
+    description: 'Data field mapped to node color for Layer 2',
+    category: 'Data Mappings',
+    showIf: checkBool('layer2', true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "srcFieldL3": {
+    editor: "select",
     name: 'Layer 3 Source Field',
-    description: 'Select the field to match source nodes',
-    category: FieldsCategory,
+    description: 'Data field identifying the "source" for Layer 3',
+    category: 'Data Mappings',
     showIf: checkBool('layer3', true),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dstFieldLabelL3',
-    name: 'Layer 3 Destination Field Label',
-    description: "Label to be used in edge tooltips for the 'Destination' field",
-    category: FieldsCategory,
-    showIf: checkBool('layer3', true),
-    defaultValue: 'To:',
-  });
-  builder.addSelect({
-    path: 'dstFieldL3',
+  },
+  "dstFieldL3": {
+    editor: "select",
     name: 'Layer 3 Destination Field',
-    description: 'Select the field to match destination nodes',
-    category: FieldsCategory,
+    description: 'Data field identifying the "destination" for Layer 3',
+    category: 'Data Mappings',
     showIf: checkBool('layer3', true),
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addTextInput({
-    path: 'dataFieldLabelL3',
-    name: 'Layer 3 Data Field Label',
-    description: "Label to be used in edge tooltips for the 'Inbound/Outbound' data field",
-    category: FieldsCategory,
-    showIf: checkBool('layer3', true),
-    defaultValue: 'Volume:',
-  });
-  builder.addSelect({
-    path: 'inboundValueFieldL3',
+  },
+  "inboundValueFieldL3": {
+    editor: "select",
     name: 'Layer 3 Inbound Value Field',
-    description: 'Select the field to use for A-Z traffic values',
+    description: 'Data field showing traffic from "destination" to "source" for Layer 3',
     showIf: checkBool('layer3', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
-  builder.addSelect({
-    path: 'outboundValueFieldL3',
+  },
+  "outboundValueFieldL3": {
+    editor: "select",
     name: 'Layer 3 Outbound Value Field',
-    description: 'Select the field to use for Z-A traffic values',
+    description: 'Data field showing traffic from "source" to "destination" for Layer 3',
     showIf: checkBool('layer3', true),
-    category: FieldsCategory,
+    category: 'Data Mappings',
     settings: {
       allowCustomValue: false,
       options: [],
       getOptions: buildChoices,
     },
-  });
+  },
+  "nodeFieldL3": {
+    editor: "select",
+    name: 'Layer 3 Node Color Field',
+    description: 'Data field mapped to node color for Layer 3',
+    category: 'Data Mappings',
+    showIf: checkBool('layer3', true),
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
   // -------------------- Ad-Hoc Query Variable Bindings --------------------
-  builder.addTextInput({
-    path: 'dashboardNodeVarL1',
+  "dashboardNodeVarL1": {
+    editor: "text",
     name: 'Binding: Node Layer 1',
     showIf: checkBool('layer1', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'node',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeSrcVarL1',
+  },
+  "dashboardEdgeSrcVarL1": {
+    editor: "text",
     name: 'Binding: Edge "Source" Layer 1',
     showIf: checkBool('layer1', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'source',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeDstVarL1',
+  },
+  "dashboardEdgeDstVarL1": {
+    editor: "text",
     name: 'Binding: Edge "Destination" Layer 1',
     showIf: checkBool('layer1', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'dest',
-  });
-  builder.addTextInput({
-    path: 'dashboardNodeVarL2',
+  },
+  "dashboardNodeVarL2": {
+    editor: "text",
     name: 'Binding: Node Layer 2',
     showIf: checkBool('layer2', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'node',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeSrcVarL2',
+  },
+  "dashboardEdgeSrcVarL2": {
+    editor: "text",
     name: 'Binding: Edge "Source" Layer 2',
     showIf: checkBool('layer2', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'source',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeDstVarL2',
+  },
+  "dashboardEdgeDstVarL2": {
+    editor: "text",
     name: 'Binding: Edge "Destination" Layer 2',
     showIf: checkBool('layer2', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'dest',
-  });
-  builder.addTextInput({
-    path: 'dashboardNodeVarL3',
+  },
+  "dashboardNodeVarL3": {
+    editor: "text",
     name: 'Binding: Node Layer 3',
     showIf: checkBool('layer3', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'node',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeSrcVarL3',
+  },
+  "dashboardEdgeSrcVarL3": {
+    editor: "text",
     name: 'Binding: Edge "Source" Layer 3',
     showIf: checkBool('layer3', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'src',
-  });
-  builder.addTextInput({
-    path: 'dashboardEdgeDstVarL3',
+  },
+  "dashboardEdgeDstVarL3": {
+    editor: "text",
     name: 'Binding: Edge "Destination" Layer 3',
     showIf: checkBool('layer3', true),
-    category: QueryCategory,
+    category: "Variable Bindings",
     defaultValue: 'dest',
-  });
+  },
 
   // -------------------- Sidebar Options --------------------
-  builder.addBooleanSwitch({
-    path: 'showSidebar',
+  "showSidebar": {
+    editor: "boolean",
     name: 'Show Map Sidebar',
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     defaultValue: true,
-  });
-  builder.addBooleanSwitch({
-    path: 'legendL1',
+  },
+  "legendL1": {
+    editor: "boolean",
     name: 'Show Layer 1 toggle',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: true,
-  });
-  builder.addTextInput({
-    path: 'layerName1',
+  },
+  "layerName1": {
+    editor: "text",
     name: 'Layer 1 Display Name',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 1',
-  });
-  builder.addBooleanSwitch({
-    path: 'legendL2',
+  },
+  "legendL2": {
+    editor: "boolean",
     name: 'Show Layer 2 toggle',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: true,
-  });
-  builder.addTextInput({
-    path: 'layerName2',
+  },
+  "layerName2": {
+    editor: "text",
     name: 'Layer 2 Display Name',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 2',
-  });
-  builder.addBooleanSwitch({
-    path: 'legendL3',
+  },
+  "legendL3": {
+    editor: "boolean",
     name: 'Show Layer 3 toggle',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: true,
-  });
-  builder.addTextInput({
-    path: 'layerName3',
+  },
+  "layerName3": {
+    editor: "text",
     name: 'Layer 3 Display Name',
-    category: SidebarCategory,
+    category: "Sidebar Options",
     showIf: checkBool('showSidebar', true),
     defaultValue: 'layer 3',
-  });
+  },
 
   // -------------------- Legend Options --------------------
-  builder.addBooleanSwitch({
-    path: 'showLegend',
+  "showLegend": {
+    editor: "boolean",
     name: 'Show Map Legend',
     description: 'show a traffic levels legend at the bottom of the map',
-    category: LegendCategory,
+    category: "Legend Options",
     defaultValue: true,
-  });
-  builder.addSliderInput({
-    path: 'legendColumnLength',
+  },
+  "legendColumnLength": {
+    editor: "slider",
     name: 'Legend Items per Column',
-    category: LegendCategory,
+    category: "Legend Options",
     showIf: checkBool('showLegend', true),
     defaultValue: 3,
     settings: {
@@ -994,53 +977,52 @@ plugin.setPanelOptions((builder) => {
       max: 12,
       step: 1,
     },
-  });
-  builder.addSelect({
-    path: 'legendPosition',
+  },
+  "legendPosition": {
+    editor: "select",
     name: 'Legend Position',
-    category: LegendCategory,
+    category: "Legend Options",
     showIf: checkBool('showLegend', true),
     description: 'position of the legend on the map',
     defaultValue: 'bottomleft',
     settings: {
       allowCustomValue: false,
-      options: [
-        {
-          label: 'Bottom Right',
-          value: 'bottomright',
-        },
-        {
-          label: 'Bottom Left',
-          value: 'bottomleft',
-        },
-        {
-          label: 'Top Right',
-          value: 'topright',
-        },
-      ],
+      options: LegendPositionOptions,
     },
-  });
-  builder.addSelect({
-    path: 'legendDefaultBehavior',
+  },
+  "legendDefaultBehavior": {
+    editor: "select",
     name: 'Legend Default Behavior',
-    category: LegendCategory,
+    category: "Legend Options",
     showIf: checkBool('showLegend', true),
     description: 'should the legend be minimized or visible by default?',
     defaultValue: 'visible',
     settings: {
       allowCustomValue: false,
-      options: [
-        {
-          label: 'Visible',
-          value: 'visible',
-        },
-        {
-          label: 'Minimized',
-          value: 'minimized',
-        },
-      ],
+      options: LegendBehaviorOptions,
     },
-  });
+  },
+}
+
+for(let i=0; i<=2; i++){
+  for(let optionName in layerOptions){
+    options[optionName.replace("${i}", i.toString())] = {...layerOptions[optionName]};
+  }
+}
+
+const categories = {}
+for(let optionPath in options){
+  if(options[optionPath].hasOwnProperty('category')){
+    let category = options[optionPath].category;
+    categories[category] = [category];
+  }
+}
+
+// -------------------- Network Map Panel Options --------------------
+plugin.setPanelOptions((builder) => {
+  for(let optionPath in options){
+    builder.addCustomEditor(resolveSetting(optionPath, options[optionPath]))
+  }
 });
 
 plugin.useFieldConfig({
