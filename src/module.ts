@@ -7,6 +7,8 @@ import { ViewportCoordinateButton } from './components/ViewportCoordinateButton'
 
 import { ViewStrategies, BaseTilesets, PoliticalBoundaryTilesets, PoliticalLabelTilesets, LegendPositionOptions, LegendBehaviorOptions } from './options'
 
+const LAYER_LIMIT = 3;
+
 const customEditors = {
   "CoordinateButton": CoordinateButton,
   "CustomTextArea": CustomTextArea,
@@ -15,10 +17,16 @@ const customEditors = {
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
-function checkBool(settingName: string, value: any) {
+/*function checkBool(settingName: string, value: any) {
   return function (config: MapOptions) {
     return config[settingName] === value;
   };
+}*/
+function resolvePath(object, path, defaultValue=null){
+  return path
+    .split(/[\.\[\]\'\"]/)
+    .filter(p => p)
+    .reduce((o, p) => o ? o[p] : defaultValue, object)
 }
 
 function checkBools(settings: object) {
@@ -27,7 +35,8 @@ function checkBools(settings: object) {
     for (let i = 0; i < keys.length; i++) {
       let settingName = keys[i];
       let value = settings[settingName];
-      if (config[settingName] !== value) {
+      // after this, on to the real fun. Time to deal with lining everything back up in code.
+      if (resolvePath(config, settingName) !== value) {
         return false;
       }
     }
@@ -88,12 +97,14 @@ function resolveSetting(path, setting){
   let output = {...setting}
   if(output.hasOwnProperty('editor')){
     let editorName = output.editor;
-    console.log(editorName);
     if(editorName in customEditors){
       output.editor = customEditors[editorName];
     } else {
       output.editor = standardEditorsRegistry.get(editorName).editor
     }
+  }
+  if(output.hasOwnProperty('showIf')){
+    output.showIf = checkBools(output.showIf)
   }
   if(output.hasOwnProperty('category')){
     output.category = categories[output.category];
@@ -104,6 +115,218 @@ function resolveSetting(path, setting){
 }
 
 let layerOptions = {
+  "layers[${i}].visible": {
+    editor: "boolean",
+    name: 'Layer ${i+1} on',
+    category: "Layer Options",
+    defaultValue: true,
+  },
+  "layers[${i}].jsonFromUrl": {
+    editor: "boolean",
+    name: 'Fetch Layer ${i+1} JSON from URL',
+    showIf: {"layers[${i}].visible": true},
+    category: "Layer Options",
+    defaultValue: false,
+  },
+  "layers[${i}].mapjson": {
+    id: 'mapjsonL1',
+    name: 'Layer ${i+1} Map data (json)',
+    category: "Layer Options",
+    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": false },
+    description: 'JSON with edges and nodes of network map',
+    defaultValue: '{"edges":[], "nodes":[]}',
+    settings: { useTextarea: true, rows: 10 },
+    editor: "CustomTextArea",
+  },
+  "layers[${i}].mapjsonUrl": {
+    editor: "text",
+    name: 'Layer ${i+1} Map data (URL)',
+    category: "Layer Options",
+    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": true },
+    description: 'URL that returns JSON with edges and nodes of network map',
+    defaultValue: '',
+  },
+  "layers[${i}].color": {
+    editor: "color",
+    name: 'Layer ${i+1} Default color',
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    description: 'The default color for nodes and links on Layer ${i+1}',
+    defaultValue: 'grey',
+  },
+  "layers[${i}].nodeWidth": {
+    editor: "slider",
+    name: 'Layer ${i+1} Node Size',
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  },
+  "layers[${i}].edgeWidth": {
+    editor: "slider",
+    name: 'Layer ${i+1} Edge Width',
+    defaultValue: 3,
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
+  },
+  "layers[${i}].pathOffset": {
+    editor: "slider",
+    name: 'Layer ${i+1} Edge Offset',
+    description: 'The offset between AZ path and ZA path',
+    defaultValue: 3,
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    }
+  },
+  "layers[${i}].endpointId": {
+    editor: "text",
+    name: 'Layer ${i+1} Endpoint Identifier',
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    description: 'Topology "meta" field used to match topology nodes to query data',
+    defaultValue: 'pops',
+  },
+  "layers[${i}].nodeHighlight": {
+    editor: "color",
+    name: 'Layer ${i+1} Node highlight color',
+    category: "Layer Options",
+    showIf: {"layers[${i}].visible": true},
+    description: 'The color to highlight nodes that match the query',
+    defaultValue: 'red',
+  },
+  "layers[${i}].srcFieldLabel": {
+    editor: "text",
+    name: 'Layer ${i+1} "Source" Field Label',
+    description: 'Label for "source" datapoint for layer ${i+1}',
+    category: 'Tooltip Options',
+    showIf: {"layers[${i}].visible": true},
+    defaultValue: 'From:',
+  },
+  "layers[${i}].dstFieldLabel": {
+    editor: "text",
+    name: 'Layer ${i+1} "Destination" Field Label',
+    description: 'Label for "destination" datapoint for layer ${i+1}',
+    category: 'Tooltip Options',
+    showIf: {"layers[${i}].visible": true},
+    defaultValue: 'To:',
+  },
+  "layers[${i}].dataFieldLabel": {
+    editor: "text",
+    name: 'Layer ${i+1} "Data" Field Label',
+    description: 'Label for "Inbound/Outbound" field for layer ${i+1}',
+    category: 'Tooltip Options',
+    showIf: {"layers[${i}].visible": true},
+    defaultValue: 'Volume:',
+  },
+  "layers[${i}].srcField": {
+    editor: "select",
+    name: 'Layer ${i+1} Source Field',
+    description: 'Data field identifying the "source" for Layer ${i+1}',
+    category: 'Data Mappings',
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "layers[${i}].dstField": {
+    editor: "select",
+    name: 'Layer ${i+1} Destination Field',
+    description: 'Data field identifying the "destination" for Layer ${i+1}',
+    category: 'Data Mappings',
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "layers[${i}].inboundValueField": {
+    editor: "select",
+    name: 'Layer ${i+1} Inbound Value Field',
+    description: 'Data field showing traffic from "destination" to "source" for Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: 'Data Mappings',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "layers[${i}].outboundValueField": {
+    editor: "select",
+    name: 'Layer ${i+1} Outbound Value Field',
+    description: 'Data field showing traffic from "source" to "destination" for Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: 'Data Mappings',
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "layers[${i}].nodeValueField": {
+    editor: "select",
+    name: 'Layer ${i+1} Node Color Field',
+    description: 'Data field mapped to node color for Layer ${i+1}',
+    category: 'Data Mappings',
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoices,
+    },
+  },
+  "layers[${i}].legend": {
+    editor: "boolean",
+    name: 'Show Layer ${i+1} toggle',
+    category: "Sidebar Options",
+    showIf: {"showSidebar": true},
+    defaultValue: true,
+  },
+  "layers[${i}].name": {
+    editor: "text",
+    name: 'Layer ${i+1} Display Name',
+    category: "Sidebar Options",
+    showIf: {"showSidebar": true},
+    defaultValue: 'layer ${i+1}',
+  },
+
+  "layers[${i}].dashboardNodeVar": {
+    editor: "text",
+    name: 'Binding: Node Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: "Variable Bindings",
+    defaultValue: 'node',
+  },
+  "layers[${i}].dashboardEdgeSrcVarL1": {
+    editor: "text",
+    name: 'Binding: Edge "Source" Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: "Variable Bindings",
+    defaultValue: 'source',
+  },
+  "layers[${i}].dashboardEdgeDstVarL1": {
+    editor: "text",
+    name: 'Binding: Edge "Destination" Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: "Variable Bindings",
+    defaultValue: 'dest',
+  },
 
 }
 
@@ -131,13 +354,13 @@ const options = {
       settings: { allowCustomValue: false, options: ViewStrategies, },
   },
   //////////////
-  // Variables for center and zoom level options
+  // Setting the Map Center from Dashboard Variables
   //////////////
   "latitudeVar": {
     editor: "select",
     name: 'Latitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: checkBool('initialViewStrategy', 'variables'),
+    showIf: {"initialViewStrategy": 'variables'},
     settings: {
       allowCustomValue: false,
       getOptions: buildChoicesWithSuggestions,
@@ -147,7 +370,7 @@ const options = {
     editor: "select",
     name: 'Longitude Variable',
     description: 'Select a dashboard or query variable to set initial longitude of map',
-    showIf: checkBool('initialViewStrategy', 'variables'),
+    showIf: {"initialViewStrategy": 'variables'},
     settings: {
       allowCustomValue: false,
       options: [],
@@ -155,20 +378,21 @@ const options = {
     },
   },
   //////////////
+  // "Viewport" top-left, bottom-right and auto-resize options
   // Static center and zoom level options
   //////////////
   'setLatLngZoom': {
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
-    showIf: checkBool('initialViewStrategy', 'static'),
+    showIf: {"initialViewStrategy": 'static'},
     settings: { label: 'Set Lat/Lng & Zoom' },
     editor: "CoordinateButton",
   },
   "viewport.center.lat": {
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: checkBool('initialViewStrategy', 'static'),
+    showIf: {"initialViewStrategy": 'static'},
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
@@ -176,7 +400,7 @@ const options = {
   "viewport.center.lng": {
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: checkBool('initialViewStrategy', 'static'),
+    showIf: {"initialViewStrategy": 'static'},
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
@@ -192,41 +416,38 @@ const options = {
       step: 0.5,
     },
   },
-  //////////////
-  // "Viewport" top-left, bottom-right and auto-resize options
-  //////////////
   "setViewport": {
     name: 'Set Zoom Viewport to Current Map View',
     description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
-    showIf: checkBool('initialViewStrategy', 'viewport'),
+    showIf: {"initialViewStrategy": 'viewport'},
     settings: { label: 'Set Viewport Coordinates' },
     editor: "ViewportCoordinateButton",
   },
   "viewport.top": {
     name: 'Initial viewport: Top Left: Latitude',
     description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
-    showIf: checkBool('initialViewStrategy', 'viewport'),
+    showIf: {"initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
   },
   "viewport.left": {
     name: 'Initial viewport: Top Left: Longitude',
     description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
-    showIf: checkBool('initialViewStrategy', 'viewport'),
+    showIf: {"initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
   },
   "viewport.bottom": {
     name: 'Initial viewport: Bottom Right: Latitude',
     description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
-    showIf: checkBool('initialViewStrategy', 'viewport'),
+    showIf: {"initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
   },
   "viewport.right": {
     name: 'Initial viewport: Bottom Right: Longitude',
     description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
-    showIf: checkBool('initialViewStrategy', 'viewport'),
+    showIf: {"initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     editor: "CustomTextArea",
   },
@@ -266,6 +487,9 @@ const options = {
       options: PoliticalLabelTilesets,
     },
   },
+  //////////////
+  // View/UI Controls
+  //////////////
   "showViewControls": {
     editor: "boolean",
     name: 'Show View Controls',
@@ -301,612 +525,7 @@ const options = {
     category: "View Options",
     defaultValue: true,
   },
-
-  // -------------------- Layer Options -------------------
-  "layer1": {
-    editor: "boolean",
-    name: 'Layer 1 on',
-    category: "Layer Options",
-    defaultValue: true,
-  },
-  "jsonFromUrlL1": {
-    editor: "boolean",
-    name: 'Fetch Layer 1 JSON from URL',
-    showIf: checkBool('layer1', true),
-    category: "Layer Options",
-    defaultValue: false,
-  },
-  "mapjsonUrlL1": {
-    editor: "text",
-    name: 'Layer 1 Map data (URL)',
-    category: "Layer Options",
-    showIf: checkBools({ layer1: true, jsonFromUrlL1: true }),
-    description: 'URL that returns JSON with edges and nodes of network map',
-    defaultValue: '',
-  },
-  "mapjsonL1": {
-    id: 'mapjsonL1',
-    name: 'Layer 1 Map data (json)',
-    category: "Layer Options",
-    showIf: checkBools({ layer1: true, jsonFromUrlL1: false }),
-    description: 'JSON with edges and nodes of network map',
-    defaultValue: '{"edges":[], "nodes":[]}',
-    settings: { useTextarea: true, rows: 10 },
-    editor: "CustomTextArea",
-  },
-  "color1": {
-    editor: "color",
-    name: 'Layer 1 Default color',
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    description: 'The default color for nodes and links on Layer 1',
-    defaultValue: 'grey',
-  },
-  "endpointIdL1": {
-    editor: "text",
-    name: 'Layer 1 Endpoint Identifier',
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    description: 'The endpoint identifier in the meta data to match to the query',
-    defaultValue: 'pops',
-  },
-  "nodeHighlightL1": {
-    editor: "color",
-    name: 'Layer 1 Node highlight color',
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    description: 'The color to highlight nodes that match the query',
-    defaultValue: 'red',
-  },
-  "nodeWidthL1": {
-    editor: "slider",
-    name: 'Layer 1 Node Size',
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "edgeWidthL1": {
-    editor: "slider",
-    name: 'Layer 1 Edge Width',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "pathOffsetL1": {
-    editor: "slider",
-    name: 'Layer 1 Edge Offset',
-    description: 'The offset between AZ path and ZA path',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer1', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-
-  "layer2": {
-    editor: "boolean",
-    name: 'Layer 2 on',
-    category: "Layer Options",
-    defaultValue: false,
-  },
-  "jsonFromUrlL2": {
-    editor: "boolean",
-    name: 'Fetch Layer 2 JSON from URL',
-    showIf: checkBool('layer2', true),
-    category: "Layer Options",
-    defaultValue: false,
-  },
-  "mapjsonUrlL2": {
-    editor: "text",
-    name: 'Layer 2 Map data (URL)',
-    category: "Layer Options",
-    showIf: checkBools({ layer2: true, jsonFromUrlL2: true }),
-    description: 'URL that returns JSON with edges and nodes of network map',
-    defaultValue: '',
-  },
-  'mapjsonL2': {
-    id: 'mapjsonL2',
-    name: 'Layer 2 Map data (json)',
-    category: "Layer Options",
-    showIf: checkBools({ layer2: true, jsonFromUrlL2: false }),
-    description: 'JSON with edges and nodes of network map',
-    defaultValue: '{"edges":[], "nodes":[]}',
-    settings: { useTextarea: true, rows: 10 },
-    editor: "CustomTextArea",
-  },
-  "color2": {
-    editor: "color",
-    name: 'Layer 2 Default color',
-    category: "Layer Options",
-    showIf: checkBool('layer2', true),
-    description: 'The default color for nodes and links on Layer 2',
-    defaultValue: 'grey',
-  },
-  "endpointIdL2": {
-    editor: "text",
-    name: 'Layer 2 Endpoint Identifier',
-    category: "Layer Options",
-    description: 'The endpoint identifier in the meta data to match to the query',
-    showIf: checkBool('layer2', true),
-    defaultValue: 'pops',
-  },
-  "nodeHighlightL2": {
-    editor: "color",
-    name: 'Layer 2 Node highlight color',
-    category: "Layer Options",
-    description: 'The color to highlight nodes that match the query',
-    showIf: checkBool('layer2', true),
-    defaultValue: 'red',
-  },
-  "nodeWidthL2": {
-    editor: "slider",
-    name: 'Layer 2 Node Size',
-    category: "Layer Options",
-    showIf: checkBool('layer2', true),
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "edgeWidthL2": {
-    editor: "slider",
-    name: 'Layer 2 Edge Width',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer2', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "pathOffsetL2": {
-    editor: "slider",
-    name: 'Layer 2 Edge Offset',
-    description: 'The offset between AZ path and ZA path',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer2', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-
-  // Layer 3
-  "layer3": {
-    editor: "boolean",
-    name: 'Layer 3 on',
-    category: "Layer Options",
-    defaultValue: false,
-  },
-  "jsonFromUrlL3": {
-    editor: "boolean",
-    name: 'Fetch Layer 3 JSON from URL',
-    showIf: checkBool('layer3', true),
-    category: "Layer Options",
-    defaultValue: false,
-  },
-  "mapjsonUrlL3": {
-    editor: "text",
-    name: 'Layer 3 Map data (URL)',
-    category: "Layer Options",
-    showIf: checkBools({ layer3: true, jsonFromUrlL3: true }),
-    description: 'URL that returns JSON with edges and nodes of network map',
-    defaultValue: '',
-  },
-  'mapjsonL3': {
-    id: 'mapjsonL3',
-    name: 'Layer 3 Map data (json)',
-    category: "Layer Options",
-    showIf: checkBools({ layer3: true, jsonFromUrlL3: false }),
-    description: 'JSON with edges and nodes of network map',
-    defaultValue: '{"edges":[], "nodes":[]}',
-    settings: { useTextarea: true, rows: 10 },
-    editor: "CustomTextArea",
-  },
-  "color3": {
-    editor: "color",
-    name: 'Layer 3 Default color',
-    category: "Layer Options",
-    showIf: checkBool('layer3', true),
-    description: 'The default color for nodes and links on Layer 3',
-    defaultValue: 'grey',
-  },
-  "endpointIdL3": {
-    editor: "text",
-    name: 'Layer 3 Endpoint Identifier',
-    category: "Layer Options",
-    description: 'The endpoint identifier in the meta data to match to the query',
-    showIf: checkBool('layer3', true),
-    defaultValue: 'pops',
-  },
-  "nodeHighlightL3": {
-    editor: "color",
-    name: 'Layer 3 Node highlight color',
-    category: "Layer Options",
-    description: 'The color to highlight nodes that match the query',
-    showIf: checkBool('layer3', true),
-    defaultValue: 'red',
-  },
-  "nodeWidthL3": {
-    editor: "slider",
-    name: 'Layer 3 Node Size',
-    category: "Layer Options",
-    showIf: checkBool('layer3', true),
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "edgeWidthL3": {
-    editor: "slider",
-    name: 'Layer 3 Edge Width',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer3', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "pathOffsetL3": {
-    editor: "slider",
-    name: 'Layer 3 Edge Offset',
-    description: 'The offset between AZ path and ZA path',
-    defaultValue: 3,
-    category: "Layer Options",
-    showIf: checkBool('layer3', true),
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-
-  // -------------------- Tooltip Category ---------------------
-  "srcFieldLabelL1": {
-    editor: "text",
-    name: 'Layer 1 "Source" Field Label',
-    description: 'Label for "source" datapoint for layer 1',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer1', true),
-    defaultValue: 'From:',
-  },
-  "dstFieldLabelL1": {
-    editor: "text",
-    name: 'Layer 1 "Destination" Field Label',
-    description: 'Label for "destination" datapoint for layer 1',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer1', true),
-    defaultValue: 'To:',
-  },
-  "dataFieldLabelL1": {
-    editor: "text",
-    name: 'Layer 1 "Data" Field Label',
-    description: 'Label for "Inbound/Outbound" field for layer 1',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer1', true),
-    defaultValue: 'Volume:',
-  },
-
-  "srcFieldLabelL2": {
-    editor: "text",
-    name: 'Layer 2 "Source" Field Label',
-    description: 'Label for "source" datapoint for layer 2',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer2', true),
-    defaultValue: 'From:',
-  },
-  "dstFieldLabelL2": {
-    editor: "text",
-    name: 'Layer 2 "Destination" Field Label',
-    description: 'Label for "destination" datapoint for layer 2',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer2', true),
-    defaultValue: 'To:',
-  },
-  "dataFieldLabelL2": {
-    editor: "text",
-    name: 'Layer 2 "Data" Field Label',
-    description: 'Label for "Inbound/Outbound" field for layer 2',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer2', true),
-    defaultValue: 'Volume:',
-  },
-
-  "srcFieldLabelL3": {
-    editor: "text",
-    name: 'Layer 3 "Source" Field Label',
-    description: 'Label for "source" datapoint for layer 3',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer3', true),
-    defaultValue: 'From:',
-  },
-  "dstFieldLabelL3": {
-    editor: "text",
-    name: 'Layer 3 "Destination" Field Label',
-    description: 'Label for "destination" datapoint for layer 3',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer3', true),
-    defaultValue: 'To:',
-  },
-  "dataFieldLabelL3": {
-    editor: "text",
-    name: 'Layer 3 "Data" Field Label',
-    description: 'Label for "Inbound/Outbound" field for layer 3',
-    category: 'Tooltip Options',
-    showIf: checkBool('layer3', true),
-    defaultValue: 'Volume:',
-  },
-
-
-
-  // -------------------- Choose Fields --------------------
-  "srcFieldL1": {
-    editor: "select",
-    name: 'Layer 1 Source Field',
-    description: 'Data field identifying the "source" for Layer 1',
-    category: 'Data Mappings',
-    showIf: checkBool('layer1', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "dstFieldL1": {
-    editor: "select",
-    name: 'Layer 1 Destination Field',
-    description: 'Data field identifying the "destination" for Layer 1',
-    category: 'Data Mappings',
-    showIf: checkBool('layer1', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "inboundValueFieldL1": {
-    editor: "select",
-    name: 'Layer 1 Inbound Value Field',
-    description: 'Data field showing traffic from "destination" to "source" for Layer 1',
-    showIf: checkBool('layer1', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "outboundValueFieldL1": {
-    editor: "select",
-    name: 'Layer 1 Outbound Value Field',
-    description: 'Data field showing traffic from "source" to "destination" for Layer 1',
-    showIf: checkBool('layer1', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "nodeFieldL1": {
-    editor: "select",
-    name: 'Layer 1 Node Color Field',
-    description: 'Data field mapped to node color for Layer 1',
-    category: 'Data Mappings',
-    showIf: checkBool('layer1', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "srcFieldL2": {
-    editor: "select",
-    name: 'Layer 2 Source Field',
-    description: 'Data field identifying the "source" for Layer 2',
-    showIf: checkBool('layer2', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "dstFieldL2": {
-    editor: "select",
-    name: 'Layer 2 Destination Field',
-    description: 'Data field identifying the "destination" for Layer 2',
-    showIf: checkBool('layer2', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "inboundValueFieldL2": {
-    editor: "select",
-    name: 'Layer 2 Inbound Value Field',
-    description: 'Data field showing traffic from "destination" to "source" for Layer 2',
-    showIf: checkBool('layer2', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "outboundValueFieldL2": {
-    editor: "select",
-    name: 'Layer 2 Outbound Value Field',
-    description: 'Data field showing traffic from "source" to "destination" for Layer 2',
-    showIf: checkBool('layer2', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "nodeFieldL2": {
-    editor: "select",
-    name: 'Layer 2 Node Color Field',
-    description: 'Data field mapped to node color for Layer 2',
-    category: 'Data Mappings',
-    showIf: checkBool('layer2', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "srcFieldL3": {
-    editor: "select",
-    name: 'Layer 3 Source Field',
-    description: 'Data field identifying the "source" for Layer 3',
-    category: 'Data Mappings',
-    showIf: checkBool('layer3', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "dstFieldL3": {
-    editor: "select",
-    name: 'Layer 3 Destination Field',
-    description: 'Data field identifying the "destination" for Layer 3',
-    category: 'Data Mappings',
-    showIf: checkBool('layer3', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "inboundValueFieldL3": {
-    editor: "select",
-    name: 'Layer 3 Inbound Value Field',
-    description: 'Data field showing traffic from "destination" to "source" for Layer 3',
-    showIf: checkBool('layer3', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "outboundValueFieldL3": {
-    editor: "select",
-    name: 'Layer 3 Outbound Value Field',
-    description: 'Data field showing traffic from "source" to "destination" for Layer 3',
-    showIf: checkBool('layer3', true),
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "nodeFieldL3": {
-    editor: "select",
-    name: 'Layer 3 Node Color Field',
-    description: 'Data field mapped to node color for Layer 3',
-    category: 'Data Mappings',
-    showIf: checkBool('layer3', true),
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  // -------------------- Ad-Hoc Query Variable Bindings --------------------
-  "dashboardNodeVarL1": {
-    editor: "text",
-    name: 'Binding: Node Layer 1',
-    showIf: checkBool('layer1', true),
-    category: "Variable Bindings",
-    defaultValue: 'node',
-  },
-  "dashboardEdgeSrcVarL1": {
-    editor: "text",
-    name: 'Binding: Edge "Source" Layer 1',
-    showIf: checkBool('layer1', true),
-    category: "Variable Bindings",
-    defaultValue: 'source',
-  },
-  "dashboardEdgeDstVarL1": {
-    editor: "text",
-    name: 'Binding: Edge "Destination" Layer 1',
-    showIf: checkBool('layer1', true),
-    category: "Variable Bindings",
-    defaultValue: 'dest',
-  },
-  "dashboardNodeVarL2": {
-    editor: "text",
-    name: 'Binding: Node Layer 2',
-    showIf: checkBool('layer2', true),
-    category: "Variable Bindings",
-    defaultValue: 'node',
-  },
-  "dashboardEdgeSrcVarL2": {
-    editor: "text",
-    name: 'Binding: Edge "Source" Layer 2',
-    showIf: checkBool('layer2', true),
-    category: "Variable Bindings",
-    defaultValue: 'source',
-  },
-  "dashboardEdgeDstVarL2": {
-    editor: "text",
-    name: 'Binding: Edge "Destination" Layer 2',
-    showIf: checkBool('layer2', true),
-    category: "Variable Bindings",
-    defaultValue: 'dest',
-  },
-  "dashboardNodeVarL3": {
-    editor: "text",
-    name: 'Binding: Node Layer 3',
-    showIf: checkBool('layer3', true),
-    category: "Variable Bindings",
-    defaultValue: 'node',
-  },
-  "dashboardEdgeSrcVarL3": {
-    editor: "text",
-    name: 'Binding: Edge "Source" Layer 3',
-    showIf: checkBool('layer3', true),
-    category: "Variable Bindings",
-    defaultValue: 'src',
-  },
-  "dashboardEdgeDstVarL3": {
-    editor: "text",
-    name: 'Binding: Edge "Destination" Layer 3',
-    showIf: checkBool('layer3', true),
-    category: "Variable Bindings",
-    defaultValue: 'dest',
-  },
-
+  
   // -------------------- Sidebar Options --------------------
   "showSidebar": {
     editor: "boolean",
@@ -914,48 +533,6 @@ const options = {
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
     category: "Sidebar Options",
     defaultValue: true,
-  },
-  "legendL1": {
-    editor: "boolean",
-    name: 'Show Layer 1 toggle',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: true,
-  },
-  "layerName1": {
-    editor: "text",
-    name: 'Layer 1 Display Name',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: 'layer 1',
-  },
-  "legendL2": {
-    editor: "boolean",
-    name: 'Show Layer 2 toggle',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: true,
-  },
-  "layerName2": {
-    editor: "text",
-    name: 'Layer 2 Display Name',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: 'layer 2',
-  },
-  "legendL3": {
-    editor: "boolean",
-    name: 'Show Layer 3 toggle',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: true,
-  },
-  "layerName3": {
-    editor: "text",
-    name: 'Layer 3 Display Name',
-    category: "Sidebar Options",
-    showIf: checkBool('showSidebar', true),
-    defaultValue: 'layer 3',
   },
 
   // -------------------- Legend Options --------------------
@@ -970,7 +547,7 @@ const options = {
     editor: "slider",
     name: 'Legend Items per Column',
     category: "Legend Options",
-    showIf: checkBool('showLegend', true),
+    showIf: {"showLegend": true},
     defaultValue: 3,
     settings: {
       min: 1,
@@ -982,7 +559,7 @@ const options = {
     editor: "select",
     name: 'Legend Position',
     category: "Legend Options",
-    showIf: checkBool('showLegend', true),
+    showIf: {"showLegend": true},
     description: 'position of the legend on the map',
     defaultValue: 'bottomleft',
     settings: {
@@ -994,7 +571,7 @@ const options = {
     editor: "select",
     name: 'Legend Default Behavior',
     category: "Legend Options",
-    showIf: checkBool('showLegend', true),
+    showIf: {"showLegend": true},
     description: 'should the legend be minimized or visible by default?',
     defaultValue: 'visible',
     settings: {
@@ -1004,9 +581,36 @@ const options = {
   },
 }
 
-for(let i=0; i<=2; i++){
+// assuming 3 layers here
+for(let i=0; i<LAYER_LIMIT; i++){
+  // copy all of the options for each layer
   for(let optionName in layerOptions){
-    options[optionName.replace("${i}", i.toString())] = {...layerOptions[optionName]};
+    // ensuring that we replace the keys so, for example:
+    // "layer[${i}].visible" becomes
+    // "layer[0].visible"
+    let option = optionName.replace("${i}", i.toString())
+    options[option] = {...layerOptions[optionName]};
+    if(options[option].hasOwnProperty("name")){
+      options[option].name = options[option].name.replace("${i+1}", (i+1).toString());
+    }
+    if(options[option].hasOwnProperty("description")){
+      options[option].description = options[option].description.replace("${i+1}", (i+1).toString());
+    }
+    // reformat the keys in the "showIf" conditions if they exist
+    // showIf: {"layer[${i}].visible": true}
+    // becomes
+    // showIf: { "layer[0].visible": true }
+    if(options[option].hasOwnProperty("showIf")){
+      let copy = {...options[option].showIf};
+      for(let showIfName in options[option].showIf){
+        if(showIfName.indexOf("${i}") >= 0){
+          let accessor = showIfName.replace("${i}", i.toString())
+          copy[accessor] = copy[showIfName];
+          delete copy[showIfName]
+        }
+      }
+      options[option].showIf = copy;
+    }
   }
 }
 
