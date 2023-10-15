@@ -6,7 +6,7 @@ import { sanitizeTopology } from 'components/lib/topologyTools';
 import 'components/MapCanvas.component.js';
 import { PubSub } from 'components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
-
+import { resolvePath, setPath, LAYER_LIMIT } from "components/lib/utils.js"
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {
@@ -33,22 +33,22 @@ export class MapPanel extends Component<Props> {
     let self = this;
     return function (event) {
       let setLocation = {};
-      for (let i = 1; i < 3; i++) {
-        const srcVar = 'var-' + self.props.options['dashboardEdgeSrcVarL' + i];
-        const dstVar = 'var-' + self.props.options['dashboardEdgeDstVarL' + i];
-        const nodeVar = 'var-' + self.props.options['dashboardNodeVarL' + i];
+      for (let i = 0; i < LAYER_LIMIT; i++) {
+        const srcVar = 'var-' + self.props.options.layer[i]['dashboardEdgeSrcVar'];
+        const dstVar = 'var-' + self.props.options.layer[i]['dashboardEdgeDstVar'];
+        const nodeVar = 'var-' + self.props.options.layer[i]['dashboardNodeVar'];
         setLocation[srcVar] = null;
         setLocation[dstVar] = null;
         setLocation[nodeVar] = null;
       }
       if (event && event.nodeA && event.nodeZ) {
-        const srcVariable = 'var-' + self.props.options['dashboardEdgeSrcVarL' + event.layer];
+        const srcVariable = 'var-' + self.props.options.layer[event.layer]['dashboardEdgeSrcVar'];
         setLocation[srcVariable] = event.nodeA;
-        const dstVariable = 'var-' + self.props.options['dashboardEdgeDstVarL' + event.layer];
+        const dstVariable = 'var-' + self.props.options.layer[event.layer]['dashboardEdgeDstVar'];
         setLocation[dstVariable] = event.nodeZ;
       }
       if (event && event.type === 'node') {
-        const dashboardVariable = 'var-' + self.props.options['dashboardNodeVarL' + event.layer];
+        const dashboardVariable = 'var-' + self.props.options.layer[event.layer]['dashboardNodeVar'];
         setLocation[dashboardVariable] = event.selection.name;
       }
 
@@ -57,32 +57,35 @@ export class MapPanel extends Component<Props> {
   }
 
   updateCenter = (centerData) => {
-    const startLat = centerData.center.lat;
-    const startLng = centerData.center.lng;
-    const startZoom = centerData.zoom;
-    this.props.onOptionsChange({ ...this.props.options, startLat, startLng, startZoom });
+    let viewport = { 
+      "zoom": centerData.zoom,
+      "center": {
+        "lat": centerData.center.lat,
+        "lng": centerData.center.lng,
+      }
+    }
+    this.props.onOptionsChange({ ...this.props.options, viewport });
   };
 
   updateMapViewport = (viewportData) => {
     const coordinates = viewportData.coordinates;
-    const viewportTopLeftLat = coordinates.getNorth().toFixed(2);
-    const viewportTopLeftLng = coordinates.getWest().toFixed(2);
-    const viewportBottomRightLat = coordinates.getSouth().toFixed(2);
-    const viewportBottomRightLng = coordinates.getEast().toFixed(2);
     this.props.onOptionsChange({
       ...this.props.options,
-      viewportTopLeftLat,
-      viewportTopLeftLng,
-      viewportBottomRightLat,
-      viewportBottomRightLng,
+      "viewport": {
+        "top": coordinates.getNorth().toFixed(2),
+        "left": coordinates.getWest().toFixed(2),
+        "bottom": coordinates.getSouth().toFixed(2),
+        "right": coordinates.getEast().toFixed(2),
+      }
     });
   };
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
   updateMapJson = (mapData) => {
+    debugger;
     const { options } = this.props;
-    let { mapjsonL1, mapjsonL2, mapjsonL3 } = options;
+    let [ mapjsonL1, mapjsonL2, mapjsonL3 ] = options;
     if (mapData.layer1 != null) {
       mapjsonL1 = JSON.stringify(sanitizeTopology(mapData.layer1));
     }
@@ -92,7 +95,11 @@ export class MapPanel extends Component<Props> {
     if (mapData.layer3 != null) {
       mapjsonL3 = JSON.stringify(sanitizeTopology(mapData.layer3));
     }
-    this.props.onOptionsChange({ ...this.props.options, mapjsonL1, mapjsonL2, mapjsonL3 });
+    let update = { ...this.props.options }
+    update.layers[0].mapjson = mapjsonL1;
+    update.layers[1].mapjson = mapjsonL2;
+    update.layers[2].mapjson = mapjsonL3;
+    this.props.onOptionsChange(update);
   };
 
   calculateOptionsChanges = () => {
@@ -101,9 +108,9 @@ export class MapPanel extends Component<Props> {
 
     const optionsToWatch = [
       'background',
-      'tileSetLayer',
-      'boundaryLayer',
-      'labelLayer',
+      'tileset.geographic',
+      'tileset.boundaries',
+      'tileset.labels',
       'showSidebar',
       'showViewControls',
       'showLegend',
@@ -117,55 +124,31 @@ export class MapPanel extends Component<Props> {
       'enableNodeAnimation',
       'enableEdgeAnimation',
 
-      'layer1',
-      'color1',
-      'endpointIdL1',
-      'nodeHighlightL1',
-      'nodeWidthL1',
-      'edgeWidthL1',
-      'pathOffsetL1',
-      'layerName1',
-      'legendL1',
-      'dstFieldLabelL1',
-      'srcFieldLabelL1',
-      'dataFieldLabelL1',
-
-      'layer2',
-      'color2',
-      'endpointIdL2',
-      'nodeHighlightL2',
-      'nodeWidthL2',
-      'edgeWidthL2',
-      'pathOffsetL2',
-      'layerName2',
-      'legendL2',
-      'dstFieldLabelL2',
-      'srcFieldLabelL2',
-      'dataFieldLabelL2',
-
-      'layer3',
-      'color3',
-      'endpointIdL3',
-      'nodeHighlightL3',
-      'nodeWidthL3',
-      'edgeWidthL3',
-      'pathOffsetL3',
-      'layerName3',
-      'legendL3',
-      'dstFieldLabelL3',
-      'srcFieldLabelL3',
-      'dataFieldLabelL3',
-
       'resolvedLat',
       'resolvedLng',
     ];
-
+    for(i=0; i<LAYER_LIMIT; i++){
+      optionsToWatch.push(`layers[${i}].visible`);
+      optionsToWatch.push(`layers[${i}].color`);
+      optionsToWatch.push(`layers[${i}].endpointId`);
+      optionsToWatch.push(`layers[${i}].nodeHighlight`);
+      optionsToWatch.push(`layers[${i}].nodeWidth`);
+      optionsToWatch.push(`layers[${i}].edgeWidth`);
+      optionsToWatch.push(`layers[${i}].pathOffset`);
+      optionsToWatch.push(`layers[${i}].name`);
+      optionsToWatch.push(`layers[${i}].legend`);
+      optionsToWatch.push(`layers[${i}].dstFieldLabel`);
+      optionsToWatch.push(`layers[${i}].srcFieldLabel`);
+      optionsToWatch.push(`layers[${i}].dataFieldLabel`);
+    }
     optionsToWatch.forEach((option) => {
-      if (this.lastOptions[option] !== this.props.options[option]) {
+      let lastValue = resolvePath(lastOptions, option);
+      let currentValue = resolvePath(options, option);
+      if (lastValue !== currentValue) {
         if (option === 'background') {
-          this.props.options[option] = this.theme.visualization.getColorByName(this.props.options.background);
+          this.props.options.background = this.theme.visualization.getColorByName(this.props.options.background);
         }
-        this.lastOptions[option] = this.props.options[option];
+        setPath(this.lastOptions, option, this.props.options[option]);
         changed.push(option);
       }
     });
@@ -236,11 +219,11 @@ export class MapPanel extends Component<Props> {
     return output;
   }
 
-  resolveMapData(layer: string, replaceVariables) {
+  resolveMapData(layer: number, replaceVariables) {
     const { options } = this.props;
     // if we want to fetch from a url, check the cache or return a live response
-    if (options['jsonFromUrl' + layer]) {
-      let jsonUrl = replaceVariables(options['mapjsonUrl' + layer]);
+    if (options.layers[layer]['jsonFromUrl']) {
+      let jsonUrl = replaceVariables(options.layers[layer]['mapjsonUrl']);
       if (this.mapjsonCache[layer][jsonUrl]) {
         // if we have a cached copy of the response, return it wrapped in a promise
         return new Promise((resolve) => {
@@ -262,8 +245,8 @@ export class MapPanel extends Component<Props> {
     }
     // in the case that we don't want to fetch from a url, return a promise with local data
     return new Promise((resolve) => {
-      if (options['mapjson' + layer]) {
-        resolve(options['mapjson' + layer]); // if local data is set, return it
+      if (options.layers[layer]['mapjson']) {
+        resolve(options.layers[layer]['mapjson']); // if local data is set, return it
       } else {
         resolve({ nodes: [], edges: [] }); // default value: empty layer
       }
@@ -283,58 +266,38 @@ export class MapPanel extends Component<Props> {
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
 
-    let colorsL1 = {
-      defaultColor: options.color1,
-      nodeHighlight: options.nodeHighlightL1,
-    };
-    let fieldsL1 = {
-      srcField: options.srcFieldL1,
-      dstField: options.dstFieldL1,
-      inboundValueField: options.inboundValueFieldL1,
-      outboundValueField: options.outboundValueFieldL1,
-      endpointId: options.endpointIdL1,
-    };
-    let colorsL2 = {
-      defaultColor: options.color2,
-      nodeHighlight: options.nodeHighlightL2,
-    };
-    let fieldsL2 = {
-      srcField: options.srcFieldL2,
-      dstField: options.dstFieldL2,
-      inboundValueField: options.inboundValueFieldL2,
-      outboundValueField: options.outboundValueFieldL2,
-      endpointId: options.endpointIdL2,
-    };
-    let colorsL3 = {
-      defaultColor: options.color3,
-      nodeHighlight: options.nodeHighlightL3,
-    };
-    let fieldsL3 = {
-      srcField: options.srcFieldL3,
-      dstField: options.dstFieldL3,
-      inboundValueField: options.inboundValueFieldL3,
-      outboundValueField: options.outboundValueFieldL3,
-      endpointId: options.endpointIdL3,
-    };
-    let topology = {
-      layer1: { nodes: [], edges: [] },
-      layer2: { nodes: [], edges: [] },
-      layer3: { nodes: [], edges: [] },
-    };
+    let colors = [];
+    let fields = [];
+    for(let i=0; i<LAYER_LIMIT; i++){
+      colors.push({
+        defaultColor: options.layers[i].color,
+        nodeHighlight: options.layers[i].nodeHighlight,
+      })
+      fields.push({
+        srcField: options.layers[i].srcField,
+        dstField: options.layers[i].dstField,
+        inboundValueField: options.layers[i].inboundValueField,
+        outboundValueField: options.layers[i].outboundValueField,
+        endpointId: options.layers[i].endpointId,
+      })
+    }
+    let topology = [
+      { nodes: [], edges: [] },
+      { nodes: [], edges: [] },
+      { nodes: [], edges: [] },
+    ]
 
     try {
       if (data) {
         Promise.all([
-          this.resolveMapData('L1', replaceVariables),
-          this.resolveMapData('L2', replaceVariables),
-          this.resolveMapData('L3', replaceVariables),
+          this.resolveMapData(0, replaceVariables),
+          this.resolveMapData(1, replaceVariables),
+          this.resolveMapData(2, replaceVariables),
         ]).then((topologyData) => {
-          let parsedDataL1 = parseData(data, topologyData[0], colorsL1, fieldsL1, 1);
-          let parsedDataL2 = parseData(data, topologyData[1], colorsL2, fieldsL2, 1);
-          let parsedDataL3 = parseData(data, topologyData[2], colorsL3, fieldsL3, 1);
-          topology['layer1'] = parsedDataL1[3];
-          topology['layer2'] = parsedDataL2[3];
-          topology['layer3'] = parsedDataL3[3];
+          for(let i=0; i<LAYER_LIMIT; i++){
+            let parsedData = parseData(data, topologyData[i], colorsL1, fieldsL1, 1);
+            topology[i] = parsedData[3];
+          }
           this.mapCanvas.current.updateMapTopology(topology);
           this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
           PubSub.publish('hideTooltip', null, this.mapCanvas.current);

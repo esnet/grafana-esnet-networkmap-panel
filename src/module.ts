@@ -4,10 +4,8 @@ import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
 import { CoordinateButton } from './components/CoordinateButton';
 import { ViewportCoordinateButton } from './components/ViewportCoordinateButton';
-
+import { resolvePath, LAYER_LIMIT } from './components/lib/utils';
 import { ViewStrategies, BaseTilesets, PoliticalBoundaryTilesets, PoliticalLabelTilesets, LegendPositionOptions, LegendBehaviorOptions } from './options'
-
-const LAYER_LIMIT = 3;
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
@@ -17,43 +15,33 @@ const customEditors = {
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
-/*function checkBool(settingName: string, value: any) {
-  return function (config: MapOptions) {
-    return config[settingName] === value;
-  };
-}*/
-function resolvePath(object, path, defaultValue=null){
-  return path
-    .split(/[\.\[\]\'\"]/)
-    .filter(p => p)
-    .reduce((o, p) => o ? o[p] : defaultValue, object)
-}
-
 function checkBools(settings: object) {
   return function (config: MapOptions) {
     let keys = Object.keys(settings);
     for (let i = 0; i < keys.length; i++) {
       let settingName = keys[i];
       let value = settings[settingName];
-      // after this, on to the real fun. Time to deal with lining everything back up in code.
-      if (resolvePath(config, settingName) !== value) {
-        return false;
+      // if we're passed an array, check that the value is in the array
+      if(Array.isArray(value)){
+        // if it's not in the array, return false.
+        if (value.indexOf(resolvePath(config, settingName)) < 0){
+          return false;
+        }
+        // otherwise, keep looping, checking that everything matches
+      // if we're passed anything other than an array, make sure it's an exact match
+      } else {
+        if (resolvePath(config, settingName) !== value) {
+          // if it's not an exact match, return false
+          return false;
+        }
+        // otherwise, keep looping, checking that everything matches
       }
     }
+    // finally, we've checked everything. Return true.
     return true;
   };
 }
 
-function checkInArray(settingName: string, values: any[]) {
-  return function (config: MapOptions) {
-    for (let i = 0; i < values.length; i++) {
-      if (values[i] === config[settingName]) {
-        return true;
-      }
-    }
-    return false;
-  };
-}
 
 async function buildChoices(context: FieldOverrideContext) {
   const options: any[] = [{ value: null, label: '- No Mapping -' }];
@@ -129,7 +117,6 @@ let layerOptions = {
     defaultValue: false,
   },
   "layers[${i}].mapjson": {
-    id: 'mapjsonL1',
     name: 'Layer ${i+1} Map data (json)',
     category: "Layer Options",
     showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": false },
@@ -330,129 +317,9 @@ let layerOptions = {
 
 }
 
-/*`
-Name Remapping, so far:
-viewportTopLeftLat -> viewport.top
-viewportTopLeftLng -> viewport.left
-viewportBottomRightLat -> viewport.bottom
-viewportBottomRightLat -> viewport.right
-
-startLat -> viewport.center.lat
-startLng -> viewport.center.lng
-startZoom -> viewport.zoom
-
-tilesetLayer -> tileset.geographic
-boundaryLayer -> tileset.boundaries
-labelLayer -> tileset.labels
-`*/
-
 const options = {
-  "initialViewStrategy": {
-      editor: "select",
-      name: 'Map Initial View Strategy',
-      description: 'Strategy to set the initial center and zoom level of the map',
-      settings: { allowCustomValue: false, options: ViewStrategies, },
-  },
-  //////////////
-  // Setting the Map Center from Dashboard Variables
-  //////////////
-  "latitudeVar": {
-    editor: "select",
-    name: 'Latitude Variable',
-    description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: {"initialViewStrategy": 'variables'},
-    settings: {
-      allowCustomValue: false,
-      getOptions: buildChoicesWithSuggestions,
-    },
-  },
-  'longitudeVar': {
-    editor: "select",
-    name: 'Longitude Variable',
-    description: 'Select a dashboard or query variable to set initial longitude of map',
-    showIf: {"initialViewStrategy": 'variables'},
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoicesWithSuggestions,
-    },
-  },
-  //////////////
-  // "Viewport" top-left, bottom-right and auto-resize options
-  // Static center and zoom level options
-  //////////////
-  'setLatLngZoom': {
-    name: 'Set Default Latitude / Longitude / Zoom',
-    description:
-      'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
-    showIf: {"initialViewStrategy": 'static'},
-    settings: { label: 'Set Lat/Lng & Zoom' },
-    editor: "CoordinateButton",
-  },
-  "viewport.center.lat": {
-    name: 'Starting Latitude of map',
-    description: 'This will be the center of the map when it loads',
-    showIf: {"initialViewStrategy": 'static'},
-    defaultValue: 39,
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
-  "viewport.center.lng": {
-    name: 'Starting Longitude of map',
-    description: 'This will be the center of the map when it loads',
-    showIf: {"initialViewStrategy": 'static'},
-    defaultValue: -98,
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
-  'viewport.zoom': {
-    editor: "slider",
-    name: 'Starting zoom level of map',
-    showIf: checkInArray('initialViewStrategy', ['static', 'variables']),
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
-  },
-  "setViewport": {
-    name: 'Set Zoom Viewport to Current Map View',
-    description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
-    showIf: {"initialViewStrategy": 'viewport'},
-    settings: { label: 'Set Viewport Coordinates' },
-    editor: "ViewportCoordinateButton",
-  },
-  "viewport.top": {
-    name: 'Initial viewport: Top Left: Latitude',
-    description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
-  "viewport.left": {
-    name: 'Initial viewport: Top Left: Longitude',
-    description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
-  "viewport.bottom": {
-    name: 'Initial viewport: Bottom Right: Latitude',
-    description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
-  "viewport.right": {
-    name: 'Initial viewport: Bottom Right: Longitude',
-    description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
-    settings: { useTextarea: true, rows: 1 },
-    editor: "CustomTextArea",
-  },
   ///////////////
-  // Background layers & color
+  // Uncategorized/Main options
   ///////////////
   "background": {
     editor: 'color',
@@ -468,6 +335,7 @@ const options = {
       allowCustomValue: false,
       options: BaseTilesets,
     },
+    defaultValue: "arcgis",
   },
   "tileset.boundaries": {
     editor: "select",
@@ -477,6 +345,7 @@ const options = {
       allowCustomValue: false,
       options: PoliticalBoundaryTilesets,
     },
+    defaultValue: null,
   },
   "tileset.labels": {
     editor: "select",
@@ -486,7 +355,126 @@ const options = {
       allowCustomValue: false,
       options: PoliticalLabelTilesets,
     },
+    defaultValue: null,
   },
+  //////////////
+  // "Viewport" strategy and options
+  //////////////
+  "initialViewStrategy": {
+      editor: "select",
+      name: 'Map Initial View Strategy',
+      description: 'Strategy to set the initial center and zoom level of the map',
+      category: "Viewport Options",
+      settings: { allowCustomValue: false, options: ViewStrategies, },
+      defaultValue: "static",
+  },
+  "setLatLngZoom": {
+    name: 'Set Default Latitude / Longitude / Zoom',
+    description:
+      'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
+    showIf: {"initialViewStrategy": 'static'},
+    settings: { label: 'Set Lat/Lng & Zoom' },
+    category: "Viewport Options",
+    editor: "CoordinateButton",
+  },
+  // --- options for "static" zoom strategy
+  "viewport.center.lat": {
+    name: 'Starting Latitude of map',
+    description: 'This will be the center of the map when it loads',
+    showIf: {"initialViewStrategy": 'static'},
+    defaultValue: 39,
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+  "viewport.center.lng": {
+    name: 'Starting Longitude of map',
+    description: 'This will be the center of the map when it loads',
+    showIf: {"initialViewStrategy": 'static'},
+    defaultValue: -98,
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+  // --- options for "variables" zoom strategy
+  "latitudeVar": {
+    editor: "select",
+    name: 'Latitude Variable',
+    description: 'Select a dashboard or query variable to set initial latitude of map',
+    showIf: {"initialViewStrategy": 'variables'},
+    category: "Viewport Options",
+    settings: {
+      allowCustomValue: false,
+      getOptions: buildChoicesWithSuggestions,
+    },
+  },
+  "longitudeVar": {
+    editor: "select",
+    name: 'Longitude Variable',
+    description: 'Select a dashboard or query variable to set initial longitude of map',
+    showIf: {"initialViewStrategy": 'variables'},
+    category: "Viewport Options",
+    settings: {
+      allowCustomValue: false,
+      options: [],
+      getOptions: buildChoicesWithSuggestions,
+    },
+  },
+  // --- options for "static"/"variables" zoom strategy
+  "viewportZoom": {
+    editor: "slider",
+    name: 'Starting zoom level of map',
+    showIf: {'initialViewStrategy': ['static', 'variables']},
+    category: "Viewport Options",
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.25,
+    },
+  },
+  // --- options for "viewport" zoom strategy
+  "setViewport": {
+    name: 'Set Zoom Viewport to Current Map View',
+    description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
+    showIf: {"initialViewStrategy": 'viewport'},
+    settings: { label: 'Set Viewport Coordinates' },
+    category: "Viewport Options",
+    editor: "ViewportCoordinateButton",
+  },
+  "viewport.top": {
+    name: 'Initial viewport: Northern Boundary (Latitude)',
+    description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
+    showIf: {"initialViewStrategy": 'viewport'},
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+  "viewport.left": {
+    name: 'Initial viewport: Western Boundary (Longitude)',
+    description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
+    showIf: {"initialViewStrategy": 'viewport'},
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+  "viewport.bottom": {
+    name: 'Initial viewport: Eastern Boundary (Latitude)',
+    description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
+    showIf: {"initialViewStrategy": 'viewport'},
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+  "viewport.right": {
+    name: 'Initial viewport: Southern Boundary (Longitude)',
+    description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
+    showIf: {"initialViewStrategy": 'viewport'},
+    settings: { useTextarea: true, rows: 1 },
+    category: "Viewport Options",
+    editor: "CustomTextArea",
+  },
+
   //////////////
   // View/UI Controls
   //////////////
@@ -595,6 +583,9 @@ for(let i=0; i<LAYER_LIMIT; i++){
     }
     if(options[option].hasOwnProperty("description")){
       options[option].description = options[option].description.replace("${i+1}", (i+1).toString());
+    }
+    if(options[option].hasOwnProperty("defaultValue") && typeof(options[option].defaultValue) === "string"){
+      options[option].defaultValue = options[option].defaultValue.replace("${i+1}", (i+1).toString());
     }
     // reformat the keys in the "showIf" conditions if they exist
     // showIf: {"layer[${i}].visible": true}

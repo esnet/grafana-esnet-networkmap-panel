@@ -16,8 +16,8 @@
         import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
         var parsedData = {};
         var lavender = "rgb(202, 149, 229)"
-        var topology = {
-            "layer1":{
+        var topology = [
+            {
                 "name": "ES.net Layer 1: Core Circuits",
                 "layer": "core",
                 "pathLayout": {
@@ -1836,7 +1836,7 @@
                     }
                 ]
             },
-            "layer2":{
+            {
                 "edges":[
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                         "latLngs":[[49.02,-105.99],[45.81,-101.77],[44.59,-96.06]],
@@ -1869,66 +1869,74 @@
                             "meta":{},
                             "latLng":[52.16340342422403,-93.95507812500001],
                         }
-                ]}};
+                ]
+            }
+        ];
         var options = {
             "initialViewStrategy": "viewport",
-
-            "viewportTopLeftLat": 33,
-            "viewportTopLeftLng": -141,
-            "viewportBottomRightLat": 43,
-            "viewportBottomRightLng": -41,
-
-            "startLat":38.68,
-            "startLng":-96.96,
-            "startZoom":3.5,
-
-            "showSidebar": false,
+            "showSidebar": true,
             "showViewControls": true,
             "enableEdgeAnimation": true,
             "enableNodeAnimation": true,
             "enableScrolling": true,
             "enableEditing": true,
             "background":"#EDEDED",
-            // global options
-            // this string corresponds to options in RenderMap.js
-            "tileSetLayer":"esri.shaded",
-            // this string (or null) corresponds to options in RenderMap.js
-            "boundaryLayer":"toner.boundaries",
-            // this string (or null) corresponds to options in RenderMap.js
-            "labelLayer":null,
-            // these are legacy, they've been overridden by per-layer options.
-            "edgeWidth":3,
-            "editMode":true,
-            "nodeWidth":5,
-            "pathOffset":3,
-            // layer 1 rendering options
-            "layer1":true,
-            "color1": lavender,
-            "endpointIdL1":"pops",
-            "nodeWidthL1":4,
-            "edgeWidthL1":2,
-            "pathOffsetL1":2,
-            "layerName1":"Core Topology",
-            "legendL1":true,
-            // layer 2 rendering options
-            "layer2":false,
-            "color2": lavender,
-            "endpointIdL2":"pops",
-            "nodeWidthL2":5,
-            "edgeWidthL2":3,
-            "pathOffsetL2":3,
-            "layerName2":"Site Topology",
-            "legendL2":true,
-            // layer 3 rendering options
-            "layer3":false,
-            "color3": lavender,
-            "endpointIdL3":"pops",
-            "nodeHighlightL3":"red",
-            "nodeWidthL3":6.5,
-            "edgeWidthL3":2,
-            "pathOffsetL3":1.5,
-            "layerName3":"Peer Topology",
-            "legendL3":true,
+            "viewport": {
+                "top": 33,
+                "left": -141,
+                "bottom": 43,
+                "right": -41,
+                "center": {
+                    "lat":38.68,
+                    "lng":-96.96,
+                },
+                "zoom":3.5
+            },
+            "tileset": {
+                // global options
+                // this string corresponds to options in RenderMap.js
+                "geographic":"esri.shaded",
+                // this string (or null) corresponds to options in RenderMap.js
+                "boundaries":"toner.boundaries",
+                // this string (or null) corresponds to options in RenderMap.js
+                "labels": null,
+            },
+            "layers": [
+                {
+                    // layer 1 rendering options
+                    "visible":true,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeWidth":4,
+                    "edgeWidth":2,
+                    "pathOffset":2,
+                    "name":"Core Topology",
+                    "legend":true,
+                },
+                {
+                    // layer 2 rendering options
+                    "layer":false,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeWidth":5,
+                    "edgeWidth":3,
+                    "pathOffset":3,
+                    "name":"Site Topology",
+                    "legend":true,
+                },
+                {
+                    // layer 3 rendering options
+                    "layer":false,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeHighlight":"red",
+                    "nodeWidth":6.5,
+                    "edgeWidth":2,
+                    "pathOffset":1.5,
+                    "name":"Peer Topology",
+                    "legend":true,
+                }
+            ]
         };
         var canvas = document.createElement("esnet-map-canvas");
         var optionsElem = document.createElement('textarea');
@@ -1942,10 +1950,10 @@
             optionsElem.value = JSON.stringify(options);
         }
         canvas.updateTopology = function(topology){
-            var cleanTopology = { layer1: null, layer2: null, layer3: null };
-            for(var i=1; i<=3; i++){
-                if(topology["layer" + i]){
-                    cleanTopology["layer"+i] = sanitizeTopology(topology['layer'+i]);
+            var cleanTopology = [];
+            for(var i=0; i<3; i++){
+                if(topology[i]){
+                    cleanTopology[i] = sanitizeTopology(topology[i]);
                 }
             }
             dataElem.value = JSON.stringify(cleanTopology);

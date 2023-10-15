@@ -68,8 +68,8 @@ function sanitizeName(name){
 
 function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
-  const edgeWidth = ref.options["edgeWidthL"+layerId];
-  const defaultEdgeColor = ref.options["color"+layerId];
+  const edgeWidth = ref.options.layers[layerId].edgeWidth;
+  const defaultEdgeColor = ref.options.layers[layerId].color;
   var azLines = g.selectAll('path.edge-az').data(data.edges);
 
   const doEdgeMouseOver = (event, d) => {
@@ -89,9 +89,9 @@ function renderEdges(g, data, ref, layerId, options) {
     PubSub.publish("hideTooltip", null, ref.svg.node());
 
     var labels = {
-      "src": options["srcFieldLabelL"+layerId] ? options["srcFieldLabelL"+layerId] : "From:",
-      "dst": options["dstFieldLabelL"+layerId] ? options["dstFieldLabelL"+layerId] : "To:",
-      "data": options["dataFieldLabelL"+layerId] ? options["dataFieldLabelL"+layerId] : "Volume:",
+      "src": options.layers[layerId]["srcFieldLabel"] ? options.layers[layerId]["srcFieldLabel"] : "From:",
+      "dst": options.layers[layerId]["dstFieldLabel"] ? options.layers[layerId]["dstFieldLabel"] : "To:",
+      "data": options.layers[layerId]["dataFieldLabel"] ? options.layers[layerId]["dataFieldLabel"] : "Volume:",
     }
 
     if(d.meta.template){
@@ -394,17 +394,17 @@ function renderNodeControl(g, data, ref, layerId){
     }
     PubSub.clearLast("dragStarted", ref.svg.node());
     if(ref.mapCanvas.updateTopology){
-      ref.mapCanvas.updateTopology({
-        "layer1": ref.data["layer1"],
-        "layer2": ref.data["layer2"],
-        "layer3": ref.data["layer3"],
-      })
+      ref.mapCanvas.updateTopology([
+        ref.data[0],
+        ref.data[1],
+        ref.data[2],
+      ])
     } else {
-      PubSub.publish("updateTopology", {
-        "layer1": ref.data["layer1"],
-        "layer2": ref.data["layer2"],
-        "layer3": ref.data["layer3"],
-      }, ref.svg.node());
+      PubSub.publish("updateTopology", [
+        ref.data[0],
+        ref.data[1],
+        ref.data[2],
+      ], ref.svg.node());
     }
     d3.select(`.control-point-layer${layerId}.control-point-for-node-${sanitizeName(d.name)}`)
       .classed("control-selected", true);
@@ -454,8 +454,8 @@ function renderNodeControl(g, data, ref, layerId){
       evt.stopPropagation();
       PubSub.publish("setEditSelection", {
         "object": pointData,
-        "index": evt.target.getAttribute("data-index"),
-        "layer": evt.target.getAttribute("data-layer"),
+        "index": evt.target.getAttribute("data-index") * 1,
+        "layer": evt.target.getAttribute("data-layer") * 1,
         "type": "nodes"
       }, ref.svg.node());
     })
@@ -500,9 +500,10 @@ function renderEdgeControl(g, data, ref, layerId) {
     })
     .on('mousedown', function(evt, edgeData){
       evt.stopPropagation();
-      var idx = evt.target.getAttribute("data-index");
-      var layer = evt.target.getAttribute("data-layer");
-      PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layer}, ref.svg.node());
+      var idx = evt.target.getAttribute("data-index") * 1;
+      var layer = evt.target.getAttribute("data-layer") * 1;
+      let editSelection = {"object": edgeData, "type": "edges", "index": idx, "layer": layer};
+      PubSub.publish("setEditSelection", editSelection, ref.svg.node());
     })
     //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
     .on('mouseenter', function () {
@@ -554,17 +555,17 @@ function renderEdgeControl(g, data, ref, layerId) {
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
     if(ref.mapCanvas.updateTopology){
-      ref.mapCanvas.updateTopology({
-        "layer1": ref.data["layer1"],
-        "layer2": ref.data["layer2"],
-        "layer3": ref.data["layer3"],
-      })
+      ref.mapCanvas.updateTopology([
+        ref.data[0],
+        ref.data[1],
+        ref.data[2],
+      ])
     } else {
-      PubSub.publish("updateTopology", {
-        "layer1": ref.data["layer1"],
-        "layer2": ref.data["layer2"],
-        "layer3": ref.data["layer3"],
-      }, ref.svg.node());
+      PubSub.publish("updateTopology", [
+        ref.data[0],
+        ref.data[1],
+        ref.data[2],
+      ], ref.svg.node());
     }
     d3.select(`.controlEdge.l${layerId}.edge-az-${sanitizeName(edgeData.name)}`)
       .classed("control-selected", true);
@@ -584,12 +585,13 @@ function renderEdgeControl(g, data, ref, layerId) {
       .merge(feature)
       .on('mousedown', function(evt, d){
         evt.stopPropagation();
-        PubSub.publish("setEditSelection", {
+        let editSelection = {
           "object": edgeData,
           "index": idx,
           "layer": layerId,
           "type": "edges"
-        }, ref.svg.node());
+        }
+        PubSub.publish("setEditSelection", editSelection, ref.svg.node());
       })
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
@@ -618,7 +620,7 @@ function renderEdgeControl(g, data, ref, layerId) {
 }
 
 function renderNodes(g, data, ref, layerId) {
-  const defaultNodeColor = ref.options["color"+layerId];
+  const defaultNodeColor = ref.options.layers[layerId]["color"];
   var feature = g.selectAll('g.node').data(data.nodes);
   var div = ref.div;
   feature
@@ -636,7 +638,7 @@ function renderNodes(g, data, ref, layerId) {
     .attr('class', 'scale-container')
     .attr('transform', "scale(1.0, 1.0)")
     .html(function(d){
-      var circle = `<circle r='${ref.options["nodeWidthL"+layerId]}' />`
+      var circle = `<circle r='${ref.options.layers[layerId]["nodeWidth"]}' />`
       return d.meta.svg || circle;
     })
     .attr('text', function (d) {
@@ -675,16 +677,16 @@ function renderNodes(g, data, ref, layerId) {
       return this.childNodes[0];
     })
     .attr("height", function(d){
-      return ref.options["nodeWidthL"+layerId] * 2;
+      return ref.options.layers[layerId]["nodeWidth"] * 2;
     })
     .attr("width", function(d){
-      return ref.options["nodeWidthL"+layerId] * 2;
+      return ref.options.layers[layerId]["nodeWidth"] * 2;
     })
     .attr("x", function(d){
-      return ref.options["nodeWidthL"+layerId] * -1;
+      return ref.options.layers[layerId]["nodeWidth"] * -1;
     })
     .attr("y", function(d){
-      return ref.options["nodeWidthL"+layerId] * -1;
+      return ref.options.layers[layerId]["nodeWidth"] * -1;
     })
 
 
@@ -797,9 +799,9 @@ export class EsMap {
     this.mapCanvas = mapCanvas;
     this.leafletMap = this.mapCanvas.getCurrentLeafletMap();
     this.svg = svg;
-    this.data = {};
-    this.mapLayers = {};
-    this.curves = {}; // specific edge curves for each layer
+    this.data = [];
+    this.mapLayers = [];
+    this.curves = []; // specific edge curves for each layer
     this.lineGen = d3.line().curve(curve); // the default curve we'll use to render edges
     this.editEdges = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editEdgeMode;
     this.editNodes = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editNodeMode;
@@ -1017,10 +1019,10 @@ export class EsMap {
       d.controlPointPath = d3.line()(d.points);
 
       //--- setup the azPath
-      d.azPath = ref.curves['layer'+layerId](offsetPoints(d.points, ref.mapCanvas.options["pathOffsetL"+layerId]));
+      d.azPath = ref.curves[layerId](offsetPoints(d.points, ref.mapCanvas.options.layers[layerId].pathOffset));
 
       //--- setup the zaPath
-      d.zaPath = ref.curves['layer'+layerId](offsetPoints(d.points.reverse(), ref.mapCanvas.options["pathOffsetL"+layerId]));
+      d.zaPath = ref.curves[layerId](offsetPoints(d.points.reverse(), ref.mapCanvas.options.layers[layerId].pathOffset));
     });
 
     //---swap out edge list with the filtered list
@@ -1031,20 +1033,19 @@ export class EsMap {
   update() {
     this.mapCanvas.options.enableScrolling && this.leafletMap.dragging.enable();
     var layerId = 0;
-    for (const [name, data] of Object.entries(this.data)) {
-      layerId++;
+    this.data.forEach((data)=>{
       this.updateCoordinates(data, layerId);
-    }
+      layerId++;      
+    })
     var layerId = 0;
-    for (const [name, g] of Object.entries(this.mapLayers)) {
-      layerId++;
-      if(!this.options['layer' + layerId]){
-        continue;
+    this.mapLayers.forEach((g)=>{
+      if(!this.options.layers[layerId]['visible']){
+        return;
       }
       var edge_g = g.select('g.edge');
       var node_g = g.select('g.node');
       var controlpoint_g = g.select('g.cp');
-      var data = this.data[name];
+      var data = this.data[layerId];
 
       if (this.editNodes == 1) {
         renderNodeControl(controlpoint_g, data, this, layerId);
@@ -1066,20 +1067,21 @@ export class EsMap {
       }
       renderNodes(node_g, data, this, layerId);
       renderEdges(edge_g, data, this, layerId, this.mapCanvas.options);
-    }
+      layerId++;
+    })
   }
 
-  addNetLayer(name, data) {
+  addNetLayer(idx, data) {
     var ref = this;
-    ref.data[name] = data;
+    ref.data[idx] = data;
     let lineGen = ref.lineGen;
     if (data?.pathLayout?.type && d3.hasOwnProperty(data?.pathLayout?.type)){
       let linefunc = d3[data.pathLayout.type];
       lineGen = d3.line().curve(linefunc);
     }
-    ref.curves[name] = lineGen;
+    ref.curves[idx] = lineGen;
     var map_g = this.svg.append('g').attr('class', 'esmap');
-    ref.mapLayers[name] = map_g;
+    ref.mapLayers[idx] = map_g;
 
     var edge_g = map_g.append('g').attr('class', 'edge');
     var node_g = map_g.append('g').attr('class', 'node');

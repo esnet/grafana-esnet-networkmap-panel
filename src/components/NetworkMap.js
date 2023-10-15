@@ -1,5 +1,6 @@
 import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
+import { LAYER_LIMIT } from './lib/utils.js'
 const PubSub = pubsub.PubSub;
 
 // these imports are the result of very significant trial and error.
@@ -41,9 +42,7 @@ export default class NetworkMap {
    */
   constructor(mapCanvas) {
     this.mapCanvas = mapCanvas;
-    this.g1 = null;
-    this.g2 = null;
-    this.g3 = null;
+    this.groups = [];
 
     //--- grab copy or instantiate the current leaflet map singleton
     this.leafletMap = this.mapCanvas.getCurrentLeafletMap();
@@ -95,7 +94,6 @@ export default class NetworkMap {
 
   renderMapLayers() {
     if(this.mapCanvas.topology){
-        let layers = Object.keys(this.mapCanvas.topology);
         function getDisplayName(nodeName, nodes){
           var displayName = nodeName;
           nodes.forEach((node)=>{
@@ -105,36 +103,32 @@ export default class NetworkMap {
           });
           return displayName;
         }
-        layers.forEach((name)=>{
-          for(var i=0; i<this.mapCanvas.topology[name].edges.length; i++){
-            var endpointId = `endpointIdL${name.charAt(name.length-1)}`;
-            var edge = this.mapCanvas.topology[name].edges[i];
-            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][0], this.mapCanvas.topology[name].nodes);
-            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options[endpointId]][1], this.mapCanvas.topology[name].nodes);
+        let l = 0;
+        this.mapCanvas.topology.forEach((layer)=>{
+          if(!layer) return
+          for(var e=0; e<layer.edges.length; e++){
+            var endpointId = `endpointId`;
+            var edge = layer.edges[e];
+            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][0], layer.nodes);
+            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][1], layer.nodes);
           }
+          l++; // update the layer index
         });
     }
 
-    if(this.g1) this.g1.remove();
-    if(this.g2) this.g2.remove();
-    if(this.g3) this.g3.remove();
+    // clear all existing layers
+    this.groups.forEach((group) => group.remove());
     // Draw the map json topology data!!! Currently supports up to 3 layers
     let emptyLayer = { "nodes": [], "edges": [] };
-    let layer1 = emptyLayer;
-    let layer2 = emptyLayer;
-    let layer3 = emptyLayer;
-    if(this.mapCanvas.topology.layer1){
-      layer1 = this.mapCanvas.topology.layer1;
+    let emptyTopology = [emptyLayer, emptyLayer, emptyLayer];
+    for(let i=0; i<LAYER_LIMIT; i++){
+      emptyTopology.push(emptyLayer);
+      let layer = emptyLayer;
+      if(this.mapCanvas.topology[i]){
+        layer = this.mapCanvas.topology[i];
+      }
+      this.groups.push(this.esmap.addNetLayer(i, layer));
     }
-    if(this.mapCanvas.topology.layer2){
-      layer2 = this.mapCanvas.topology.layer2;
-    }
-    if(this.mapCanvas.topology.layer3){
-      layer3 = this.mapCanvas.topology.layer3;
-    }
-    this.g1 = this.esmap.addNetLayer('layer1', layer1);
-    this.g2 = this.esmap.addNetLayer('layer2', layer2);
-    this.g3 = this.esmap.addNetLayer('layer3', layer3);
   }
 
   renderMap() {

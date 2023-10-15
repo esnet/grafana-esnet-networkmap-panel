@@ -10,8 +10,8 @@ Out Volume: undefined`;
 
 const lavender = "rgb(202, 149, 229)";
 
-var TOPOLOGY = {
-            "layer1":{
+var TOPOLOGY = [
+            {
                 "edges":[
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                         "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
@@ -57,7 +57,7 @@ var TOPOLOGY = {
                             "color":lavender,
                         }
                 ],"aTest":0}
-        }
+        ]
 
 describe( "Class MapCanvas", () => {
     afterEach(async function(){
@@ -74,49 +74,59 @@ describe( "Class MapCanvas", () => {
         elem.topology = TOPOLOGY;
 
         elem.options = {
-            "startLat":38.68,
-            "startLng":-96.96,
-            "startZoom":3,
+            "viewport": {
+              "zoom":3,
+              "center": {
+                "lat":38.68,
+                "lng":-96.96,
+              }
+            },
             "showSidebar": true,
             "showViewControls": true,
             "enableScrolling": true,
             "enableEditing": true,
             "enableNodeAnimation": true,
             "enableEdgeAnimation": true,
-            "tileSetLayer":"esri.shaded",
-            "boundaryLayer":null,
-            "labelLayer":null,
+            "tileset":{
+              "geographic": "esri.shaded",
+              "boundaries": null,
+              "labels": null,
+            },
             "edgeWidth":3,
             "editMode":true,
             "nodeWidth":5,
             "pathOffset":3,
-           // layer 1 rendering options
-            "layer1":true,
-            "endpointIdL1":"pops",
-            "nodeWidthL1":4,
-            "edgeWidthL1":1.5,
-            "pathOffsetL1":1.5,
-            "layerName1":"Core Topology",
-            "legendL1":true,
-            // layer 2 rendering options
-            "layer2":false,
-            "endpointIdL2":"pops",
-            "nodeWidthL2":5,
-            "edgeWidthL2":3,
-            "pathOffsetL2":3,
-            "layerName2":"Site Topology",
-            "legendL2":true,
-            // layer 3 rendering options
-            "layer3":false,
-            "endpointIdL3":"pops",
-            "nodeHighlightL3":"red",
-            "nodeWidthL3":6.5,
-            "edgeWidthL3":2,
-            "pathOffsetL3":1.5,
-            "layerName3":"Peer Topology",
-            "legendL3":true,
+            "layers": [
+                {
+                    "visible":true,
+                    "endpointId":"pops",
+                    "nodeWidth":4,
+                    "edgeWidth":1.5,
+                    "pathOffset":1.5,
+                    "name":"Core Topology",
+                    "legend":true,                 
+                },
+                {
+                    "visible":false,
+                    "endpointId":"pops",
+                    "nodeWidth":5,
+                    "edgeWidth":3,
+                    "pathOffset":3,
+                    "name":"Site Topology",
+                    "legend":true,
+                },
+                {
+                    "visible":false,
+                    "endpointId":"pops",
+                    "nodeHighlight":"red",
+                    "nodeWidth":6.5,
+                    "edgeWidth":2,
+                    "pathOffset":1.5,
+                    "name":"Peer Topology",
+                    "legend":true,                  
+                }
+            ]
         };
-
         elem.updateTopology = function(){ return }
         document.body.appendChild(elem);
     }); 
@@ -261,8 +271,8 @@ describe( "Class MapCanvas", () => {
       nodeStyle.display.should.equal("inline");
       // click the toggle containing the A node
       var newOptions = canvas.options;
-      newOptions['layer1'] = false;
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['layer1']}, canvas);
+      newOptions.layers[0]['visible'] = false;
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['layers[0].visible']}, canvas);
       // verify that the point for the A node is not visible / not in DOM
       node = document.querySelector("g.node > circle");
       (String(node)).should.equal("null");
@@ -374,13 +384,13 @@ describe( "Class MapCanvas", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       // set option boolean
       var newOptions = canvas.options;
-      newOptions['legendL1'] = false;
-      newOptions['legendL2'] = false;
-      newOptions['legendL3'] = false;
+      newOptions.layers[0]['legend'] = false;
+      newOptions.layers[1]['legend'] = false;
+      newOptions.layers[2]['legend'] = false;
       // update options
       PubSub.publish("updateMapOptions", {
           options: newOptions,
-          changed: ['legendL1', 'legendL2', 'legendL3']
+          changed: ['layers[0].legend', 'layers[1].legend', 'layers[2].legend']
         },
         canvas);
       // check that no toggle visible for layer toggle we turned off
@@ -518,16 +528,16 @@ describe( "Class MapCanvas", () => {
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
       var newTopology = canvas.topology;
-      newTopology.layer2 = newTopology.layer1;
-      newTopology.layer3 = newTopology.layer1;
+      newTopology[1] = newTopology[0];
+      newTopology[2] = newTopology[0];
       var newOptions = canvas.options;
-      newOptions['edgeWidthL3'] = 5;
-      newOptions['layer1'] = false;
-      newOptions['layer2'] = false;
-      newOptions['layer3'] = true;
+      newOptions.layers[2]['edgeWidth'] = 5;
+      newOptions.layers[0]['visible'] = false;
+      newOptions.layers[1]['visible'] = false;
+      newOptions.layers[2]['visible'] = true;
       PubSub.publish("updateMapOptions", {
         options: newOptions,
-        changed: ['layer1', 'layer2', 'layer3', 'edgeWidthL3']
+        changed: ['layers[0].visible', 'layers[1].visible', 'layers[2].visible', 'layers[2].edgeWidth']
       }, canvas);
       var randomEdge = canvas.querySelector('.edge.edge-az');
       randomEdge.getAttribute("stroke-width").should.equal("5");
@@ -671,8 +681,8 @@ describe( "Class MapCanvas", () => {
     it("should allow for editing of same-name nodes in different layers", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       // create test map topology
-      var newTopology = { 
-        "layer1": {
+      var newTopology = [
+        {
             "edges": [
                 {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                     "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
@@ -696,7 +706,7 @@ describe( "Class MapCanvas", () => {
                 }
             ]
         },
-        "layer2": {
+        {
             "edges": [
                 {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
                     "latLngs":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
@@ -721,7 +731,7 @@ describe( "Class MapCanvas", () => {
             ]
 
         },
-      }
+      ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
       var newOptions = canvas.options;
       newOptions['layer2'] = true;
@@ -735,10 +745,10 @@ describe( "Class MapCanvas", () => {
       // select edges that attach to node with this name, record positions
       // toggle layers such that we have two layers with same-named nodes
       // select the control point we want to work on
-      var cPoint = canvas.querySelector("circle.control.control-point-layer1");
-      var edgeABlayer1 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var cPoint = canvas.querySelector("circle.control.control-point-layer0");
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.connects-to-A");
       var beforeCoords1 = edgeABlayer1.getBoundingClientRect();
-      var edgeABlayer2 = canvas.querySelector(".edge-az.l2.connects-to-A");
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.connects-to-A");
       var beforeCoords2 = edgeABlayer2.getBoundingClientRect();
       var originalPos = cPoint.getBoundingClientRect();
       // create mouse event for down
@@ -755,9 +765,9 @@ describe( "Class MapCanvas", () => {
       cPoint = canvas.querySelector("circle.control");
       cPoint.dispatchEvent(upEvent);
       // select attached edges after, record positions
-      var edgeABlayer1 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.connects-to-A");
       var afterCoords1 = edgeABlayer1.getBoundingClientRect();
-      var edgeABlayer2 = canvas.querySelector(".edge-az.l2.connects-to-A");
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.connects-to-A");
       var afterCoords2 = edgeABlayer2.getBoundingClientRect();
       // positions for attached edges should have changed
       beforeCoords1.x.should.not.equal(afterCoords1.x);
@@ -766,7 +776,7 @@ describe( "Class MapCanvas", () => {
       beforeCoords2.x.should.equal(afterCoords2.x);
       beforeCoords2.y.should.equal(afterCoords2.y);
       // click layer 1 copy of "A"
-      var nodeAlayer1 = canvas.querySelector("circle.control.control-point-layer1");
+      var nodeAlayer1 = canvas.querySelector("circle.control.control-point-layer0");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       nodeAlayer1.dispatchEvent(downEvent);
@@ -786,7 +796,7 @@ describe( "Class MapCanvas", () => {
       // enter Edge editing mode
       PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
       // click layer 1, edge A--B, ensure that it's selected
-      var edgeABlayer1 = canvas.querySelector(".controlEdge.l1.edge-az-A--B");
+      var edgeABlayer1 = canvas.querySelector(".controlEdge.l0.edge-az-A--B");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       var upEvent = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer1.dispatchEvent(downEvent);
@@ -794,7 +804,7 @@ describe( "Class MapCanvas", () => {
       edgeABlayer1.getAttribute("class").should.contain("control-selected");
       PubSub.publish("setEditMode", { "mode": "edge", "value": true }, canvas);
       // click layer 2, edge A--B, ensure that it's selected
-      var edgeABlayer2 = canvas.querySelector(".controlEdge.l2.edge-az-A--B");
+      var edgeABlayer2 = canvas.querySelector(".controlEdge.l1.edge-az-A--B");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       var upEvent = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer2.dispatchEvent(downEvent);
@@ -805,7 +815,7 @@ describe( "Class MapCanvas", () => {
       PubSub.publish("updateEditMode", false, canvas);
       var closureVar = null;
       PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
-      var edgeABlayer1 = canvas.querySelector(".edge.l1.edge-az.edge-az-A--B");
+      var edgeABlayer1 = canvas.querySelector(".edge.l0.edge-az.edge-az-A--B");
       var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
       var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer1.dispatchEvent(mouseDown);
@@ -818,7 +828,7 @@ describe( "Class MapCanvas", () => {
       // click edge on other layer
       var closureVar = null;
       PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
-      var edgeABlayer2 = canvas.querySelector(".edge.l2.edge-az.edge-az-A--B");
+      var edgeABlayer2 = canvas.querySelector(".edge.l1.edge-az.edge-az-A--B");
       var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
       var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
       edgeABlayer2.dispatchEvent(mouseDown);
@@ -832,31 +842,31 @@ describe( "Class MapCanvas", () => {
 
       var closureVar = null;
       PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
-      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A circle");
-      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A circle");
+      var nodeAlayer1 = canvas.querySelector(".node.l0.node-A circle");
+      var nodeAlayer2 = canvas.querySelector(".node.l1.node-A circle");
       var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
       var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
       nodeAlayer1.dispatchEvent(mouseDown);
       nodeAlayer1.dispatchEvent(mouseUp);
       "called".should.equal(closureVar);
       // ensure selection class on our edge
-      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A .scale-container");
-      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A .scale-container");
+      var nodeAlayer1 = canvas.querySelector(".node.l0.node-A .scale-container");
+      var nodeAlayer2 = canvas.querySelector(".node.l1.node-A .scale-container");
       nodeAlayer1.getAttribute("class").should.contain("animated-node");
       nodeAlayer2.getAttribute("class").should.not.contain("animated-node");
 
       var closureVar = null;
       PubSub.subscribe("setSelection", function(){ closureVar = "called" }, canvas);
-      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A circle");
-      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A circle");
+      var nodeAlayer1 = canvas.querySelector(".node.l0.node-A circle");
+      var nodeAlayer2 = canvas.querySelector(".node.l1.node-A circle");
       var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
       var mouseUp = new MouseEvent('mouseup', { bubbles: true, view: window })
       nodeAlayer2.dispatchEvent(mouseDown);
       nodeAlayer2.dispatchEvent(mouseUp);
       "called".should.equal(closureVar);
       // ensure selection class on our edge
-      var nodeAlayer1 = canvas.querySelector(".node.l1.node-A .scale-container");
-      var nodeAlayer2 = canvas.querySelector(".node.l2.node-A .scale-container");
+      var nodeAlayer1 = canvas.querySelector(".node.l0.node-A .scale-container");
+      var nodeAlayer2 = canvas.querySelector(".node.l1.node-A .scale-container");
       nodeAlayer2.getAttribute("class").should.contain("animated-node");
       nodeAlayer1.getAttribute("class").should.not.contain("animated-node");
 
@@ -864,8 +874,8 @@ describe( "Class MapCanvas", () => {
     it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       // create mouseover for edge with template
-      var newTopology = { 
-        "layer1": {
+      var newTopology = [
+        {
             "edges": [
                 {
                     "name":"Z--L",
@@ -914,7 +924,7 @@ describe( "Class MapCanvas", () => {
                 }
             ]
         },
-      }
+      ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
       var edgeLZ = canvas.querySelector(".connects-to-Z.connects-to-L")
       var edgeAZ = canvas.querySelector(".connects-to-Z.connects-to-A")
@@ -933,13 +943,13 @@ describe( "Class MapCanvas", () => {
       expectedString.should.equal(closureVar);
       // set options for field labels
       var newOptions = canvas.options;
-      newOptions['srcFieldLabelL1'] = 'Source:';
-      newOptions['dstFieldLabelL1'] = 'Dest:';
-      newOptions['dataFieldLabelL1'] = 'Data:';
+      newOptions.layers[0]['srcFieldLabel'] = 'Source:';
+      newOptions.layers[0]['dstFieldLabel'] = 'Dest:';
+      newOptions.layers[0]['dataFieldLabel'] = 'Data:';
       PubSub.publish("updateMapOptions", {options: newOptions, changed: [
-        'srcFieldLabelL1',
-        'dstFieldLabelL1',
-        'dataFieldLabelL1',
+        'layers[0].srcFieldLabel',
+        'layers[0].dstFieldLabel',
+        'layers[0].dataFieldLabel',
       ]}, canvas);
       // fire mouseover for edge with no template
       edgeLZ.dispatchEvent(mouseoverEvent);
@@ -955,8 +965,8 @@ describe( "Class MapCanvas", () => {
     })
     it("should santize names with non-alphanum characters", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var newTopology = { 
-        "layer1": {
+      var newTopology = [
+        {
             "edges": [
                 {
                     "name":"Node A, Inc.--Node B - Inc.",
@@ -986,7 +996,7 @@ describe( "Class MapCanvas", () => {
                 }
             ]
         },
-      }
+      ]
       // set topology with weird names for both edges and nodes
       PubSub.publish("updateMapTopology", newTopology, canvas);
       // enter editing mode
@@ -1221,8 +1231,8 @@ describe( "Class MapCanvas", () => {
     it("should have a 'viewport' mode that will zoom to a pre-deterimined lat-lng viewport", ()=>{
         var canvas = document.querySelector("esnet-map-canvas");
 
-        var newTopology = {
-          "layer1": {
+        var newTopology = [
+          {
             "edges": [],
             "nodes": [
               {"name": "A", "latLng": [ 80,  80], "meta": {} },
@@ -1232,7 +1242,7 @@ describe( "Class MapCanvas", () => {
               {"name": "visible", "latLng": [38.68, -96.96], "meta": {} },
             ]
           }
-        }
+        ]
         PubSub.publish("updateMapTopology", newTopology, canvas);
 
         // helper function to see if rect named "child" is in rect named "parent"
@@ -1246,7 +1256,7 @@ describe( "Class MapCanvas", () => {
           return false;
         }
         // check the positions of each of the nodes. most should be outside of map bounding box.
-        var nodes = canvas.querySelectorAll(".node.l1");
+        var nodes = canvas.querySelectorAll(".node.l0");
         var canvasBounds = canvas.getBoundingClientRect();
         var results = []
         for(var elem of nodes){
@@ -1258,10 +1268,10 @@ describe( "Class MapCanvas", () => {
 
         var newOptions = JSON.parse(JSON.stringify(canvas.options));
         newOptions.initialViewStrategy = 'viewport';
-        newOptions.viewportTopLeftLat = 110;
-        newOptions.viewportTopLeftLng = -90;
-        newOptions.viewportBottomRightLat = -90;
-        newOptions.viewportBottomRightLng = 110;
+        newOptions.viewport.top = 110;
+        newOptions.viewport.left = -90;
+        newOptions.viewport.bottom = -90;
+        newOptions.viewport.right = 110;
         // set bounding box strategy to 'viewport' and set the viewport coords
         PubSub.publish("updateMapOptions", {options: newOptions, changed: ["initialViewStrategy", "viewportTopLeftLat", "viewportTopLeftLng", "viewportBottomRightLng", "viewportBottomRightLat"]}, canvas);
         // dispatch a resize event so the window thinks it has been resized. this should trigger viewport zoom logic.
@@ -1269,7 +1279,7 @@ describe( "Class MapCanvas", () => {
         window.dispatchEvent(resize);
 
         // check the positions of each of the nodes. All should be inside of map bounding box.        
-        var nodes = canvas.querySelectorAll(".node.l1");
+        var nodes = canvas.querySelectorAll(".node.l0");
         var canvasBounds = canvas.getBoundingClientRect();
         var results = []
         for(var elem of nodes){
@@ -1294,7 +1304,7 @@ describe( "Class MapCanvas", () => {
         window.dispatchEvent(resize);
 
         // check the positions of each of the nodes. All should be inside of map bounding box.        
-        var nodes = canvas.querySelectorAll(".node.l1");
+        var nodes = canvas.querySelectorAll(".node.l0");
         var canvasBounds = canvas.getBoundingClientRect();
         var results = []
         for(var elem of nodes){

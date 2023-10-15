@@ -1,3 +1,5 @@
+export const LAYER_LIMIT = 3;
+
 export function getUrlSearchParams() {
   const search = window.location.search.substring(1);
   const searchParamsSegments = search.split('&');
@@ -130,4 +132,23 @@ export function testJsonSchema(data) {
   } else {
     return [valid, errorDetails];
   }
+}
+
+export function resolvePath(object, path, defaultValue=null){
+  return path
+    .split(/[\.\[\]\'\"]/)
+    .filter(p => p) // remove empty splits
+    .reduce((o, p) => o ? o[p] : defaultValue, object)
+}
+
+export function setPath(object, path, newValue){
+  let splitPath = path
+    .split(/[\.\[\]\'\"]/)
+    .filter(p => p)
+  let o = object;
+  let lastItem = splitPath.pop();
+  splitPath.forEach((p)=>{
+    o = o[p]
+  })
+  o[lastItem] = newValue;
 }
