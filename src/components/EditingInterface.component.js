@@ -154,31 +154,36 @@ class EditingInterface extends BindableHTMLElement {
 
     ///////////////////////////
     // event bindings
-    toggleNodeEdit(){
+    toggleNodeEdit(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("setEditSelection", null, this);
         PubSub.publish("setEditMode", { "mode": "node", "value": !this._nodeEditMode }, this);
     }
-    toggleEdgeEdit(){
+    toggleEdgeEdit(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("setEditSelection", null, this);
         PubSub.publish("setEditMode", { "mode": "edge", "value": !this._edgeEditMode }, this);
     }
     recalcPaths(){
         PubSub.publish('recalcPaths', null, this);
     }
-    showAddNodeDialog(){
+    showAddNodeDialog(e){
+        e.stopPropagation(); // avoid bug in leaflet
         this._selectedLayer = 0;
         this._selectedObject = null;
         this._spliceIndex = null;
         this.dialog = "node";
     }
-    showAddEdgeDialog(){
+    showAddEdgeDialog(e){
+        e.stopPropagation(); // avoid bug in leaflet
         this._selectedLayer = 0;
         this._selectedObject = null;
         this._spliceIndex = null;
         this.setSrcDstOptions();
         this.dialog = "edge";
     }
-    hideDialogs(){
+    hideDialogs(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("showEditNodeDialog", null, this)
     }
     showSrcDst(event){
@@ -286,7 +291,8 @@ class EditingInterface extends BindableHTMLElement {
         }, 100);
     }
 
-    deleteSelection(){
+    deleteSelection(e){
+        e.stopPropagation(); // avoid bug in leaflet
         var topology = this.mapCanvas.topology;
         topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
         PubSub.publish("updateTopology", topology, this);

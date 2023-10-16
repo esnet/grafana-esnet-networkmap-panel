@@ -201,8 +201,8 @@ describe( "Class MapCanvas", () => {
     it("should allow users to change the map layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       var newOptions = canvas.options;
-      newOptions['tileSetLayer'] = "usgs";
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['tileSetLayer']}, canvas);
+      newOptions.tileset['geographic'] = "usgs";
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['tileset.geographic']}, canvas);
       var i=0;
       var firstLayerUrl = null;
       canvas.leafletMap.eachLayer((layer)=>{
@@ -215,8 +215,8 @@ describe( "Class MapCanvas", () => {
     it("should allow users to change the political boundary layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       var newOptions = canvas.options;
-      newOptions['boundaryLayer'] = 'toner.boundaries';
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['boundaryLayer']}, canvas);
+      newOptions.tileset['boundaries'] = 'toner.boundaries';
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['tileset.boundaries']}, canvas);
       var i=0;
       var secondLayerUrl = null;
       canvas.leafletMap.eachLayer((layer)=>{
@@ -229,8 +229,8 @@ describe( "Class MapCanvas", () => {
     it("should allow users to change the political label layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       var newOptions = canvas.options;
-      newOptions['labelLayer'] = 'toner.labels';
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['labelLayer']}, canvas);
+      newOptions.tileset['labels'] = 'toner.labels';
+      PubSub.publish("updateMapOptions", {options: newOptions, changed: ['tileset.labels']}, canvas);
       var i=0;
       var secondLayerUrl = null;
       canvas.leafletMap.eachLayer((layer)=>{
@@ -535,10 +535,12 @@ describe( "Class MapCanvas", () => {
       newOptions.layers[0]['visible'] = false;
       newOptions.layers[1]['visible'] = false;
       newOptions.layers[2]['visible'] = true;
+      console.log(newTopology, newOptions);
       PubSub.publish("updateMapOptions", {
         options: newOptions,
         changed: ['layers[0].visible', 'layers[1].visible', 'layers[2].visible', 'layers[2].edgeWidth']
       }, canvas);
+      console.log("called updateMapOptions");
       var randomEdge = canvas.querySelector('.edge.edge-az');
       randomEdge.getAttribute("stroke-width").should.equal("5");
     })
@@ -734,9 +736,9 @@ describe( "Class MapCanvas", () => {
       ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
       var newOptions = canvas.options;
-      newOptions['layer2'] = true;
+      newOptions.layers[1].visible = true;
       PubSub.publish("updateMapOptions", {options: newOptions, changed: [
-        'layer2',
+        'layers[1].visible',
       ]}, canvas);
       // enter editing mode
       PubSub.publish("updateEditMode", true, canvas);
@@ -785,7 +787,7 @@ describe( "Class MapCanvas", () => {
       var classValue = nodeAlayer1.getAttribute("class");
       classValue.should.contain("control-selected");
       // click layer 2 copy of "A"
-      var nodeAlayer2 = canvas.querySelector("circle.control.control-point-layer2");
+      var nodeAlayer2 = canvas.querySelector("circle.control.control-point-layer1");
       var downEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       var upEvent = new MouseEvent('mousedown', { bubbles: true, view: window })
       nodeAlayer2.dispatchEvent(downEvent);
@@ -1118,8 +1120,8 @@ describe( "Class MapCanvas", () => {
 
         var newOptions = JSON.parse(JSON.stringify(canvas.options));
         newOptions.multiLayerNodeSnap = true;
-        newOptions.layer2 = true;
-        PubSub.publish("updateMapOptions", {options: newOptions, changed: ['multiLayerNodeSnap', 'layer2']}, canvas);
+        newOptions.layers[1].visible = true;
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ['multiLayerNodeSnap', 'layers[1].visible']}, canvas);
 
         PubSub.publish("updateEditMode", true, canvas);
         PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);

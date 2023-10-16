@@ -27,7 +27,7 @@ class SideBar extends BindableHTMLElement {
 
   toggleLayer(event){
     var element = event.target;
-    var layer = element.id.split("-")[1];
+    var layer = element.id.split("-")[2];
     var value = element.checked;
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
@@ -63,7 +63,7 @@ class SideBar extends BindableHTMLElement {
         }
         sidebarContent += `<div class='toggle container' ${ !this.mapCanvas.options.layers[i].legend && "style='display: none;'" }>
           <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layers[i].visible && "checked"} id='sidebar-layer${i}'>
+            <input type="checkbox" ${ this.mapCanvas.options.layers[i].visible && "checked"} id='sidebar-layer-${i}'>
             <span class="slider round"></span>
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layers[i].name || "Layer " + (i+1) }</text>
@@ -125,7 +125,7 @@ class SideBar extends BindableHTMLElement {
           if(!this.mapCanvas.options.layers){
             continue;
           }
-          let selector = `#sidebar-layer${i}@onchange`;
+          let selector = `#sidebar-layer-${i}@onchange`;
           bindings[selector] = this.toggleLayer;
         }
         this.bindEvents(bindings);

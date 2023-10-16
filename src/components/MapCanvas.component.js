@@ -246,10 +246,25 @@ export class MapCanvas extends BindableHTMLElement {
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
-    var keys = Object.keys(options);
-    keys.forEach((k)=>{
+    Object.keys(options).forEach((k)=>{
       this._options[k] = options[k];
     })
+    if(options.layers){
+      Object.keys(options.layers).forEach((lk)=>{
+        this._options.layers[lk] = options.layers[lk];
+      })
+    }
+    if(options.viewport?.center){
+      Object.keys(options.viewport.center).forEach((ck)=>{
+        this._options.viewport.center[ck] = options.viewport.center[ck];
+      })
+      delete options.layers.center;
+    }
+    if(options.viewport){
+      Object.keys(options.viewport).forEach((vk)=>{
+        this._options.viewport[vk] = options.viewport[vk];
+      })
+    }
 
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
@@ -360,7 +375,11 @@ export class MapCanvas extends BindableHTMLElement {
 
   toggleLayer(layerData){
     var newValue = this._options;
-    newValue[layerData.layer] = layerData.visible;
+    if(newValue.layers && newValue.layers[layerData.layer]){
+      newValue.layers[layerData.layer].visible = layerData.visible;
+    } else {
+      newValue.layers[layerData.layer] = { visible: layerData.visible };
+    }
     this.map.renderMapLayers();
     this._updateOptions && this._updateOptions(newValue);
   }

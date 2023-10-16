@@ -148,6 +148,7 @@ function renderEdges(g, data, ref, layerId, options) {
     })
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
+      event.stopPropagation();
       PubSub.publish("clearSelection", null, ref.svg.node())
       const selectionData = {
         selection: d,
@@ -195,6 +196,7 @@ function renderEdges(g, data, ref, layerId, options) {
     })
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
+      event.stopPropagation();
       PubSub.publish("clearSelection", null, ref.svg.node())
       const selectionData = {
         selection: d,
@@ -1040,6 +1042,7 @@ export class EsMap {
     var layerId = 0;
     this.mapLayers.forEach((g)=>{
       if(!this.options.layers[layerId]['visible']){
+        layerId++;
         return;
       }
       var edge_g = g.select('g.edge');
