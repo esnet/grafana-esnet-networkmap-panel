@@ -75,7 +75,7 @@ const validateArray = function(itemSchema, data){
 // main JSON validation function: heavily recursive
 const validate = function(schema, data){
   // do type check
-  var output = { "valid": true, "errorDetails": {} }
+  var output = { "valid": true, "errorDetails": "" }
   const typeCheckers = {
     'object': (data)=>{ return typeof(data) === "object"; },
     'number': (data)=>{ return typeof(data) === "number" },
@@ -85,9 +85,8 @@ const validate = function(schema, data){
     'array': Array.isArray
   }
   if(!typeCheckers[schema['type']](data)){
-    var before = output['valid'];
     output["valid"] = false;
-    output.errorDetails[''] = "type check failed."
+    output.errorDetails += "Type check failed.<br>"
     return output;
   }
   // recursive call for each property listed above
@@ -95,9 +94,8 @@ const validate = function(schema, data){
   for(var i=0; i<props.length; i++){
       var propName = props[i];
       if(!data[propName] && schema.required.indexOf(propName)>=0){
-        var before = output['valid'];
         output['valid'] = false;
-        output['errorDetails'][propName] = "required property '"+propName+"' is not set";
+        output['errorDetails'] = "required property '"+propName+"' is not set<br>";
         return output;
       }
   }
@@ -115,7 +113,6 @@ const validate = function(schema, data){
           valid = interimOutput['valid'];
           errorDetails = interimOutput['errorDetails'];
       }
-      var before = output['valid'];
       output['valid'] = !!(valid && output['valid']);
       Object.keys(errorDetails).forEach((childProp)=>{
         var accessor = childProp == "" ? propName : propName + "." + childProp;

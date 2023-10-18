@@ -1,3 +1,25 @@
+export interface LayerOptions {
+  color: string;
+  visible: boolean;
+  jsonFromUrl: boolean;
+  mapjsonUrl: string;
+  mapjson: string;
+  nodeHighlight: string;
+  srcField: string;
+  dstField: string;
+  inboundValueField: string;
+  outboundValueField: string;
+  endpointId: string;
+  legend: boolean;
+  name: string;
+  nodeWidth: number;
+  edgeWidth: number;
+  pathOffset: number;
+  dashboardEdgeSrcVar: string;
+  dashboardEdgeDstVar: string;
+  dashboardNodeVar: string;
+}
+
 export interface MapOptions {
   background: string;
   initialViewStrategy: string;
@@ -30,27 +52,5 @@ export interface MapOptions {
   }
   viewportZoom?: number;
 
-  layers: [
-    {
-      color: string;
-      visible: boolean;
-      jsonFromUrl: boolean;
-      mapjsonUrl: string;
-      mapjson: string;
-      nodeHighlight: string;
-      srcField: string;
-      dstField: string;
-      inboundValueField: string;
-      outboundValueField: string;
-      endpointId: string;      
-      legend: boolean;
-      name: string;
-      nodeWidth: number;
-      edgeWidth: number;
-      pathOffset: number;
-      dashboardEdgeSrcVar: string;
-      dashboardEdgeDstVar: string;
-      dashboardNodeVar: string;
-    }
-  ]
+  layers: LayerOptions[]
 }

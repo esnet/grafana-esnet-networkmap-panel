@@ -119,7 +119,7 @@ let layerOptions = {
   "layers[${i}].mapjson": {
     name: 'Layer ${i+1} Map data (json)',
     category: "Layer Options",
-    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": false },
+    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -290,26 +290,29 @@ let layerOptions = {
     name: 'Layer ${i+1} Display Name',
     category: "Sidebar Options",
     showIf: {"showSidebar": true},
-    defaultValue: 'layer ${i+1}',
+    defaultValue: 'Layer ${i+1}',
   },
 
   "layers[${i}].dashboardNodeVar": {
     editor: "text",
     name: 'Binding: Node Layer ${i+1}',
+    description: "On node click, set this dashboard variable to the name of the selected node.",
     showIf: {"layers[${i}].visible": true},
     category: "Variable Bindings",
     defaultValue: 'node',
   },
-  "layers[${i}].dashboardEdgeSrcVarL1": {
+  "layers[${i}].dashboardEdgeSrcVar": {
     editor: "text",
     name: 'Binding: Edge "Source" Layer ${i+1}',
+    description: "On edge click, set this dashboard variable to the 'source' of the selected edge.",
     showIf: {"layers[${i}].visible": true},
     category: "Variable Bindings",
     defaultValue: 'source',
   },
-  "layers[${i}].dashboardEdgeDstVarL1": {
+  "layers[${i}].dashboardEdgeDstVar": {
     editor: "text",
     name: 'Binding: Edge "Destination" Layer ${i+1}',
+    description: "On edge click, set this dashboard variable to the 'destination' of the selected edge.",
     showIf: {"layers[${i}].visible": true},
     category: "Variable Bindings",
     defaultValue: 'dest',
@@ -569,7 +572,6 @@ const options = {
   },
 }
 
-// assuming 3 layers here
 for(let i=0; i<LAYER_LIMIT; i++){
   // copy all of the options for each layer
   for(let optionName in layerOptions){

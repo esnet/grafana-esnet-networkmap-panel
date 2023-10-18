@@ -23,7 +23,7 @@ export class MapPanel extends Component<Props> {
       L2: {},
       L3: {},
     };
-    this.lastOptions = this.props.options;
+    this.lastOptions = {...this.props.options};
     this.theme = createTheme();
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
@@ -34,21 +34,21 @@ export class MapPanel extends Component<Props> {
     return function (event) {
       let setLocation = {};
       for (let i = 0; i < LAYER_LIMIT; i++) {
-        const srcVar = 'var-' + self.props.options.layer[i]['dashboardEdgeSrcVar'];
-        const dstVar = 'var-' + self.props.options.layer[i]['dashboardEdgeDstVar'];
-        const nodeVar = 'var-' + self.props.options.layer[i]['dashboardNodeVar'];
+        const srcVar = 'var-' + self.props.options.layers[i]['dashboardEdgeSrcVar'];
+        const dstVar = 'var-' + self.props.options.layers[i]['dashboardEdgeDstVar'];
+        const nodeVar = 'var-' + self.props.options.layers[i]['dashboardNodeVar'];
         setLocation[srcVar] = null;
         setLocation[dstVar] = null;
         setLocation[nodeVar] = null;
       }
       if (event && event.nodeA && event.nodeZ) {
-        const srcVariable = 'var-' + self.props.options.layer[event.layer]['dashboardEdgeSrcVar'];
+        const srcVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeSrcVar'];
         setLocation[srcVariable] = event.nodeA;
-        const dstVariable = 'var-' + self.props.options.layer[event.layer]['dashboardEdgeDstVar'];
+        const dstVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeDstVar'];
         setLocation[dstVariable] = event.nodeZ;
       }
       if (event && event.type === 'node') {
-        const dashboardVariable = 'var-' + self.props.options.layer[event.layer]['dashboardNodeVar'];
+        const dashboardVariable = 'var-' + self.props.options.layers[event.layer]['dashboardNodeVar'];
         setLocation[dashboardVariable] = event.selection.name;
       }
 
@@ -57,7 +57,7 @@ export class MapPanel extends Component<Props> {
   }
 
   updateCenter = (centerData) => {
-    let viewport = { 
+    let viewport = {
       "zoom": centerData.zoom,
       "center": {
         "lat": centerData.center.lat,
@@ -83,22 +83,24 @@ export class MapPanel extends Component<Props> {
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
   updateMapJson = (mapData) => {
-    debugger;
     const { options } = this.props;
-    let [ mapjsonL1, mapjsonL2, mapjsonL3 ] = options;
-    if (mapData.layer1 != null) {
-      mapjsonL1 = JSON.stringify(sanitizeTopology(mapData.layer1));
+    let update = { ...options }
+    if(!update.layers){
+      update.layers = [];
     }
-    if (mapData.layer2 != null) {
-      mapjsonL2 = JSON.stringify(sanitizeTopology(mapData.layer2));
+    let layerUpdates = [
+        options.layers[0].mapjson,
+        options.layers[1].mapjson,
+        options.layers[2].mapjson,
+    ];
+    for(let i=0; i<LAYER_LIMIT; i++){
+      if (mapData[i] != null) {
+        layerUpdates[i] = JSON.stringify(sanitizeTopology(mapData[i]));
+      }
+      if(update.layers[i]){
+        update.layers[i].mapjson = layerUpdates[i];
+      }
     }
-    if (mapData.layer3 != null) {
-      mapjsonL3 = JSON.stringify(sanitizeTopology(mapData.layer3));
-    }
-    let update = { ...this.props.options }
-    update.layers[0].mapjson = mapjsonL1;
-    update.layers[1].mapjson = mapjsonL2;
-    update.layers[2].mapjson = mapjsonL3;
     this.props.onOptionsChange(update);
   };
 
@@ -127,12 +129,13 @@ export class MapPanel extends Component<Props> {
       'resolvedLat',
       'resolvedLng',
     ];
-    for(i=0; i<LAYER_LIMIT; i++){
+    for(let i=0; i<LAYER_LIMIT; i++){
       optionsToWatch.push(`layers[${i}].visible`);
       optionsToWatch.push(`layers[${i}].color`);
       optionsToWatch.push(`layers[${i}].endpointId`);
       optionsToWatch.push(`layers[${i}].nodeHighlight`);
       optionsToWatch.push(`layers[${i}].nodeWidth`);
+      optionsToWatch.push(`layers[${i}].mapjson`);
       optionsToWatch.push(`layers[${i}].edgeWidth`);
       optionsToWatch.push(`layers[${i}].pathOffset`);
       optionsToWatch.push(`layers[${i}].name`);
@@ -142,13 +145,23 @@ export class MapPanel extends Component<Props> {
       optionsToWatch.push(`layers[${i}].dataFieldLabel`);
     }
     optionsToWatch.forEach((option) => {
-      let lastValue = resolvePath(lastOptions, option);
-      let currentValue = resolvePath(options, option);
+      let lastValue = resolvePath(this.lastOptions, option);
+      let currentValue = resolvePath(this.props.options, option);
+      if(option === 'thresholds'){
+        // test these for relative equality; this object memory ref changes on each option change.
+        lastValue = JSON.stringify(lastValue);
+        currentValue = JSON.stringify(currentValue);
+      }
       if (lastValue !== currentValue) {
         if (option === 'background') {
           this.props.options.background = this.theme.visualization.getColorByName(this.props.options.background);
         }
-        setPath(this.lastOptions, option, this.props.options[option]);
+        if(Array.isArray(this.props.options[option])){
+          let newOption = [...resolvePath(this.props.options, option)];
+          setPath(this.lastOptions, option, newOption);
+        } else {
+          setPath(this.lastOptions, option, resolvePath(this.props.options, option));
+        }
         changed.push(option);
       }
     });
@@ -158,18 +171,9 @@ export class MapPanel extends Component<Props> {
   // A function to turn layers on or off. Takes in the layer and boolean value
   // Used in SideBar.tsx
   toggleLayer = (layer, value) => {
-    const { options } = this.props;
-    let { layer1, layer2, layer3 } = options;
-    if (layer === 'layer1') {
-      layer1 = value;
-    }
-    if (layer === 'layer2') {
-      layer2 = value;
-    }
-    if (layer === 'layer3') {
-      layer3 = value;
-    }
-    this.props.onOptionsChange({ ...options, layer1, layer2, layer3 });
+    let update = { ...this.props.options };
+    update.layers[layer].visible = value;
+    this.props.onOptionsChange(update);
   };
 
   resolveLatLngFromVars(options, data, replaceVariables) {
@@ -266,9 +270,10 @@ export class MapPanel extends Component<Props> {
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
 
-    let colors = [];
-    let fields = [];
+    let colors: any[] = [];
+    let fields: any[] = [];
     for(let i=0; i<LAYER_LIMIT; i++){
+      if(!options.layers[i]){ continue; }
       colors.push({
         defaultColor: options.layers[i].color,
         nodeHighlight: options.layers[i].nodeHighlight,
@@ -295,8 +300,17 @@ export class MapPanel extends Component<Props> {
           this.resolveMapData(2, replaceVariables),
         ]).then((topologyData) => {
           for(let i=0; i<LAYER_LIMIT; i++){
-            let parsedData = parseData(data, topologyData[i], colorsL1, fieldsL1, 1);
-            topology[i] = parsedData[3];
+            try {
+              let parsedData = parseData(data, topologyData[i], colors[i], fields[i], i);
+              topology[i] = parsedData[3];
+            } catch(e) {
+              if(!this.mapCanvas.jsonResults){
+                this.mapCanvas.jsonResults = [];
+              }
+              // @ts-ignore
+              topology[i] = topologyData[i];
+              console.error(e);
+            }
           }
           this.mapCanvas.current.updateMapTopology(topology);
           this.mapCanvas.current.updateMapDimensions({ width: width, height: height });

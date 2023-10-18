@@ -330,8 +330,8 @@ export class MapCanvas extends BindableHTMLElement {
       })
     } else {
       this.jsonResults = [];
-      for(i=0; i<utils.LAYER_LIMIT; i++){
-        this.jsonResults.push({"valid": false, "errorDetails": "No Topology data available."});
+      for(let i=0; i<utils.LAYER_LIMIT; i++){
+        this.jsonResults.push([false, "No Topology data available."]);
       }
     }
     this.sideBar && this.sideBar.render();
@@ -385,8 +385,8 @@ export class MapCanvas extends BindableHTMLElement {
   }
   getCurrentLeafletMap(){
     if(!this.leafletMap){
-      var centerCoords = [this.startlat || this._options.viewport.center.lat, this.startlng || this._options.viewport.center.lng];
-      var startZoom = this._options.viewport.zoom;
+      var centerCoords = [this.startlat || this._options?.viewport?.center?.lat, this.startlng || this._options?.viewport?.center?.lng];
+      var startZoom = this._options?.viewport?.zoom || 3;
       if(window[this.id + "mapPosition"] && window[this.id + "mapPosition"].center){
         centerCoords = window[this.id + "mapPosition"].center;
       }
@@ -401,8 +401,8 @@ export class MapCanvas extends BindableHTMLElement {
           scrollWheelZoom: false,
           doubleClickZoom: false,
           keyboard: false,
-          dragging: this._options.enableScrolling,
-          zoomControl: this._options.showViewControls,
+          dragging: this._options?.enableScrolling,
+          zoomControl: this._options?.showViewControls,
         }).setView(centerCoords, startZoom);
         if(this._options.tileset.geographic){
           L.tileLayer(
@@ -476,8 +476,8 @@ export class MapCanvas extends BindableHTMLElement {
         })
       } else {
         this.jsonResults = [];
-        for(i=0; i<utils.LAYER_LIMIT; i++){
-          this.jsonResults.push({"valid": false, "errorDetails": "No Topology data available."});
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+          this.jsonResults[i] = [false, "No Topology data available."];
         }
         return;
       }
@@ -496,7 +496,7 @@ export class MapCanvas extends BindableHTMLElement {
 
     let zIndexBase = this.options.zIndexBase ? this.options.zIndexBase : 50;
     let zIndexLayers = [];
-    for(var i=0; i<=10; i++){
+    for(let i=0; i<=10; i++){
       zIndexLayers.push(zIndexBase + (i * 10));
     }
 
@@ -627,7 +627,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(this.options.customLegend){
       output += this.options.customLegendValue;
     } else {
-      for(var i=0; i<thresholds.length; i++){
+      for(let i=0; i<thresholds.length; i++){
         if(i % columnLength == 0){
           columns.push([]);
         }

@@ -105,7 +105,7 @@ export default class NetworkMap {
         }
         let l = 0;
         this.mapCanvas.topology.forEach((layer)=>{
-          if(!layer) return
+          if(!layer || typeof(layer) == "string") return
           for(var e=0; e<layer.edges.length; e++){
             var endpointId = `endpointId`;
             var edge = layer.edges[e];
@@ -124,7 +124,7 @@ export default class NetworkMap {
     for(let i=0; i<LAYER_LIMIT; i++){
       emptyTopology.push(emptyLayer);
       let layer = emptyLayer;
-      if(this.mapCanvas.topology[i]){
+      if(this.mapCanvas.topology[i] && typeof(this.mapCanvas.topology[i]) != "string"){
         layer = this.mapCanvas.topology[i];
       }
       this.groups.push(this.esmap.addNetLayer(i, layer));

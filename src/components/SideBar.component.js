@@ -58,7 +58,7 @@ class SideBar extends BindableHTMLElement {
       let sidebarContent = '';
 
       for(let i=0; i<utils.LAYER_LIMIT; i++){
-        if(!this.mapCanvas.options.layers || !this.mapCanvas.jsonResults){
+        if(!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i] || !this.mapCanvas.jsonResults){
           continue;
         }
         sidebarContent += `<div class='toggle container' ${ !this.mapCanvas.options.layers[i].legend && "style='display: none;'" }>
@@ -68,7 +68,7 @@ class SideBar extends BindableHTMLElement {
           </label>
           <text class="legend-text">${ this.mapCanvas.options.layers[i].name || "Layer " + (i+1) }</text>
           <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i]["valid"] ) ? "valid" : "invalid" }
+            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i][0] ) ? "valid" : `invalid${this.mapCanvas.jsonResults?.[i]?.[1] ? ": " + this.mapCanvas.jsonResults[i][1] : "" }` }
           </div>
         </div>`
 
@@ -122,7 +122,7 @@ class SideBar extends BindableHTMLElement {
 
         var bindings = {}
         for(let i=0; i<utils.LAYER_LIMIT; i++){
-          if(!this.mapCanvas.options.layers){
+          if(!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i]){
             continue;
           }
           let selector = `#sidebar-layer-${i}@onchange`;
