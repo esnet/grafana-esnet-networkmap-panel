@@ -535,12 +535,10 @@ describe( "Class MapCanvas", () => {
       newOptions.layers[0]['visible'] = false;
       newOptions.layers[1]['visible'] = false;
       newOptions.layers[2]['visible'] = true;
-      console.log(newTopology, newOptions);
       PubSub.publish("updateMapOptions", {
         options: newOptions,
         changed: ['layers[0].visible', 'layers[1].visible', 'layers[2].visible', 'layers[2].edgeWidth']
       }, canvas);
-      console.log("called updateMapOptions");
       var randomEdge = canvas.querySelector('.edge.edge-az');
       randomEdge.getAttribute("stroke-width").should.equal("5");
     })
