@@ -9,9 +9,9 @@ export class EsMap {
     mapCanvas: any;
     leafletMap: any;
     svg: any;
-    data: {};
-    mapLayers: {};
-    curves: {};
+    data: any[];
+    mapLayers: any[];
+    curves: any[];
     lineGen: any;
     editEdges: any;
     editNodes: any;
@@ -23,6 +23,6 @@ export class EsMap {
     editNodeMode(setting: any): any;
     updateCoordinates(data: any, layerId: any): void;
     update(): void;
-    addNetLayer(name: any, data: any): any;
+    addNetLayer(idx: any, data: any): any;
 }
 //# sourceMappingURL=esmap.d.ts.map
