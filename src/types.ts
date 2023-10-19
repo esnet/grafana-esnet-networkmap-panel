@@ -18,6 +18,9 @@ export interface LayerOptions {
   dashboardEdgeSrcVar: string;
   dashboardEdgeDstVar: string;
   dashboardNodeVar: string;
+  nodeThresholds: any;
+  nodeNameMatchField: string;
+  nodeValueField: string;
 }
 
 export interface MapOptions {
@@ -47,10 +50,9 @@ export interface MapOptions {
     center?: {
       lat: number;
       lng: number;
-      //zoom?: number;
     }
+    zoom?: number;
   }
-  viewportZoom?: number;
 
   layers: LayerOptions[]
 }

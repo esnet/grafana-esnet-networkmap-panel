@@ -82,9 +82,25 @@ export function parseData(data, mapData, colors, fields, layer) {
     return color;
   }
 
+  function thresholdLookup(thresholds, value){
+    if(!Array.isArray(thresholds) || thresholds.length === 0){ return null }
+    let output = thresholds[0].color;
+    // begin by assigning the base color, but don't iterate over it
+    thresholds.forEach((threshold)=>{
+      if(threshold.value <= value){
+        output = threshold.color
+      }
+    })
+    return output;
+  }
   // fix the colors
   colors.defaultColor = fixColor(colors.defaultColor);
-  colors.nodeHighlight = fixColor(colors.nodeHighlight);
+  colors.nodeThresholds = colors.nodeThresholds.map((step)=>{
+    return {
+      value: step.value,
+      color: fixColor(step.color)
+    }
+  });
 
   let dataFrames = [];
 
@@ -95,11 +111,14 @@ export function parseData(data, mapData, colors, fields, layer) {
   var dstKey = fields.dstField;
   var inboundKey = fields.inboundValueField;
   var outboundKey = fields.outboundValueField;
+  var nodeNameMatchKey = fields.nodeNameMatchField;
+  var nodeValueKey = fields.nodeValueField;
 
   // initialize arrays
   let parsedData = [];
-  let infIn= [];
-  let infOut= [];
+  let infIn = [];
+  let infOut = [];
+  let nodeValues = [];
 
   // const valueField = valKey
   //   ? data.series.map((series: { fields: any[] }) =>
@@ -170,6 +189,12 @@ export function parseData(data, mapData, colors, fields, layer) {
       } else {
         infOut.push({ name: row[dstKey], value: row[outboundKey] });
       }
+
+
+      if(row.hasOwnProperty(nodeNameMatchKey) && row.hasOwnProperty(nodeValueKey)){
+        nodeValues.push({ name: row[nodeNameMatchKey], value: row[nodeValueKey] })
+      }
+
     });
   });
 
@@ -243,16 +268,21 @@ export function parseData(data, mapData, colors, fields, layer) {
     let match2 = infOut.find((d) => d.name === node.name);
     node.inValue = 'N/A';
     node.outValue = 'N/A';
+    node.color = colors.defaultColor;
     if (match1 || match2) {
-      node.color = colors.nodeHighlight;
       if (match1) {
         node.inValue = `${valueField[0].display(match1.value).text} ${valueField[0].display(match1.value).suffix}`;
       }
       if (match2) {
         node.outValue = `${valueField[0].display(match2.value).text} ${valueField[0].display(match2.value).suffix}`;
       }
-    } else {
-      node.color = colors.defaultColor;
+    }
+
+    let nodeMatch = nodeValues.find((d) => d.name == node.name);
+    let nodeMatchValue = nodeMatch ? nodeMatch.value : 0;
+    let output = thresholdLookup(colors.nodeThresholds, nodeMatchValue);
+    if(output){
+      node.color = output;
     }
   });
 
@@ -260,5 +290,5 @@ export function parseData(data, mapData, colors, fields, layer) {
   mapJson.aTest = 0;
 
   // returns parsedData: pairs & their value, infIn: aggregated by first group by, infOut: appregated by 2nd group by
-  return [parsedData, infIn, infOut, mapJson, srcKey, dstKey, inboundKey, outboundKey];
+  return mapJson;
 }

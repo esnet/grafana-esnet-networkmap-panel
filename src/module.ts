@@ -43,7 +43,7 @@ function checkBools(settings: object) {
 }
 
 
-async function buildChoices(context: FieldOverrideContext) {
+/*async function buildChoices(context: FieldOverrideContext) {
   const options: any[] = [{ value: null, label: '- No Mapping -' }];
   if (context && context.data) {
     for (const frame of context.data) {
@@ -56,7 +56,7 @@ async function buildChoices(context: FieldOverrideContext) {
     }
   }
   return Promise.resolve(options);
-}
+}*/
 
 async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
   const options: any[] = [{ value: null, label: '- No Mapping -' }];
@@ -106,19 +106,43 @@ let layerOptions = {
   "layers[${i}].visible": {
     editor: "boolean",
     name: 'Layer ${i+1} on',
-    category: "Layer Options",
+    category: "Layers",
     defaultValue: true,
   },
-  "layers[${i}].jsonFromUrl": {
+
+
+  "layers[${i}].legend": {
     editor: "boolean",
-    name: 'Fetch Layer ${i+1} JSON from URL',
+    name: 'Show Layer ${i+1} toggle',
+    category: "Layer ${i+1}: Basic Options",
+    showIf: {"showSidebar": true, "layers[${i}].visible": true},
+    defaultValue: true,
+  },
+  "layers[${i}].name": {
+    editor: "text",
+    name: 'Layer ${i+1} Display Name',
+    category: "Layer ${i+1}: Basic Options",
+    showIf: {"layers[${i}].visible": true },
+    defaultValue: 'Layer ${i+1}',
+  },
+  "layers[${i}].color": {
+    editor: "color",
+    name: 'Layer ${i+1} Default color',
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
-    category: "Layer Options",
+    description: 'The default color for nodes and links on Layer ${i+1}',
+    defaultValue: 'grey',
+  },
+  "layers[${i}].jsonFromUrl": {
+    name: 'Fetch Layer ${i+1} JSON from URL',
+    category: "Layer ${i+1}: Basic Options",
+    showIf: {"layers[${i}].visible": true},
     defaultValue: false,
+    editor: "boolean",
   },
   "layers[${i}].mapjson": {
     name: 'Layer ${i+1} Map data (json)',
-    category: "Layer Options",
+    category: "Layer ${i+1}: Basic Options",
     showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
@@ -126,38 +150,26 @@ let layerOptions = {
     editor: "CustomTextArea",
   },
   "layers[${i}].mapjsonUrl": {
-    editor: "text",
     name: 'Layer ${i+1} Map data (URL)',
-    category: "Layer Options",
+    category: "Layer ${i+1}: Basic Options",
     showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": true },
     description: 'URL that returns JSON with edges and nodes of network map',
     defaultValue: '',
+    editor: "text",
   },
-  "layers[${i}].color": {
-    editor: "color",
-    name: 'Layer ${i+1} Default color',
-    category: "Layer Options",
+  "layers[${i}].endpointId": {
+    editor: "text",
+    name: 'Layer ${i+1} Endpoint Identifier',
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
-    description: 'The default color for nodes and links on Layer ${i+1}',
-    defaultValue: 'grey',
-  },
-  "layers[${i}].nodeWidth": {
-    editor: "slider",
-    name: 'Layer ${i+1} Node Size',
-    category: "Layer Options",
-    showIf: {"layers[${i}].visible": true},
-    defaultValue: 5,
-    settings: {
-      min: 1,
-      max: 15,
-      step: 0.5,
-    },
+    description: 'Which topology "meta" field should be used to match topology nodes to query data?',
+    defaultValue: 'pops',
   },
   "layers[${i}].edgeWidth": {
     editor: "slider",
     name: 'Layer ${i+1} Edge Width',
     defaultValue: 3,
-    category: "Layer Options",
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
     settings: {
       min: 1,
@@ -170,7 +182,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Edge Offset',
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
-    category: "Layer Options",
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
     settings: {
       min: 1,
@@ -178,127 +190,121 @@ let layerOptions = {
       step: 0.5,
     }
   },
-  "layers[${i}].endpointId": {
-    editor: "text",
-    name: 'Layer ${i+1} Endpoint Identifier',
-    category: "Layer Options",
+
+  "layers[${i}].nodeWidth": {
+    editor: "slider",
+    name: 'Layer ${i+1} Node Size',
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
-    description: 'Topology "meta" field used to match topology nodes to query data',
-    defaultValue: 'pops',
+    defaultValue: 5,
+    settings: {
+      min: 1,
+      max: 15,
+      step: 0.5,
+    },
   },
-  "layers[${i}].nodeHighlight": {
-    editor: "color",
-    name: 'Layer ${i+1} Node highlight color',
-    category: "Layer Options",
+  "layers[${i}].nodeThresholds": {
+    editor: "thresholds",
+    name: "Node Thresholds",
+    category: "Layer ${i+1}: Basic Options",
     showIf: {"layers[${i}].visible": true},
-    description: 'The color to highlight nodes that match the query',
-    defaultValue: 'red',
+    description: "Set thresholds for node coloration. Used to indicate e.g. up/down node information",
+  },
+  "layers[${i}].nodeNameMatchField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Node Match Field',
+    description: 'Data field mapped to match a node color row for Layer ${i+1}',
+    category: "Layer ${i+1}: Basic Options",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+    },
+  },
+  "layers[${i}].nodeValueField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Node Color Field',
+    description: 'Data field mapped to node color thresholds for Layer ${i+1}',
+    category: "Layer ${i+1}: Basic Options",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+    },
+  },
+
+  "layers[${i}].srcField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Source Field',
+    description: 'Data field identifying the "source" for Layer ${i+1}',
+    category: "Layer ${i+1}: Data Bindings",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+    },
   },
   "layers[${i}].srcFieldLabel": {
     editor: "text",
     name: 'Layer ${i+1} "Source" Field Label',
     description: 'Label for "source" datapoint for layer ${i+1}',
-    category: 'Tooltip Options',
+    category: "Layer ${i+1}: Data Bindings",
     showIf: {"layers[${i}].visible": true},
     defaultValue: 'From:',
+  },
+
+  "layers[${i}].dstField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Destination Field',
+    description: 'Data field identifying the "destination" for Layer ${i+1}',
+    category: "Layer ${i+1}: Data Bindings",
+    showIf: {"layers[${i}].visible": true},
+    settings: {
+      allowCustomValue: false,
+    },
   },
   "layers[${i}].dstFieldLabel": {
     editor: "text",
     name: 'Layer ${i+1} "Destination" Field Label',
     description: 'Label for "destination" datapoint for layer ${i+1}',
-    category: 'Tooltip Options',
+    category: "Layer ${i+1}: Data Bindings",
     showIf: {"layers[${i}].visible": true},
     defaultValue: 'To:',
+  },
+  "layers[${i}].inboundValueField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Inbound Value Field',
+    description: 'Data field showing traffic from "destination" to "source" for Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: "Layer ${i+1}: Data Bindings",
+    settings: {
+      allowCustomValue: false,
+    },
+  },
+  "layers[${i}].outboundValueField": {
+    editor: "field-name",
+    name: 'Layer ${i+1} Outbound Value Field',
+    description: 'Data field showing traffic from "source" to "destination" for Layer ${i+1}',
+    showIf: {"layers[${i}].visible": true},
+    category: "Layer ${i+1}: Data Bindings",
+    settings: {
+      allowCustomValue: false,
+    },
   },
   "layers[${i}].dataFieldLabel": {
     editor: "text",
     name: 'Layer ${i+1} "Data" Field Label',
     description: 'Label for "Inbound/Outbound" field for layer ${i+1}',
-    category: 'Tooltip Options',
+    category: "Layer ${i+1}: Data Bindings",
     showIf: {"layers[${i}].visible": true},
     defaultValue: 'Volume:',
   },
-  "layers[${i}].srcField": {
-    editor: "select",
-    name: 'Layer ${i+1} Source Field',
-    description: 'Data field identifying the "source" for Layer ${i+1}',
-    category: 'Data Mappings',
-    showIf: {"layers[${i}].visible": true},
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "layers[${i}].dstField": {
-    editor: "select",
-    name: 'Layer ${i+1} Destination Field',
-    description: 'Data field identifying the "destination" for Layer ${i+1}',
-    category: 'Data Mappings',
-    showIf: {"layers[${i}].visible": true},
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "layers[${i}].inboundValueField": {
-    editor: "select",
-    name: 'Layer ${i+1} Inbound Value Field',
-    description: 'Data field showing traffic from "destination" to "source" for Layer ${i+1}',
-    showIf: {"layers[${i}].visible": true},
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "layers[${i}].outboundValueField": {
-    editor: "select",
-    name: 'Layer ${i+1} Outbound Value Field',
-    description: 'Data field showing traffic from "source" to "destination" for Layer ${i+1}',
-    showIf: {"layers[${i}].visible": true},
-    category: 'Data Mappings',
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "layers[${i}].nodeValueField": {
-    editor: "select",
-    name: 'Layer ${i+1} Node Color Field',
-    description: 'Data field mapped to node color for Layer ${i+1}',
-    category: 'Data Mappings',
-    showIf: {"layers[${i}].visible": true},
-    settings: {
-      allowCustomValue: false,
-      options: [],
-      getOptions: buildChoices,
-    },
-  },
-  "layers[${i}].legend": {
-    editor: "boolean",
-    name: 'Show Layer ${i+1} toggle',
-    category: "Sidebar Options",
-    showIf: {"showSidebar": true},
-    defaultValue: true,
-  },
-  "layers[${i}].name": {
-    editor: "text",
-    name: 'Layer ${i+1} Display Name',
-    category: "Sidebar Options",
-    showIf: {"showSidebar": true},
-    defaultValue: 'Layer ${i+1}',
-  },
+
+
 
   "layers[${i}].dashboardNodeVar": {
     editor: "text",
     name: 'Binding: Node Layer ${i+1}',
     description: "On node click, set this dashboard variable to the name of the selected node.",
     showIf: {"layers[${i}].visible": true},
-    category: "Variable Bindings",
+    category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'node',
   },
   "layers[${i}].dashboardEdgeSrcVar": {
@@ -306,7 +312,7 @@ let layerOptions = {
     name: 'Binding: Edge "Source" Layer ${i+1}',
     description: "On edge click, set this dashboard variable to the 'source' of the selected edge.",
     showIf: {"layers[${i}].visible": true},
-    category: "Variable Bindings",
+    category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'source',
   },
   "layers[${i}].dashboardEdgeDstVar": {
@@ -314,7 +320,7 @@ let layerOptions = {
     name: 'Binding: Edge "Destination" Layer ${i+1}',
     description: "On edge click, set this dashboard variable to the 'destination' of the selected edge.",
     showIf: {"layers[${i}].visible": true},
-    category: "Variable Bindings",
+    category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'dest',
   },
 
@@ -424,7 +430,7 @@ const options = {
     },
   },
   // --- options for "static"/"variables" zoom strategy
-  "viewportZoom": {
+  "viewport.zoom": {
     editor: "slider",
     name: 'Starting zoom level of map',
     showIf: {'initialViewStrategy': ['static', 'variables']},
@@ -570,6 +576,7 @@ const options = {
       options: LegendBehaviorOptions,
     },
   },
+
 }
 
 for(let i=0; i<LAYER_LIMIT; i++){
@@ -585,6 +592,9 @@ for(let i=0; i<LAYER_LIMIT; i++){
     }
     if(options[option].hasOwnProperty("description")){
       options[option].description = options[option].description.replace("${i+1}", (i+1).toString());
+    }
+    if(options[option].hasOwnProperty("category")){
+      options[option].category = options[option].category.replace("${i+1}", (i+1).toString());
     }
     if(options[option].hasOwnProperty("defaultValue") && typeof(options[option].defaultValue) === "string"){
       options[option].defaultValue = options[option].defaultValue.replace("${i+1}", (i+1).toString());
