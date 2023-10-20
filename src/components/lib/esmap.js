@@ -265,9 +265,9 @@ function renderEdges(g, data, ref, layerId, options) {
 }
 
 function deleteControlPoint(evt, d, edgeData, ref){
-  for(var i=0; i<edgeData.latLngs.length; i++){
-    if(edgeData.latLngs[i] == d){
-      edgeData.latLngs.splice(i, 1);
+  for(var i=0; i<edgeData.coordinates.length; i++){
+    if(edgeData.coordinates[i] == d){
+      edgeData.coordinates.splice(i, 1);
       PubSub.publish("updateMapTopology", ref.data, ref.svg.node());
       PubSub.publish("refresh", null, ref.svg.node());
       PubSub.publish("updateTopologyData", null, ref.svg.node());
@@ -285,16 +285,16 @@ function addControlPoint(evt, obj, ref) {
   // figure out difference in able between each pair of points and the click point
   // if the delta is nearly 0 we have a match
   // https://stackoverflow.com/questions/21608853/add-a-vertex-in-the-middle-of-a-path-with-d3js
-  var latLngs = obj.__data__.latLngs;
+  var coordinates = obj.__data__.coordinates;
   var target = [ll.lat, ll.lng];
 
   var idx = 0;
   var splicePoint = 0;
   var found = 0;
   var minDelta = 1000;
-  for (idx = 0; idx < latLngs.length - 1; idx++) {
-    var angleA = Math.abs(Math.atan((latLngs[idx][1] - target[1]) / (latLngs[idx][0] - target[0])));
-    var angleB = Math.abs(Math.atan((latLngs[idx][1] - latLngs[idx + 1][1]) / (latLngs[idx][0] - latLngs[idx + 1][0])));
+  for (idx = 0; idx < coordinates.length - 1; idx++) {
+    var angleA = Math.abs(Math.atan((coordinates[idx][1] - target[1]) / (coordinates[idx][0] - target[0])));
+    var angleB = Math.abs(Math.atan((coordinates[idx][1] - coordinates[idx + 1][1]) / (coordinates[idx][0] - coordinates[idx + 1][0])));
 
     var delta = Math.abs(angleA - angleB);
     if (delta < 0.1 && delta < minDelta) {
@@ -307,10 +307,10 @@ function addControlPoint(evt, obj, ref) {
 
   if (found == 1) {
     // insert target into the array at idx
-    var tmp = latLngs.slice(0, splicePoint);
+    var tmp = coordinates.slice(0, splicePoint);
     tmp.push(target);
-    latLngs = tmp.concat(latLngs.slice(splicePoint));
-    obj.__data__.latLngs = latLngs;
+    coordinates = tmp.concat(coordinates.slice(splicePoint));
+    obj.__data__.coordinates = coordinates;
     ref.update();
   }
 }
@@ -319,8 +319,8 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
     var mapId = "map-" + mapCanvas.instanceId;
     var layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
     var ll = {};
-    ll.lat = nodeData['latLng'][0];
-    ll.lng = nodeData['latLng'][1];
+    ll.lat = nodeData['coordinate'][0];
+    ll.lng = nodeData['coordinate'][1];
 
     // procedure for updating the edge:
     // get all edges that have "nodeData.name" as a node
@@ -332,28 +332,28 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
           // the index of the point we want is 0
           var idx = 0;
           var step = 1;
-          var end = d.latLngs.length - 1;
+          var end = d.coordinates.length - 1;
           if(d.nodeZ == nodeData.name){
             // if we are manipulating the "Z" end
             // the index of the point we want is the last one
-            idx = d.latLngs.length - 1;
+            idx = d.coordinates.length - 1;
             step = -1;
             end = 0;
           }
           // manipulate the point
-          d.latLngs[idx][0] = ll.lat;
-          d.latLngs[idx][1] = ll.lng;
+          d.coordinates[idx][0] = ll.lat;
+          d.coordinates[idx][1] = ll.lng;
           // and each of the other points (but not the endpoint);
-          var totalCtrlPnts = d.latLngs.length - 1;
-          var latDelta = (ll.lat - d.latLngs[end][0]) / (totalCtrlPnts);
-          var lngDelta = (ll.lng - d.latLngs[end][1]) / (totalCtrlPnts);
+          var totalCtrlPnts = d.coordinates.length - 1;
+          var latDelta = (ll.lat - d.coordinates[end][0]) / (totalCtrlPnts);
+          var lngDelta = (ll.lng - d.coordinates[end][1]) / (totalCtrlPnts);
           for(var i=(idx + step); i != end; i += step){
             if(end > 0){
-              d.latLngs[i][0] = ll.lat - latDelta * i;
-              d.latLngs[i][1] = ll.lng - lngDelta * i;
+              d.coordinates[i][0] = ll.lat - latDelta * i;
+              d.coordinates[i][1] = ll.lng - lngDelta * i;
             } else {
-              d.latLngs[i][0] = d.latLngs[end][0] + latDelta * i;
-              d.latLngs[i][1] = d.latLngs[end][1] + lngDelta * i;
+              d.coordinates[i][0] = d.coordinates[end][0] + latDelta * i;
+              d.coordinates[i][1] = d.coordinates[end][1] + lngDelta * i;
             }
           }
         })
@@ -378,8 +378,8 @@ function renderNodeControl(g, data, ref, layerId){
     PubSub.publish("dragStarted", evt, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
-    nodeData['latLng'][0] = ll.lat;
-    nodeData['latLng'][1] = ll.lng;
+    nodeData['coordinate'][0] = ll.lat;
+    nodeData['coordinate'][1] = ll.lng;
     doEdgeSnap(nodeData, layerId, ref.mapCanvas);
     //--- rerender stuff
     ref.update();
@@ -467,7 +467,7 @@ function renderNodeControl(g, data, ref, layerId){
   PubSub.subscribe("setEditSelection", setNodeEditSelection, ref.svg.node());
 
   g.selectAll('circle').attr('transform', function (d) {
-    var ll = L.latLng(d.latLng);
+    var ll = L.latLng(d.coordinate);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
     return 'translate(' + pt.x + ',' + pt.y + ')';
   });
@@ -575,7 +575,7 @@ function renderEdgeControl(g, data, ref, layerId) {
 
   data.edges.forEach(function (edgeData, idx) {
     var my_g = g.append('g');
-    var feature = my_g.selectAll('circle').data(edgeData.latLngs);
+    var feature = my_g.selectAll('circle').data(edgeData.coordinates);
 
     feature
       .enter()
@@ -716,7 +716,7 @@ function renderNodes(g, data, ref, layerId) {
 
 
   g.selectAll('g.node').attr('transform', function (d) {
-    var ll = L.latLng(d.latLng);
+    var ll = L.latLng(d.coordinate);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
     return 'translate(' + pt.x + ',' + pt.y + ')';
   });
@@ -905,8 +905,8 @@ export class EsMap {
         if(latOrLng == "longitude"){
           idx = 1;
         }
-        self.lastInteractedObject.latLng[idx] += amount;
-        var ll = self.lastInteractedObject.latLng;
+        self.lastInteractedObject.coordinate[idx] += amount;
+        var ll = self.lastInteractedObject.coordinate;
         d3.selectAll(".connects-to-"+sanitizeName(self.lastInteractedObject.name))
             // for each edge that we select:
             .attr('d', function (d) {
@@ -916,10 +916,10 @@ export class EsMap {
               if(d.nodeZ == self.lastInteractedObject.name){
                 // if we are manipulating the "Z" end
                 // the index of the point we want is the last one
-                idx = d.latLngs.length - 1;
+                idx = d.coordinates.length - 1;
               }
               // manipulate the point
-              d.latLngs[idx] = ll;
+              d.coordinates[idx] = ll;
             })
         self.update();
       }
@@ -987,13 +987,13 @@ export class EsMap {
       var reject = 0;
       d.points = [];
       d.rejected = 0;
-      if (typeof d.latLngs === 'undefined' || d.latLngs === null) {
+      if (typeof d.coordinates === 'undefined' || d.coordinates === null) {
         d.rejected = 1;
         return;
       }
 
       //--- setup control points
-      d.latLngs.forEach(function (coord) {
+      d.coordinates.forEach(function (coord) {
         if (!Array.isArray(coord)) {
           reject = 1;
           return;

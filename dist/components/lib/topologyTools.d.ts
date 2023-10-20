@@ -1,12 +1,12 @@
 export function sanitizeNode(node: any): {
     name: any;
     meta: any;
-    latLng: any;
+    coordinate: any;
 };
 export function sanitizeEdge(edge: any): {
     name: any;
     meta: any;
-    latLngs: any;
+    coordinates: any;
     children: any;
 };
 export function sanitizeTopology(layerData: any): {

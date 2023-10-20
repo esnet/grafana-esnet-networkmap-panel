@@ -210,7 +210,7 @@ class EditingInterface extends BindableHTMLElement {
             svg: nodeSvg,
             template: nodeTooltip,
           },
-          latLng: [parseFloat(nodeLat), parseFloat(nodeLng)],
+          coordinate: [parseFloat(nodeLat), parseFloat(nodeLng)],
           children: [],
         }
 
@@ -253,13 +253,13 @@ class EditingInterface extends BindableHTMLElement {
           }
         }
 
-        var latLngs = [null, null];
+        var coordinates = [null, null];
         for (let i = 0; i < mapJson[edge_layer].nodes.length; i++) {
           if (mapJson[edge_layer].nodes[i].name === node_source) {
-            latLngs[0] = mapJson[edge_layer].nodes[i].latLng;
+            coordinates[0] = mapJson[edge_layer].nodes[i].coordinate;
           }
           if (mapJson[edge_layer].nodes[i].name === node_destination) {
-            latLngs[1] = mapJson[edge_layer].nodes[i].latLng;
+            coordinates[1] = mapJson[edge_layer].nodes[i].coordinate;
           }
         }
         var lavender = "rgb(202, 149, 229)";
@@ -273,7 +273,7 @@ class EditingInterface extends BindableHTMLElement {
           layer: edge_layer,
           azColor:lavender,
           zaColor:lavender,
-          latLngs: latLngs,
+          coordinates: coordinates,
           children: [],
         });
         var defaultLayer = {"nodes":[], "edges": []};
@@ -519,7 +519,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
+                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.0") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -527,7 +527,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
+                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.1") }'></input>
                         </td>
                       </tr>
                       <tr>

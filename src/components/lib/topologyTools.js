@@ -2,7 +2,7 @@ export function sanitizeNode(node){
   return {
     name: node.name,
     meta: node.meta,
-    latLng: node.latLng,
+    coordinate: node.coordinate,
   };
 };
 
@@ -10,7 +10,7 @@ export function sanitizeEdge(edge){
   return {
     name: edge.name,
     meta: edge.meta,
-    latLngs: edge.latLngs,
+    coordinates: edge.coordinates,
     children: edge.children,
   };
 };
