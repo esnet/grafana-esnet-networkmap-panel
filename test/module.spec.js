@@ -14,7 +14,7 @@ var TOPOLOGY = [
             {
                 "edges":[
                     {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
-                        "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                        "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                         "children":[],
                         "azColor":lavender,
                         "zaColor":lavender,
@@ -22,7 +22,7 @@ var TOPOLOGY = [
                     },
                     {"name":"B--C","meta":{
                         "endpoint_identifiers":{"pops":["B","C"]}},
-                        "latLngs":[[34.59,-96.06],[37.99,-93.86],[42.16,-93.95]],
+                        "coordinates":[[34.59,-96.06],[37.99,-93.86],[42.16,-93.95]],
                         "children":[],
                         "azColor":lavender,
                         "zaColor":lavender,
@@ -30,7 +30,7 @@ var TOPOLOGY = [
                     },
                     {"name":"A--C","meta":{
                         "endpoint_identifiers":{"pops":["A","C"]}},
-                        "latLngs":[[39.02,-105.99],[41.90,-100.72],[42.16,-93.95]],
+                        "coordinates":[[39.02,-105.99],[41.90,-100.72],[42.16,-93.95]],
                         "children":[],
                         "azColor":lavender,
                         "zaColor":lavender,
@@ -41,19 +41,19 @@ var TOPOLOGY = [
                         {
                             "name":"A",
                             "meta":{},
-                            "latLng":[39.027718840211605,-105.99609375000001],
+                            "coordinate":[39.027718840211605,-105.99609375000001],
                             "color":lavender,
                         },
                         {
                             "name":"B",
                             "meta":{},
-                            "latLng":[34.59704151614417,-96.064453125],
+                            "coordinate":[34.59704151614417,-96.064453125],
                             "color":lavender,
                         },
                         {
                             "name":"C",
                             "meta":{},
-                            "latLng":[42.16340342422403,-93.95507812500001],
+                            "coordinate":[42.16340342422403,-93.95507812500001],
                             "color":lavender,
                         }
                 ],"aTest":0}
@@ -685,7 +685,7 @@ describe( "Class MapCanvas", () => {
         {
             "edges": [
                 {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
-                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
                     "azColor":lavender,
                     "zaColor":lavender,
@@ -695,13 +695,13 @@ describe( "Class MapCanvas", () => {
                 {
                   "name":"A",
                   "meta":{},
-                  "latLng":[39.02,-105.99],
+                  "coordinate":[39.02,-105.99],
                   "color":lavender,
                 },
                 {
                   "name":"B",
                   "meta":{},
-                  "latLng":[34.59,-96.06],
+                  "coordinate":[34.59,-96.06],
                   "color":lavender,
                 }
             ]
@@ -709,7 +709,7 @@ describe( "Class MapCanvas", () => {
         {
             "edges": [
                 {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
-                    "latLngs":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
+                    "coordinates":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
                     "children":[],
                     "azColor":lavender,
                     "zaColor":lavender,
@@ -719,13 +719,13 @@ describe( "Class MapCanvas", () => {
                 {
                   "name":"A",
                   "meta":{},
-                  "latLng":[49.02,-115.99],
+                  "coordinate":[49.02,-115.99],
                   "color":lavender,
                 },
                 {
                   "name":"B",
                   "meta":{},
-                  "latLng":[44.59,-106.06],
+                  "coordinate":[44.59,-106.06],
                   "color":lavender,
                 }
             ]
@@ -885,7 +885,7 @@ describe( "Class MapCanvas", () => {
                       },
                       "template": "${labels.src} ABCDEF ${labels.dst} GHIJKL"
                     },
-                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
                     "azColor":lavender,
                     "zaColor":lavender,
@@ -897,7 +897,7 @@ describe( "Class MapCanvas", () => {
                         "pops":["A","Z"]
                       }
                     },
-                    "latLngs":[[30.02,-105.99],[34.52,-105.99],[39.02,-105.99]],
+                    "coordinates":[[30.02,-105.99],[34.52,-105.99],[39.02,-105.99]],
                     "children":[],
                     "azColor":lavender,
                     "zaColor":lavender,
@@ -907,19 +907,19 @@ describe( "Class MapCanvas", () => {
                 {
                   "name":"A",
                   "meta":{},
-                  "latLng":[30.02,-105.99],
+                  "coordinate":[30.02,-105.99],
                   "color":lavender,                  
                 },
                 {
                   "name":"Z",
                   "meta":{},
-                  "latLng":[39.02,-105.99],
+                  "coordinate":[39.02,-105.99],
                   "color":lavender,
                 },
                 {
                   "name":"L",
                   "meta":{},
-                  "latLng":[34.59,-96.06],
+                  "coordinate":[34.59,-96.06],
                   "color":lavender,
                 }
             ]
@@ -975,7 +975,7 @@ describe( "Class MapCanvas", () => {
                         "pops":["Node A, Inc.","Node B - Inc."]
                       }
                     },
-                    "latLngs":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+                    "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
                     "azColor":lavender,
                     "zaColor":lavender,
@@ -985,13 +985,13 @@ describe( "Class MapCanvas", () => {
                 {
                   "name":"Node A, Inc.",
                   "meta":{},
-                  "latLng":[39.02,-105.99],
+                  "coordinate":[39.02,-105.99],
                   "color":lavender,
                 },
                 {
                   "name":"Node B - Inc.",
                   "meta":{},
-                  "latLng":[34.59,-96.06],
+                  "coordinate":[34.59,-96.06],
                   "color":lavender,
                 }
             ]
@@ -1235,11 +1235,11 @@ describe( "Class MapCanvas", () => {
           {
             "edges": [],
             "nodes": [
-              {"name": "A", "latLng": [ 80,  80], "meta": {} },
-              {"name": "B", "latLng": [ 80, -80], "meta": {} },
-              {"name": "C", "latLng": [-80, -80], "meta": {} },
-              {"name": "D", "latLng": [-80,  80], "meta": {} },
-              {"name": "visible", "latLng": [38.68, -96.96], "meta": {} },
+              {"name": "A", "coordinate": [ 80,  80], "meta": {} },
+              {"name": "B", "coordinate": [ 80, -80], "meta": {} },
+              {"name": "C", "coordinate": [-80, -80], "meta": {} },
+              {"name": "D", "coordinate": [-80,  80], "meta": {} },
+              {"name": "visible", "coordinate": [38.68, -96.96], "meta": {} },
             ]
           }
         ]

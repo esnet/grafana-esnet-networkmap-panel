@@ -33,13 +33,13 @@ const schema = {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          latLngs: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
+          coordinates: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
           meta: {
             type: 'object',
             properties: { endpoint_identifiers: { type: 'object' } },
           },
         },
-        required: ['name', 'latLngs', 'meta'],
+        required: ['name', 'coordinates', 'meta'],
       },
     },
     nodes: {
@@ -48,9 +48,9 @@ const schema = {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          latLng: { type: 'array', items: { type: 'number' } },
+          coordinate: { type: 'array', items: { type: 'number' } },
         },
-        required: ['name', 'latLng'],
+        required: ['name', 'coordinate'],
       },
     },
   },
@@ -116,7 +116,7 @@ const validate = function(schema, data){
       output['valid'] = !!(valid && output['valid']);
       Object.keys(errorDetails).forEach((childProp)=>{
         var accessor = childProp == "" ? propName : propName + "." + childProp;
-        output['errorDetails'][accessor] = errorDetails[childProp];
+        output['errorDetails'] += errorDetails[childProp];
       })
   })
   return output;
