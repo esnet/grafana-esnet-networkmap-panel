@@ -1,5 +1,7 @@
 [![Build Status](https://api.travis-ci.com/esnet/grafana-esnet-networkmap-panel.svg?branch=main)](https://app.travis-ci.com/github/esnet/grafana-esnet-networkmap-panel)
 
+![Network Map Screenshot](/src/img/networkmap.png "a title")
+
 # Network Map Panel
 
 This panel displays a network topology.
