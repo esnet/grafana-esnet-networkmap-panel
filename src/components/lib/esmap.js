@@ -456,8 +456,8 @@ function renderNodeControl(g, data, ref, layerId){
       evt.stopPropagation();
       PubSub.publish("setEditSelection", {
         "object": pointData,
-        "index": evt.target.getAttribute("data-index") * 1,
-        "layer": evt.target.getAttribute("data-layer") * 1,
+        "index": Number(evt.target.getAttribute("data-index")),
+        "layer": Number(evt.target.getAttribute("data-layer")),
         "type": "nodes"
       }, ref.svg.node());
     })
@@ -502,8 +502,8 @@ function renderEdgeControl(g, data, ref, layerId) {
     })
     .on('mousedown', function(evt, edgeData){
       evt.stopPropagation();
-      var idx = evt.target.getAttribute("data-index") * 1;
-      var layer = evt.target.getAttribute("data-layer") * 1;
+      var idx = Number(evt.target.getAttribute("data-index"));
+      var layer = Number(evt.target.getAttribute("data-layer"));
       let editSelection = {"object": edgeData, "type": "edges", "index": idx, "layer": layer};
       PubSub.publish("setEditSelection", editSelection, ref.svg.node());
     })

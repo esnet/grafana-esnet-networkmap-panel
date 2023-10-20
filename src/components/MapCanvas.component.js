@@ -246,25 +246,12 @@ export class MapCanvas extends BindableHTMLElement {
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
+
+    // options is sparse -- it includes only updated options.
+    // here we merge the options into the in-memory copy
     Object.keys(options).forEach((k)=>{
       this._options[k] = options[k];
     })
-    if(options.layers){
-      Object.keys(options.layers).forEach((lk)=>{
-        this._options.layers[lk] = options.layers[lk];
-      })
-    }
-    if(options.viewport?.center){
-      Object.keys(options.viewport.center).forEach((ck)=>{
-        this._options.viewport.center[ck] = options.viewport.center[ck];
-      })
-      delete options.layers.center;
-    }
-    if(options.viewport){
-      Object.keys(options.viewport).forEach((vk)=>{
-        this._options.viewport[vk] = options.viewport[vk];
-      })
-    }
 
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;

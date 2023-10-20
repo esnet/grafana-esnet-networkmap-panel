@@ -386,6 +386,13 @@ class EditingInterface extends BindableHTMLElement {
         if(this._formTouched){
             var dirtyForm = this.shadow.querySelector("#add_node_form");
         }
+
+        let selectedLayerOptions = "";
+
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            selectedLayerOptions += `<option value='${i}' ${ this._selectedLayer === i && "selected"}>Layer ${i+1}</option>`;
+        }
+
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -492,9 +499,7 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="node_layer">
-                            <option value='0' ${ this._selectedLayer == 0 && "selected"}>Layer 1</option>
-                            <option value='1' ${ this._selectedLayer == 1 && "selected"}>Layer 2</option>
-                            <option value='2' ${ this._selectedLayer == 2 && "selected"}>Layer 3</option>
+                            ${selectedLayerOptions}
                           </select>
                         </td>
                       </tr>
@@ -566,9 +571,7 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="edge_layer">
-                            <option value="0" ${ this._selectedLayer == 0 && "selected"}>Layer 1</option>
-                            <option value="1" ${ this._selectedLayer == 1 && "selected"}>Layer 2</option>
-                            <option value="2" ${ this._selectedLayer == 2 && "selected"}>Layer 3</option>
+                            ${selectedLayerOptions}
                           </select>
                         </td>
                       </tr>
