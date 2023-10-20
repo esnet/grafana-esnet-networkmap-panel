@@ -1,0 +1,351 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
+        },
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 23,
+  "iteration": 1697812966096,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "grafana-googlesheets-datasource",
+        "uid": "zBZQvAz4k"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "dark-blue",
+                "value": null
+              },
+              {
+                "color": "semi-dark-blue",
+                "value": 10000000000
+              },
+              {
+                "color": "blue",
+                "value": 100000000000
+              },
+              {
+                "color": "light-blue",
+                "value": 1000000000000
+              },
+              {
+                "color": "super-light-blue",
+                "value": 10000000000000
+              },
+              {
+                "color": "#EAB839",
+                "value": 100000000000000
+              }
+            ]
+          },
+          "unit": "bps"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 9,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 2,
+      "options": {
+        "background": "#EDEDED",
+        "enableEdgeAnimation": true,
+        "enableEditing": true,
+        "enableNodeAnimation": true,
+        "enableScrolling": true,
+        "initialViewStrategy": "static",
+        "layers": [
+          {
+            "color": "#49a7f25e",
+            "dashboardEdgeDstVar": "destination",
+            "dashboardEdgeDstVarL1": "dest",
+            "dashboardEdgeSrcVar": "source",
+            "dashboardEdgeSrcVarL1": "source",
+            "dashboardNodeVar": "node",
+            "dataFieldLabel": "Volume:",
+            "dstField": "dst",
+            "dstFieldLabel": "To:",
+            "edgeWidth": 2.5,
+            "endpointId": "pops",
+            "inboundValueField": "in_bits",
+            "jsonFromUrl": false,
+            "legend": true,
+            "mapjson": "{\"edges\":[{\"name\":\"A--B\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"A\",\"B\"]}},\"coordinates\":[[42.30619185993376,-106.00734642032997],[42.30619185993376,-92.30145333497663]],\"children\":[]},{\"name\":\"A--C\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"A\",\"C\"]}},\"coordinates\":[[42.30619185993376,-106.00734642032997],[34.5952660320894,-99.10139879776413]],\"children\":[]},{\"name\":\"B--C\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"B\",\"C\"]}},\"coordinates\":[[42.30619185993376,-92.30145333497663],[34.5952660320894,-99.10139879776413]],\"children\":[]}],\"nodes\":[{\"name\":\"A\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[42.30619185993376,-106.00734642032997]},{\"name\":\"B\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[42.30619185993376,-92.30145333497663]},{\"name\":\"C\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[34.5952660320894,-99.10139879776413]}]}",
+            "mapjsonUrl": "",
+            "name": "Layer 1",
+            "nodeHighlight": "dark-blue",
+            "nodeNameMatchField": "Node",
+            "nodeThresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "red"
+                },
+                {
+                  "color": "dark-blue",
+                  "value": 1
+                }
+              ]
+            },
+            "nodeValueField": "Up/Down (1: up, 0:down)",
+            "nodeWidth": 5,
+            "outboundValueField": "out_bits",
+            "pathOffset": 1.5,
+            "srcField": "src",
+            "srcFieldLabel": "From:",
+            "visible": true
+          },
+          {
+            "color": "#37178029",
+            "dashboardEdgeDstVar": "destination",
+            "dashboardEdgeDstVarL1": "dest",
+            "dashboardEdgeSrcVar": "source",
+            "dashboardEdgeSrcVarL1": "source",
+            "dashboardNodeVar": "node",
+            "dataFieldLabel": "Volume:",
+            "dstFieldLabel": "To:",
+            "edgeWidth": 1.5,
+            "endpointId": "pops",
+            "jsonFromUrl": false,
+            "legend": false,
+            "mapjson": "{\"edges\":[],\"nodes\":[]}",
+            "mapjsonUrl": "",
+            "name": "Layer 2",
+            "nodeHighlight": "red",
+            "nodeWidth": 5,
+            "pathOffset": 1.5,
+            "srcFieldLabel": "From:",
+            "visible": false
+          },
+          {
+            "color": "grey",
+            "dashboardEdgeDstVarL1": "dest",
+            "dashboardEdgeSrcVarL1": "source",
+            "dashboardNodeVar": "node",
+            "dataFieldLabel": "Volume:",
+            "dstFieldLabel": "To:",
+            "edgeWidth": 3,
+            "endpointId": "pops",
+            "jsonFromUrl": false,
+            "legend": false,
+            "mapjson": "{\"edges\":[],\"nodes\":[]}",
+            "mapjsonUrl": "",
+            "name": "Layer 3",
+            "nodeHighlight": "red",
+            "nodeWidth": 5,
+            "pathOffset": 3,
+            "srcFieldLabel": "From:",
+            "visible": false
+          }
+        ],
+        "legendColumnLength": 3,
+        "legendDefaultBehavior": "visible",
+        "legendPosition": "bottomleft",
+        "nodeThresholds": {
+          "mode": "absolute",
+          "steps": [
+            {
+              "color": "red"
+            },
+            {
+              "color": "green",
+              "value": 1
+            }
+          ]
+        },
+        "showLegend": true,
+        "showSidebar": false,
+        "showViewControls": true,
+        "thresholds": [
+          {
+            "color": "#1F60C4",
+            "value": null
+          },
+          {
+            "color": "#3274D9",
+            "value": 10000000000
+          },
+          {
+            "color": "#5794F2",
+            "value": 100000000000
+          },
+          {
+            "color": "#8AB8FF",
+            "value": 1000000000000
+          },
+          {
+            "color": "#C0D8FF",
+            "value": 10000000000000
+          },
+          {
+            "color": "#EAB839",
+            "value": 100000000000000
+          }
+        ],
+        "tileset": {
+          "geographic": "arcgis"
+        },
+        "viewport": {
+          "center": {
+            "lat": 38.98734416871349,
+            "lng": -97.95167707525174
+          },
+          "zoom": 3.75
+        },
+        "viewportZoom": 5,
+        "zIndexBase": 200
+      },
+      "targets": [
+        {
+          "alias": "",
+          "bucketAggs": [
+            {
+              "field": "start",
+              "id": "2",
+              "settings": {
+                "interval": "auto"
+              },
+              "type": "date_histogram"
+            }
+          ],
+          "cacheDurationSeconds": 300,
+          "datasource": {
+            "type": "grafana-googlesheets-datasource",
+            "uid": "zBZQvAz4k"
+          },
+          "metrics": [
+            {
+              "id": "1",
+              "type": "count"
+            }
+          ],
+          "query": "",
+          "refId": "A",
+          "spreadsheet": "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc",
+          "timeField": "start"
+        },
+        {
+          "cacheDurationSeconds": 300,
+          "datasource": {
+            "type": "grafana-googlesheets-datasource",
+            "uid": "zBZQvAz4k"
+          },
+          "hide": false,
+          "range": "Node Up",
+          "refId": "B",
+          "spreadsheet": "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc"
+        }
+      ],
+      "title": "Panel Title",
+      "type": "esnet-networkmap-panel"
+    }
+  ],
+  "refresh": "",
+  "schemaVersion": 36,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "source",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "destination",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "",
+          "value": ""
+        },
+        "hide": 0,
+        "name": "node",
+        "options": [
+          {
+            "selected": true,
+            "text": "",
+            "value": ""
+          }
+        ],
+        "query": "",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "New Options Test",
+  "uid": "jKeMQeMIk",
+  "version": 36,
+  "weekStart": ""
+}
