@@ -1,4 +1,5 @@
 import * as pubsub from './lib/pubsub.js';
+import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
 
@@ -12,7 +13,7 @@ class EditingInterface extends BindableHTMLElement {
         this._nodeEditMode = false;
         this._selection = false;
         this._dialog = false;
-        this._selectedLayer = "layer1";
+        this._selectedLayer = 0;
         this._spliceIndex = null;
         this._formTouched = false;
     }
@@ -153,31 +154,36 @@ class EditingInterface extends BindableHTMLElement {
 
     ///////////////////////////
     // event bindings
-    toggleNodeEdit(){
+    toggleNodeEdit(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("setEditSelection", null, this);
         PubSub.publish("setEditMode", { "mode": "node", "value": !this._nodeEditMode }, this);
     }
-    toggleEdgeEdit(){
+    toggleEdgeEdit(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("setEditSelection", null, this);
         PubSub.publish("setEditMode", { "mode": "edge", "value": !this._edgeEditMode }, this);
     }
     recalcPaths(){
         PubSub.publish('recalcPaths', null, this);
     }
-    showAddNodeDialog(){
-        this._selectedLayer = "layer1";
+    showAddNodeDialog(e){
+        e.stopPropagation(); // avoid bug in leaflet
+        this._selectedLayer = 0;
         this._selectedObject = null;
         this._spliceIndex = null;
         this.dialog = "node";
     }
-    showAddEdgeDialog(){
-        this._selectedLayer = "layer1";
+    showAddEdgeDialog(e){
+        e.stopPropagation(); // avoid bug in leaflet
+        this._selectedLayer = 0;
         this._selectedObject = null;
         this._spliceIndex = null;
         this.setSrcDstOptions();
         this.dialog = "edge";
     }
-    hideDialogs(){
+    hideDialogs(e){
+        e.stopPropagation(); // avoid bug in leaflet
         PubSub.publish("showEditNodeDialog", null, this)
     }
     showSrcDst(event){
@@ -204,7 +210,7 @@ class EditingInterface extends BindableHTMLElement {
             svg: nodeSvg,
             template: nodeTooltip,
           },
-          latLng: [parseFloat(nodeLat), parseFloat(nodeLng)],
+          coordinate: [parseFloat(nodeLat), parseFloat(nodeLng)],
           children: [],
         }
 
@@ -218,10 +224,9 @@ class EditingInterface extends BindableHTMLElement {
             this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
         }
         var defaultLayer = {"nodes":[], "edges": []};
-        const mapJson = {
-            "layer1": this._topology.layer1 || defaultLayer,
-            "layer2": this._topology.layer2 || defaultLayer,
-            "layer3": this._topology.layer3 || defaultLayer,
+        const mapJson = [];
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            mapJson.push(this._topology[i] || defaultLayer);
         }
         PubSub.publish("updateTopology", mapJson, this);
 
@@ -238,46 +243,40 @@ class EditingInterface extends BindableHTMLElement {
         var node_source = this.shadow.querySelector('#node_source').value;
         var node_destination = this.shadow.querySelector('#node_destination').value;
 
-        var optionsJson = {};
+        var mapJson = [];
 
-        var accessors = ['layer1', 'layer2', 'layer3'];
-        for (var i = 0; i < accessors.length; i++) {
+        for (var i = 0; i < utils.LAYER_LIMIT; i++) {
           try {
-            optionsJson[accessors[i]] = this._topology[accessors[i]];
+            mapJson[i] = this._topology[i];
           } catch (e) {
-            optionsJson[accessors[i]] = { nodes: [], edges: [] };
+            mapJson[i] = { nodes: [], edges: [] };
           }
         }
 
-        var latLngs = [null, null];
-        for (let i = 0; i < optionsJson[edge_layer].nodes.length; i++) {
-          if (optionsJson[edge_layer].nodes[i].name === node_source) {
-            latLngs[0] = optionsJson[edge_layer].nodes[i].latLng;
+        var coordinates = [null, null];
+        for (let i = 0; i < mapJson[edge_layer].nodes.length; i++) {
+          if (mapJson[edge_layer].nodes[i].name === node_source) {
+            coordinates[0] = mapJson[edge_layer].nodes[i].coordinate;
           }
-          if (optionsJson[edge_layer].nodes[i].name === node_destination) {
-            latLngs[1] = optionsJson[edge_layer].nodes[i].latLng;
+          if (mapJson[edge_layer].nodes[i].name === node_destination) {
+            coordinates[1] = mapJson[edge_layer].nodes[i].coordinate;
           }
         }
         var lavender = "rgb(202, 149, 229)";
-        optionsJson[edge_layer].edges.push({
+        mapJson[edge_layer].edges.push({
           name: node_source + '--' + node_destination,
           meta: {
             endpoint_identifiers: {
               pops: [node_source, node_destination],
             },
           },
-          layer: edge_layer.charAt(edge_layer.length - 1) * 1,
+          layer: edge_layer,
           azColor:lavender,
           zaColor:lavender,
-          latLngs: latLngs,
+          coordinates: coordinates,
           children: [],
         });
         var defaultLayer = {"nodes":[], "edges": []};
-        var mapJson = {
-            "layer1": this._topology.layer1 || defaultLayer,
-            "layer2": this._topology.layer2 || defaultLayer,
-            "layer3": this._topology.layer3 || defaultLayer,
-        }
         PubSub.publish("updateTopology", mapJson, this);
         PubSub.publish('updateMapTopology', mapJson, this);
 
@@ -292,9 +291,10 @@ class EditingInterface extends BindableHTMLElement {
         }, 100);
     }
 
-    deleteSelection(){
+    deleteSelection(e){
+        e.stopPropagation(); // avoid bug in leaflet
         var topology = this.mapCanvas.topology;
-        topology['layer'+this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
+        topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
         PubSub.publish("updateTopology", topology, this);
         PubSub.publish("updateMapTopology", topology, this);
         PubSub.publish("refresh", null, this);
@@ -386,6 +386,13 @@ class EditingInterface extends BindableHTMLElement {
         if(this._formTouched){
             var dirtyForm = this.shadow.querySelector("#add_node_form");
         }
+
+        let selectedLayerOptions = "";
+
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            selectedLayerOptions += `<option value='${i}' ${ this._selectedLayer === i && "selected"}>Layer ${i+1}</option>`;
+        }
+
         this.shadow.innerHTML = `
             <style>
                 .button-overlay { 
@@ -492,9 +499,7 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="node_layer">
-                            <option value='layer1' ${ this._selectedLayer == "layer1" && "selected"}>Layer 1</option>
-                            <option value='layer2' ${ this._selectedLayer == "layer2" && "selected"}>Layer 2</option>
-                            <option value='layer3' ${ this._selectedLayer == "layer3" && "selected"}>Layer 3</option>
+                            ${selectedLayerOptions}
                           </select>
                         </td>
                       </tr>
@@ -519,7 +524,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Latitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.0") }'></input>
+                          <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.0") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -527,7 +532,7 @@ class EditingInterface extends BindableHTMLElement {
                           <label>Longitude:</label>
                         </td>
                         <td>
-                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "latLng.1") }'></input>
+                          <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.1") }'></input>
                         </td>
                       </tr>
                       <tr>
@@ -566,9 +571,7 @@ class EditingInterface extends BindableHTMLElement {
                         </td>
                         <td>
                           <select id="edge_layer">
-                            <option value="layer1" ${ this._selectedLayer == "layer1" && "selected"}>Layer 1</option>
-                            <option value="layer2" ${ this._selectedLayer == "layer2" && "selected"}>Layer 2</option>
-                            <option value="layer3" ${ this._selectedLayer == "layer3" && "selected"}>Layer 3</option>
+                            ${selectedLayerOptions}
                           </select>
                         </td>
                       </tr>
@@ -609,7 +612,7 @@ class EditingInterface extends BindableHTMLElement {
               <div class='button edit-mode-only tight-form-func' id='add_edge'>
                 +&nbsp;Edge
               </div>
-              <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer && this._selectedType) ? "display: block" : "display: none" }'>
+              <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer !== null && this._selectedType) ? "display: block" : "display: none" }'>
                 Delete<br>
                 ${this._selectedObject && this._selectedObject.name}
               </div>

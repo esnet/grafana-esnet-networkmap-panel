@@ -1,4 +1,5 @@
 import * as pubsub from './lib/pubsub.js';
+import * as utils from "./lib/utils.js";
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
 
@@ -26,7 +27,7 @@ class SideBar extends BindableHTMLElement {
 
   toggleLayer(event){
     var element = event.target;
-    var layer = element.id.split("-")[1];
+    var layer = element.id.split("-")[2];
     var value = element.checked;
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
@@ -53,6 +54,26 @@ class SideBar extends BindableHTMLElement {
           this.shadow.id = "tooltip-"+this.instanceId;
           this.append(this.shadow);        
       }
+
+      let sidebarContent = '';
+
+      for(let i=0; i<utils.LAYER_LIMIT; i++){
+        if(!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i] || !this.mapCanvas.jsonResults){
+          continue;
+        }
+        sidebarContent += `<div class='toggle container' ${ !this.mapCanvas.options.layers[i].legend && "style='display: none;'" }>
+          <label class="switch">
+            <input type="checkbox" ${ this.mapCanvas.options.layers[i].visible && "checked"} id='sidebar-layer-${i}'>
+            <span class="slider round"></span>
+          </label>
+          <text class="legend-text">${ this.mapCanvas.options.layers[i].name || "Layer " + (i+1) }</text>
+          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i][0] ) ? "valid" : `invalid${this.mapCanvas.jsonResults?.[i]?.[1] ? ": " + this.mapCanvas.jsonResults[i][1] : "" }` }
+          </div>
+        </div>`
+
+      }
+
       this.shadow.innerHTML = `
         <style>
           #tooltip-${this.instanceId} {
@@ -92,45 +113,21 @@ class SideBar extends BindableHTMLElement {
           }
         </style>
         <h2>Map Layers</h2>
-        <div class='toggle container' ${ !this.mapCanvas.options.legendL1 && "style='display: none;'" }>
-          <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer1 && "checked"} id='sidebar-layer1'>
-            <span class="slider round"></span>
-          </label>
-          <text class="legend-text">${ this.mapCanvas.options.layerName1 || "Layer 1" }</text>
-          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer1[0]) ? "valid" : "invalid" }
-          </div>
-        </div>
 
-        <div class='toggle container' ${ !this.mapCanvas.options.legendL2 && "style='display: none;'" }>
-          <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer2 && "checked"} id='sidebar-layer2'>
-            <span class="slider round"></span>
-          </label>
-          <text class="legend-text">${ this.mapCanvas.options.layerName2 || "Layer 2" }</text>
-          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer2[0]) ? "valid" : "invalid" }
-          </div>
-        </div>
+        ${sidebarContent}
 
-        <div class='toggle container' ${ !this.mapCanvas.options.legendL3 && "style='display: none;'" }>
-          <label class="switch">
-            <input type="checkbox" ${ this.mapCanvas.options.layer3 && "checked"} id='sidebar-layer3'>
-            <span class="slider round"></span>
-          </label>
-          <text class="legend-text">${ this.mapCanvas.options.layerName3 || "Layer 3" }</text>
-          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults.layer3[0]) ? "valid" : "invalid" }
-          </div>
-        </div>
         <h2>Tooltip</h2>
         <div class='sidebar tooltip' id='sidebar-tooltip'>
         </div>`
+
         var bindings = {}
-        bindings["#sidebar-layer1@onchange"] = this.toggleLayer;
-        bindings["#sidebar-layer2@onchange"] = this.toggleLayer;
-        bindings["#sidebar-layer3@onchange"] = this.toggleLayer;
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+          if(!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i]){
+            continue;
+          }
+          let selector = `#sidebar-layer-${i}@onchange`;
+          bindings[selector] = this.toggleLayer;
+        }
         this.bindEvents(bindings);
 
   }

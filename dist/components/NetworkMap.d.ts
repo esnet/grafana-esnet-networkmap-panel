@@ -6,9 +6,7 @@ export default class NetworkMap {
      */
     constructor(mapCanvas: any);
     mapCanvas: any;
-    g1: any;
-    g2: any;
-    g3: any;
+    groups: any[];
     leafletMap: any;
     svgLayer: any;
     sideBar: any;

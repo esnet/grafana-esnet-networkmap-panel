@@ -1,3 +1,5 @@
+export const LAYER_LIMIT = 3;
+
 export function getUrlSearchParams() {
   const search = window.location.search.substring(1);
   const searchParamsSegments = search.split('&');
@@ -31,13 +33,13 @@ const schema = {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          latLngs: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
+          coordinates: { type: 'array', items: { type: 'array', items: { type: 'number' } } },
           meta: {
             type: 'object',
             properties: { endpoint_identifiers: { type: 'object' } },
           },
         },
-        required: ['name', 'latLngs', 'meta'],
+        required: ['name', 'coordinates', 'meta'],
       },
     },
     nodes: {
@@ -46,9 +48,9 @@ const schema = {
         type: 'object',
         properties: {
           name: { type: 'string' },
-          latLng: { type: 'array', items: { type: 'number' } },
+          coordinate: { type: 'array', items: { type: 'number' } },
         },
-        required: ['name', 'latLng'],
+        required: ['name', 'coordinate'],
       },
     },
   },
@@ -73,7 +75,7 @@ const validateArray = function(itemSchema, data){
 // main JSON validation function: heavily recursive
 const validate = function(schema, data){
   // do type check
-  var output = { "valid": true, "errorDetails": {} }
+  var output = { "valid": true, "errorDetails": "" }
   const typeCheckers = {
     'object': (data)=>{ return typeof(data) === "object"; },
     'number': (data)=>{ return typeof(data) === "number" },
@@ -83,9 +85,8 @@ const validate = function(schema, data){
     'array': Array.isArray
   }
   if(!typeCheckers[schema['type']](data)){
-    var before = output['valid'];
     output["valid"] = false;
-    output.errorDetails[''] = "type check failed."
+    output.errorDetails += "Type check failed.<br>"
     return output;
   }
   // recursive call for each property listed above
@@ -93,9 +94,8 @@ const validate = function(schema, data){
   for(var i=0; i<props.length; i++){
       var propName = props[i];
       if(!data[propName] && schema.required.indexOf(propName)>=0){
-        var before = output['valid'];
         output['valid'] = false;
-        output['errorDetails'][propName] = "required property '"+propName+"' is not set";
+        output['errorDetails'] = "required property '"+propName+"' is not set<br>";
         return output;
       }
   }
@@ -113,11 +113,10 @@ const validate = function(schema, data){
           valid = interimOutput['valid'];
           errorDetails = interimOutput['errorDetails'];
       }
-      var before = output['valid'];
       output['valid'] = !!(valid && output['valid']);
       Object.keys(errorDetails).forEach((childProp)=>{
         var accessor = childProp == "" ? propName : propName + "." + childProp;
-        output['errorDetails'][accessor] = errorDetails[childProp];
+        output['errorDetails'] += errorDetails[childProp];
       })
   })
   return output;
@@ -130,4 +129,23 @@ export function testJsonSchema(data) {
   } else {
     return [valid, errorDetails];
   }
+}
+
+export function resolvePath(object, path, defaultValue=null){
+  return path
+    .split(/[\.\[\]\'\"]/)
+    .filter(p => p) // remove empty splits
+    .reduce((o, p) => o ? o[p] : defaultValue, object)
+}
+
+export function setPath(object, path, newValue){
+  let splitPath = path
+    .split(/[\.\[\]\'\"]/)
+    .filter(p => p)
+  let o = object;
+  let lastItem = splitPath.pop();
+  splitPath.forEach((p)=>{
+    o = o[p]
+  })
+  o[lastItem] = newValue;
 }
