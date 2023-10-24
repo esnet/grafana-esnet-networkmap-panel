@@ -42,22 +42,6 @@ function checkBools(settings: object) {
   };
 }
 
-
-/*async function buildChoices(context: FieldOverrideContext) {
-  const options: any[] = [{ value: null, label: '- No Mapping -' }];
-  if (context && context.data) {
-    for (const frame of context.data) {
-      const frameName = frame.refId;
-      for (const field of frame.fields) {
-        const name = getFieldDisplayName(field, frame, context.data);
-        const value = field.name;
-        options.push({ value, label: (!!frameName ? '[' + frameName + '] ' : '') + name });
-      }
-    }
-  }
-  return Promise.resolve(options);
-}*/
-
 async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
   const options: any[] = [{ value: null, label: '- No Mapping -' }];
   if (context !== undefined && context.getSuggestions) {
