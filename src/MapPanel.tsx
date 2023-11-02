@@ -276,7 +276,7 @@ export class MapPanel extends Component<Props> {
       if(!options.layers[i]){ continue; }
       colors.push({
         defaultColor: options.layers[i].color,
-        nodeHighlight: options.layers[i].nodeHighlight,
+        nodeThresholds: options.layers[i].nodeThresholds?.steps || [],
       })
       fields.push({
         srcField: options.layers[i].srcField,
@@ -284,6 +284,8 @@ export class MapPanel extends Component<Props> {
         inboundValueField: options.layers[i].inboundValueField,
         outboundValueField: options.layers[i].outboundValueField,
         endpointId: options.layers[i].endpointId,
+        nodeNameMatchField: options.layers[i].nodeNameMatchField,
+        nodeValueField: options.layers[i].nodeValueField,
       })
     }
     let topology = [
@@ -301,8 +303,8 @@ export class MapPanel extends Component<Props> {
         ]).then((topologyData) => {
           for(let i=0; i<LAYER_LIMIT; i++){
             try {
-              let parsedData = parseData(data, topologyData[i], colors[i], fields[i], i);
-              topology[i] = parsedData[3];
+              // @ts-ignore
+              topology[i] = parseData(data, topologyData[i], colors[i], fields[i], i);
             } catch(e) {
               if(!this.mapCanvas.jsonResults){
                 this.mapCanvas.jsonResults = [];
