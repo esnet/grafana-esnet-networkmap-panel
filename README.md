@@ -1,6 +1,6 @@
 [![Build Status](https://api.travis-ci.com/esnet/grafana-esnet-networkmap-panel.svg?branch=main)](https://app.travis-ci.com/github/esnet/grafana-esnet-networkmap-panel)
 
-![Network Map Screenshot](/src/img/networkmap.png "Network Map Screenshot")
+![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
 
 # Network Map Panel
 
@@ -14,7 +14,7 @@ The plugin will plot traffic information on the network topology, showing bi-dir
 
 The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:
 
-[Dashboard JSON Snippet](/demonstration/dashboard.json)
+[Dashboard JSON Snippet](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/demonstration/dashboard.json)
 
 
 
