@@ -375,7 +375,7 @@ function renderNodeControl(g, data, ref, layerId){
 
   function dragged(evt, nodeData) {
     var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", evt, ref.svg.node());
+    PubSub.publish("dragStarted", { event: evt, node: {...nodeData} }, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     nodeData['coordinate'][0] = ll.lat;
@@ -394,6 +394,8 @@ function renderNodeControl(g, data, ref, layerId){
       // to run.
       return
     }
+    var dragStart = PubSub.last("dragStarted", ref.svg.node());
+    PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, this);
     PubSub.clearLast("dragStarted", ref.svg.node());
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
@@ -531,7 +533,7 @@ function renderEdgeControl(g, data, ref, layerId) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData, idx, layerId) {
-    PubSub.publish("dragStarted", evt, ref.svg.node());
+    PubSub.publish("dragStarted", {event: evt, edge: { ...edgeData } }, ref.svg.node());
     PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layerId}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
@@ -553,6 +555,8 @@ function renderEdgeControl(g, data, ref, layerId) {
       // to run.
       return
     }
+    var dragStart = PubSub.last("dragStarted", ref.svg.node());
+    PubSub.publish("updateMapEdge", {"layer": layerId, "edge": edgeData, "oldEdge": dragStart.edge }, this);
     PubSub.clearLast("dragStarted", ref.svg.node());
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
