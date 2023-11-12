@@ -223,7 +223,7 @@ class EditingInterface extends BindableHTMLElement {
             this._topology[layer].nodes.push(node);
             PubSub.publish("createMapNode", {"layer": layer, "node": node }, this);
         } else {
-            this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+            let oldNode = this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
             PubSub.publish("updateMapNode", {"layer": layer, "node": node, "oldNode": oldNode }, this);
         }
         var defaultLayer = {"nodes":[], "edges": []};
