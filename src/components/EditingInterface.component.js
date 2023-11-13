@@ -3,6 +3,8 @@ import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
 
+const LAVENDER = "rgb(202, 149, 229)";
+
 class EditingInterface extends BindableHTMLElement {
     constructor(topology) {
         super();
@@ -200,11 +202,10 @@ class EditingInterface extends BindableHTMLElement {
         var nodeTooltip = this.shadow.querySelector('#node_tooltip').value;
         var nodeLat = this.shadow.querySelector('#node_lat').value;
         var nodeLng = this.shadow.querySelector('#node_lng').value;
-        var lavender = "rgb(202, 149, 229)";
 
         var newNode = {
           name: nodeName,
-          color: lavender,
+          color: this.mapCanvas.options?.layers?.[nodeLayer]?.color || LAVENDER,
           meta: {
             display_name: nodeDisplayName,
             svg: nodeSvg,
@@ -220,8 +221,10 @@ class EditingInterface extends BindableHTMLElement {
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
             this._topology[layer].nodes.push(node);
+            PubSub.publish("createMapNode", {"layer": layer, "node": node }, this);
         } else {
-            this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+            let oldNode = this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+            PubSub.publish("updateMapNode", {"layer": layer, "node": node, "oldNode": oldNode }, this);
         }
         var defaultLayer = {"nodes":[], "edges": []};
         const mapJson = [];
@@ -238,7 +241,8 @@ class EditingInterface extends BindableHTMLElement {
             PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
         }, 10);
     }
-    createMapEdge(){
+    createMapEdge(e){
+        e.stopPropagation();
         var edge_layer = this.shadow.querySelector('#edge_layer').value;
         var node_source = this.shadow.querySelector('#node_source').value;
         var node_destination = this.shadow.querySelector('#node_destination').value;
@@ -262,8 +266,7 @@ class EditingInterface extends BindableHTMLElement {
             coordinates[1] = mapJson[edge_layer].nodes[i].coordinate;
           }
         }
-        var lavender = "rgb(202, 149, 229)";
-        mapJson[edge_layer].edges.push({
+        let newEdge = {
           name: node_source + '--' + node_destination,
           meta: {
             endpoint_identifiers: {
@@ -271,12 +274,21 @@ class EditingInterface extends BindableHTMLElement {
             },
           },
           layer: edge_layer,
-          azColor:lavender,
-          zaColor:lavender,
+          azColor: this.mapCanvas.options?.layers?.[edge_layer]?.color || LAVENDER,
+          zaColor: this.mapCanvas.options?.layers?.[edge_layer]?.color || LAVENDER,
           coordinates: coordinates,
           children: [],
-        });
-        var defaultLayer = {"nodes":[], "edges": []};
+        };
+
+        mapJson[edge_layer].edges.push(newEdge);
+
+        PubSub.publish("createMapEdge", {
+            "layer": edge_layer,
+            "source": node_source,
+            "destination": node_destination,
+            "edge": newEdge
+        }, this);
+
         PubSub.publish("updateTopology", mapJson, this);
         PubSub.publish('updateMapTopology', mapJson, this);
 
@@ -294,7 +306,13 @@ class EditingInterface extends BindableHTMLElement {
     deleteSelection(e){
         e.stopPropagation(); // avoid bug in leaflet
         var topology = this.mapCanvas.topology;
-        topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
+        var deleted = topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
+        if(this._selectedType == "edges"){
+            PubSub.publish("deleteMapEdge", {"edge": deleted[0]}, this)
+        }
+        if(this._selectedType == "nodes"){
+            PubSub.publish("deleteMapNode", {"node": deleted[0]}, this)
+        }
         PubSub.publish("updateTopology", topology, this);
         PubSub.publish("updateMapTopology", topology, this);
         PubSub.publish("refresh", null, this);

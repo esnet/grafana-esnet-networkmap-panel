@@ -139,7 +139,7 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
-      var connections = " connects-to-"+name.split("--").join(" connects-to-");
+      var connections = " cnxn-"+name.split("--").join(" cnxn-");
       var layerClass = ' l'+layerId;
       return 'edge edge-az edge-az-' + name + connections + layerClass;
     })
@@ -187,7 +187,10 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('stroke-width', edgeWidth)
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
-      var connections = " connects-to-"+name.split("--").join(" connects-to-");
+      var connections = " cnxn-"+name.split("--").join(" cnxn-");
+      if(d.meta?.endpoint_identifiers?.pops && d.meta.endpoint_identifiers.pops?.length){
+        connections += " cnxn-"+d.meta.endpoint_identifiers.pops.join(" cnxn-");
+      }
       var layerClass = ' l'+layerId;
       return 'edge edge-za edge-za-' + name + connections + layerClass;
     })
@@ -264,10 +267,12 @@ function renderEdges(g, data, ref, layerId, options) {
 
 }
 
-function deleteControlPoint(evt, d, edgeData, ref){
+function deleteControlPoint(evt, d, edgeData, ref, layerId){
   for(var i=0; i<edgeData.coordinates.length; i++){
     if(edgeData.coordinates[i] == d){
+      var oldEdgeData = JSON.parse(JSON.stringify(edgeData));
       edgeData.coordinates.splice(i, 1);
+      PubSub.publish("updateMapEdge", {"layer": layerId, "edge": edgeData, "oldEdge": oldEdgeData }, ref.svg.node());
       PubSub.publish("updateMapTopology", ref.data, ref.svg.node());
       PubSub.publish("refresh", null, ref.svg.node());
       PubSub.publish("updateTopologyData", null, ref.svg.node());
@@ -276,10 +281,11 @@ function deleteControlPoint(evt, d, edgeData, ref){
   }
 }
 
-function addControlPoint(evt, obj, ref) {
+function addControlPoint(evt, obj, ref, layerId) {
 
   var mapDiv = ref.leafletMap.getContainer();
   var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
+  var oldEdgeData = JSON.parse(JSON.stringify(obj.__data__))
 
   // we know the mouse is on one of the segmets
   // figure out difference in able between each pair of points and the click point
@@ -312,6 +318,7 @@ function addControlPoint(evt, obj, ref) {
     coordinates = tmp.concat(coordinates.slice(splicePoint));
     obj.__data__.coordinates = coordinates;
     ref.update();
+    PubSub.publish("updateMapEdge", {"layer": layerId, "edge": obj.__data__, "oldEdge": oldEdgeData }, ref.svg.node());
   }
 }
 
@@ -324,10 +331,11 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
 
     // procedure for updating the edge:
     // get all edges that have "nodeData.name" as a node
-    var selector = `#${mapId} ${layerSelector}.connects-to-${sanitizeName(nodeData.name)}`;
+    var selector = `#${mapId} ${layerSelector}.cnxn-${sanitizeName(nodeData.name)}`;
     d3.selectAll(selector)
         // for each edge that we select:
         .attr('d', function (d) {
+          var oldEdgeData = JSON.parse(JSON.stringify(d));
           // if we are manipulating the "A" end
           // the index of the point we want is 0
           var idx = 0;
@@ -356,6 +364,7 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
               d.coordinates[i][1] = d.coordinates[end][1] + lngDelta * i;
             }
           }
+          PubSub.publish("updateMapEdge", {"layer": layerId, "edge": d, "oldEdge": oldEdgeData }, mapCanvas);
         })
 }
 
@@ -375,7 +384,7 @@ function renderNodeControl(g, data, ref, layerId){
 
   function dragged(evt, nodeData) {
     var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", evt, ref.svg.node());
+    PubSub.publish("dragStarted", { event: evt, node: {...nodeData} }, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     nodeData['coordinate'][0] = ll.lat;
@@ -394,6 +403,8 @@ function renderNodeControl(g, data, ref, layerId){
       // to run.
       return
     }
+    var dragStart = PubSub.last("dragStarted", ref.svg.node());
+    PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, this);
     PubSub.clearLast("dragStarted", ref.svg.node());
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
@@ -498,7 +509,7 @@ function renderEdgeControl(g, data, ref, layerId) {
     })
     // still need to figure out how to not zoom when doubleclicking here
     .on('dblclick', function (d) {
-      addControlPoint(d, this, ref);
+      addControlPoint(d, this, ref, layerId);
     })
     .on('mousedown', function(evt, edgeData){
       evt.stopPropagation();
@@ -531,7 +542,7 @@ function renderEdgeControl(g, data, ref, layerId) {
   g.selectAll('g').remove();
 
   function dragged(evt, d, edgeData, idx, layerId) {
-    PubSub.publish("dragStarted", evt, ref.svg.node());
+    PubSub.publish("dragStarted", {event: evt, edge: { ...edgeData } }, ref.svg.node());
     PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layerId}, ref.svg.node());
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
@@ -553,9 +564,11 @@ function renderEdgeControl(g, data, ref, layerId) {
       // to run.
       return
     }
+    var dragStart = PubSub.last("dragStarted", ref.svg.node());
     PubSub.clearLast("dragStarted", ref.svg.node());
     var zoom = ref.leafletMap.getZoom();
     var center = L.latLng(ref.leafletMap.getCenter());
+    PubSub.publish("updateMapEdge", {"layer": layerId, "edge": edgeData, "oldEdge": dragStart.edge }, ref.svg.node());
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
         ref.data[0],
@@ -614,7 +627,7 @@ function renderEdgeControl(g, data, ref, layerId) {
         ref.mapCanvas.options.enableScrolling && ref.leafletMap.dragging.enable();
       })
       .on('dblclick', function (evt, d) {
-        deleteControlPoint(evt, d, edgeData, ref);
+        deleteControlPoint(evt, d, edgeData, ref, layerId);
       });
 
     feature.exit().remove();
@@ -907,7 +920,7 @@ export class EsMap {
         }
         self.lastInteractedObject.coordinate[idx] += amount;
         var ll = self.lastInteractedObject.coordinate;
-        d3.selectAll(".connects-to-"+sanitizeName(self.lastInteractedObject.name))
+        d3.selectAll(".cnxn-"+sanitizeName(self.lastInteractedObject.name))
             // for each edge that we select:
             .attr('d', function (d) {
               // if we are manipulating the "A" end
@@ -1041,7 +1054,7 @@ export class EsMap {
     })
     var layerId = 0;
     this.mapLayers.forEach((g)=>{
-      if(!this.options.layers[layerId]['visible']){
+      if(!this?.options?.layers?.[layerId]?.['visible']){
         layerId++;
         return;
       }

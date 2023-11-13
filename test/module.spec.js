@@ -223,7 +223,7 @@ describe( "Class MapCanvas", () => {
         if(i==1) secondLayerUrl = layer._url;
         i++;
       });
-      const tonerBoundariesUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lines/{z}/{x}/{y}{r}.{ext}';
+      const tonerBoundariesUrl = 'https://tiles.stadiamaps.com/tiles/stamen_toner_lines/{z}/{x}/{y}{r}.{ext}';
       secondLayerUrl.should.equal(tonerBoundariesUrl);
     });
     it("should allow users to change the political label layer tileset", ()=>{
@@ -237,7 +237,7 @@ describe( "Class MapCanvas", () => {
         if(i==1) secondLayerUrl = layer._url;
         i++;
       });
-      const tonerLabelsUrl = 'https://stamen-tiles-{s}.a.ssl.fastly.net/toner-labels/{z}/{x}/{y}{r}.{ext}';
+      const tonerLabelsUrl = 'https://tiles.stadiamaps.com/tiles/stamen_toner_labels/{z}/{x}/{y}{r}.{ext}';
       secondLayerUrl.should.equal(tonerLabelsUrl);
     });
     it("should allow users to 'home' the map by clicking a button", ()=>{
@@ -368,6 +368,9 @@ describe( "Class MapCanvas", () => {
     it("should allow users to add an edge control point on double-click", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
+      var closureVar = false;
+      // test that we publish updateMapEdge
+      PubSub.subscribe("updateMapEdge", (e)=>{ closureVar= true; }, canvas)
       PubSub.publish("updateEditMode", true, canvas);
       // create a (double) click event
       var dblClickEvent = new MouseEvent('dblclick', { bubbles: true, clientX: 200, clientY: 200 })
@@ -379,6 +382,7 @@ describe( "Class MapCanvas", () => {
       controlPointsBefore.should.not.equal(controlPointsAfter);
       // check that we now have more control points on the edge
       controlPointsAfter.should.be.greaterThan(controlPointsBefore);
+      closureVar.should.equal(true);
     });
     it("should allow users to remove layer toggles", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -402,6 +406,9 @@ describe( "Class MapCanvas", () => {
     it("should allow users to double click to remove edge control points", ()=>{
       // get canvas
       var canvas = document.querySelector("esnet-map-canvas");
+      var closureVar = false;
+      // test that we publish updateMapEdge
+      PubSub.subscribe("updateMapEdge", (e)=>{ closureVar= true; }, canvas)
       // turn on editing mode
       PubSub.publish("updateEditMode", true, canvas);
       // double click control point to remove
@@ -414,6 +421,7 @@ describe( "Class MapCanvas", () => {
       PubSub.publish("updateEditMode", true, canvas);
       var afterAllCps = canvas.querySelectorAll(".control.controlPoint")
       afterAllCps.length.should.be.lessThan(beforeAllCps.length)
+      closureVar.should.equal(true);
     })
     it("should evenly space edge control points after node drag", ()=>{
       // enter editing mode
@@ -585,7 +593,16 @@ describe( "Class MapCanvas", () => {
       var canvas = document.querySelector("esnet-map-canvas");
 
       var closureVar = null;
+      var closureVar2 = false;
+      var closureVar3 = false;
       canvas.updateTopology = () => { closureVar = "called"; }
+
+      PubSub.subscribe("updateMapNode", (e)=>{ 
+        closureVar3 = true;
+      }, canvas);
+      PubSub.subscribe("updateMapEdge", (e)=>{ 
+        closureVar2 = true;
+      }, canvas);
 
       // enter editing mode
       PubSub.publish("updateEditMode", true, canvas);
@@ -614,10 +631,13 @@ describe( "Class MapCanvas", () => {
       (newPos.y).should.be.approximately(originalPos.y + 10, 4);
       // check callback fired
       closureVar.should.equal("called");
+      closureVar2.should.equal(true)
+      closureVar3.should.equal(true)
     });
     it("should allow users to drag edge edit control points", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
+      // test that we publish updateMapEdge
       PubSub.publish("updateEditMode", true, canvas);
       var cPoint = canvas.querySelector("circle.control");
 
@@ -627,9 +647,9 @@ describe( "Class MapCanvas", () => {
       // create mouse event for down
       var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
       // create mouse event for drag
-      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + 30, clientY: originalPos.y + 30, view: window })
       // create mouse event for up
-      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 10, clientY: originalPos.y + 10, view: window })
+      var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + 30, clientY: originalPos.y + 30, view: window })
       // fire down
       cPoint.dispatchEvent(downEvent);
       // fire drag
@@ -640,8 +660,8 @@ describe( "Class MapCanvas", () => {
       var cPoint = canvas.querySelector("circle.control");
       var newPos = cPoint.getBoundingClientRect()
       newPos = {x: newPos.x + 4, y: newPos.y + 4};
-      (newPos.x).should.approximately(originalPos.x + 10, 4);
-      (newPos.y).should.approximately(originalPos.y + 10, 4);
+      (newPos.x).should.approximately(originalPos.x + 30, 4);
+      (newPos.y).should.approximately(originalPos.y + 30, 4);
     });
     it("should persist a topology change when a user drags an editable edge control point", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -746,9 +766,9 @@ describe( "Class MapCanvas", () => {
       // toggle layers such that we have two layers with same-named nodes
       // select the control point we want to work on
       var cPoint = canvas.querySelector("circle.control.control-point-layer0");
-      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.connects-to-A");
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.cnxn-A");
       var beforeCoords1 = edgeABlayer1.getBoundingClientRect();
-      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.cnxn-A");
       var beforeCoords2 = edgeABlayer2.getBoundingClientRect();
       var originalPos = cPoint.getBoundingClientRect();
       // create mouse event for down
@@ -765,9 +785,9 @@ describe( "Class MapCanvas", () => {
       cPoint = canvas.querySelector("circle.control");
       cPoint.dispatchEvent(upEvent);
       // select attached edges after, record positions
-      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.connects-to-A");
+      var edgeABlayer1 = canvas.querySelector(".edge-az.l0.cnxn-A");
       var afterCoords1 = edgeABlayer1.getBoundingClientRect();
-      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.connects-to-A");
+      var edgeABlayer2 = canvas.querySelector(".edge-az.l1.cnxn-A");
       var afterCoords2 = edgeABlayer2.getBoundingClientRect();
       // positions for attached edges should have changed
       beforeCoords1.x.should.not.equal(afterCoords1.x);
@@ -926,8 +946,8 @@ describe( "Class MapCanvas", () => {
         },
       ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
-      var edgeLZ = canvas.querySelector(".connects-to-Z.connects-to-L")
-      var edgeAZ = canvas.querySelector(".connects-to-Z.connects-to-A")
+      var edgeLZ = canvas.querySelector(".cnxn-Z.cnxn-L")
+      var edgeAZ = canvas.querySelector(".cnxn-Z.cnxn-A")
 
       var closureVar = "";
       PubSub.subscribe("showTooltip", (value)=>{ closureVar = value.text; }, canvas);
@@ -1168,6 +1188,7 @@ describe( "Class MapCanvas", () => {
     })
     it("should have a node editing form that persists values between edits", ()=>{
         var canvas = document.querySelector("esnet-map-canvas");
+        var closureVar = false;
         PubSub.publish("updateEditMode", true, canvas);
         var add_node = canvas.editingInterface.shadow.querySelector("#add_node");
         var mouseDown = new MouseEvent('mousedown', { bubbles: true, view: window });
@@ -1185,6 +1206,9 @@ describe( "Class MapCanvas", () => {
         var nodeNameInput = canvas.editingInterface.shadow.querySelector("#node_name");
         nodeNameInput.value.should.equal("ABCD");
         nodeNameInput.getAttribute("value").should.equal("ABCD");
+        var createNode = canvas.editingInterface.shadow.querySelector("#create_node");
+        createNode.dispatchEvent(mouseDown);
+        createNode.dispatchEvent(mouseUp);
     })
     it("should show tooltips that render inside the DOM element when the sidebar is disabled", ()=>{
         var canvas = document.querySelector("esnet-map-canvas");
@@ -1329,7 +1353,7 @@ describe( "Class MapCanvas", () => {
       var mouseUpEvent = new MouseEvent('mouseup', { bubbles: true, clientX: 200, clientY: 200, view: window });
       // get position of edges of that node
 
-      var edgeClassName = `.connects-to-A`;
+      var edgeClassName = `.cnxn-A`;
       var edge = document.querySelector(edgeClassName);
       var edgeLocation = edge.getBoundingClientRect();
       
