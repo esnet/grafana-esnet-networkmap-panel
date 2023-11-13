@@ -10,7 +10,7 @@ addons:
       - google-chrome-stable
 
 node_js:
-- 'lts/*'
+- '18'
 
 cache: 
   yarn: true
