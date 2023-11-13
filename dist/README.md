@@ -1,5 +1,7 @@
 [![Build Status](https://api.travis-ci.com/esnet/grafana-esnet-networkmap-panel.svg?branch=main)](https://app.travis-ci.com/github/esnet/grafana-esnet-networkmap-panel)
 
+![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
+
 # Network Map Panel
 
 This panel displays a network topology.
@@ -7,6 +9,13 @@ This panel displays a network topology.
 The topology can be either geographically referenced against a geographic tileset, or purely logical.
 
 The plugin will plot traffic information on the network topology, showing bi-directional traffic flow between nodes.
+
+## Dashboard JSON
+
+The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:
+
+[Dashboard JSON Snippet](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/demonstration/dashboard.json)
+
 
 
 ## Introductory Tutorial
