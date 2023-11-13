@@ -1207,7 +1207,6 @@ describe( "Class MapCanvas", () => {
         nodeNameInput.value.should.equal("ABCD");
         nodeNameInput.getAttribute("value").should.equal("ABCD");
         var createNode = canvas.editingInterface.shadow.querySelector("#create_node");
-        console.log(createNode);
         createNode.dispatchEvent(mouseDown);
         createNode.dispatchEvent(mouseUp);
     })

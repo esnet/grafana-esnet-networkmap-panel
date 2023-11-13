@@ -190,7 +190,6 @@ function renderEdges(g, data, ref, layerId, options) {
       var connections = " cnxn-"+name.split("--").join(" cnxn-");
       if(d.meta?.endpoint_identifiers?.pops && d.meta.endpoint_identifiers.pops?.length){
         connections += " cnxn-"+d.meta.endpoint_identifiers.pops.join(" cnxn-");
-        console.log(connections);
       }
       var layerClass = ' l'+layerId;
       return 'edge edge-za edge-za-' + name + connections + layerClass;
