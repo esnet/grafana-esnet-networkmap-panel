@@ -410,8 +410,9 @@ function renderNodeControl(g, data, ref, layerId){
     }
     var dragStart = PubSub.last("dragStarted", ref.svg.node());
     PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, ref.svg.node());
-    PubSub.publish("snapEdges", {"node": d, "layer": layerId}, ref.svg.node());
     PubSub.clearLast("dragStarted", ref.svg.node());
+    doEdgeSnap(d, layerId, ref.mapCanvas, true);
+    ref.update();
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
         ref.data[0],
@@ -833,7 +834,7 @@ export class EsMap {
     this.lastInteractedType = null; // "nodes" or "edges"
 
     PubSub.subscribe("snapEdges", (data)=>{
-      doEdgeSnap(data.node, data.layer, this.mapCanvas, true)
+      doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
     }, this.mapCanvas)
 
     if(!this.mapCanvas.options.showSidebar){

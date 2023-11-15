@@ -1058,8 +1058,8 @@ describe( "Class MapCanvas", () => {
       cPoint.dispatchEvent(downEvent);
       cPoint.dispatchEvent(dragEvent);
       cPoint = canvas.querySelector("circle.control");
-      // drag a node with weird name. 
       cPoint.dispatchEvent(upEvent);
+      // drag a node with weird name. 
       var edgeAB = canvas.querySelector(".edge-az");
       var afterCoords = edgeAB.getBoundingClientRect();
       beforeCoords.x.should.not.equal(afterCoords.x);
