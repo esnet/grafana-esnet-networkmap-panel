@@ -322,7 +322,7 @@ function addControlPoint(evt, obj, ref, layerId) {
   }
 }
 
-function doEdgeSnap(nodeData, layerId, mapCanvas){
+function doEdgeSnap(nodeData, layerId, mapCanvas, sendSignal){
     var mapId = "map-" + mapCanvas.instanceId;
     var layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
     var ll = {};
@@ -335,7 +335,10 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
     d3.selectAll(selector)
         // for each edge that we select:
         .attr('d', function (d) {
-          var oldEdgeData = JSON.parse(JSON.stringify(d));
+          var oldEdgeData = null;
+          if(!!sendSignal){
+            oldEdgeData = JSON.parse(JSON.stringify(d));
+          }
           // if we are manipulating the "A" end
           // the index of the point we want is 0
           var idx = 0;
@@ -364,7 +367,9 @@ function doEdgeSnap(nodeData, layerId, mapCanvas){
               d.coordinates[i][1] = d.coordinates[end][1] + lngDelta * i;
             }
           }
-          PubSub.publish("updateMapEdge", {"layer": layerId, "edge": d, "oldEdge": oldEdgeData }, mapCanvas);
+          if(!!sendSignal){
+            PubSub.publish("updateMapEdge", {"layer": layerId, "edge": d, "oldEdge": oldEdgeData }, mapCanvas);
+          }
         })
 }
 
@@ -389,7 +394,7 @@ function renderNodeControl(g, data, ref, layerId){
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     nodeData['coordinate'][0] = ll.lat;
     nodeData['coordinate'][1] = ll.lng;
-    doEdgeSnap(nodeData, layerId, ref.mapCanvas);
+    doEdgeSnap(nodeData, layerId, ref.mapCanvas, false);
     //--- rerender stuff
     ref.update();
     setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
@@ -404,7 +409,8 @@ function renderNodeControl(g, data, ref, layerId){
       return
     }
     var dragStart = PubSub.last("dragStarted", ref.svg.node());
-    PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, this);
+    PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, ref.svg.node());
+    PubSub.publish("snapEdges", {"node": d, "layer": layerId}, ref.svg.node());
     PubSub.clearLast("dragStarted", ref.svg.node());
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
@@ -827,7 +833,7 @@ export class EsMap {
     this.lastInteractedType = null; // "nodes" or "edges"
 
     PubSub.subscribe("snapEdges", (data)=>{
-      doEdgeSnap(data.node, data.layer, this.mapCanvas)
+      doEdgeSnap(data.node, data.layer, this.mapCanvas, true)
     }, this.mapCanvas)
 
     if(!this.mapCanvas.options.showSidebar){
