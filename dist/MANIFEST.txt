@@ -1,0 +1,40 @@
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA512
+
+{
+  "manifestVersion": "2.0.0",
+  "signatureType": "private",
+  "signedByOrg": "jkafaderesnet",
+  "signedByOrgName": "jkafaderesnet",
+  "rootUrls": [
+    "https://dashboard.stardust.es.net/",
+    "https://gf.gc1.dev-stage.stardust.es.net/"
+  ],
+  "plugin": "esnet-networkmap-panel",
+  "version": "2.0.3",
+  "time": 1700012718455,
+  "keyId": "7e4d0c6a708866e7",
+  "files": {
+    "LICENSE": "96b9ca9fdc37ad5ecf0e279997062f408283b247d5b47b6b741cd33965853796",
+    "CHANGELOG.md": "f039df40cb9e6dffcd8eb814227ba03e47f686d447bfb45e5eae8bdf83fa9465",
+    "module.js.LICENSE.txt": "95efede2671f7967592b43ec0b831fb12fd69783319585840b25f3f9d2076392",
+    "module.js.map": "cfa7ca3481f4e5b2eb46d5588fa4c0fe5da78269a391d0cd6c2402a75896ee57",
+    "plugin.json": "597893d3060b42b84f076a04a868a27a025475a504cd02a2abaada9ca85ff83c",
+    "README.md": "843f8e0b057835665a6a89d335631278916288e4fac5f3744f1dd5a06a832c3b",
+    "img/networkmap.png": "e1f5593b889e93119d196ed96724b35b1490ec6cbdbf796f2c36734e7344fb0e",
+    "img/logo.svg": "47c8055314f360d07a0848d018bd1853785f5c4ce1de4ded37d35d1bb4d6df51",
+    "module.js": "a4275ade809d575fcbfff2b9d7c95e880f25cecaf859b72d7f67010f1322e606"
+  }
+}
+-----BEGIN PGP SIGNATURE-----
+Version: OpenPGP.js v4.10.10
+Comment: https://openpgpjs.org
+
+wrgEARMKAAYFAmVUIq4AIQkQfk0ManCIZucWIQTzOyW2kQdOhGNlcPN+TQxq
+cIhm56P7AgkBu8tNXgVlUNwuMrSqLkz8nLVZcpnCjRvCEykMibKJ0Jfc7Sjq
+3mULIjHwIZ8Lh18FY4zJrsUy1yzJo7r8D8fDFEoCCLJyBQ0Zr5mizCocHckn
+6MbNrSXhHm5pkKowEOOlW8svcMk503F8prKddo39iQxApGDNDWZNKcc1rSh9
+1n7zLZRm
+=kT2Y
+-----END PGP SIGNATURE-----
