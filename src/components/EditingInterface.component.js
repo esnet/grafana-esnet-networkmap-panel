@@ -308,10 +308,10 @@ class EditingInterface extends BindableHTMLElement {
         var topology = this.mapCanvas.topology;
         var deleted = topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
         if(this._selectedType == "edges"){
-            PubSub.publish("deleteMapEdge", {"edge": deleted[0]}, this)
+            PubSub.publish("deleteMapEdge", {"edge": deleted[0], "layer":this._selectedLayer}, this)
         }
         if(this._selectedType == "nodes"){
-            PubSub.publish("deleteMapNode", {"node": deleted[0]}, this)
+            PubSub.publish("deleteMapNode", {"node": deleted[0], "layer":this._selectedLayer}, this)
         }
         PubSub.publish("updateTopology", topology, this);
         PubSub.publish("updateMapTopology", topology, this);
