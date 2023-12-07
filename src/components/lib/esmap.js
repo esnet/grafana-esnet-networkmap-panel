@@ -392,6 +392,9 @@ function renderNodeControl(g, data, ref, layerId){
     PubSub.publish("dragStarted", { event: evt, node: {...nodeData} }, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
+    if(!nodeData['coordinate']){
+      nodeData['coordinate'] = [];
+    }
     nodeData['coordinate'][0] = ll.lat;
     nodeData['coordinate'][1] = ll.lng;
     doEdgeSnap(nodeData, layerId, ref.mapCanvas, false);
@@ -485,6 +488,7 @@ function renderNodeControl(g, data, ref, layerId){
   PubSub.subscribe("setEditSelection", setNodeEditSelection, ref.svg.node());
 
   g.selectAll('circle').attr('transform', function (d) {
+    if(!d.coordinate) return null;
     var ll = L.latLng(d.coordinate);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
     return 'translate(' + pt.x + ',' + pt.y + ')';
@@ -736,6 +740,7 @@ function renderNodes(g, data, ref, layerId) {
 
 
   g.selectAll('g.node').attr('transform', function (d) {
+    if(!d.coordinate) return null;
     var ll = L.latLng(d.coordinate);
     var pt = ref.leafletMap.latLngToLayerPoint(ll);
     return 'translate(' + pt.x + ',' + pt.y + ')';
