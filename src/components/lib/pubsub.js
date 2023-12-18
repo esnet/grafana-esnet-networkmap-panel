@@ -186,10 +186,3 @@ export function getInstance() {
 }
 
 export var PubSub = getInstance();
-
-try {
-    module.exports.PubSub = getInstance();
-    exports.PubSub = getInstance();
-} catch (e) {
-    console.debug(e)
-}

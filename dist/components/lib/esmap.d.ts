@@ -4,6 +4,7 @@ export function bearingAngle(src: any, dest: any): number;
 export function angle(cx: any, cy: any, ex: any, ey: any): number;
 export function getBisectAngle(pointA: any, pointB: any, pointC: any): number;
 export function rotate(cx: any, cy: any, x: any, y: any, angle: any, anticlock_wise?: boolean): any[];
+export function getTooltipRenderText(edge: IEdge, labels: ILabels | undefined, isAZ: boolean): any;
 export class EsMap {
     constructor(mapCanvas: any, svg: any, div: any, curve: any);
     mapCanvas: any;
