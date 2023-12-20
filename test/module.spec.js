@@ -1004,7 +1004,7 @@ describe( "Class MapCanvas", () => {
           <span>no data</span>
         </div>
         <div class="flow-direction-tooltip false">
-          <span>A</span>
+          <span>Z</span>
           <span>
             <svg xmlns="http://www.w3.org/2000/svg"
               width="24"
@@ -1014,13 +1014,13 @@ describe( "Class MapCanvas", () => {
               stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="lucide lucide-arrow-left"
+              class="lucide lucide-arrow-right"
             >
-              <path d="m12 19-7-7 7-7"/>
-              <path d="M19 12H5"/>
+              <path d="M5 12h14"/>
+              <path d="m12 5 7 7-7 7"/>
             </svg>
           </span>
-          <span>Z</span>
+          <span>A</span>
         </div>
         <div class="flow-amount-element false">
           <span>

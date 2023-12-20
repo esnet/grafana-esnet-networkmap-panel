@@ -151,7 +151,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[srcKey]}---${row[dstKey]}`,
+          azName: `${row[srcKey]}--${row[dstKey]}`,
           inboundValue: row[inboundKey],
           outboundValue: row[outboundKey],
         });
@@ -160,7 +160,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[dstKey]}---${row[srcKey]}`, // assemble the edge name backwards
+          azName: `${row[dstKey]}--${row[srcKey]}`, // assemble the edge name backwards
           // this will cause us to have a situation where we match on the reverse of the
           // normal edge. our outbound key becomes the inbound value for the z-a edge
           inboundValue: row[outboundKey],
@@ -205,8 +205,8 @@ export function parseData(data, mapData, colors, fields, layer) {
     // first, color all edges with their default "dead link" values
     edge.azColor = colors.defaultColor;
     edge.zaColor = colors.defaultColor;
-    edge.AZdisplayValue = 'N/A';
-    edge.ZAdisplayValue = 'N/A';
+    edge.AZdisplayValue = 'no data';
+    edge.ZAdisplayValue = 'no data';
     edge.AZvalue += null;
     edge.ZAvalue += null;
   });
@@ -230,35 +230,35 @@ export function parseData(data, mapData, colors, fields, layer) {
     // create names
     edge.nodeA = getDisplayName(nodeA);
     edge.nodeZ = getDisplayName(nodeZ);
-    edge.AZname = `${nodeA}---${nodeZ}`;
-    edge.ZAname = `${nodeZ}---${nodeA}`;
+    edge.AZname = `${nodeA}--${nodeZ}`;
+    edge.ZAname = `${nodeZ}--${nodeA}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.AZname);
     let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
 
     if (matchAZ) {
       // if we get an a-z match, assign inbound and outbound "normally"
-      edge.AZvalue = matchAZ.inboundValue;
-      edge.azColor = valueField[0].display(edge.AZvalue).color;
-      let AZdisplay = valueField[0].display(edge.AZvalue);
-      edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
+      edge.azValue = matchAZ.inboundValue;
+      let azDisplay = valueField[0].display(edge.azValue);
+      edge.azColor = azDisplay.color;
+      edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
       if (matchAZ.outboundValue) {
-        edge.ZAvalue = matchAZ.outboundValue;
-        edge.zaColor = valueField[0].display(edge.ZAvalue).color;
-        let ZAdisplay = valueField[0].display(edge.ZAvalue);
-        edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+        edge.zaValue = matchAZ.outboundValue;
+        let zaDisplay = valueField[0].display(edge.zaValue);
+        edge.zaColor = zaDisplay.color;
+        edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
       }
     }
     if (matchZA) {
       // if we get a z-a match, flip-flop inbound and outbound
-      edge.ZAvalue = matchZA.inboundValue;
-      edge.zaColor = valueField[0].display(edge.ZAvalue).color;
-      let ZAdisplay = valueField[0].display(edge.ZAvalue);
-      edge.ZAdisplayValue = `${ZAdisplay.text} ${ZAdisplay.suffix}`;
+      edge.zaValue = matchZA.inboundValue;
+      edge.zaColor = valueField[0].display(edge.zaValue).color;
+      let zaDisplay = valueField[0].display(edge.zaValue);
+      edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
       if (matchZA.outboundValue) {
-        edge.AZvalue = matchZA.outboundValue;
-        edge.azColor = valueField[0].display(edge.AZvalue).color;
-        let AZdisplay = valueField[0].display(edge.AZvalue);
-        edge.AZdisplayValue = `${AZdisplay.text} ${AZdisplay.suffix}`;
+        edge.azValue = matchZA.outboundValue;
+        edge.azColor = valueField[0].display(edge.azValue).color;
+        let azDisplay = valueField[0].display(edge.azValue);
+        edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
       }
     }
   });

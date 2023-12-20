@@ -89,18 +89,18 @@ export const getTooltipRenderText = (edge, labels, isAZ) => {
       </div>
       <div class="flow-amount-element ${isAZ && "bold"}">
         <span>${SVG.gauge}</span>
-        <span>${edge.AZdisplayValue || "no data"}</span>
+        <span>${edge.azDisplayValue || "no data"}</span>
       </div>
     `;
     const zaTips = `
       <div class="flow-direction-tooltip ${!isAZ && "bold"}">
-        <span>${edge.nodeA}</span>
-        <span>${SVG.arrowLeft}</span>
         <span>${edge.nodeZ}</span>
+        <span>${SVG.arrowRight}</span>
+        <span>${edge.nodeA}</span>
       </div>
       <div class="flow-amount-element ${!isAZ && "bold"}">
         <span>${SVG.gauge}</span>
-        <span>${edge.ZAdisplayValue || "no data"}</span>
+        <span>${edge.zaDisplayValue || "no data"}</span>
       </div>
     `;
     if (isAZ) {
@@ -152,7 +152,7 @@ function renderEdges(g, data, ref, layerId, options) {
       "dst": options.layers[layerId]["dstFieldLabel"] ? options.layers[layerId]["dstFieldLabel"] : "To:",
       "data": options.layers[layerId]["dataFieldLabel"] ? options.layers[layerId]["dataFieldLabel"] : "Volume:",
     }
-    const azVolume = d.AZdisplayValue;
+    const azVolume = d.azDisplayValue;
     const zaVolume = reverseEdge;
 
     var text = getTooltipRenderText(d, labels, isAZ).trim();
