@@ -125,6 +125,10 @@ export class MapPanel extends Component<Props> {
       'enableEditing',
       'enableNodeAnimation',
       'enableEdgeAnimation',
+      'enableCustomNodeTooltip',
+      'enableCustomEdgeTooltip',
+      'customNodeTooltip',
+      'customEdgeTooltip',
 
       'resolvedLat',
       'resolvedLng',

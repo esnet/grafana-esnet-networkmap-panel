@@ -4,7 +4,7 @@ import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
-import { SVG } from "./iconography.js";
+import { defaultCustomEdgeTooltip, defaultEdgeTooltip } from './../../options.js';
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -67,54 +67,6 @@ function sanitizeName(name){
   return sanitized;
 }
 
-/**
- * Returns the markup to render for a tooltip given edge.
- *
- * @param {IEdge} edge                    The data for an edge
- * @param {ILabels|undefined} labels      Optional. The data for a label. This is only utitlized if template is
- *                                        defined under the edge's meta property.
- * @param {boolean} isAZ                  Set to true to return markup that will apply a bold style to the AZ directional flow text,
- *                                        otherwise the ZA direction flow will be highlighted.
- * @returns
- */
-export const getTooltipRenderText = (edge, labels, isAZ) => {
-  if (edge.meta && edge.meta.template) {
-    return renderTemplate(edge.meta.template, {"d": edge, "self": edge, "labels": labels });
-  } else {
-    const azTips = `
-      <div class="flow-direction-tooltip ${isAZ && "bold"}">
-        <span>${edge.nodeA}</span>
-        <span>${SVG.arrowRight}</span>
-        <span>${edge.nodeZ}</span>
-      </div>
-      <div class="flow-amount-element ${isAZ && "bold"}">
-        <span>${SVG.gauge}</span>
-        <span>${edge.azDisplayValue || "no data"}</span>
-      </div>
-    `;
-    const zaTips = `
-      <div class="flow-direction-tooltip ${!isAZ && "bold"}">
-        <span>${edge.nodeZ}</span>
-        <span>${SVG.arrowRight}</span>
-        <span>${edge.nodeA}</span>
-      </div>
-      <div class="flow-amount-element ${!isAZ && "bold"}">
-        <span>${SVG.gauge}</span>
-        <span>${edge.zaDisplayValue || "no data"}</span>
-      </div>
-    `;
-    if (isAZ) {
-      return (azTips + zaTips)
-        .replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <");
-    } else {
-      return (zaTips + azTips)
-        .replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <");
-    }
-  }
-};
-
 function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
   const edgeWidth = ref.options.layers[layerId].edgeWidth;
@@ -137,7 +89,7 @@ function renderEdges(g, data, ref, layerId, options) {
     const isAZ = thisEdge.classed("edge-az");
     var color = d.azColor ? d.azColor : defaultEdgeColor;
     if(!isAZ){
-      color = d.zaColor ? d.zaColor : defaultEdgeColor
+      color = d.zaColor ? d.zaColor : defaultEdgeColor;
     }
 
     if(!thisEdge.classed('animated-edge')){
@@ -147,15 +99,17 @@ function renderEdges(g, data, ref, layerId, options) {
 
     PubSub.publish("hideTooltip", null, ref.svg.node());
 
-    var labels = {
-      "src": options.layers[layerId]["srcFieldLabel"] ? options.layers[layerId]["srcFieldLabel"] : "From:",
-      "dst": options.layers[layerId]["dstFieldLabel"] ? options.layers[layerId]["dstFieldLabel"] : "To:",
-      "data": options.layers[layerId]["dataFieldLabel"] ? options.layers[layerId]["dataFieldLabel"] : "Volume:",
-    }
-    const azVolume = d.azDisplayValue;
-    const zaVolume = reverseEdge;
+    var template = ref.options.enableCustomEdgeTooltip ? ref.options.customEdgeTooltip : defaultEdgeTooltip;
 
-    var text = getTooltipRenderText(d, labels, isAZ).trim();
+    let renderData = {
+      forward: { from: d.nodeA, to: d.nodeZ, dataPoint: d.azDisplayValue },
+      reverse: { from: d.nodeZ, to: d.nodeA, dataPoint: d.zaDisplayValue }
+    };
+
+    var text = renderTemplate(template, renderData)
+      .replaceAll(/\s+/g, " ")
+      .replaceAll("><", "> <")
+      .trim();
 
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
@@ -490,7 +444,7 @@ function renderNodeControl(g, data, ref, layerId){
     .enter()
     .append('circle')
     .attr('r', 6)
-    .attr('class', function(d){ 
+    .attr('class', function(d){
       return `control controlPoint control-point-layer${layerId} control-point-for-node-${sanitizeName(d.name)}`; })
     .attr("data-layer", layerId)
     .attr("data-index", function(d, idx){ return idx; })
@@ -1113,7 +1067,7 @@ export class EsMap {
     var layerId = 0;
     this.data.forEach((data)=>{
       this.updateCoordinates(data, layerId);
-      layerId++;      
+      layerId++;
     })
     var layerId = 0;
     this.mapLayers.forEach((g)=>{

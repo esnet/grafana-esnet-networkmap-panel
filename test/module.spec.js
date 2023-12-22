@@ -891,7 +891,7 @@ describe( "Class MapCanvas", () => {
       nodeAlayer1.getAttribute("class").should.not.contain("animated-node");
 
     })
-    it("should allow for edge templates from the topology, as well as specific overrides for field labels", () => {
+    it("should allow for icon and non-icon edge templates from the topology", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       // create mouseover for edge with template
       var newTopology = [
@@ -946,8 +946,8 @@ describe( "Class MapCanvas", () => {
         },
       ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
-      var edgeLZ = canvas.querySelector(".cnxn-Z.cnxn-L")
-      var edgeAZ = canvas.querySelector(".cnxn-Z.cnxn-A")
+      var edgeZL = canvas.querySelector(".cnxn-Z.cnxn-L");
+      var edgeAZ = canvas.querySelector(".cnxn-A.cnxn-Z");
 
       var closureVar = "";
       var closureDiv = document.createElement('div');
@@ -960,15 +960,13 @@ describe( "Class MapCanvas", () => {
       }, canvas);
       // fire mouseover
       let mouseoverEvent = new Event('mouseover', { bubbles: true });
-      edgeLZ.dispatchEvent(mouseoverEvent);
+      edgeZL.dispatchEvent(mouseoverEvent);
       // check tooltip text
-      "From: ABCDEF To: GHIJKL".should.equal(closureVar);
-
-      edgeAZ.dispatchEvent(mouseoverEvent);
-      const testFlowSVGPlusMarkupString = `
-        <div class="flow-direction-tooltip bold">
-          <span>A</span>
-          <span>
+      const testLZFlowIconMarkupStr = `
+        <div class="flow-tooltip">
+          <strong>
+            Z → L
+            <br />
             <svg xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -977,16 +975,16 @@ describe( "Class MapCanvas", () => {
               stroke="currentColor"
               stroke-linecap="round"
               stroke-linejoin="round"
-              class="lucide lucide-arrow-right"
+              class="lucide lucide-gauge"
             >
-              <path d="M5 12h14"/>
-              <path d="m12 5 7 7-7 7"/>
+              <path d="m12 14 4-4"/> <path d="M3.34 19a10 10 0 1 1 17.32 0"/>
             </svg>
-          </span>
-          <span>Z</span>
+          </strong>
         </div>
-        <div class="flow-amount-element bold">
+        <div class="flow-tooltip">
           <span>
+            L → Z
+            <br />
             <svg xmlns="http://www.w3.org/2000/svg"
               width="24"
               height="24"
@@ -1001,80 +999,39 @@ describe( "Class MapCanvas", () => {
               <path d="M3.34 19a10 10 0 1 1 17.32 0"/>
             </svg>
           </span>
-          <span>no data</span>
-        </div>
-        <div class="flow-direction-tooltip false">
-          <span>Z</span>
-          <span>
-            <svg xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-arrow-right"
-            >
-              <path d="M5 12h14"/>
-              <path d="m12 5 7 7-7 7"/>
-            </svg>
-          </span>
-          <span>A</span>
-        </div>
-        <div class="flow-amount-element false">
-          <span>
-            <svg xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-gauge"
-              >
-                  <path d="m12 14 4-4"/>
-                  <path d="M3.34 19a10 10 0 1 1 17.32 0"/>
-              </svg>
-            </span>
-          <span>no data</span>
-        </div>
-      `.trim();
-      let expectedString = testFlowSVGPlusMarkupString;
-      let testDiv = document.createElement('div');
-      testDiv.innerHTML = expectedString
-        .replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <");
-      // check tooltip text for edge with no template
-      console.log("test 2/4: tooltip text for edge with no template")
-      testDiv.innerHTML.should.equal(closureDiv.innerHTML);
-      // set options for field labels
+          </div>
+        `.replaceAll(/\s+/g, " ")
+        .replaceAll("><", "> <")
+        .trim();
+      console.log("Test 1/4: tooltip text for edge with default icon template");
+      testLZFlowIconMarkupStr.should.equal(closureVar);
+
       var newOptions = canvas.options;
-      newOptions.layers[0]['srcFieldLabel'] = 'Source:';
-      newOptions.layers[0]['dstFieldLabel'] = 'Dest:';
-      newOptions.layers[0]['dataFieldLabel'] = 'Data:';
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: [
-        'layers[0].srcFieldLabel',
-        'layers[0].dstFieldLabel',
-        'layers[0].dataFieldLabel',
-      ]}, canvas);
-      // fire mouseover for edge with no template
-      edgeLZ.dispatchEvent(mouseoverEvent);
-      // check tooltip text
-      "Source: ABCDEF Dest: GHIJKL".should.equal(closureVar);
-      // create mouseover for edge with a template
-      // fire mouseover
+      newOptions.enableCustomEdgeTooltip = true;
+      PubSub.publish("updateMapOptions", { options: newOptions, changed: [
+        "enableCustomEdgeTooltip"
+      ]});
       edgeAZ.dispatchEvent(mouseoverEvent);
-      // check tooltip text
-      expectedString = testFlowSVGPlusMarkupString;
-      testDiv.innerHTML = expectedString
-        .replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <");
-      // check tooltip text for edge with no template
-      console.log("test 4/4: tooltip text for edge w/o template");
-      testDiv.innerHTML.should.equal(closureDiv.innerHTML);
-    })
+      const testAZFlowMarkupStr = `
+        <div class="flow-tooltip">
+          <strong>
+            A → Z
+            <br />
+            Rate:
+          </strong>
+        </div>
+        <div class="flow-tooltip">
+          <span>
+            Z → A
+            <br />
+            Rate:
+          </span>
+        </div>
+      `.replaceAll(/\s+/g, " ")
+        .replaceAll("><", "> <")
+        .trim();
+      testAZFlowMarkupStr.should.equal(closureVar);
+    });
     it("should santize names with non-alphanum characters", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       var newTopology = [

@@ -70,6 +70,7 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.subscribe('newMap', this.newMap, this);
     PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
+    PubSub.subscribe('toggleTooltipLabelType', this.toggleTooltipLabelType, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
@@ -256,6 +257,7 @@ export class MapCanvas extends BindableHTMLElement {
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
     }
+
     if( wasChanged('showLegend', changed) || 
         wasChanged('customLegend', changed) || 
         wasChanged('customLegendValue', changed) || 
@@ -306,6 +308,7 @@ export class MapCanvas extends BindableHTMLElement {
     }
     this.sideBar && this.sideBar.render();
   }
+
   updateMapTopology(newTopology){
     this._topology = newTopology;
     if(this.editingInterface){
@@ -360,7 +363,23 @@ export class MapCanvas extends BindableHTMLElement {
     this._updateOptions && this._updateOptions(newValue);
   }
 
-  toggleLayer(layerData){
+  /**
+   * Updates the canvas to display tooltips with an updated toggle event to render an icon or text.
+   *
+   * @param {{isIcon: boolean, legend: string}} labelTypeData
+   */
+  toggleTooltipLabelType (labelTypeData) {
+    var newValue = this._options;
+    if (newValue.labelTypeData === undefined) {
+      newValue.labelTypeData = labelTypeData;
+    } else {
+      newValue.labelTypeData = { ...newValue.labelTypeData, ...labelTypeData};
+    }
+    this.map.renderMapLayers();
+    this._updateOptions && this._updateOptions(newValue);
+  }
+
+  toggleLayer(layerData) {
     var newValue = this._options;
     if(newValue.layers && newValue.layers[layerData.layer]){
       newValue.layers[layerData.layer].visible = layerData.visible;
@@ -370,6 +389,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.map.renderMapLayers();
     this._updateOptions && this._updateOptions(newValue);
   }
+
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options?.viewport?.center?.lat, this.startlng || this._options?.viewport?.center?.lng];

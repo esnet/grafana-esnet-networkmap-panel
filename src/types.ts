@@ -41,6 +41,10 @@ export interface MapOptions {
   legendPosition: string;
   legendDefaultBehavior: string;
   zIndexBase: number;
+  labelTypeData: {
+    isIcon: boolean;
+    legend: string;
+  }
 
   viewport: {
     top?: number;
