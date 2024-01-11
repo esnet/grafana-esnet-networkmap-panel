@@ -10,6 +10,9 @@ yarn-error.log*
 
 node_modules/
 
+# local yarn
+.yarn
+
 # Runtime data
 pids
 *.pid
@@ -33,3 +36,6 @@ e2e-results/
 .idea
 .vscode
 .DS_store
+
+# Playwright
+playwright*

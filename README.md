@@ -10,13 +10,17 @@ The topology can be either geographically referenced against a geographic tilese
 
 The plugin will plot traffic information on the network topology, showing bi-directional traffic flow between nodes.
 
+## Table of Contents
+
+[Dashboard JSON](#Dashboard-JSON)
+[Introductory Tutorial](#Introductory-Tutorial)
+[Testing Requirements](#Testing-Requirements)
+
 ## Dashboard JSON
 
 The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:
 
 [Dashboard JSON Snippet](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/demonstration/dashboard.json)
-
-
 
 ## Introductory Tutorial
 
@@ -336,4 +340,27 @@ You should now be looking at the main dashboard view. Let's add another panel:
 
 You should now have a dashboard that visualizes a point-in-time snapshot of your network traffic, along with a line graph that shows the network traffic over the the selected grafana timerange.
 
+## Testing Requirements
 
+Jest and Playwright are used to implement unit and integration testing for the plugin, following as closely as needed to
+the implementation utilized by Grafana's plugin-e2e package.
+
+Tests are run via Yarn 4.0.2 and above. If you installed Yarn through a package manager such as Chocolately (Windows),
+APT (Linux), or Brew (Mac), it may not be the latest version and should be updated by running the following from the
+terminal in the project directory:
+
+```
+$ yarn policies set-version stable
+```
+
+This will install the current stable release of Yarn _for the plugin_, and should permit your system's installed version
+to continue in use in all other places. This is the preferred way to install and upgrade Yarn on a per project basis.
+
+To run the tests:
+
+```
+$ yarn e2e
+```
+
+Integration tests are written with the assumption that Google Chrome is installed. Reconfigure in the playwright.config.ts
+file if a different browser is preferred. Test suite files (*.spec) are included in the e2e folder.
