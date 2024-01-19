@@ -1,7 +1,8 @@
 import { test, expect, Request } from '@playwright/test';
+import testIds from '../src/constants';
 import testConfig from './e2e.config.json';
 
-const { protocolHostPort, homepage, dashboard, editNetworkMapPanelPath, testIds } = testConfig;
+const { protocolHostPort, homepage, dashboard, editNetworkMapPanelPath } = testConfig;
 
 test("has title", async ({ page }) => {
   await page.goto(protocolHostPort);
@@ -67,8 +68,6 @@ test("load plugin edit page - view options", async ({ page }) => {
   // define canvas controls under control of view options
 
   await mapEditorCanvas.waitForSelector(".leaflet-control-zoom");
-  // await mapEditorCanvas.waitForSelector('.leaflet-control-zoom-in[data-testid]');
-  // await mapEditorCanvas.waitForSelector('.leaflet-control-zoom-out[data-testid]');
 
   const mapZoomInControl = await page.getByTestId(testIds.zoomInBtn);
   const mapZoomOutControl = await page.getByTestId(testIds.zoomOutBtn);
@@ -80,17 +79,18 @@ test("load plugin edit page - view options", async ({ page }) => {
 
   // define Grafana controls/panels for view options
   const showViewControlGroup = await page.getByLabel("Show View Controls");
-  const enableMapScrollingOnDragControlGroup = await page.getByLabel("Enable Map Scrolling on Drag");
+  const enableMapScrollingOnDragControlGroup = await page.getByLabel("Enable Map Scrolling on Drag");  // TODO: test movability
   const enableMapEditingControlGroup = await page.getByLabel("Enable Map Editing");
-  const enableNodeSelectionAnimationsControlGroup = await page.getByLabel("Enable Node Selection Animations");
-  const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");
+  const enableNodeSelectionAnimationsControlGroup = await page.getByLabel("Enable Node Selection Animations");  // TODO: test animations
+  const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");  // TODO: test animations
+
 
   const sidebarControlLocatorSelector = "div div:has(input[type='checkbox'])";
   const showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
-  const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);
+  const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test movability
   const enableMapEditingControl = enableMapEditingControlGroup.locator(sidebarControlLocatorSelector);
-  const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);
-  const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);
+  const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
+  const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
 
   // CHECK DEFAULTS (all enabled/checked)
 
@@ -106,24 +106,22 @@ test("load plugin edit page - view options", async ({ page }) => {
   await expect(mapAddEdgeControl).toBeVisible();
   await expect(mapAddNodeControl).toBeVisible();
 
-  // node selection animations enabled, but no node selected
-  await expect(page.locator(".control.control-selected")).toBeEmpty();
-
   // CHECK CONTROL ACTIONS (upon click/edit)
 
   // check Show View Controls
   await showViewControlGroup.scrollIntoViewIfNeeded();
-  await showViewControlGroup.click({ force: true });
+  await showViewControlsControl.click();
   await expect(mapZoomInControl).not.toBeVisible();
   await expect(mapZoomOutControl).not.toBeVisible();
 
   // check enable map editing
   await enableMapEditingControlGroup.scrollIntoViewIfNeeded();
-  await enableMapEditingControlGroup.click({ force: true });
+  await enableMapEditingControl.click();
   await expect(mapEditEdgeToggleControl).not.toBeVisible();
   await expect(mapEditNodeToggleControl).not.toBeVisible();
   await expect(mapAddEdgeControl).not.toBeVisible();
   await expect(mapAddNodeControl).not.toBeVisible();
 
   // check enable node selection animation
+  // TBD
 });

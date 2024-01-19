@@ -2,9 +2,7 @@ import * as pubsub from './lib/pubsub.js';
 import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
-import e2eConfig from '../../e2e/e2e.config.json'
-
-const { testIds } = e2eConfig;
+import testIds from '../constants.js'
 
 const LAVENDER = "rgb(202, 149, 229)";
 
@@ -510,7 +508,7 @@ class EditingInterface extends BindableHTMLElement {
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
-                <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${e2eConfig.testIds.map}">
+                <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${testIds.map}">
                   <form id='add_node_form'>
                     <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
                     <table>

@@ -2,15 +2,5 @@
     "dashboard": "network-map-test",
     "homepage": "/?orgId=1",
     "protocolHostPort": "http://localhost:3000",
-    "editNetworkMapPanelPath": "/d/Pd8s_eKIz/network-map-test?orgId=1&editPanel=4",
-    "testIds": {
-        "sidebar": "ff297192-4b73-5dea-aba2-d7a6d59d105d",
-        "map": "10e06a9d-1141-5c10-b94b-353f1e5218c2",
-        "zoomInBtn": "df207817-4d9f-54fd-b2fa-33c106ce8c9e",
-        "zoomOutBtn": "794dfeda-acb2-54b9-9bda-a78f5a747427",
-        "addEdgeBtn": "e5a92a95-5ee4-571c-a74b-2662212f8354",
-        "addNodeBtn": "5e9bd3f3-34b8-58f0-a02a-dc7524ec6ccd",
-        "editEdgeToggleBtn": "3e68d8aa-64f0-56da-9475-76fde8f69cb1",
-        "editNodeToggleBtn": "b69f6a1a-d519-5acc-854e-4bba279184dc"
-    }
+    "editNetworkMapPanelPath": "/d/Pd8s_eKIz/network-map-test?orgId=1&var-node=ALBQ&editPanel=4"
 }

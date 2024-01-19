@@ -18,5 +18,5 @@ export default class NetworkMap {
     renderMapLayers(): void;
     renderMap(): any;
 }
-import * as es from "./lib/esmap.js";
+import * as es from './lib/esmap.js';
 //# sourceMappingURL=NetworkMap.d.ts.map
