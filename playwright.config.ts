@@ -37,13 +37,21 @@ export default defineConfig({
       testMatch: /.*\.setup\.ts/
     },
     {
+      name: 'plugin',
+      testMatch: 'plugin.spec.ts',
+      use: {
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['setup']
+    },
+    {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],
         // Use prepared auth state.
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup']
+      dependencies: ['setup', 'plugin']
     },
 
     {
@@ -53,7 +61,7 @@ export default defineConfig({
         // Use prepared auth state.
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup']
+      dependencies: ['setup', 'plugin']
     },
 
     {
@@ -63,7 +71,7 @@ export default defineConfig({
         // Use prepared auth state.
         storageState: 'playwright/.auth/user.json',
       },
-      dependencies: ['setup']
+      dependencies: ['setup', 'plugin']
     },
     /* Test against mobile viewports. */
     // {

@@ -39,3 +39,5 @@ e2e-results/
 
 # Playwright
 playwright*
+test-results
+tests-examples

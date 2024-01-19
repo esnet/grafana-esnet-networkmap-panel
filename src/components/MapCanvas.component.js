@@ -6,8 +6,9 @@ import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
-import { types, BindableHTMLElement } from './lib/rubbercement.js'
+import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
+import e2eConfig from '../../e2e/e2e.config.json';
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -419,9 +420,11 @@ export class MapCanvas extends BindableHTMLElement {
     }
     let zoomIn = this.querySelector(".leaflet-control-zoom-in");
     zoomIn?.classList.add("tight-form-func");
+    zoomIn?.setAttribute("data-testid", e2eConfig.testIds.zoomInBtn);
     zoomIn?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     let zoomOut = this.querySelector(".leaflet-control-zoom-out")
     zoomOut?.classList.add("tight-form-func");
+    zoomOut?.setAttribute("data-testid", e2eConfig.testIds.zoomOutBtn);
     zoomOut?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     this.leafletMap.on("zoomend", (event)=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
@@ -660,7 +663,7 @@ export class MapCanvas extends BindableHTMLElement {
       </div>
 
 
-      <div id='map-${this.instanceId}'>
+      <div id='map-${this.instanceId}' data-testid='${e2eConfig.testIds.sidebar}'>
         <div class='home-overlay'>
             <div class="button tight-form-func" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠

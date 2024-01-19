@@ -345,6 +345,8 @@ You should now have a dashboard that visualizes a point-in-time snapshot of your
 Jest and Playwright are used to implement unit and integration testing for the plugin, following as closely as needed to
 the implementation utilized by Grafana's plugin-e2e package.
 
+### Yarn setup
+
 Tests are run via Yarn 4.0.2 and above. If you installed Yarn through a package manager such as Chocolately (Windows),
 APT (Linux), or Brew (Mac), it may not be the latest version and should be updated by running the following from the
 terminal in the project directory:
@@ -356,9 +358,40 @@ $ yarn policies set-version stable
 This will install the current stable release of Yarn _for the plugin_, and should permit your system's installed version
 to continue in use in all other places. This is the preferred way to install and upgrade Yarn on a per project basis.
 
-To run the tests:
+### Test configuration
 
+You must specify a username and password as a JSON object under playwright/.auth/credentials.json. At the same time,
+e2e/e2e.config.json should be configured to target a particular dashboard for running the tests upon. Use the included
+e2e.confgi.json.sample as a basis for your own e2e.config.json.
+
+Testids should not have to be changed, although you have the option of doing so. The only requirement is that all testids
+therein be unique.
+
+Sample playwright/.auth/credentials.json:
+
+```json
+{
+    "username": "myGrafanaUser",
+    "password": "myGrafanaPassword"
+}
 ```
+
+### Test Execution and Reporting
+
+To run both component and integration tests:
+
+```sh
+$ make test
+```
+
+You also have the option of running component and integration tests seperately, either using make or Yarn (both pairs
+of shell commands below do the same thing.)
+
+```sh
+$ make test:component
+$ make test:e2e
+
+$ yarn test
 $ yarn e2e
 ```
 

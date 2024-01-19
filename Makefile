@@ -1,7 +1,7 @@
 NODE=/Users/seg/.nvm/versions/node/v14.17.6/bin/node
 NPM=/Users/seg/.nvm/versions/node/v14.17.6/bin/npm
 GRAFANA_PATH="node_modules/@grafana/toolkit/bin/grafana-toolkit.js"
-BREW=/usr/local/bin/brew
+BREW=$(which brew)
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
 
 .PHONY: prod
@@ -26,6 +26,15 @@ restart:
 .PHONY: test
 test:
 	yarn test
+	yarn e2e
+
+.PHONY: test\:component
+test\:component:
+	yarn test
+
+.PHONY: test\:e2e
+test\:e2e:
+	yarn e2e
 
 .PHONY: testignore
 testignore:
