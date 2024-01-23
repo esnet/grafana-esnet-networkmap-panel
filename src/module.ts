@@ -91,6 +91,7 @@ let layerOptions = {
     editor: "boolean",
     name: 'Layer ${i+1} on',
     category: "Layers",
+    showIf: { "useConfigurationUrl": false },
     defaultValue: true,
   },
 
@@ -99,35 +100,35 @@ let layerOptions = {
     editor: "boolean",
     name: 'Show Layer ${i+1} toggle',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"showSidebar": true, "layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "showSidebar": true, "layers[${i}].visible": true},
     defaultValue: true,
   },
   "layers[${i}].name": {
     editor: "text",
     name: 'Layer ${i+1} Display Name',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true },
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true },
     defaultValue: 'Layer ${i+1}',
   },
   "layers[${i}].color": {
     editor: "color",
     name: 'Layer ${i+1} Default color',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     description: 'The default color for nodes and links on Layer ${i+1}',
     defaultValue: 'grey',
   },
   "layers[${i}].jsonFromUrl": {
     name: 'Fetch Layer ${i+1} JSON from URL',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     defaultValue: false,
     editor: "boolean",
   },
   "layers[${i}].mapjson": {
     name: 'Layer ${i+1} Map data (json)',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
+    showIf: { "useConfigurationUrl": false,  "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
     settings: { useTextarea: true, rows: 10 },
@@ -136,7 +137,7 @@ let layerOptions = {
   "layers[${i}].mapjsonUrl": {
     name: 'Layer ${i+1} Map data (URL)',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": true },
+    showIf: { "useConfigurationUrl": false,  "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": true },
     description: 'URL that returns JSON with edges and nodes of network map',
     defaultValue: '',
     editor: "text",
@@ -145,7 +146,7 @@ let layerOptions = {
     editor: "text",
     name: 'Layer ${i+1} Endpoint Identifier',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     description: 'Which topology "meta" field should be used to match topology nodes to query data?',
     defaultValue: 'pops',
   },
@@ -154,7 +155,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Edge Width',
     defaultValue: 3,
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       min: 1,
       max: 15,
@@ -167,7 +168,7 @@ let layerOptions = {
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       min: 1,
       max: 15,
@@ -179,7 +180,7 @@ let layerOptions = {
     editor: "slider",
     name: 'Layer ${i+1} Node Size',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     defaultValue: 5,
     settings: {
       min: 1,
@@ -191,7 +192,7 @@ let layerOptions = {
     editor: "thresholds",
     name: "Node Thresholds",
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     description: "Set thresholds for node coloration. Used to indicate e.g. up/down node information",
   },
   "layers[${i}].nodeNameMatchField": {
@@ -199,7 +200,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Node Match Field',
     description: 'Data field mapped to match a node color row for Layer ${i+1}',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -209,7 +210,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Node Color Field',
     description: 'Data field mapped to node color thresholds for Layer ${i+1}',
     category: "Layer ${i+1}: Basic Options",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -220,7 +221,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Source Field',
     description: 'Data field identifying the "source" for Layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -230,7 +231,7 @@ let layerOptions = {
     name: 'Layer ${i+1} "Source" Field Label',
     description: 'Label for "source" datapoint for layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     defaultValue: 'From:',
   },
 
@@ -239,7 +240,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Destination Field',
     description: 'Data field identifying the "destination" for Layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -249,14 +250,14 @@ let layerOptions = {
     name: 'Layer ${i+1} "Destination" Field Label',
     description: 'Label for "destination" datapoint for layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     defaultValue: 'To:',
   },
   "layers[${i}].inboundValueField": {
     editor: "field-name",
     name: 'Layer ${i+1} Inbound Value Field',
     description: 'Data field showing traffic from "destination" to "source" for Layer ${i+1}',
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     settings: {
       allowCustomValue: false,
@@ -266,7 +267,7 @@ let layerOptions = {
     editor: "field-name",
     name: 'Layer ${i+1} Outbound Value Field',
     description: 'Data field showing traffic from "source" to "destination" for Layer ${i+1}',
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     settings: {
       allowCustomValue: false,
@@ -277,7 +278,7 @@ let layerOptions = {
     name: 'Layer ${i+1} "Data" Field Label',
     description: 'Label for "Inbound/Outbound" field for layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     defaultValue: 'Volume:',
   },
 
@@ -287,7 +288,7 @@ let layerOptions = {
     editor: "text",
     name: 'Binding: Node Layer ${i+1}',
     description: "On node click, set this dashboard variable to the name of the selected node.",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'node',
   },
@@ -295,7 +296,7 @@ let layerOptions = {
     editor: "text",
     name: 'Binding: Edge "Source" Layer ${i+1}',
     description: "On edge click, set this dashboard variable to the 'source' of the selected edge.",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'source',
   },
@@ -303,7 +304,7 @@ let layerOptions = {
     editor: "text",
     name: 'Binding: Edge "Destination" Layer ${i+1}',
     description: "On edge click, set this dashboard variable to the 'destination' of the selected edge.",
-    showIf: {"layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     defaultValue: 'dest',
   },
@@ -314,10 +315,21 @@ const options = {
   ///////////////
   // Uncategorized/Main options
   ///////////////
+  "useConfigurationUrl": {
+    editor: "boolean",
+    name: 'Fetch Configuration from URL',
+    defaultValue: false,
+  },
+  "configurationUrl": {
+    editor: "text",
+    name: 'URL to Fetch Configuration From',
+    defaultValue: "",
+  },
   "background": {
     editor: 'color',
     name: 'Map Background Color',
     description: 'The default color for the background, with no tileset',
+    showIf: { "useConfigurationUrl": false },
     defaultValue: '#EDEDED',
   },
   "tileset.geographic": {
@@ -328,6 +340,7 @@ const options = {
       allowCustomValue: false,
       options: BaseTilesets,
     },
+    showIf: { "useConfigurationUrl": false },
     defaultValue: "arcgis",
   },
   "tileset.boundaries": {
@@ -338,6 +351,7 @@ const options = {
       allowCustomValue: false,
       options: PoliticalBoundaryTilesets,
     },
+    showIf: { "useConfigurationUrl": false },
     defaultValue: null,
   },
   "tileset.labels": {
@@ -348,6 +362,7 @@ const options = {
       allowCustomValue: false,
       options: PoliticalLabelTilesets,
     },
+    showIf: { "useConfigurationUrl": false },
     defaultValue: null,
   },
   //////////////
@@ -359,13 +374,14 @@ const options = {
       description: 'Strategy to set the initial center and zoom level of the map',
       category: "Viewport Options",
       settings: { allowCustomValue: false, options: ViewStrategies, },
+      showIf: { "useConfigurationUrl": false },
       defaultValue: "static",
   },
   "setLatLngZoom": {
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
-    showIf: {"initialViewStrategy": 'static'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'static'},
     settings: { label: 'Set Lat/Lng & Zoom' },
     category: "Viewport Options",
     editor: "CoordinateButton",
@@ -374,7 +390,7 @@ const options = {
   "viewport.center.lat": {
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: {"initialViewStrategy": 'static'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'static'},
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
@@ -383,7 +399,7 @@ const options = {
   "viewport.center.lng": {
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: {"initialViewStrategy": 'static'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'static'},
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
@@ -394,7 +410,7 @@ const options = {
     editor: "select",
     name: 'Latitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: {"initialViewStrategy": 'variables'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'variables'},
     category: "Viewport Options",
     settings: {
       allowCustomValue: false,
@@ -405,7 +421,7 @@ const options = {
     editor: "select",
     name: 'Longitude Variable',
     description: 'Select a dashboard or query variable to set initial longitude of map',
-    showIf: {"initialViewStrategy": 'variables'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'variables'},
     category: "Viewport Options",
     settings: {
       allowCustomValue: false,
@@ -417,7 +433,7 @@ const options = {
   "viewport.zoom": {
     editor: "slider",
     name: 'Starting zoom level of map',
-    showIf: {'initialViewStrategy': ['static', 'variables']},
+    showIf: { "useConfigurationUrl": false, 'initialViewStrategy': ['static', 'variables']},
     category: "Viewport Options",
     defaultValue: 5,
     settings: {
@@ -430,7 +446,7 @@ const options = {
   "setViewport": {
     name: 'Set Zoom Viewport to Current Map View',
     description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
-    showIf: {"initialViewStrategy": 'viewport'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'viewport'},
     settings: { label: 'Set Viewport Coordinates' },
     category: "Viewport Options",
     editor: "ViewportCoordinateButton",
@@ -438,7 +454,7 @@ const options = {
   "viewport.top": {
     name: 'Initial viewport: Northern Boundary (Latitude)',
     description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -446,7 +462,7 @@ const options = {
   "viewport.left": {
     name: 'Initial viewport: Western Boundary (Longitude)',
     description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -454,7 +470,7 @@ const options = {
   "viewport.bottom": {
     name: 'Initial viewport: Eastern Boundary (Latitude)',
     description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -462,7 +478,7 @@ const options = {
   "viewport.right": {
     name: 'Initial viewport: Southern Boundary (Longitude)',
     description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
-    showIf: {"initialViewStrategy": 'viewport'},
+    showIf: { "useConfigurationUrl": false, "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -513,6 +529,7 @@ const options = {
     name: 'Show Map Sidebar',
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
     category: "Sidebar Options",
+    showIf: { "useConfigurationUrl": false },
     defaultValue: true,
   },
 
