@@ -59,6 +59,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.jsonResults = [false, false, false];
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
+    this.optionsCache = {};
   }
 
   // connect component
@@ -112,6 +113,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(this.options && this.options.legendDefaultBehavior){
       this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
+    this.maybeFetchOptions();
 
     const params = utils.getUrlSearchParams();
     if (
@@ -244,12 +246,45 @@ export class MapCanvas extends BindableHTMLElement {
     this.leafletMap && this.leafletMap.dragging.disable();
   }
 
+  maybeFetchOptions(){
+    if(this.options["useConfigurationUrl"]){
+      let self = this;
+
+      function populateOptionsAndTopology(){
+        self._options = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
+        let topo = [];
+        for(var i=0; i<self._options.layers.length; i++){
+          topo.push(JSON.parse(self._options.layers[i].mapjson));
+          self._topology = topo;
+          self.render();
+        }
+      }
+      // if we have a hit in cache, create a merged options object from cache
+      if(this.optionsCache[this.options["configurationUrl"]]){
+        populateOptionsAndTopology();
+        return
+      }
+      // otherwise, no hit in cache, let's grab them from the URL
+      // XXX need to send authentication headers here...
+      fetch(this.options["configurationUrl"]).then((response)=>{
+        response.json().then((config)=>{
+          self.optionsCache[self.options["configurationUrl"]] = config;
+          populateOptionsAndTopology();
+        })
+      })
+    }
+  }
+
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
 
+    this.maybeFetchOptions();
+
+    console.log(this._options, options, changed);
+
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy
-    Object.keys(options).forEach((k)=>{
+    changed.forEach((k)=>{
       this._options[k] = options[k];
     })
 
@@ -468,6 +503,7 @@ export class MapCanvas extends BindableHTMLElement {
         }
         return;
       }
+      console.log(this.topology);
       this.sideBar && this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
