@@ -44,7 +44,7 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
     if (!!textareaRef.current) {
       // ensure that the js 'value' property stays in sync with the actual DOM value
       if (textareaRef.current.innerHTML !== textareaRef.current.value) {
-        textareaRef.current.value = textareaRef.current.innerHTML;
+        textareaRef.current.value = unescape(textareaRef.current.innerHTML);
       }
     }
   });
