@@ -101,9 +101,12 @@ function renderEdges(g, data, ref, layerId, options) {
 
     var template = ref.options.enableCustomEdgeTooltip ? ref.options.customEdgeTooltip : defaultEdgeTooltip;
 
+    const forward = { from: d.nodeA, to: d.nodeZ, dataPoint: d.azDisplayValue };
+    const reverse = { from: d.nodeZ, to: d.nodeA, dataPoint: d.zaDisplayValue };
+
     let renderData = {
-      forward: { from: d.nodeA, to: d.nodeZ, dataPoint: d.azDisplayValue },
-      reverse: { from: d.nodeZ, to: d.nodeA, dataPoint: d.zaDisplayValue }
+      forward: isAZ ? forward : reverse,
+      reverse: isAZ ? reverse : forward,
     };
 
     var text = renderTemplate(template, renderData)
