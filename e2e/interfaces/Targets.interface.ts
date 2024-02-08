@@ -7,4 +7,5 @@ export interface ITargets {
     targetDashboard: string;
     targetPanel: IPanel | undefined;
     targetPanelId: number;
+    orgId: number | undefined;
 }

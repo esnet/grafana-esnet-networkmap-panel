@@ -1,4 +1,4 @@
-import { createDashboard, createFolder, getDashboard } from './grafana-api';
+import { createDashboard, createFolder, getCurrentUser, getDashboard } from './grafana-api';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import e2eConfig from './e2e.config.json';
@@ -7,7 +7,7 @@ import { IPanel } from './interfaces/Panel.inteface';
 
 let targetFolderUid;
 let targetDashboardUid;
-const { targetFolder, targetDashboard, targetPanel } = e2eConfig;
+const { targetFolder, targetDashboard } = e2eConfig;
 
 const pluginTestSetupFnName = 'folder-dashboard.setup.getFolderDashboardTargets';
 
@@ -50,12 +50,18 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
   }
 
   const dashboardInfo = JSON.parse(dashboardJsonStr);
-  const targetPanel = (dashboardInfo.dashboard.panels as Array<IPanel>).find(panel => panel.type === 'esnet-networkmap-panel');
+  const targetPanel = (dashboardInfo.dashboard.panels as Array<IPanel>).find(panel => panel.type === e2eConfig.targetPanelType);
   if (!targetPanel) {
-    throw new Error(`${pluginTestSetupFnName}: cannot resolve targetPanel, none matching 'esnet-networkmap-panel' found.`);
+    throw new Error(`${pluginTestSetupFnName}: cannot resolve targetPanel, none matching '${e2eConfig.targetPanelType}' found.`);
   }
   const targetPanelId = targetPanel.id as number;
 
+  // get org id
+  const currentUserResponseJsonStr = await getCurrentUser();
+  let orgId = undefined;
+  if (!!currentUserResponseJsonStr) {
+    orgId = JSON.parse(currentUserResponseJsonStr).orgId;
+  }
 
   const targetsFixtureObj = {
     targetDashboardUid,
@@ -64,6 +70,7 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     targetFolder,
     targetDashboard,
     targetPanel,
+    orgId
   };
   return targetsFixtureObj;
 };

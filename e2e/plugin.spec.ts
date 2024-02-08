@@ -7,15 +7,27 @@ import { ITargets } from './interfaces/Targets.interface';
 import { pluginTest } from './plugin-def';
 import { getFolderDashboardTargets } from './folderDashboardInit';
 
-const { protocolHostPort, homepage, targetDashboard } = e2eConfig;
+const { protocolHostPort } = getHostInfo(credentials);
+const { targetDashboard } = e2eConfig;
 
-const getEditNetworkMapPanelUrl = (targetDashboardUid: string, targetDb: string, panelId: string | number) => {
+const getHomepageUrl = (orgId?: string | number) => {
+  const { protocolHostPort } = getHostInfo(credentials);
+  if (orgId) {
+    return `${protocolHostPort}/?orgId=${orgId}`;
+  } else {
+    return protocolHostPort;
+  }
+}
+
+const getEditNetworkMapPanelUrl = (targetDashboardUid: string, targetDb: string, panelId: string | number, orgId?: string | number) => {
     const { protocolHostPort } = getHostInfo(credentials);
     const paramObj = {
       editPanel: panelId,
       'var-node': 'ALBQ',
-      orgId: 1
     };
+    if (!!orgId) {
+      paramObj['orgId'] = orgId;
+    }
     const paramArr = Object.entries(paramObj).reduce((acc, paramVal) => {
       const [param, val] = paramVal;
       acc.push(`${param}=${val}`);
@@ -39,15 +51,15 @@ pluginTest.describe("plugin testing", () => {
     await expect(page).toHaveTitle(/Grafana/);
   });
 
-  pluginTest("login access", async ({ page }) => {
-    await page.goto(`${protocolHostPort}${homepage}`);
+  pluginTest("login access", async ({ page, targets }: { page: Page, targets: ITargets }) => {
+    await page.goto(getHomepageUrl(targets.orgId));
 
     // Expects page to have a heading with the name of Installation.
     await expect(page.getByText("Welcome to Grafana")).toBeVisible();
   });
 
-  pluginTest("dashboards access", async ({ page }) => {
-    await page.goto(`${protocolHostPort}${homepage}`);
+  pluginTest("dashboards access", async ({ page, targets }: { page: Page, targets: ITargets}) => {
+    await page.goto(getHomepageUrl(targets.orgId));
     // click the dashboards button
     await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
     await page.waitForURL("**/dashboards");
@@ -57,8 +69,8 @@ pluginTest.describe("plugin testing", () => {
   });
 
   // TODO: disabled for now, not a target to test, but retained for navigational aide if needed
-  pluginTest.skip(`navigate to dashboard ${targetDashboard}`, async ({ page }) => {
-    await page.goto(`${protocolHostPort}${homepage}`);
+  pluginTest.skip(`navigate to dashboard ${targetDashboard}`, async ({ page, targets }: { page: Page, targets: ITargets}) => {
+    await page.goto(getHomepageUrl(targets.orgId));
 
     // promise for list of dashboards to be populated
     const searchPromise = page.waitForRequest("**/api/search?limit=1000&**");
@@ -82,8 +94,8 @@ pluginTest.describe("plugin testing", () => {
   pluginTest("load plugin edit page - view options", async ({ page, targets }: { page: Page, targets: ITargets}) => {
     // load plugin edit page
     const fnName = "plugin.spec['load plugin edit page - view options']";
-    const { targetDashboardUid, targetFolder, targetDashboard, targetPanel, targetPanelId } = targets;
-    const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId)}/orgId=1`;
+    const { targetDashboardUid, targetFolder, targetDashboard, targetPanelId, orgId } = targets;
+    const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
     await page.goto(editNetworkMapPanelUrl);
 
     // wait for page to load up canvas

@@ -5,7 +5,8 @@ const moduleName = 'config.info';
 const targetGrafanaInstanceName = e2eConfig.grafanaInstanceName || "grafana";
 const grafanaInfo = (dockerInfo as Array<any>).find(nfo => nfo.Name == `/${targetGrafanaInstanceName}`);
 if (!grafanaInfo) {
-  const err = `${moduleName}: No Docker instance named "${targetGrafanaInstanceName}" could be found. Configure one in e2e.config.json or use "grafana" as the name`
+  const configInstr = 'Configure one in e2e.config.json under the key "grafanaInstanceName" or use "grafana" as the name';
+  const err = `${moduleName}: No Docker instance named "${targetGrafanaInstanceName}" could be found. ${configInstr}`;
   throw new Error(err);
 }
 const { IPAddress, Ports } = grafanaInfo?.NetworkSettings;
@@ -19,8 +20,8 @@ const { IPAddress, Ports } = grafanaInfo?.NetworkSettings;
 export const getHostInfo = (credentials: {username: string, password: string}) => {
   const fnName = 'auth.setup.getHostInfo';
   let protocolHostPort;
-  let basicAuthProtocolHostPort;
   const portKeys = Object.keys(Ports);
+
   if (portKeys.length === 1) {
     const portInfo = Ports[portKeys[0]] as {
       HostIp: string;

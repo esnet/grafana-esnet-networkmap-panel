@@ -1,8 +1,6 @@
 {
-    "targetPanel": "network-map-test",
+    "targetPanelType": "esnet-networkmap-panel",
     "targetDashboard": "network-map-test-dashboard",
     "targetFolder": "network-map-test-folder",
-    "homepage": "/?orgId=1",
-    "protocolHostPort": "http://localhost:3000",
     "grafanaInstanceName": "esnet-networkmap-panel"
 }

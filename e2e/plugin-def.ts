@@ -15,5 +15,6 @@ export const pluginTest: PluginTest = base.extend<PluginTestOptions>({
       targetFolder: '',
       targetPanel: undefined,
       targetPanelId: -1,
+      orgId: -1,
     }, {option: true} ]
 });
