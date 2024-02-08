@@ -27,7 +27,6 @@ const getEditNetworkMapPanelUrl = (targetDashboardUid: string, targetDb: string,
 pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
-      console.log("plugin.spec['plugin testing'].pluginTest.use():targets: entered");
       const newFixtureObj = await getFolderDashboardTargets();
       use(newFixtureObj);
     }
@@ -60,28 +59,22 @@ pluginTest.describe("plugin testing", () => {
   // TODO: disabled for now, not a target to test, but retained for navigational aide if needed
   pluginTest.skip(`navigate to dashboard ${targetDashboard}`, async ({ page }) => {
     await page.goto(`${protocolHostPort}${homepage}`);
-    console.log(`get dashboard ${targetDashboard}: ${page.url()}`);
 
     // promise for list of dashboards to be populated
     const searchPromise = page.waitForRequest("**/api/search?limit=1000&**");
     let search: Request | null = null;
     searchPromise.then(result => {
-      console.log("get dashboard ${targetDashboard}: result received");
       if (!search && result !== null) {
         search = result;
-        console.log(`get dashboard ${targetDashboard}: searchPromise resolved: ${search.url()}`);
       }
     });
 
     await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
     await page.waitForURL("**/dashboards");
-    console.log(`get dashboard ${targetDashboard}: ${page.url()}`);
 
     // click the dashboard item for the target dashboard
     await page.getByText(targetDashboard).click();
-    console.log(`get dashboard ${targetDashboard}: ${page.url()}`);
     await page.waitForURL(`**/d/**/${targetDashboard}?orgId=1`);
-    console.log(`get dashboard ${targetDashboard}: ${page.url()}`);
   });
 
   // limited testing of sliding switches for hide/show map canvas features
@@ -89,10 +82,8 @@ pluginTest.describe("plugin testing", () => {
   pluginTest("load plugin edit page - view options", async ({ page, targets }: { page: Page, targets: ITargets}) => {
     // load plugin edit page
     const fnName = "plugin.spec['load plugin edit page - view options']";
-    console.log(`${fnName}: enter, targets...\n${JSON.stringify(targets, null, 2)}`);
     const { targetDashboardUid, targetFolder, targetDashboard, targetPanel, targetPanelId } = targets;
     const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId)}/orgId=1`;
-    console.log(`${fnName}: editNetworkMapPanelUrl: ${editNetworkMapPanelUrl}`);
     await page.goto(editNetworkMapPanelUrl);
 
     // wait for page to load up canvas
@@ -106,8 +97,6 @@ pluginTest.describe("plugin testing", () => {
     const titleSuffix = '\\s+-\\s+Dashboards\\s+-\\s+Grafana';
     const expectedTitleRegExp = new RegExp(`Edit\\s+panel\\s+-\\s+${targetDashboard}\\s+-\\s+${targetFolder}${titleSuffix}`);
     const actualTitle = await page.title();
-    console.log(`${fnName}: testing expected title ${expectedTitleRegExp.source}}`);
-    console.log(`${fnName}: actual title ${actualTitle}`);
     await expect(expectedTitleRegExp.test(actualTitle)).toBeTruthy();
 
     const mapZoomInControl = await page.getByTestId(testIds.zoomInBtn);

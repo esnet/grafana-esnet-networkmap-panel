@@ -32,7 +32,6 @@ export const getHostInfo = (credentials: {username: string, password: string}) =
         "Authorization": `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`
       };
       const result = { protocolHostPort, basicAuthHeader};
-      console.log(`config.info.getHostInfo:\n${JSON.stringify(result, null, 2)}`);
       return result;
     } else {
       throw new Error(`${fnName}: cannot derive port number from Docker NetworkSettings.Ports inspection:\n${JSON.stringify(Ports)}`)

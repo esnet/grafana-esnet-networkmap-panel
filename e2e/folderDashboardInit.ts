@@ -19,11 +19,9 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     headers: basicAuthHeader
   });
   const foldersJsonResponse = await foldersResponse.json();
-  console.log(`folderDashboardInit.getFolderDashboardTargets: ${JSON.stringify(foldersJsonResponse, null, 2)}`);
   const matchedFolder = foldersJsonResponse.find(r => r.title === targetFolder);
   let folderId;
   if (!matchedFolder) {
-    console.log(`${pluginTestSetupFnName}: No folder "${targetFolder}" found, creating new one...`);
     const result = await createFolder("network-map-test-folder");
     targetFolderUid = result.uid;
     folderId = result.id;
@@ -37,8 +35,6 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     headers: basicAuthHeader
   });
   const dashboardSearchResponseJson = await dashboardSearchResponse.json();
-  console.log(`${pluginTestSetupFnName}: fetch dashboard "${targetDashboard}" response`);
-  console.log(JSON.stringify(dashboardSearchResponseJson, null, 2));
   let dashboardJsonStr;
   if (dashboardSearchResponseJson.length === 0) {
     targetDashboardUid = 'pending';
@@ -54,8 +50,6 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
   }
 
   const dashboardInfo = JSON.parse(dashboardJsonStr);
-  console.log(`${pluginTestSetupFnName}: dashboardInfo for uid ${targetDashboardUid}:`);
-  console.log(JSON.stringify(dashboardInfo, null, 2));
   const targetPanel = (dashboardInfo.dashboard.panels as Array<IPanel>).find(panel => panel.type === 'esnet-networkmap-panel');
   if (!targetPanel) {
     throw new Error(`${pluginTestSetupFnName}: cannot resolve targetPanel, none matching 'esnet-networkmap-panel' found.`);
@@ -71,6 +65,5 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     targetDashboard,
     targetPanel,
   };
-  console.log(`${pluginTestSetupFnName}: targetsFixtureObj:\n${JSON.stringify(targetsFixtureObj, null, 2)}`);
   return targetsFixtureObj;
 };

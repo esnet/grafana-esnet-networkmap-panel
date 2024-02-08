@@ -14,8 +14,6 @@ export const getDashboard = async (dbUid: string): Promise<string> => {
     headers: basicAuthHeader,
   });
   const responseJson = await dashboardGetResponse.json();
-  console.log(`plugin.spec.createDashboard: /api/dashboards/uid/${dbUid} response:`);
-  console.log(JSON.stringify(responseJson, null, 2));
   return JSON.stringify(responseJson);
 }
 
@@ -34,8 +32,6 @@ export const getCurrentUser = async (): Promise<string | undefined> => {
       }
     });
     const responseJsonStr = JSON.stringify(await userResponse.json(), null, 2);
-    console.log(`grafana-api.getCurrentUser: Response:`);
-    console.log(responseJsonStr);
     return responseJsonStr;
   } catch (e) {
     console.trace(`grafana-api.getCurrentUser: Error in fetching current user: ${e.message}`);
@@ -95,8 +91,6 @@ export const createDashboard = async (folderUid: string, dashboardTitle?: string
       }
     });
     const dashboardCreateResponseJson = await dashboardCreateResponse.json();
-    console.log('plugin.spec.createDashboard: /api/dashboards/db response:');
-    console.log(JSON.stringify(dashboardCreateResponseJson, null, 2));
     return JSON.stringify(dashboardCreateResponseJson);
   };
   
@@ -121,8 +115,6 @@ export const createFolder = async (folderTitle: string, folderUid?: string): Pro
         }
     });
     const createFolderJsonResponse = await folderCreateResponse.json();
-    console.log("plugin.spec.createFolder: /api/folders response");
-    console.log(JSON.stringify(createFolderJsonResponse, null, 2));
     return {
         id: createFolderJsonResponse.id,
         uid: createFolderJsonResponse.uid,
