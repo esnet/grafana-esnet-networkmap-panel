@@ -528,7 +528,7 @@ const options = {
     description: 'HTML template used for edge tooltips',
     category: "Tooltip Options",
     defaultValue: defaultCustomEdgeTooltip,
-    settings: { useTextarea: true, rows: 10 },
+    settings: { useTextarea: true, rows: 10, isMonospaced: true },
     showIf: {"enableCustomEdgeTooltip": true},
   },
 

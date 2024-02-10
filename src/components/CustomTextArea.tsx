@@ -3,7 +3,11 @@ import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
 import { TextArea } from '@grafana/ui';
 
-interface Props extends StandardEditorProps<string, StringFieldConfigSettings> {
+interface CustomTextAreaSettings extends StringFieldConfigSettings {
+  isMonospaced: boolean;
+}
+
+interface Props extends StandardEditorProps<string, CustomTextAreaSettings> {
   suffix?: ReactNode;
 }
 
@@ -44,13 +48,22 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
     if (!!textareaRef.current) {
       // ensure that the js 'value' property stays in sync with the actual DOM value
       if (textareaRef.current.innerHTML !== textareaRef.current.value) {
-        textareaRef.current.value = textareaRef.current.innerHTML;
+        textareaRef.current.value = unescape(textareaRef.current.innerHTML);
       }
     }
   });
 
+  const attribs = {};
+  if (item.settings?.isMonospaced) {
+    attribs['style'] = {
+      fontFamily: "monospace",
+      fontSize: "10pt"
+    };
+  }
+
   return (
     <TextArea
+      {...attribs}
       placeholder={item.settings?.placeholder}
       defaultValue={value || ''}
       rows={(item.settings?.useTextarea && item.settings.rows) || 5}
