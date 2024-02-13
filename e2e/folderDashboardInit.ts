@@ -36,10 +36,11 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
   });
   const dashboardSearchResponseJson = await dashboardSearchResponse.json();
   let dashboardJsonStr;
+  targetDashboardUid = 'pending';
   if (dashboardSearchResponseJson.length === 0) {
-    targetDashboardUid = 'pending';
     const targetDashboardJsonStr = await createDashboard(targetFolderUid, targetDashboard);  // store targetDashboardId for later
     const createdDashboard = JSON.parse(targetDashboardJsonStr);
+    targetDashboardUid = createdDashboard.uid;
     dashboardJsonStr = await getDashboard(createdDashboard.uid);
   } else if (dashboardSearchResponseJson.length === 1) {
     const targetIdx = 0;

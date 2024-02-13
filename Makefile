@@ -26,8 +26,15 @@ run:
 restart:
 	$(BREW) services restart grafana
 
+.PHONY: compose
+compose:
+	# start grafana docker instance and map project to plugin directory on instance
+	docker-compose up -d
+	# get instance info
+	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
+
 .PHONY: test
-test:
+test: compose
 	yarn test
 	yarn e2e
 
@@ -36,11 +43,7 @@ test\:component:
 	yarn test
 
 .PHONY: test\:e2e
-test\:e2e:
-	# start grafana docker instance and map project to plugin directory on instance
-	docker-compose up -d
-	# get instance info
-	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
+test\:e2e: compose
 	# run e2e tests
 	yarn e2e
 
