@@ -10,6 +10,15 @@ yarn-error.log*
 
 node_modules/
 
+# local build artifacts, with choice exceptions
+dist/*
+!dist/*/
+!dist/plugin.json
+!dist/module.*
+!dist/options.*
+!dist/components/CustomTextArea.*
+!dist/components/lib/!esmap.*
+
 # Runtime data
 pids
 *.pid

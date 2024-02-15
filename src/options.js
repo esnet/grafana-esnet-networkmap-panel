@@ -95,9 +95,20 @@ export const LegendBehaviorOptions = [
     label: 'Minimized',
     value: 'minimized',
   },
-]
+];
+
+export const monospacedFontSize = '10pt';
 
 export const defaultNodeTooltip = `
+  <div class="flow-tooltip">
+    <strong>\${name}</strong>
+  </div>
+  <div class="flow-tooltip">
+    <strong>In Volume: \${inValue}</strong>
+  </div>
+  <div class="flow-tooltip">
+    <strong>Out Volume: \${outValue}</strong>
+  </div>
 `;
 export const defaultCustomNodeTooltip = `
 `;

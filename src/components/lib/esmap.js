@@ -4,7 +4,7 @@ import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
-import { defaultCustomEdgeTooltip, defaultEdgeTooltip } from '../../options.js';
+import { defaultEdgeTooltip, defaultNodeTooltip } from '../../options.js';
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -465,13 +465,15 @@ function renderNodeControl(g, data, ref, layerId){
       PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.svg.node());
     })
     .on('mouseover', function (event, d) {
+      let text;
       if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
+        text = renderTemplate(d.meta.template, {...d, "self": d })
       } else {
-        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-        <p><b>In Volume: </b> ${d.inValue}</p>
-        <p><b>Out Volume: </b> ${d.outValue}</p>`;
+        text = renderTemplate(defaultNodeTooltip,  {...d, "self": d});
       }
+      text = text.replaceAll(/\s+/g, " ")
+        .replaceAll("><", "> <")
+        .trim();
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseleave', function(){
@@ -684,13 +686,15 @@ function renderNodes(g, data, ref, layerId) {
     })
     .on('mouseover', function (event, d) {
       d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)")
+      let text;
       if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
+        text = renderTemplate(d.meta.template, {...d, "self": d })
       } else {
-        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-        <p><b>In Volume: </b> ${d.inValue}</p>
-        <p><b>Out Volume: </b> ${d.outValue}</p>`;
+        text = renderTemplate(defaultNodeTooltip,  {...d, "self": d});
       }
+      text = text.replaceAll(/\s+/g, " ")
+        .replaceAll("><", "> <")
+        .trim();
 
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })

@@ -2,9 +2,11 @@ import React, { ReactNode, useCallback, useEffect, useRef } from 'react';
 
 import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
 import { TextArea } from '@grafana/ui';
+import { monospacedFontSize } from '../options';
 
 interface CustomTextAreaSettings extends StringFieldConfigSettings {
   isMonospaced: boolean;
+  fontSize: string;
 }
 
 interface Props extends StandardEditorProps<string, CustomTextAreaSettings> {
@@ -57,7 +59,7 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
   if (item.settings?.isMonospaced) {
     attribs['style'] = {
       fontFamily: "monospace",
-      fontSize: "10pt"
+      fontSize: item.settings?.fontSize || monospacedFontSize
     };
   }
 

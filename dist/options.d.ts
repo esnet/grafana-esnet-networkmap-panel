@@ -31,7 +31,8 @@ export const LegendBehaviorOptions: {
     label: string;
     value: string;
 }[];
-export const defaultNodeTooltip: "\n";
+export const monospacedFontSize: "10pt";
+export const defaultNodeTooltip: "\n  <div class=\"flow-tooltip\">\n    <strong>${name}</strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <strong>In Volume: ${inValue}</strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <strong>Out Volume: ${outValue}</strong>\n  </div>\n";
 export const defaultCustomNodeTooltip: "\n";
 export const defaultCustomEdgeTooltip: "\n  <div class=\"flow-tooltip\">\n    <strong>\n      ${forward.from} → ${forward.to}\n      <br />\n      Rate: ${forward.dataPoint}\n    </strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <span>\n      ${reverse.from} → ${reverse.to}\n      <br />\n      Rate: ${reverse.dataPoint}\n    </span>\n  </div>\n";
 export const defaultEdgeTooltip: string;

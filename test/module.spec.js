@@ -2,11 +2,7 @@ import * as should from "../node_modules/should/should.js"
 import * as pubsub from '../src/components/lib/pubsub.js';
 const PubSub = pubsub.PubSub;
 
-const EXPECTED_MOUSEOVER_TEXT = `A
-
-In Volume: undefined
-
-Out Volume: undefined`;
+const EXPECTED_MOUSEOVER_REGEX = /A\s+In Volume:\s+\d+\s+Out Volume:\s+\d+/;
 
 const lavender = "rgb(202, 149, 229)";
 
@@ -43,18 +39,24 @@ var TOPOLOGY = [
                             "meta":{},
                             "coordinate":[39.027718840211605,-105.99609375000001],
                             "color":lavender,
+                            "inValue": 1234567890,
+                            "outValue": 9876543210,
                         },
                         {
                             "name":"B",
                             "meta":{},
                             "coordinate":[34.59704151614417,-96.064453125],
                             "color":lavender,
+                            "inValue": 3213213213,
+                            "outValue": 31313131313,
                         },
                         {
                             "name":"C",
                             "meta":{},
                             "coordinate":[42.16340342422403,-93.95507812500001],
                             "color":lavender,
+                            "inValue": 12358132134,
+                            "outValue": 63063063012,
                         }
                 ],"aTest":0}
         ]
@@ -178,7 +180,7 @@ describe( "Class MapCanvas", () => {
       var style = window.getComputedStyle(toolOverlayButton);
       style.display.should.equal("inline-block");
     });
-    it("should show a tooltip in the sidebar when a user hovers over a node", ()=>{
+    it("should show a tooltip in the sidebar when a user hovers over a node", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       var node = document.querySelector("g.node > g.scale-container > circle");
       // create a bubbling mouseover event
@@ -186,9 +188,10 @@ describe( "Class MapCanvas", () => {
       // fire the mouseover event on our demonstration node
       node.dispatchEvent(mouseoverEvent);
       // get the sidebar tooltip text
-      var sidebarText = canvas.querySelector("#sidebar-tooltip").innerText;
+      const sidebarTooltip = canvas.querySelector("#sidebar-tooltip");
+      var sidebarText = sidebarTooltip.innerText;
       // test that the sidebar tooltip text is as expected
-      sidebarText.should.equal(EXPECTED_MOUSEOVER_TEXT);
+      sidebarText.should.match(EXPECTED_MOUSEOVER_REGEX);
     });
     it("should have an edit mode characterized by edit buttons", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");

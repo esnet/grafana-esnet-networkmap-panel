@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
 interface CustomTextAreaSettings extends StringFieldConfigSettings {
     isMonospaced: boolean;
+    fontSize: string;
 }
 interface Props extends StandardEditorProps<string, CustomTextAreaSettings> {
     suffix?: ReactNode;

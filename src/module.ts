@@ -14,7 +14,7 @@ import {
   LegendBehaviorOptions,
   defaultCustomEdgeTooltip,
   defaultCustomNodeTooltip
-} from './options.js'
+} from './options.js';
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
@@ -139,7 +139,7 @@ let layerOptions = {
     showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
-    settings: { useTextarea: true, rows: 10 },
+    settings: { useTextarea: true, rows: 10, isMonospaced: true },
     editor: "CustomTextArea",
   },
   "layers[${i}].mapjsonUrl": {
@@ -512,7 +512,7 @@ const options = {
     description: 'HTML template used for node tooltips',
     category: "Tooltip Options",
     defaultValue: defaultCustomNodeTooltip,
-    settings: { useTextarea: true, rows: 10 },
+    settings: { useTextarea: true, rows: 10, isMonospaced: true  },
     showIf: {"enableCustomNodeTooltip": true},
   },
   "enableCustomEdgeTooltip": {
