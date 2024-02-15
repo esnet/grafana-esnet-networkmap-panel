@@ -86,17 +86,6 @@ class SideBar extends BindableHTMLElement {
       </div>`
     }
 
-    // const sidebarToggleTooltipIconElId = "sidebar-toggle-tooltip-icon";
-    // sidebarTooltipContent += `
-    //   <div class="toggle container">
-    //     <label class="switch">
-    //       <input type="checkbox" ${this.mapCanvas.options.labelTypeData?.isIcon && "checked"} id="${sidebarToggleTooltipIconElId}">
-    //       <span class="slider round"></span>
-    //     </label>
-    //     <text class="legend-text">Enable Tooltip Icon</text>
-    //   </div>
-    // `
-
     this.shadow.innerHTML = `
       <style>
         #tooltip-${this.instanceId} {
@@ -153,7 +142,6 @@ class SideBar extends BindableHTMLElement {
       let selector = `#sidebar-layer-${i}@onchange`;
       bindings[selector] = this.toggleLayer;
     }
-    // bindings[`#${sidebarToggleTooltipIconElId}@onchange`] = this.toggleTooltipLabelType;
     this.bindEvents(bindings);
   }
 

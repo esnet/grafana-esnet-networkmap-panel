@@ -466,11 +466,9 @@ function renderNodeControl(g, data, ref, layerId){
     })
     .on('mouseover', function (event, d) {
       let text;
-      if(d.meta.template){
-        text = renderTemplate(d.meta.template, {...d, "self": d })
-      } else {
-        text = renderTemplate(defaultNodeTooltip,  {...d, "self": d});
-      }
+      const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
+
+      text = renderTemplate(template, {...d, "self": d });
       text = text.replaceAll(/\s+/g, " ")
         .replaceAll("><", "> <")
         .trim();
@@ -685,13 +683,10 @@ function renderNodes(g, data, ref, layerId) {
       return d.color ? d.color : defaultNodeColor;
     })
     .on('mouseover', function (event, d) {
-      d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)")
-      let text;
-      if(d.meta.template){
-        text = renderTemplate(d.meta.template, {...d, "self": d })
-      } else {
-        text = renderTemplate(defaultNodeTooltip,  {...d, "self": d});
-      }
+      d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)");
+      const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
+
+      let text = renderTemplate(template, {...d, "self": d });
       text = text.replaceAll(/\s+/g, " ")
         .replaceAll("><", "> <")
         .trim();
