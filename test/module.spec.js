@@ -1,8 +1,19 @@
-import * as should from "../node_modules/should/should.js"
+import * as should from "../node_modules/should/should.js";
 import * as pubsub from '../src/components/lib/pubsub.js';
+import * as utils from '../src/components/lib/utils.js';
 const PubSub = pubsub.PubSub;
 
-const EXPECTED_MOUSEOVER_REGEX = /A\s+In Volume:\s+\d+\s+Out Volume:\s+\d+/;
+/**
+ * The regex to test the text for the default node tooltip template against.
+ * Note that the textual representation of the template contains SVGs that are processed
+ * by utils.getElementText such that they render SVGs a11y text in place of the
+ * SVGs.
+ * @see utils.getElementText
+ * @see options.svgGauge
+ * @see options.svgArrowLeftFromLine
+ * @see options.svgArrowRightToLine
+ */
+const EXPECTED_NODE_MOUSEOVER_REGEX = /A\s+In Volume(\s+|:\s*)\d+\s+Out Volume(\s+|:\s*)\d+/;
 
 const lavender = "rgb(202, 149, 229)";
 
@@ -189,9 +200,11 @@ describe( "Class MapCanvas", () => {
       node.dispatchEvent(mouseoverEvent);
       // get the sidebar tooltip text
       const sidebarTooltip = canvas.querySelector("#sidebar-tooltip");
-      var sidebarText = sidebarTooltip.innerText;
+      // var sidebarTooltipText = sidebarTooltip.innerText;
+      var sidebarTooltipText = utils.getElementText(sidebarTooltip);
       // test that the sidebar tooltip text is as expected
-      sidebarText.should.match(EXPECTED_MOUSEOVER_REGEX);
+      console.log(`sidebarTooltipText: ${sidebarTooltipText}`);
+      sidebarTooltipText.should.match(EXPECTED_NODE_MOUSEOVER_REGEX);
     });
     it("should have an edit mode characterized by edit buttons", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
