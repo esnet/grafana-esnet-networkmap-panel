@@ -53,10 +53,6 @@ export class MapCanvas extends BindableHTMLElement {
      *
      * @param {{isIcon: boolean, legend: string}} labelTypeData
      */
-    toggleTooltipLabelType(labelTypeData: {
-        isIcon: boolean;
-        legend: string;
-    }): void;
     toggleLayer(layerData: any): void;
     getCurrentLeafletMap(): any;
     destroyMap(): void;

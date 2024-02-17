@@ -33,16 +33,6 @@ class SideBar extends BindableHTMLElement {
     PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
   }
 
-  /**
-   * Event handler for the toggle tooltip label sliding switch.
-   * @param {Event} event
-   */
-  toggleTooltipLabelType(event) {
-    var element = event.target;
-    var isIcon = element.checked;
-    PubSub.publish("toggleTooltipLabelType", {"isIcon": isIcon }, this);
-  }
-
   showTooltip(data) {
     var tooltip = data.text;
     var tooltipTarget = this.shadow.querySelector("#sidebar-tooltip");

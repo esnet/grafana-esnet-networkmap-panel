@@ -70,7 +70,6 @@ export class MapCanvas extends BindableHTMLElement {
     PubSub.subscribe('newMap', this.newMap, this);
     PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
-    PubSub.subscribe('toggleTooltipLabelType', this.toggleTooltipLabelType, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
@@ -360,22 +359,6 @@ export class MapCanvas extends BindableHTMLElement {
         "lng": centerData.center.lng.toFixed(2),
       }
     }
-    this._updateOptions && this._updateOptions(newValue);
-  }
-
-  /**
-   * Updates the canvas to display tooltips with an updated toggle event to render an icon or text.
-   *
-   * @param {{isIcon: boolean, legend: string}} labelTypeData
-   */
-  toggleTooltipLabelType (labelTypeData) {
-    var newValue = this._options;
-    if (newValue.labelTypeData === undefined) {
-      newValue.labelTypeData = labelTypeData;
-    } else {
-      newValue.labelTypeData = { ...newValue.labelTypeData, ...labelTypeData};
-    }
-    this.map.renderMapLayers();
     this._updateOptions && this._updateOptions(newValue);
   }
 
