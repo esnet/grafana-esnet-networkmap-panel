@@ -105,13 +105,12 @@ div.tooltip-hover p {
   margin-bottom:0;
 }
 
-div.sidebar-tooltip {   
-    position: absolute;         
+div.sidebar-tooltip {
+    position: absolute;
     text-align: left;
-    height: auto;                   
+    height: auto;
     font: sans-serif;
-    pointer-events: none;   
-    line-height: 0.9;
+    pointer-events: none;
 }
 
 .legend-text {

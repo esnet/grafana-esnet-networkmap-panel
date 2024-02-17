@@ -50,7 +50,7 @@ class SideBar extends BindableHTMLElement {
   }
 
   render() {
-    if(!this.shadow){
+    if (!this.shadow) {
         this.shadow = document.createElement("div");
         this.shadow.setAttribute("class", "tight-form-func");
         this.shadow.id = "tooltip-"+this.instanceId;
@@ -58,7 +58,6 @@ class SideBar extends BindableHTMLElement {
     }
 
     let sidebarLayerContent = "";
-    let sidebarTooltipContent = "";
 
     for (let i = 0; i < utils.LAYER_LIMIT; i++) {
       if (!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i] || !this.mapCanvas.jsonResults) {
@@ -119,9 +118,9 @@ class SideBar extends BindableHTMLElement {
       ${sidebarLayerContent}
 
       <h2>Tooltip</h2>
-      <div class="sidebar tooltip" id="sidebar-tooltip">
+      <div class="sidebar-tooltip" id="sidebar-tooltip">
       </div>
-    `
+    `;
 
     // attach event handlers and element events via bindings
     var bindings = {}
