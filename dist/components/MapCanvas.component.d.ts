@@ -48,11 +48,6 @@ export class MapCanvas extends BindableHTMLElement {
     updateMapDimensions(newDimensions: any): void;
     recalculateMapZoom(): void;
     updateCenter(centerData: any): void;
-    /**
-     * Updates the canvas to display tooltips with an updated toggle event to render an icon or text.
-     *
-     * @param {{isIcon: boolean, legend: string}} labelTypeData
-     */
     toggleLayer(layerData: any): void;
     getCurrentLeafletMap(): any;
     destroyMap(): void;
