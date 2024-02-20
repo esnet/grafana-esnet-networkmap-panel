@@ -19,6 +19,7 @@ export class EsMap {
     options: any;
     lastInteractedObject: any;
     lastInteractedType: any;
+    showTooltipSubscription: any;
     editEdgeMode(setting: any): any;
     editNodeMode(setting: any): any;
     updateCoordinates(data: any, layerId: any): void;

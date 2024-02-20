@@ -834,13 +834,17 @@ export class EsMap {
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
     this.lastInteractedType = null; // "nodes" or "edges"
+    this.showTooltipSubscription = null;
 
     PubSub.subscribe("snapEdges", (data)=>{
       doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
     }, this.mapCanvas)
 
-    if(!this.mapCanvas.options.showSidebar){
-      PubSub.subscribe("showTooltip",function(data){
+    if (!this.mapCanvas.options.showSidebar) {
+      PubSub.subscribe("showTooltip", (data) => {
+        if (this.mapCanvas.options.showSidebar) {
+          return;
+        }
         var elemId = "#map-" + mapCanvas.instanceId;
 
         var mapBounds = mapCanvas.getBoundingClientRect();
