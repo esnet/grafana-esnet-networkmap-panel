@@ -1,14 +1,14 @@
 import * as should from "../node_modules/should/should.js";
 import * as pubsub from '../src/components/lib/pubsub.js';
-import * as utils from '../src/components/lib/utils.js';
+import * as helperTestFn from './helperTestFn.js';
 const PubSub = pubsub.PubSub;
 
 /**
  * The regex to test the text for the default node tooltip template against.
  * Note that the textual representation of the template contains SVGs that are processed
- * by utils.getElementText such that they render SVGs a11y text in place of the
+ * by helperTestFn.getElementText such that they render SVGs a11y text in place of the
  * SVGs.
- * @see utils.getElementText
+ * @see helperTestFn.getElementText
  * @see options.svgGauge
  * @see options.svgArrowLeftFromLine
  * @see options.svgArrowRightToLine
@@ -201,7 +201,7 @@ describe( "Class MapCanvas", () => {
       // get the sidebar tooltip text
       const sidebarTooltip = canvas.querySelector("#sidebar-tooltip");
       // var sidebarTooltipText = sidebarTooltip.innerText;
-      var sidebarTooltipText = utils.getElementText(sidebarTooltip);
+      var sidebarTooltipText = helperTestFn.getElementText(sidebarTooltip);
       // test that the sidebar tooltip text is as expected
       console.log(`sidebarTooltipText: ${sidebarTooltipText}`);
       sidebarTooltipText.should.match(EXPECTED_NODE_MOUSEOVER_REGEX);
