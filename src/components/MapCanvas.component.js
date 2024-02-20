@@ -256,7 +256,6 @@ export class MapCanvas extends BindableHTMLElement {
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
     }
-
     if( wasChanged('showLegend', changed) || 
         wasChanged('customLegend', changed) || 
         wasChanged('customLegendValue', changed) || 
@@ -307,7 +306,6 @@ export class MapCanvas extends BindableHTMLElement {
     }
     this.sideBar && this.sideBar.render();
   }
-
   updateMapTopology(newTopology){
     this._topology = newTopology;
     if(this.editingInterface){
@@ -362,7 +360,7 @@ export class MapCanvas extends BindableHTMLElement {
     this._updateOptions && this._updateOptions(newValue);
   }
 
-  toggleLayer(layerData) {
+  toggleLayer(layerData){
     var newValue = this._options;
     if(newValue.layers && newValue.layers[layerData.layer]){
       newValue.layers[layerData.layer].visible = layerData.visible;
@@ -372,7 +370,6 @@ export class MapCanvas extends BindableHTMLElement {
     this.map.renderMapLayers();
     this._updateOptions && this._updateOptions(newValue);
   }
-
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options?.viewport?.center?.lat, this.startlng || this._options?.viewport?.center?.lng];
