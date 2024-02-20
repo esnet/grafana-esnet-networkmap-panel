@@ -76,16 +76,6 @@ function renderEdges(g, data, ref, layerId, options) {
   const doEdgeMouseOver = (event, d) => {
     var start = new Date();
     var thisEdge = d3.select(event.target)
-    var thisEdgeClassName = [...event.target.classList].find(classListItem => /edge-(az|za)-(.*)/.test(classListItem));
-    var reverseEdgeClassName;
-    if (/edge-az-/.test(thisEdgeClassName)) {
-      reverseEdgeClassName = thisEdgeClassName.replace('edge-az', 'edge-za');
-    } else if (/edge-za-/.test(thisEdgeClassName)) {
-      reverseEdgeClassName = thisEdgeClassName.replace('edge-za', 'edge-az');
-    } else {
-      console.warn(`lib.esmap.doEdgeMouseOver: Could not resolve reverse edge from ${thisEdgeClassName}`);
-    }
-    var reverseEdge = d3.select(`.${reverseEdgeClassName}`);
     const isAZ = thisEdge.classed("edge-az");
     var color = d.azColor ? d.azColor : defaultEdgeColor;
     if(!isAZ){
