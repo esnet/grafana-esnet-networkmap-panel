@@ -4,7 +4,7 @@ import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
-import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options";
+import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options.js";
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.

@@ -14,7 +14,7 @@ import {
   LegendBehaviorOptions,
   defaultCustomEdgeTooltip,
   defaultCustomNodeTooltip
-} from './options';
+} from "./options";
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
