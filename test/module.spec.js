@@ -1,6 +1,6 @@
 import * as should from "../node_modules/should/should.js";
 import * as pubsub from '../src/components/lib/pubsub.js';
-import * as helperTestFn from './helperTestFn.js';
+import * as utils from './utils.js';
 const PubSub = pubsub.PubSub;
 
 /**
@@ -8,7 +8,7 @@ const PubSub = pubsub.PubSub;
  * Note that the textual representation of the template contains SVGs that are processed
  * by helperTestFn.getElementText such that they render SVGs a11y text in place of the
  * SVGs.
- * @see helperTestFn.getElementText
+ * @see utils.getElementText
  * @see options.svgGauge
  * @see options.svgArrowLeftFromLine
  * @see options.svgArrowRightToLine
@@ -201,7 +201,7 @@ describe( "Class MapCanvas", () => {
       // get the sidebar tooltip text
       const sidebarTooltip = canvas.querySelector("#sidebar-tooltip");
       // var sidebarTooltipText = sidebarTooltip.innerText;
-      var sidebarTooltipText = helperTestFn.getElementText(sidebarTooltip);
+      var sidebarTooltipText = utils.getElementText(sidebarTooltip);
       // test that the sidebar tooltip text is as expected
       console.log(`sidebarTooltipText: ${sidebarTooltipText}`);
       sidebarTooltipText.should.match(EXPECTED_NODE_MOUSEOVER_REGEX);

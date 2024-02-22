@@ -99,10 +99,7 @@ function renderEdges(g, data, ref, layerId, options) {
       reverse: isAZ ? reverse : forward,
     };
 
-    var text = renderTemplate(template, renderData)
-      .replaceAll(/\s+/g, " ")
-      .replaceAll("><", "> <")
-      .trim();
+    var text = renderTemplate(template, renderData);
 
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
@@ -459,9 +456,6 @@ function renderNodeControl(g, data, ref, layerId){
       const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
 
       text = renderTemplate(template, {...d, "self": d });
-      text = text.replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <")
-        .trim();
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseleave', function(){
@@ -677,9 +671,6 @@ function renderNodes(g, data, ref, layerId) {
       const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
 
       let text = renderTemplate(template, {...d, "self": d });
-      text = text.replaceAll(/\s+/g, " ")
-        .replaceAll("><", "> <")
-        .trim();
 
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
