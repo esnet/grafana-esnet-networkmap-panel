@@ -3,7 +3,7 @@
 ![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
 
 For setting up in Grafana with an example: See [Introductory Tutorial](#introductory-tutorial)
-For developement: See [Development Notes](#development-notes)
+For developement: See [Development Notes](docs/development.md)
 
 # Network Map Panel
 
@@ -18,8 +18,6 @@ The plugin will plot traffic information on the network topology, showing bi-dir
 The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:
 
 [Dashboard JSON Snippet](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/demonstration/dashboard.json)
-
-
 
 ## Introductory Tutorial
 
@@ -338,39 +336,3 @@ You should now be looking at the main dashboard view. Let's add another panel:
 ### Save your Dashboard
 
 You should now have a dashboard that visualizes a point-in-time snapshot of your network traffic, along with a line graph that shows the network traffic over the the selected grafana timerange.
-
-## Development Notes
-
-This was built in Node 14.21.3 (LTS Fermium) and intended to be built using Yarn (1.22.21).
-
-### Local development
-
-Pre-requisite: For local development, Grafana must be running locally or as a Docker container.
-
-1. Ensure Grafana is running.
-    - On Homebrew (Mac), `brew services start grafana` should be sufficient.
-    - Via Docker, you can start the container using `docker run -d -p 3000:3000  grafana-esnet-networkmap-panel-grafana`
-    - On Windows, you may use Docker Desktop to run the container or enable it as a Windows service. (Hit Ctrl-R and enter
-    `services.msc` to open the Services dialog, scroll to the Grafana entry, right-click and select Enable.)
-
-Project setup:
-
-Pre-requisites: Both Node 14.21.3 (LTS Fermium) and Yarn must be installed. Later builds may not build or your mileage may vary.
-
-1. Install required dependencies via Yarn, as normal:
-
-```
-$ yarn install
-```
-
-2. Then build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
-
-```
-$ make prod
-```
-
-3. Finally, run the Yarn script build_dts to complete the process of building without signing
-
-```
-$ yarn run build_dts
-```
