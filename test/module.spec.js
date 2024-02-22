@@ -203,7 +203,6 @@ describe( "Class MapCanvas", () => {
       // var sidebarTooltipText = sidebarTooltip.innerText;
       var sidebarTooltipText = utils.getElementText(sidebarTooltip);
       // test that the sidebar tooltip text is as expected
-      console.log(`sidebarTooltipText: ${sidebarTooltipText}`);
       sidebarTooltipText.should.match(EXPECTED_NODE_MOUSEOVER_REGEX);
     });
     it("should have an edit mode characterized by edit buttons", ()=>{
