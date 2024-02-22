@@ -151,7 +151,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[srcKey]}--${row[dstKey]}`,
+          azName: `${row[srcKey]}---${row[dstKey]}`,
           inboundValue: row[inboundKey],
           outboundValue: row[outboundKey],
         });
@@ -160,7 +160,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[dstKey]}--${row[srcKey]}`, // assemble the edge name backwards
+          azName: `${row[dstKey]}---${row[srcKey]}`, // assemble the edge name backwards
           // this will cause us to have a situation where we match on the reverse of the
           // normal edge. our outbound key becomes the inbound value for the z-a edge
           inboundValue: row[outboundKey],
