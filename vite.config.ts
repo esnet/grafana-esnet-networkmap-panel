@@ -9,6 +9,7 @@ export default defineConfig({
     name: 'jsdom',
     environment: 'jsdom',
     root: './test',
+    globals: true,
     browser: {
       enabled: true,
       headless: true,
