@@ -5,7 +5,16 @@ import { CustomTextArea } from './components/CustomTextArea';
 import { CoordinateButton } from './components/CoordinateButton';
 import { ViewportCoordinateButton } from './components/ViewportCoordinateButton';
 import { resolvePath, LAYER_LIMIT } from './components/lib/utils';
-import { ViewStrategies, BaseTilesets, PoliticalBoundaryTilesets, PoliticalLabelTilesets, LegendPositionOptions, LegendBehaviorOptions } from './options'
+import {
+  ViewStrategies,
+  BaseTilesets,
+  PoliticalBoundaryTilesets,
+  PoliticalLabelTilesets,
+  LegendPositionOptions,
+  LegendBehaviorOptions,
+  defaultCustomEdgeTooltip,
+  defaultCustomNodeTooltip
+} from "./options";
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
@@ -130,7 +139,7 @@ let layerOptions = {
     showIf: { "layers[${i}].visible": true, "layers[${i}].jsonFromUrl": [false, undefined, null] },
     description: 'JSON with edges and nodes of network map',
     defaultValue: '{"edges":[], "nodes":[]}',
-    settings: { useTextarea: true, rows: 10 },
+    settings: { useTextarea: true, rows: 10, isMonospaced: true },
     editor: "CustomTextArea",
   },
   "layers[${i}].mapjsonUrl": {
@@ -225,14 +234,6 @@ let layerOptions = {
       allowCustomValue: false,
     },
   },
-  "layers[${i}].srcFieldLabel": {
-    editor: "text",
-    name: 'Layer ${i+1} "Source" Field Label',
-    description: 'Label for "source" datapoint for layer ${i+1}',
-    category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
-    defaultValue: 'From:',
-  },
 
   "layers[${i}].dstField": {
     editor: "field-name",
@@ -244,14 +245,7 @@ let layerOptions = {
       allowCustomValue: false,
     },
   },
-  "layers[${i}].dstFieldLabel": {
-    editor: "text",
-    name: 'Layer ${i+1} "Destination" Field Label',
-    description: 'Label for "destination" datapoint for layer ${i+1}',
-    category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
-    defaultValue: 'To:',
-  },
+
   "layers[${i}].inboundValueField": {
     editor: "field-name",
     name: 'Layer ${i+1} Inbound Value Field',
@@ -272,16 +266,6 @@ let layerOptions = {
       allowCustomValue: false,
     },
   },
-  "layers[${i}].dataFieldLabel": {
-    editor: "text",
-    name: 'Layer ${i+1} "Data" Field Label',
-    description: 'Label for "Inbound/Outbound" field for layer ${i+1}',
-    category: "Layer ${i+1}: Data Bindings",
-    showIf: {"layers[${i}].visible": true},
-    defaultValue: 'Volume:',
-  },
-
-
 
   "layers[${i}].dashboardNodeVar": {
     editor: "text",
@@ -506,15 +490,48 @@ const options = {
     category: "View Options",
     defaultValue: true,
   },
-  
-  // -------------------- Sidebar Options --------------------
   "showSidebar": {
     editor: "boolean",
     name: 'Show Map Sidebar',
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
-    category: "Sidebar Options",
+    category: "View Options",
     defaultValue: true,
   },
+
+  // -------------------- Tooltip Options --------------------
+  "enableCustomNodeTooltip": {
+    editor: "boolean",
+    name: 'Use Custom Node Tooltips',
+    description: 'Use custom templates for tooltips for map nodes',
+    category: "Tooltip Options",
+    defaultValue: false,
+  },
+  "customNodeTooltip": {
+    editor: "CustomTextArea",
+    name: 'Custom Node Tooltip',
+    description: 'HTML template used for node tooltips',
+    category: "Tooltip Options",
+    defaultValue: defaultCustomNodeTooltip,
+    settings: { useTextarea: true, rows: 10, isMonospaced: true  },
+    showIf: {"enableCustomNodeTooltip": true},
+  },
+  "enableCustomEdgeTooltip": {
+    editor: "boolean",
+    name: 'Use Custom Edge Tooltips',
+    description: 'Use custom templates for tooltips for map edges',
+    category: "Tooltip Options",
+    defaultValue: false,
+  },
+  "customEdgeTooltip": {
+    editor: "CustomTextArea",
+    name: 'Custom Edge Tooltip',
+    description: 'HTML template used for edge tooltips',
+    category: "Tooltip Options",
+    defaultValue: defaultCustomEdgeTooltip,
+    settings: { useTextarea: true, rows: 10, isMonospaced: true },
+    showIf: {"enableCustomEdgeTooltip": true},
+  },
+
 
   // -------------------- Legend Options --------------------
   "showLegend": {
@@ -560,7 +577,6 @@ const options = {
       options: LegendBehaviorOptions,
     },
   },
-
 }
 
 for(let i=0; i<LAYER_LIMIT; i++){

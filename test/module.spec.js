@@ -1,12 +1,19 @@
-import * as should from "../node_modules/should/should.js"
+import * as should from "../node_modules/should/should.js";
 import * as pubsub from '../src/components/lib/pubsub.js';
+import * as utils from './utils.js';
 const PubSub = pubsub.PubSub;
 
-const EXPECTED_MOUSEOVER_TEXT = `A
-
-In Volume: undefined
-
-Out Volume: undefined`;
+/**
+ * The regex to test the text for the default node tooltip template against.
+ * Note that the textual representation of the template contains SVGs that are processed
+ * by helperTestFn.getElementText such that they render SVGs a11y text in place of the
+ * SVGs.
+ * @see utils.getElementText
+ * @see options.svgGauge
+ * @see options.svgArrowLeftFromLine
+ * @see options.svgArrowRightToLine
+ */
+const EXPECTED_NODE_MOUSEOVER_REGEX = /A\s+In Volume(\s+|:\s*)\d+\s+Out Volume(\s+|:\s*)\d+/;
 
 const lavender = "rgb(202, 149, 229)";
 
@@ -43,18 +50,24 @@ var TOPOLOGY = [
                             "meta":{},
                             "coordinate":[39.027718840211605,-105.99609375000001],
                             "color":lavender,
+                            "inValue": 1234567890,
+                            "outValue": 9876543210,
                         },
                         {
                             "name":"B",
                             "meta":{},
                             "coordinate":[34.59704151614417,-96.064453125],
                             "color":lavender,
+                            "inValue": 3213213213,
+                            "outValue": 31313131313,
                         },
                         {
                             "name":"C",
                             "meta":{},
                             "coordinate":[42.16340342422403,-93.95507812500001],
                             "color":lavender,
+                            "inValue": 12358132134,
+                            "outValue": 63063063012,
                         }
                 ],"aTest":0}
         ]
@@ -178,7 +191,7 @@ describe( "Class MapCanvas", () => {
       var style = window.getComputedStyle(toolOverlayButton);
       style.display.should.equal("inline-block");
     });
-    it("should show a tooltip in the sidebar when a user hovers over a node", ()=>{
+    it("should show a tooltip in the sidebar when a user hovers over a node", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       var node = document.querySelector("g.node > g.scale-container > circle");
       // create a bubbling mouseover event
@@ -186,9 +199,11 @@ describe( "Class MapCanvas", () => {
       // fire the mouseover event on our demonstration node
       node.dispatchEvent(mouseoverEvent);
       // get the sidebar tooltip text
-      var sidebarText = canvas.querySelector("#sidebar-tooltip").innerText;
+      const sidebarTooltip = canvas.querySelector("#sidebar-tooltip");
+      // var sidebarTooltipText = sidebarTooltip.innerText;
+      var sidebarTooltipText = utils.getElementText(sidebarTooltip);
       // test that the sidebar tooltip text is as expected
-      sidebarText.should.equal(EXPECTED_MOUSEOVER_TEXT);
+      sidebarTooltipText.should.match(EXPECTED_NODE_MOUSEOVER_REGEX);
     });
     it("should have an edit mode characterized by edit buttons", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -891,7 +906,7 @@ describe( "Class MapCanvas", () => {
       nodeAlayer1.getAttribute("class").should.not.contain("animated-node");
 
     })
-    it("should allow for edge templates from the topology, as well as specific overrides for field labels", ()=>{
+    it("should allow for icon and non-icon edge templates from the topology", () => {
       var canvas = document.querySelector("esnet-map-canvas");
       // create mouseover for edge with template
       var newTopology = [
@@ -946,43 +961,28 @@ describe( "Class MapCanvas", () => {
         },
       ]
       PubSub.publish("updateMapTopology", newTopology, canvas);
-      var edgeLZ = canvas.querySelector(".cnxn-Z.cnxn-L")
-      var edgeAZ = canvas.querySelector(".cnxn-Z.cnxn-A")
+      var edgeZL = canvas.querySelector(".cnxn-Z.cnxn-L");
+      var edgeAZ = canvas.querySelector(".cnxn-A.cnxn-Z");
 
-      var closureVar = "";
-      PubSub.subscribe("showTooltip", (value)=>{ closureVar = value.text; }, canvas);
       // fire mouseover
       let mouseoverEvent = new Event('mouseover', { bubbles: true });
-      edgeLZ.dispatchEvent(mouseoverEvent);
+      edgeZL.dispatchEvent(mouseoverEvent);
       // check tooltip text
-      "From: ABCDEF To: GHIJKL".should.equal(closureVar);
+      var label = canvas.querySelector(".flow-tooltip strong").innerText.trim();
+      "Z → L".should.equal(label);
 
-      edgeAZ.dispatchEvent(mouseoverEvent);
-      var expectedString = "<p><b>From:</b> A</p>\n        <p><b>To:</b>  Z</p>\n        <p><b>Volume:</b>  undefined</p>";
-      // check tooltip text for edge with no template
-      expectedString.should.equal(closureVar);
-      // set options for field labels
       var newOptions = canvas.options;
-      newOptions.layers[0]['srcFieldLabel'] = 'Source:';
-      newOptions.layers[0]['dstFieldLabel'] = 'Dest:';
-      newOptions.layers[0]['dataFieldLabel'] = 'Data:';
-      PubSub.publish("updateMapOptions", {options: newOptions, changed: [
-        'layers[0].srcFieldLabel',
-        'layers[0].dstFieldLabel',
-        'layers[0].dataFieldLabel',
-      ]}, canvas);
-      // fire mouseover for edge with no template
-      edgeLZ.dispatchEvent(mouseoverEvent);
-      // check tooltip text
-      "Source: ABCDEF Dest: GHIJKL".should.equal(closureVar);
-      // create mouseover for edge with a template
-      // fire mouseover
+      newOptions.enableCustomEdgeTooltip = true;
+      newOptions.customEdgeTooltip = "<div class='flow-tooltip'>${forward.from} → ${forward.to}</div>";
+      PubSub.publish("updateMapOptions", { options: newOptions, changed: [
+        "enableCustomEdgeTooltip",
+
+      ]});
       edgeAZ.dispatchEvent(mouseoverEvent);
-      // check tooltip text
-      expectedString = "<p><b>Source:</b> A</p>\n        <p><b>Dest:</b>  Z</p>\n        <p><b>Data:</b>  undefined</p>";
-      // check tooltip text for edge with no template
-      expectedString.should.equal(closureVar);
-    })
+      var label = canvas.querySelector(".flow-tooltip").innerText.trim();
+      const testAZFlowMarkupStr = `A → Z`;
+      testAZFlowMarkupStr.should.equal(label);
+    });
     it("should santize names with non-alphanum characters", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       var newTopology = [
