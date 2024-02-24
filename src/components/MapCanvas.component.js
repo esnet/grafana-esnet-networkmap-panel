@@ -252,12 +252,19 @@ export class MapCanvas extends BindableHTMLElement {
 
       function populateOptionsAndTopology(){
         self._options = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
+        // never allow editing on a configuration populated from a URL
+        self._options.enableEditing = false;
+        self.disableEditing();
         let topo = [];
         for(var i=0; i<self._options.layers.length; i++){
           topo.push(JSON.parse(self._options.layers[i].mapjson));
-          self._topology = topo;
-          self.render();
         }
+        self._topology = topo;
+        self.shadow.remove();
+        self.shadow = null;
+        self.render();
+        self.newMap();
+        self.sideBar && self.sideBar.render();
       }
       // if we have a hit in cache, create a merged options object from cache
       if(this.optionsCache[this.options["configurationUrl"]]){
@@ -279,8 +286,6 @@ export class MapCanvas extends BindableHTMLElement {
     var {options, changed} = changedOptions;
 
     this.maybeFetchOptions();
-
-    console.log(this._options, options, changed);
 
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy
@@ -503,7 +508,6 @@ export class MapCanvas extends BindableHTMLElement {
         }
         return;
       }
-      console.log(this.topology);
       this.sideBar && this.sideBar.render();
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
