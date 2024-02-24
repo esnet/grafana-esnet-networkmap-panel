@@ -1,5 +1,5 @@
-NODE=/Users/seg/.nvm/versions/node/v14.17.6/bin/node
-NPM=/Users/seg/.nvm/versions/node/v14.17.6/bin/npm
+NODE=`which node`
+NPM=`which npm`
 GRAFANA_PATH="node_modules/@grafana/toolkit/bin/grafana-toolkit.js"
 BREW=$(which brew)
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology

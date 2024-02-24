@@ -10,6 +10,20 @@ export const esmapCss = `
   position: relative;
 }
 
+.flow-tooltip {
+  display: flex;
+  align-items: center;
+  grid-gap: 8px;
+}
+.flow-tooltip strong {
+  font-weight: bold;
+}
+.flow-tooltip svg {
+  height: 12px;
+  width: 12px;
+  stroke-width: 2px;
+}
+
 svg path.edge-az {
   marker-start: url("#arrow");
 }
@@ -91,13 +105,12 @@ div.tooltip-hover p {
   margin-bottom:0;
 }
 
-div.sidebar-tooltip {   
-    position: absolute;         
+div.sidebar-tooltip {
+    position: absolute;
     text-align: left;
-    height: auto;                   
+    height: auto;
     font: sans-serif;
-    pointer-events: none;   
-    line-height: 0.9;
+    pointer-events: none;
 }
 
 .legend-text {
