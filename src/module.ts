@@ -507,6 +507,7 @@ const options = {
     description: 'Enable map editing controls in edit mode',
     category: "View Options",
     defaultValue: true,
+    showIf: { "useConfigurationUrl": false }
   },
   "enableNodeAnimation": {
     editor: "boolean",
