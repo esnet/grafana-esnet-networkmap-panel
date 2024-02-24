@@ -249,6 +249,9 @@ export class MapPanel extends Component<Props> {
     }
     // in the case that we don't want to fetch from a url, return a promise with local data
     return new Promise((resolve) => {
+      if (this.mapCanvas?.current?.topology?.[layer]){
+        resolve(JSON.stringify(this.mapCanvas.current.topology[layer]));
+      }
       if (options.layers[layer]['mapjson']) {
         resolve(options.layers[layer]['mapjson']); // if local data is set, return it
       } else {
@@ -262,10 +265,11 @@ export class MapPanel extends Component<Props> {
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
-    this.mapCanvas.current.updateTopology = this.updateMapJson;
     if (fieldConfig.defaults?.unit) {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
+
+    this.mapCanvas.current.updateTopology = this.updateMapJson;
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
@@ -275,7 +279,7 @@ export class MapPanel extends Component<Props> {
     for(let i=0; i<LAYER_LIMIT; i++){
       if(!options.layers[i]){ continue; }
       colors.push({
-        defaultColor: options.layers[i].color,
+        defaultColor: this.mapCanvas?.current?.options?.layers?.[i]?.color || options.layers[i].color,
         nodeThresholds: options.layers[i].nodeThresholds?.steps || [],
       })
       fields.push({
