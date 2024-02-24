@@ -200,16 +200,16 @@ let layerOptions = {
   "layers[${i}].nodeThresholds": {
     editor: "thresholds",
     name: "Node Thresholds",
-    category: "Layer ${i+1}: Basic Options",
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    category: "Layer ${i+1}: Data Bindings",
+    showIf: { "layers[${i}].visible": true},
     description: "Set thresholds for node coloration. Used to indicate e.g. up/down node information",
   },
   "layers[${i}].nodeNameMatchField": {
     editor: "field-name",
     name: 'Layer ${i+1} Node Match Field',
     description: 'Data field mapped to match a node color row for Layer ${i+1}',
-    category: "Layer ${i+1}: Basic Options",
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    category: "Layer ${i+1}: Data Bindings",
+    showIf: { "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -218,8 +218,8 @@ let layerOptions = {
     editor: "field-name",
     name: 'Layer ${i+1} Node Color Field',
     description: 'Data field mapped to node color thresholds for Layer ${i+1}',
-    category: "Layer ${i+1}: Basic Options",
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    category: "Layer ${i+1}: Data Bindings",
+    showIf: { "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -229,7 +229,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Source Field',
     description: 'Data field identifying the "source" for Layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -239,7 +239,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Destination Field',
     description: 'Data field identifying the "destination" for Layer ${i+1}',
     category: "Layer ${i+1}: Data Bindings",
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     settings: {
       allowCustomValue: false,
     },
@@ -248,7 +248,7 @@ let layerOptions = {
     editor: "field-name",
     name: 'Layer ${i+1} Inbound Value Field',
     description: 'Data field showing traffic from "destination" to "source" for Layer ${i+1}',
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     settings: {
       allowCustomValue: false,
@@ -258,7 +258,7 @@ let layerOptions = {
     editor: "field-name",
     name: 'Layer ${i+1} Outbound Value Field',
     description: 'Data field showing traffic from "source" to "destination" for Layer ${i+1}',
-    showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
+    showIf: { "layers[${i}].visible": true},
     category: "Layer ${i+1}: Data Bindings",
     settings: {
       allowCustomValue: false,

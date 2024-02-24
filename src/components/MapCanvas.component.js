@@ -249,9 +249,57 @@ export class MapCanvas extends BindableHTMLElement {
   maybeFetchOptions(){
     if(this.options["useConfigurationUrl"]){
       let self = this;
+      let maskedKeys = {
+        "showLegend": "masked",
+        "legendColumnLength": "masked",
+        "legendPosition": "masked",
+        "legendDefaultBehavior": "masked",
+        "customEdgeTooltip": "masked",
+        "customNodeTooltip": "masked",
+        "enableCustomEdgeTooltip": "masked",
+        "enableCustomNodeTooltip": "masked",
+        "enableEdgeAnimation": "masked",
+        "enableNodeAnimation": "masked",
+        "enableScrolling": "masked",
+        "showViewControls": "masked",
+        "thresholds": "masked",
+      }
+      let maskedLayerKeys = {
+        "nodeThresholds": "masked",
+        "nodeNameMatchField": "masked",
+        "nodeValueField": "masked",
+        "srcField": "masked",
+        "dstField": "masked",
+        "inboundValueField": "masked",
+        "outboundValueField": "masked",
+        "dashboardNodeVar": "masked",
+        "dashboardEdgeSrcVar": "masked",
+        "dashboardEdgeDstVar": "masked",
+      }
 
       function populateOptionsAndTopology(){
-        self._options = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
+        let newOptions = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
+
+        Object.keys(newOptions).forEach((key)=>{
+          // deal with per-layer options in a more nuanced way
+          if(key == "layers"){
+            for(let i=0; i<utils.LAYER_LIMIT; i++){
+              if(!newOptions.layers[i]) continue;
+              Object.keys(newOptions.layers[i]).forEach((layerKey)=>{
+                // if this layer option is not masked, set it on the in-memory options object.
+                if(!maskedLayerKeys[layerKey]){
+                  self._options.layers[i][layerKey] = newOptions.layers[i][layerKey];
+                }
+              })
+            }
+            // stop processing the key "layers" here, moving on to the next key in the loop.
+            return
+          }
+          // if our option is not masked, set it on the in-memory options object.
+          if(!maskedKeys[key]){
+            self._options[key] = newOptions[key];
+          }
+        })
         // never allow editing on a configuration populated from a URL
         self._options.enableEditing = false;
         self.disableEditing();
