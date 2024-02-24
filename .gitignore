@@ -29,6 +29,9 @@ work/
 ci/
 e2e-results/
 
+# machine-specific build artifacts
+.yarn
+
 # Editors
 .idea
 .vscode

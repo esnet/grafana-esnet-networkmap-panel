@@ -2,6 +2,9 @@
 
 ![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
 
+For setting up in Grafana with an example: See [Introductory Tutorial](#introductory-tutorial)
+For developement: See [Development Notes](docs/development.md)
+
 # Network Map Panel
 
 This panel displays a network topology.
@@ -15,8 +18,6 @@ The plugin will plot traffic information on the network topology, showing bi-dir
 The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:
 
 [Dashboard JSON Snippet](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/demonstration/dashboard.json)
-
-
 
 ## Introductory Tutorial
 
@@ -335,5 +336,3 @@ You should now be looking at the main dashboard view. Let's add another panel:
 ### Save your Dashboard
 
 You should now have a dashboard that visualizes a point-in-time snapshot of your network traffic, along with a line graph that shows the network traffic over the the selected grafana timerange.
-
-

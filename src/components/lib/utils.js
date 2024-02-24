@@ -149,3 +149,20 @@ export function setPath(object, path, newValue){
   })
   o[lastItem] = newValue;
 }
+
+try {
+  const Utils = {
+    getUrlSearchParams,
+    schema,
+    validateArray,
+    validate,
+    testJsonSchema,
+    resolvePath,
+    setPath,
+    LAYER_LIMIT
+  }
+  module.exports.Utils = Utils;
+  exports.Utils = Utils;
+} catch (e) {
+  console.debug(e)
+}

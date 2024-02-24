@@ -4,6 +4,7 @@ import * as d3_import from './d3.min.js';
 // populate either with import or ES6 root-scope version
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
+import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options.js";
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -78,7 +79,7 @@ function renderEdges(g, data, ref, layerId, options) {
     const isAZ = thisEdge.classed("edge-az");
     var color = d.azColor ? d.azColor : defaultEdgeColor;
     if(!isAZ){
-      color = d.zaColor ? d.zaColor : defaultEdgeColor
+      color = d.zaColor ? d.zaColor : defaultEdgeColor;
     }
 
     if(!thisEdge.classed('animated-edge')){
@@ -88,19 +89,18 @@ function renderEdges(g, data, ref, layerId, options) {
 
     PubSub.publish("hideTooltip", null, ref.svg.node());
 
-    var labels = {
-      "src": options.layers[layerId]["srcFieldLabel"] ? options.layers[layerId]["srcFieldLabel"] : "From:",
-      "dst": options.layers[layerId]["dstFieldLabel"] ? options.layers[layerId]["dstFieldLabel"] : "To:",
-      "data": options.layers[layerId]["dataFieldLabel"] ? options.layers[layerId]["dataFieldLabel"] : "Volume:",
-    }
+    var template = ref.options.enableCustomEdgeTooltip ? ref.options.customEdgeTooltip : defaultEdgeTooltip;
 
-    if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d, "labels": labels });
-    } else {
-        var text = `<p><b>${labels.src}</b> ${ isAZ ? d.nodeA : d.nodeZ }</p>
-        <p><b>${labels.dst}</b>  ${ isAZ ? d.nodeZ : d.nodeA }</p>
-        <p><b>${labels.data}</b>  ${ isAZ ? d.AZdisplayValue : d.ZAdisplayValue }</p>`;
-    }
+    const forward = { from: d.nodeA, to: d.nodeZ, dataPoint: d.azDisplayValue };
+    const reverse = { from: d.nodeZ, to: d.nodeA, dataPoint: d.zaDisplayValue };
+
+    let renderData = {
+      forward: isAZ ? forward : reverse,
+      reverse: isAZ ? reverse : forward,
+    };
+
+    var text = renderTemplate(template, renderData);
+
     PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
 
@@ -434,7 +434,7 @@ function renderNodeControl(g, data, ref, layerId){
     .enter()
     .append('circle')
     .attr('r', 6)
-    .attr('class', function(d){ 
+    .attr('class', function(d){
       return `control controlPoint control-point-layer${layerId} control-point-for-node-${sanitizeName(d.name)}`; })
     .attr("data-layer", layerId)
     .attr("data-index", function(d, idx){ return idx; })
@@ -452,13 +452,10 @@ function renderNodeControl(g, data, ref, layerId){
       PubSub.publish("showEditNodeDialog", { "object": pointData, "index": spliceIndex, "layer": pointData.layer }, ref.svg.node());
     })
     .on('mouseover', function (event, d) {
-      if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
-      } else {
-        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-        <p><b>In Volume: </b> ${d.inValue}</p>
-        <p><b>Out Volume: </b> ${d.outValue}</p>`;
-      }
+      let text;
+      const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
+
+      text = renderTemplate(template, {...d, "self": d });
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
     .on('mouseleave', function(){
@@ -670,14 +667,10 @@ function renderNodes(g, data, ref, layerId) {
       return d.color ? d.color : defaultNodeColor;
     })
     .on('mouseover', function (event, d) {
-      d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)")
-      if(d.meta.template){
-        var text = renderTemplate(d.meta.template, {"d": d, "self": d });
-      } else {
-        var text = `<p><b>${ d.meta.displayName || d.name}</b></p>
-        <p><b>In Volume: </b> ${d.inValue}</p>
-        <p><b>Out Volume: </b> ${d.outValue}</p>`;
-      }
+      d3.select(event.target.parentElement).attr("transform", "scale(1.5, 1.5)");
+      const template = ref.options.enableCustomNodeTooltip ? ref.options.customNodeTooltip : defaultNodeTooltip;
+
+      let text = renderTemplate(template, {...d, "self": d });
 
       PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
     })
@@ -832,13 +825,17 @@ export class EsMap {
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
     this.lastInteractedType = null; // "nodes" or "edges"
+    this.showTooltipSubscription = null;
 
     PubSub.subscribe("snapEdges", (data)=>{
       doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
     }, this.mapCanvas)
 
-    if(!this.mapCanvas.options.showSidebar){
-      PubSub.subscribe("showTooltip",function(data){
+    if (!this.mapCanvas.options.showSidebar) {
+      PubSub.subscribe("showTooltip", (data) => {
+        if (this.mapCanvas.options.showSidebar) {
+          return;
+        }
         var elemId = "#map-" + mapCanvas.instanceId;
 
         var mapBounds = mapCanvas.getBoundingClientRect();
@@ -1057,7 +1054,7 @@ export class EsMap {
     var layerId = 0;
     this.data.forEach((data)=>{
       this.updateCoordinates(data, layerId);
-      layerId++;      
+      layerId++;
     })
     var layerId = 0;
     this.mapLayers.forEach((g)=>{
