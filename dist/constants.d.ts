@@ -1,12 +1,12 @@
 export default testIds;
 declare namespace testIds {
-    let sidebar: string;
-    let map: string;
-    let zoomInBtn: string;
-    let zoomOutBtn: string;
-    let addEdgeBtn: string;
-    let addNodeBtn: string;
-    let editEdgeToggleBtn: string;
-    let editNodeToggleBtn: string;
+    const sidebar: string;
+    const map: string;
+    const zoomInBtn: string;
+    const zoomOutBtn: string;
+    const addEdgeBtn: string;
+    const addNodeBtn: string;
+    const editEdgeToggleBtn: string;
+    const editNodeToggleBtn: string;
 }
 //# sourceMappingURL=constants.d.ts.map

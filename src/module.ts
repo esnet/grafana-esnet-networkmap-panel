@@ -24,8 +24,8 @@ const customEditors = {
 
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
-function checkBools(settings: object) {
-  return function (config: MapOptions) {
+const checkBools = (settings: object) => {
+  return (config: MapOptions) => {
     let keys = Object.keys(settings);
     for (let i = 0; i < keys.length; i++) {
       let settingName = keys[i];
@@ -51,7 +51,7 @@ function checkBools(settings: object) {
   };
 }
 
-async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
+const buildChoicesWithSuggestions = async (context: FieldOverrideContext) => {
   const options: any[] = [{ value: null, label: '- No Mapping -' }];
   if (context !== undefined && context.getSuggestions) {
     const suggestions: any[] = context.getSuggestions();
@@ -74,7 +74,7 @@ async function buildChoicesWithSuggestions(context: FieldOverrideContext) {
   return Promise.resolve(options);
 }
 
-function resolveSetting(path, setting){
+const resolveSetting = (path, setting) => {
   let output = {...setting}
   if(output.hasOwnProperty('editor')){
     let editorName = output.editor;
