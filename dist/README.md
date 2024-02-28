@@ -173,7 +173,7 @@ This will optionally fetch Layer 1's JSON topology from a URL instead of the pro
 
 **Layer 1 Map Data (JSON)**
 
-From the Google Sheet at https://docs.Google.com/spreadsheets/d/1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc/edit#gid=0, click the tab for the sheet named "Topology" along the bottom of the viewport and paste in the content in the most upper-left cell (A1).
+From the Google Sheet at https://docs.google.com/spreadsheets/d/1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc/edit#gid=0, click the tab for the sheet named "Topology" along the bottom of the viewport and paste in the content in the most upper-left cell (A1).
 
 **Layer 1 Default Color**
 
