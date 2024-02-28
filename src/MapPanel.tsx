@@ -129,6 +129,7 @@ export class MapPanel extends Component<Props> {
       'enableCustomEdgeTooltip',
       'customNodeTooltip',
       'customEdgeTooltip',
+      'useConfigurationUrl',
 
       'resolvedLat',
       'resolvedLng',
@@ -253,6 +254,7 @@ export class MapPanel extends Component<Props> {
     }
     // in the case that we don't want to fetch from a url, return a promise with local data
     return new Promise((resolve) => {
+      console.log(this.mapCanvas?.current?.topology?.[layer]);
       if (this.mapCanvas?.current?.topology?.[layer]){
         resolve(JSON.stringify(this.mapCanvas.current.topology[layer]));
       }
@@ -273,7 +275,7 @@ export class MapPanel extends Component<Props> {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
 
-    this.mapCanvas.current.updateTopology = this.updateMapJson;
+    this.mapCanvas.current.updateTopology = ()=>{ console.log("I would now do 'this.updateMapJson'"); } ;
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
@@ -334,7 +336,8 @@ export class MapPanel extends Component<Props> {
     PubSub.subscribe(
       'updateTopologyData',
       () => {
-        this.updateMapJson(this.mapCanvas.current['topology']);
+        console.log("I would now do updateMapJson...");
+        //this.updateMapJson(this.mapCanvas.current['topology']);
       },
       this.mapCanvas.current
     );
@@ -344,12 +347,39 @@ export class MapPanel extends Component<Props> {
   }
 
   componentDidUpdate() {
-    this.updateMap();
+    const { options, fieldConfig } = this.props;
 
     let changed = this.calculateOptionsChanges();
 
+    if(changed.indexOf("useConfigurationUrl") >= 0){
+      if(!options.useConfigurationUrl){
+        console.log('doing update in mapPanel')
+        let thresholds: any[];
+        thresholds = [];
+        fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
+          thresholds.push({
+            color: this.theme.visualization.getColorByName(threshold.color),
+            value: threshold.value,
+          });
+        });
+        options.thresholds = thresholds;
+        options.zIndexBase = 200;
+
+        // need to do something here to kill and rebuild the whole map canvas element.
+        this.mapCanvas.current.options = JSON.parse(JSON.stringify(options));
+        this.mapCanvas.current.shadow.remove();
+        this.mapCanvas.current.shadow = null;
+        this.mapCanvas.current.render();
+        this.mapCanvas.current.newMap();
+        this.mapCanvas.current.topology = null;
+
+      }
+    }
+
+    this.updateMap();
+
     if (changed.length > 0) {
-      this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
+      this.mapCanvas.current.updateMapOptions({ options: options, changed: changed });
     }
   }
 
