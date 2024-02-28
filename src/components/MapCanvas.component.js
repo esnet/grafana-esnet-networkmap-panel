@@ -54,6 +54,7 @@ export class MapCanvas extends BindableHTMLElement {
     this._topology = null;
     this._options = null;
     this._selection = false;
+    this._remoteLoaded = false;
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = [false, false, false];
@@ -304,10 +305,13 @@ export class MapCanvas extends BindableHTMLElement {
         self._options.enableEditing = false;
         self.disableEditing();
         let topo = [];
-        for(var i=0; i<self._options.layers.length; i++){
-          topo.push(JSON.parse(self._options.layers[i].mapjson));
+        for(var i=0; i<newOptions.layers.length; i++){
+          topo.push(JSON.parse(newOptions.layers[i].mapjson));
         }
+        console.log(topo);
         self._topology = topo;
+        self.topology = topo;
+        self._remoteLoaded = true;
         self.shadow.remove();
         self.shadow = null;
         self.render();
@@ -315,7 +319,8 @@ export class MapCanvas extends BindableHTMLElement {
         self.sideBar && self.sideBar.render();
       }
       // if we have a hit in cache, create a merged options object from cache
-      if(this.optionsCache[this.options["configurationUrl"]]){
+      if(self.optionsCache[self.options["configurationUrl"]]){
+        console.log("cache short-circuit", self.optionsCache[self.options["configurationUrl"]]);
         populateOptionsAndTopology();
         return
       }
@@ -333,7 +338,12 @@ export class MapCanvas extends BindableHTMLElement {
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
 
-    this.maybeFetchOptions();
+    console.log('maybeFetchOptions...', changed);
+    if(wasChanged('useConfigurationUrl', changed)){
+      this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
+      this.maybeFetchOptions();
+      return
+    }
 
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy
@@ -749,6 +759,7 @@ export class MapCanvas extends BindableHTMLElement {
 
 
       <div id='map-${this.instanceId}'>
+        <div class="loading-overlay" style="background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">Loading Topology Data...</div>
         <div class='home-overlay'>
             <div class="button tight-form-func" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠
