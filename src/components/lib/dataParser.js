@@ -1,6 +1,6 @@
 import { DataFrameView } from '@grafana/data';
 
-const EDGE_ENDPT_DELIMITER = '--';
+const ENDPOINT_DELIMITER = '--';
 
 export function parseData(data, mapData, colors, fields, layer) {
   // helper function to parse grafana colors
@@ -153,7 +153,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[srcKey]}${EDGE_ENDPT_DELIMITER}${row[dstKey]}`,
+          azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
           inboundValue: row[inboundKey],
           outboundValue: row[outboundKey],
         });
@@ -162,7 +162,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[dstKey]}${EDGE_ENDPT_DELIMITER}${row[srcKey]}`, // assemble the edge name backwards
+          azName: `${row[dstKey]}${ENDPOINT_DELIMITER}${row[srcKey]}`, // assemble the edge name backwards
           // this will cause us to have a situation where we match on the reverse of the
           // normal edge. our outbound key becomes the inbound value for the z-a edge
           inboundValue: row[outboundKey],
@@ -172,7 +172,7 @@ export function parseData(data, mapData, colors, fields, layer) {
         parsedData.push({
           in: row[srcKey],
           out: row[dstKey],
-          azName: `${row[srcKey]}${EDGE_ENDPT_DELIMITER}${row[dstKey]}`,
+          azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
           inboundValue: row[inboundKey],
           outboundValue: null,
         });
@@ -232,8 +232,8 @@ export function parseData(data, mapData, colors, fields, layer) {
     // create names
     edge.nodeA = getDisplayName(nodeA);
     edge.nodeZ = getDisplayName(nodeZ);
-    edge.AZname = `${nodeA}${EDGE_ENDPT_DELIMITER}${nodeZ}`;
-    edge.ZAname = `${nodeZ}${EDGE_ENDPT_DELIMITER}${nodeA}`;
+    edge.AZname = `${nodeA}${ENDPOINT_DELIMITER}${nodeZ}`;
+    edge.ZAname = `${nodeZ}${ENDPOINT_DELIMITER}${nodeA}`;
     let matchAZ = parsedData.find((d) => d.azName === edge.AZname);
     let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
 
