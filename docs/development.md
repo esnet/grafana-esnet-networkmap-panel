@@ -17,13 +17,13 @@ Project setup:
 
 Pre-requisites: Both Node 14.21.3 (LTS Fermium) and Yarn must be installed. Later builds may not build or your mileage may vary.
 
-1. Install required dependencies via Yarn, as normal:
+2. Install required dependencies via Yarn, as normal:
 
 ```
 $ yarn install
 ```
 
-2. Configure Grafana to read plugins from the parent directory of the project.
+3. Configure Grafana to read plugins from the parent directory of the project.
 
 When installed as a service, the most likely place for the config file is `/usr/local/etc/grafana/grafana.ini`
 For exmaple, if the project is located in /Users/myuser/grafana-plugins/grafana-esnet-networkmap-panel, set the
@@ -38,7 +38,9 @@ dist directory to the correct location.
 
 Mapping only needs to be done once. Restart Grafana or the container after mapping is complete.
 
-2. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
+4. Build the project once using `make dev`. This will create source maps permit setting of breakpoints in Chrome Debugger during development. Note that this must be run at least once and may require rerunning periodically if the plugin is being developed in the Grafana webapp.
+
+5. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
 
 This will update the files in the dist directory.
 
@@ -63,3 +65,10 @@ $ yarn run build_dts
 
 7. Enter edit mode in the newly added panel. You should be able to view a map (and it's sidebar when enabled) plus work with the
 Grafana sidebar on the right to configure the panel.
+
+### Troubleshooting
+
+Q1. I cannot set breakpoints in TypeScript files in the Chrome debugger. What is going on?
+
+A1. It is possible that the project was built using `make prod` without running `make dev` first. `make dev` will create the source
+    maps files in the dist directory allowing setting of breakpoints within TypeScript.
