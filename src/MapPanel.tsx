@@ -228,44 +228,6 @@ export class MapPanel extends Component<Props> {
     return output;
   }
 
-  resolveMapData(layer: number, replaceVariables) {
-    const { options } = this.props;
-    // if we want to fetch from a url, check the cache or return a live response
-    if (options.layers[layer]['jsonFromUrl']) {
-      let jsonUrl = replaceVariables(options.layers[layer]['mapjsonUrl']);
-      if (this.mapjsonCache[layer][jsonUrl]) {
-        // if we have a cached copy of the response, return it wrapped in a promise
-        return new Promise((resolve) => {
-          resolve(this.mapjsonCache[layer][jsonUrl]);
-        });
-      }
-      // otherwise return a promise from `fetch`
-      return fetch(jsonUrl)
-        .then((response) => {
-          this.mapjsonCache[layer][jsonUrl] = response.text();
-          return this.mapjsonCache[layer][jsonUrl];
-        })
-        .catch((error) => {
-          // Handle the error
-          // this is important logging for end users.
-          console.error('Failed to fetch JSON from URL: ', encodeURI(jsonUrl));
-          return JSON.stringify({ nodes: [], edges: [] });
-        });
-    }
-    // in the case that we don't want to fetch from a url, return a promise with local data
-    return new Promise((resolve) => {
-      console.log(this.mapCanvas?.current?.topology?.[layer]);
-      if (this.mapCanvas?.current?.topology?.[layer]){
-        resolve(JSON.stringify(this.mapCanvas.current.topology[layer]));
-      }
-      if (options.layers[layer]['mapjson']) {
-        resolve(options.layers[layer]['mapjson']); // if local data is set, return it
-      } else {
-        resolve({ nodes: [], edges: [] }); // default value: empty layer
-      }
-    });
-  }
-
   updateMap() {
     const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
@@ -275,7 +237,7 @@ export class MapPanel extends Component<Props> {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
 
-    this.mapCanvas.current.updateTopology = ()=>{ console.log("I would now do 'this.updateMapJson'"); } ;
+    this.mapCanvas.current.updateTopology = this.updateMapJson;
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
@@ -303,41 +265,49 @@ export class MapPanel extends Component<Props> {
       { nodes: [], edges: [] },
       { nodes: [], edges: [] },
     ]
+    let topologyData = [
+      "",
+      "",
+      "",
+    ]
 
-    try {
-      if (data) {
-        Promise.all([
-          this.resolveMapData(0, replaceVariables),
-          this.resolveMapData(1, replaceVariables),
-          this.resolveMapData(2, replaceVariables),
-        ]).then((topologyData) => {
-          for(let i=0; i<LAYER_LIMIT; i++){
-            try {
-              // @ts-ignore
-              topology[i] = parseData(data, topologyData[i], colors[i], fields[i], i);
-            } catch(e) {
-              if(!this.mapCanvas.jsonResults){
-                this.mapCanvas.jsonResults = [];
-              }
-              // @ts-ignore
-              topology[i] = topologyData[i];
-              console.error(e);
-            }
-          }
-          this.mapCanvas.current.updateMapTopology(topology);
-          this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
-          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
-        });
+    for(let layer=0; layer<LAYER_LIMIT; layer++){
+
+      // if we have an existing in-memory copy, use it
+      if (this.mapCanvas?.current?.topology?.[layer]){
+        topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
+      } else if (options.layers[layer]['mapjson']) {
+        topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
+      } 
+
+      try {
+        // here, we parse the topology data (as strings in topologyData)
+        // and enrich it with analytics data (from 'data'). This function also
+        // parses the topologyData for errors. In the case that we have an error
+        // we pass the topologyData along to MapCanvas to figure out what went wrong.
+        // Overall, this mechanism should be simplified and generalized so we can
+        // use this outside of a Grafana context.
+        // @ts-ignore
+        topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer);
+      } catch(e) {
+        // ensure that the mapcanvas has jsonResults set up so it can collect errors.
+        if(!this.mapCanvas.current.jsonResults){
+          this.mapCanvas.current.jsonResults = [];
+        }
+        // @ts-ignore
+        topology[layer] = topologyData[layer];
+        console.error(e);
       }
-    } catch (error) {
     }
+    this.mapCanvas.current.updateMapTopology(topology);
+    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+    PubSub.publish('hideTooltip', null, this.mapCanvas.current);
 
     PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
     PubSub.subscribe(
       'updateTopologyData',
       () => {
-        console.log("I would now do updateMapJson...");
-        //this.updateMapJson(this.mapCanvas.current['topology']);
+        this.updateMapJson(this.mapCanvas.current['topology']);
       },
       this.mapCanvas.current
     );
@@ -353,7 +323,6 @@ export class MapPanel extends Component<Props> {
 
     if(changed.indexOf("useConfigurationUrl") >= 0){
       if(!options.useConfigurationUrl){
-        console.log('doing update in mapPanel')
         let thresholds: any[];
         thresholds = [];
         fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
