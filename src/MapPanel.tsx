@@ -244,22 +244,7 @@ export class MapPanel extends Component<Props> {
 
     let colors: any[] = [];
     let fields: any[] = [];
-    for(let i=0; i<LAYER_LIMIT; i++){
-      if(!options.layers[i]){ continue; }
-      colors.push({
-        defaultColor: this.mapCanvas?.current?.options?.layers?.[i]?.color || options.layers[i].color,
-        nodeThresholds: options.layers[i].nodeThresholds?.steps || [],
-      })
-      fields.push({
-        srcField: options.layers[i].srcField,
-        dstField: options.layers[i].dstField,
-        inboundValueField: options.layers[i].inboundValueField,
-        outboundValueField: options.layers[i].outboundValueField,
-        endpointId: options.layers[i].endpointId,
-        nodeNameMatchField: options.layers[i].nodeNameMatchField,
-        nodeValueField: options.layers[i].nodeValueField,
-      })
-    }
+
     let topology = [
       { nodes: [], edges: [] },
       { nodes: [], edges: [] },
@@ -272,7 +257,20 @@ export class MapPanel extends Component<Props> {
     ]
 
     for(let layer=0; layer<LAYER_LIMIT; layer++){
-
+      if(!options.layers[layer]){ continue; }
+      colors.push({
+        defaultColor: this.mapCanvas?.current?.options?.layers?.[layer]?.color || options.layers[layer].color,
+        nodeThresholds: options.layers[layer].nodeThresholds?.steps || [],
+      })
+      fields.push({
+        srcField: options.layers[layer].srcField,
+        dstField: options.layers[layer].dstField,
+        inboundValueField: options.layers[layer].inboundValueField,
+        outboundValueField: options.layers[layer].outboundValueField,
+        endpointId: options.layers[layer].endpointId,
+        nodeNameMatchField: options.layers[layer].nodeNameMatchField,
+        nodeValueField: options.layers[layer].nodeValueField,
+      })
       // if we have an existing in-memory copy, use it
       if (this.mapCanvas?.current?.topology?.[layer]){
         topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
