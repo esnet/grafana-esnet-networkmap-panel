@@ -308,7 +308,6 @@ export class MapCanvas extends BindableHTMLElement {
         for(var i=0; i<newOptions.layers.length; i++){
           topo.push(JSON.parse(newOptions.layers[i].mapjson));
         }
-        console.log(topo);
         self._topology = topo;
         self.topology = topo;
         self._remoteLoaded = true;
@@ -320,7 +319,6 @@ export class MapCanvas extends BindableHTMLElement {
       }
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
-        console.log("cache short-circuit", self.optionsCache[self.options["configurationUrl"]]);
         populateOptionsAndTopology();
         return
       }
@@ -338,7 +336,6 @@ export class MapCanvas extends BindableHTMLElement {
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
 
-    console.log('maybeFetchOptions...', changed);
     if(wasChanged('useConfigurationUrl', changed)){
       this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
       this.maybeFetchOptions();
@@ -348,7 +345,7 @@ export class MapCanvas extends BindableHTMLElement {
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy
     changed.forEach((k)=>{
-      this._options[k] = options[k];
+      utils.setPath(this._options, k, utils.resolvePath(options, k)) ;
     })
 
     function wasChanged(option, changes){

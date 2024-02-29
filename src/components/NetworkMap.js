@@ -93,7 +93,6 @@ export default class NetworkMap {
   }
 
   renderMapLayers() {
-    console.log("renderMapLayers", this.mapCanvas.topology);
     if(this.mapCanvas.topology){
         function getDisplayName(nodeName, nodes){
           var displayName = nodeName;
