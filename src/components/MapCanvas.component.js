@@ -54,11 +54,13 @@ export class MapCanvas extends BindableHTMLElement {
     this._topology = null;
     this._options = null;
     this._selection = false;
+    this._remoteLoaded = false;
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = [false, false, false];
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
+    this.optionsCache = {};
   }
 
   // connect component
@@ -112,6 +114,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(this.options && this.options.legendDefaultBehavior){
       this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
+    this.maybeFetchOptions();
 
     const params = utils.getUrlSearchParams();
     if (
@@ -244,13 +247,105 @@ export class MapCanvas extends BindableHTMLElement {
     this.leafletMap && this.leafletMap.dragging.disable();
   }
 
+  maybeFetchOptions(){
+    if(this.options["useConfigurationUrl"]){
+      let self = this;
+      let maskedKeys = {
+        "showLegend": "masked",
+        "legendColumnLength": "masked",
+        "legendPosition": "masked",
+        "legendDefaultBehavior": "masked",
+        "customEdgeTooltip": "masked",
+        "customNodeTooltip": "masked",
+        "enableCustomEdgeTooltip": "masked",
+        "enableCustomNodeTooltip": "masked",
+        "enableEdgeAnimation": "masked",
+        "enableNodeAnimation": "masked",
+        "enableScrolling": "masked",
+        "showViewControls": "masked",
+        "thresholds": "masked",
+      }
+      let maskedLayerKeys = {
+        "nodeThresholds": "masked",
+        "nodeNameMatchField": "masked",
+        "nodeValueField": "masked",
+        "srcField": "masked",
+        "dstField": "masked",
+        "inboundValueField": "masked",
+        "outboundValueField": "masked",
+        "dashboardNodeVar": "masked",
+        "dashboardEdgeSrcVar": "masked",
+        "dashboardEdgeDstVar": "masked",
+      }
+
+      function populateOptionsAndTopology(){
+        let newOptions = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
+
+        Object.keys(newOptions).forEach((key)=>{
+          // deal with per-layer options in a more nuanced way
+          if(key == "layers"){
+            for(let i=0; i<utils.LAYER_LIMIT; i++){
+              if(!newOptions.layers[i]) continue;
+              Object.keys(newOptions.layers[i]).forEach((layerKey)=>{
+                // if this layer option is not masked, set it on the in-memory options object.
+                if(!maskedLayerKeys[layerKey]){
+                  self._options.layers[i][layerKey] = newOptions.layers[i][layerKey];
+                }
+              })
+            }
+            // stop processing the key "layers" here, moving on to the next key in the loop.
+            return
+          }
+          // if our option is not masked, set it on the in-memory options object.
+          if(!maskedKeys[key]){
+            self._options[key] = newOptions[key];
+          }
+        })
+        // never allow editing on a configuration populated from a URL
+        self._options.enableEditing = false;
+        self.disableEditing();
+        let topo = [];
+        for(var i=0; i<newOptions.layers.length; i++){
+          topo.push(JSON.parse(newOptions.layers[i].mapjson));
+        }
+        self._topology = topo;
+        self.topology = topo;
+        self._remoteLoaded = true;
+        self.shadow.remove();
+        self.shadow = null;
+        self.render();
+        self.newMap();
+        self.sideBar && self.sideBar.render();
+      }
+      // if we have a hit in cache, create a merged options object from cache
+      if(self.optionsCache[self.options["configurationUrl"]]){
+        populateOptionsAndTopology();
+        return
+      }
+      // otherwise, no hit in cache, let's grab them from the URL
+      // XXX need to send authentication headers here...
+      fetch(this.options["configurationUrl"]).then((response)=>{
+        response.json().then((config)=>{
+          self.optionsCache[self.options["configurationUrl"]] = config;
+          populateOptionsAndTopology();
+        })
+      })
+    }
+  }
+
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
 
+    if(wasChanged('useConfigurationUrl', changed)){
+      this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
+      this.maybeFetchOptions();
+      return
+    }
+
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy
-    Object.keys(options).forEach((k)=>{
-      this._options[k] = options[k];
+    changed.forEach((k)=>{
+      utils.setPath(this._options, k, utils.resolvePath(options, k)) ;
     })
 
     function wasChanged(option, changes){
@@ -661,6 +756,7 @@ export class MapCanvas extends BindableHTMLElement {
 
 
       <div id='map-${this.instanceId}'>
+        <div class="loading-overlay" style="background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">Loading Topology Data...</div>
         <div class='home-overlay'>
             <div class="button tight-form-func" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠

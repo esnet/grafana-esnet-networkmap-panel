@@ -129,6 +129,7 @@ export class MapPanel extends Component<Props> {
       'enableCustomEdgeTooltip',
       'customNodeTooltip',
       'customEdgeTooltip',
+      'useConfigurationUrl',
 
       'resolvedLat',
       'resolvedLng',
@@ -227,104 +228,78 @@ export class MapPanel extends Component<Props> {
     return output;
   }
 
-  resolveMapData(layer: number, replaceVariables) {
-    const { options } = this.props;
-    // if we want to fetch from a url, check the cache or return a live response
-    if (options.layers[layer]['jsonFromUrl']) {
-      let jsonUrl = replaceVariables(options.layers[layer]['mapjsonUrl']);
-      if (this.mapjsonCache[layer][jsonUrl]) {
-        // if we have a cached copy of the response, return it wrapped in a promise
-        return new Promise((resolve) => {
-          resolve(this.mapjsonCache[layer][jsonUrl]);
-        });
-      }
-      // otherwise return a promise from `fetch`
-      return fetch(jsonUrl)
-        .then((response) => {
-          this.mapjsonCache[layer][jsonUrl] = response.text();
-          return this.mapjsonCache[layer][jsonUrl];
-        })
-        .catch((error) => {
-          // Handle the error
-          // this is important logging for end users.
-          console.error('Failed to fetch JSON from URL: ', encodeURI(jsonUrl));
-          return JSON.stringify({ nodes: [], edges: [] });
-        });
-    }
-    // in the case that we don't want to fetch from a url, return a promise with local data
-    return new Promise((resolve) => {
-      if (options.layers[layer]['mapjson']) {
-        resolve(options.layers[layer]['mapjson']); // if local data is set, return it
-      } else {
-        resolve({ nodes: [], edges: [] }); // default value: empty layer
-      }
-    });
-  }
-
   updateMap() {
     const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
-    this.mapCanvas.current.updateTopology = this.updateMapJson;
     if (fieldConfig.defaults?.unit) {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
+
+    this.mapCanvas.current.updateTopology = this.updateMapJson;
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
 
     let colors: any[] = [];
     let fields: any[] = [];
-    for(let i=0; i<LAYER_LIMIT; i++){
-      if(!options.layers[i]){ continue; }
-      colors.push({
-        defaultColor: options.layers[i].color,
-        nodeThresholds: options.layers[i].nodeThresholds?.steps || [],
-      })
-      fields.push({
-        srcField: options.layers[i].srcField,
-        dstField: options.layers[i].dstField,
-        inboundValueField: options.layers[i].inboundValueField,
-        outboundValueField: options.layers[i].outboundValueField,
-        endpointId: options.layers[i].endpointId,
-        nodeNameMatchField: options.layers[i].nodeNameMatchField,
-        nodeValueField: options.layers[i].nodeValueField,
-      })
-    }
+
     let topology = [
       { nodes: [], edges: [] },
       { nodes: [], edges: [] },
       { nodes: [], edges: [] },
     ]
+    let topologyData = [
+      "",
+      "",
+      "",
+    ]
 
-    try {
-      if (data) {
-        Promise.all([
-          this.resolveMapData(0, replaceVariables),
-          this.resolveMapData(1, replaceVariables),
-          this.resolveMapData(2, replaceVariables),
-        ]).then((topologyData) => {
-          for(let i=0; i<LAYER_LIMIT; i++){
-            try {
-              // @ts-ignore
-              topology[i] = parseData(data, topologyData[i], colors[i], fields[i], i);
-            } catch(e) {
-              if(!this.mapCanvas.jsonResults){
-                this.mapCanvas.jsonResults = [];
-              }
-              // @ts-ignore
-              topology[i] = topologyData[i];
-              console.error(e);
-            }
-          }
-          this.mapCanvas.current.updateMapTopology(topology);
-          this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
-          PubSub.publish('hideTooltip', null, this.mapCanvas.current);
-        });
+    for(let layer=0; layer<LAYER_LIMIT; layer++){
+      if(!options.layers[layer]){ continue; }
+      colors.push({
+        defaultColor: this.mapCanvas?.current?.options?.layers?.[layer]?.color || options.layers[layer].color,
+        nodeThresholds: options.layers[layer].nodeThresholds?.steps || [],
+      })
+      fields.push({
+        srcField: options.layers[layer].srcField,
+        dstField: options.layers[layer].dstField,
+        inboundValueField: options.layers[layer].inboundValueField,
+        outboundValueField: options.layers[layer].outboundValueField,
+        endpointId: options.layers[layer].endpointId,
+        nodeNameMatchField: options.layers[layer].nodeNameMatchField,
+        nodeValueField: options.layers[layer].nodeValueField,
+      })
+      // if we have an existing in-memory copy, use it
+      if (this.mapCanvas?.current?.topology?.[layer]){
+        topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
+      } else if (options.layers[layer]['mapjson']) {
+        topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
+      } 
+
+      try {
+        // here, we parse the topology data (as strings in topologyData)
+        // and enrich it with analytics data (from 'data'). This function also
+        // parses the topologyData for errors. In the case that we have an error
+        // we pass the topologyData along to MapCanvas to figure out what went wrong.
+        // Overall, this mechanism should be simplified and generalized so we can
+        // use this outside of a Grafana context.
+        // @ts-ignore
+        topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer);
+      } catch(e) {
+        // ensure that the mapcanvas has jsonResults set up so it can collect errors.
+        if(!this.mapCanvas.current.jsonResults){
+          this.mapCanvas.current.jsonResults = [];
+        }
+        // @ts-ignore
+        topology[layer] = topologyData[layer];
+        console.error(e);
       }
-    } catch (error) {
     }
+    this.mapCanvas.current.updateMapTopology(topology);
+    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
+    PubSub.publish('hideTooltip', null, this.mapCanvas.current);
 
     PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
     PubSub.subscribe(
@@ -340,12 +315,38 @@ export class MapPanel extends Component<Props> {
   }
 
   componentDidUpdate() {
-    this.updateMap();
+    const { options, fieldConfig } = this.props;
 
     let changed = this.calculateOptionsChanges();
 
+    if(changed.indexOf("useConfigurationUrl") >= 0){
+      if(!options.useConfigurationUrl){
+        let thresholds: any[];
+        thresholds = [];
+        fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
+          thresholds.push({
+            color: this.theme.visualization.getColorByName(threshold.color),
+            value: threshold.value,
+          });
+        });
+        options.thresholds = thresholds;
+        options.zIndexBase = 200;
+
+        // need to do something here to kill and rebuild the whole map canvas element.
+        this.mapCanvas.current.options = JSON.parse(JSON.stringify(options));
+        this.mapCanvas.current.shadow.remove();
+        this.mapCanvas.current.shadow = null;
+        this.mapCanvas.current.render();
+        this.mapCanvas.current.newMap();
+        this.mapCanvas.current.topology = null;
+
+      }
+    }
+
+    this.updateMap();
+
     if (changed.length > 0) {
-      this.mapCanvas.current.updateMapOptions({ options: this.lastOptions, changed: changed });
+      this.mapCanvas.current.updateMapOptions({ options: options, changed: changed });
     }
   }
 
