@@ -69,6 +69,6 @@ export class MapCanvas extends BindableHTMLElement {
     editingInterface: Element | null | undefined;
     sideBar: Element | null | undefined;
 }
-import { BindableHTMLElement } from "./lib/rubbercement.js";
+import { BindableHTMLElement } from './lib/rubbercement.js';
 import NetworkMap from "./NetworkMap.js";
 //# sourceMappingURL=MapCanvas.component.d.ts.map
