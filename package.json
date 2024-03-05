@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build --mode module && vite build --mode grafana",
     "build_dts": "tsc -d --declarationDir dist --declarationMap --emitDeclarationOnly",
     "lint": "eslint . --ext .ts,.tsx,.js,.jsx --cache --report-unused-disable-directives --ignore-path ./.gitignore --max-warnings 0",
     "preview": "vite preview",
@@ -51,9 +51,9 @@
     "css-loader": "^6.7.1",
     "emotion": "10.0.27",
     "eslint": "^8.56.0",
+    "eslint-plugin-jsdoc": "^48.2.0",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
-    "eslint-plugin-jsdoc": "^48.2.0",
     "glob": "^10.0.0",
     "grafana-plugin-support": "latest",
     "identity-obj-proxy": "3.0.0",
@@ -73,6 +73,7 @@
     "tsconfig-paths": "^4.1.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
+    "vitest-canvas-mock": "^0.3.3",
     "webdriverio": "^8.32.3"
   },
   "main": "index.js",
