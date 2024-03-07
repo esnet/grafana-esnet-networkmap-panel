@@ -105,6 +105,8 @@ describe( "Class MapCanvas", () => {
               "boundaries": null,
               "labels": null,
             },
+            "useConfigurationUrl": false,
+            "configurationUrl": "",
             "edgeWidth":3,
             "editMode":true,
             "nodeWidth":5,
@@ -1297,7 +1299,7 @@ describe( "Class MapCanvas", () => {
         newOptions.viewport.bottom = -90;
         newOptions.viewport.right = 110;
         // set bounding box strategy to 'viewport' and set the viewport coords
-        PubSub.publish("updateMapOptions", {options: newOptions, changed: ["initialViewStrategy", "viewportTopLeftLat", "viewportTopLeftLng", "viewportBottomRightLng", "viewportBottomRightLat"]}, canvas);
+        PubSub.publish("updateMapOptions", {options: newOptions, changed: ["initialViewStrategy", "viewport.top", "viewport.left", "viewport.bottom", "viewport.right"]}, canvas);
         // dispatch a resize event so the window thinks it has been resized. this should trigger viewport zoom logic.
         var resize = new Event('resize');
         window.dispatchEvent(resize);

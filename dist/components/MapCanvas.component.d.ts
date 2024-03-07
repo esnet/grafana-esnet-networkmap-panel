@@ -4,12 +4,14 @@ export class MapCanvas extends BindableHTMLElement {
     _topology: any;
     _options: any;
     _selection: boolean;
+    _remoteLoaded: boolean;
     map: NetworkMap | null;
     leafletMap: any;
     set jsonResults(arg: any);
     get jsonResults(): any;
     legendMinimized: boolean;
     userChangedMapFrame: boolean;
+    optionsCache: {};
     connectedCallback(): void;
     set topology(arg: any);
     get topology(): any;
@@ -42,6 +44,7 @@ export class MapCanvas extends BindableHTMLElement {
     enableEditing(): void;
     enableScrolling(): void;
     disableScrolling(): void;
+    maybeFetchOptions(): void;
     updateMapOptions(changedOptions: any): void;
     shadow: HTMLDivElement | null | undefined;
     updateMapTopology(newTopology: any): void;

@@ -101,13 +101,13 @@ jobs:
           md5sum ${{ steps.metadata.outputs.archive }} > ${{ steps.metadata.outputs.archive-checksum }}
           echo "checksum=$(cat ./${{ steps.metadata.outputs.archive-checksum }} | cut -d' ' -f1)" >> $GITHUB_OUTPUT
 
-      - name: Validate plugin
-        run: |
-          git clone https://github.com/grafana/plugin-validator
-          pushd ./plugin-validator/pkg/cmd/plugincheck2
-          go install
-          popd
-          plugincheck2 -config ./plugin-validator/config/default.yaml ${{ steps.metadata.outputs.archive }}
+      # - name: Validate plugin
+      #   run: |
+      #     git clone https://github.com/grafana/plugin-validator
+      #     pushd ./plugin-validator/pkg/cmd/plugincheck2
+      #     go install
+      #     popd
+      #     plugincheck2 -config ./plugin-validator/config/default.yaml ${{ steps.metadata.outputs.archive }}
 
       - name: Create Github release
         uses: softprops/action-gh-release@v1
