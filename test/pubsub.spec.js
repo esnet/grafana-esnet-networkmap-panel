@@ -1,5 +1,5 @@
 import * as pubsub from '../src/components/lib/pubsub.js';
-import { expect, vi, describe } from 'vitest';
+import { expect, vi, describe, it } from 'vitest';
 const PrivateMessageBus = pubsub.PrivateMessageBus;
 const PubSub = pubsub.PubSub;
 

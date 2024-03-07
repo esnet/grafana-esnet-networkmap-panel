@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from 'types';
-import 'components/MapCanvas.component.js';
+import './components/MapCanvas.component.js';
 interface Props extends PanelProps<MapOptions> {
 }
 export declare class MapPanel extends Component<Props> {

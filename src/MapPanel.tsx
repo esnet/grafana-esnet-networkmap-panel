@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
 import { MapOptions } from 'types';
-import { parseData } from 'components/lib/dataParser';
-import { sanitizeTopology } from 'components/lib/topologyTools';
-import 'components/MapCanvas.component.js';
-import { PubSub } from 'components/lib/pubsub.js';
+import { parseData } from './components/lib/dataParser';
+import { sanitizeTopology } from './components/lib/topologyTools';
+import './components/MapCanvas.component.js';
+import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
-import { resolvePath, setPath, LAYER_LIMIT } from "components/lib/utils.js"
+import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
 interface Props extends PanelProps<MapOptions> {}
 
 export class MapPanel extends Component<Props> {

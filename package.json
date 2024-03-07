@@ -18,7 +18,8 @@
     "server": "docker-compose up --build",
     "sign": "npx @grafana/sign-plugin@latest --yes",
     "start": "yarn watch",
-    "test": "vitest",
+    "test:watch": "vitest",
+    "test": "vitest run",
     "test:coverage": "vitest --coverage",
     "old_test": "karma start --single-run --browsers ChromeHeadless",
     "old_test:ci": "karma start --single-run --browsers ChromeHeadless",
@@ -73,7 +74,6 @@
     "tsconfig-paths": "^4.1.0",
     "typescript": "^5.2.2",
     "vite": "^5.1.0",
-    "vitest-canvas-mock": "^0.3.3",
     "webdriverio": "^8.32.3"
   },
   "main": "index.js",

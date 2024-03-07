@@ -42,8 +42,7 @@ const ATTRIBUTES = {
     "width": types.number,
     "startlat": types.number,
     "startlng": types.number,
-}
-
+};
 
 // web component
 export class MapCanvas extends BindableHTMLElement {
@@ -401,7 +400,7 @@ export class MapCanvas extends BindableHTMLElement {
             maplayers.BOUNDARIES[this._options.tileset.boundaries].url,
             maplayers.BOUNDARIES[this._options.tileset.boundaries].attributes).addTo(this.leafletMap);
         }
-        if(this._options.tileset.labels){
+        if(this._options.tileset.labels) {
           L.tileLayer(
             maplayers.LABELS[this._options.tileset.labels].url, 
             maplayers.LABELS[this._options.tileset.labels].attributes).addTo(this.leafletMap);

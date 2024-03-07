@@ -1,6 +1,6 @@
 import React, { useCallback } from 'react';
 import { StandardEditorProps } from '@grafana/data';
-import { PubSub } from 'components/lib/pubsub.js';
+import { PubSub } from './lib/pubsub.js';
 
 export const CoordinateButton: React.FC<StandardEditorProps> = ({ value, onChange, item }) => {
   const getAndSetMapDefaults = useCallback((e: React.SyntheticEvent) => {

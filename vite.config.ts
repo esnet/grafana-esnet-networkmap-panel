@@ -1,10 +1,10 @@
 /// <reference types="vitest" />
-import { resolve } from "path"
-import { defineConfig, UserConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import { resolve } from "path";
+import { defineConfig, UserConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
 
 // https://vitejs.dev/config/
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   console.log(`Configured mode: ${mode}`);
   let baseConfig: Partial<UserConfig> = {
     plugins: [react()],
@@ -12,39 +12,20 @@ export default defineConfig(({mode}) => {
       name: 'jsdom',
       environment: 'jsdom',
       root: './test',
-      globals: true,
       browser: {
         enabled: true,
         headless: true,
         name: 'chrome'
       },
-      deps: {
-        optimizer: {
-          web: {
-            include: ['vitest-canvas-mock']
-          }
-        }
-      },
-      setupFiles: ['./test/setupTests.js'],
-      poolOptions: {
-        threads: {
-          singleThread: true,
-        },
-      },
-      environmentOptions: {
-        jsdom: {
-          resources: 'usable',
-        },
-      },
     }
   };
 
   if (mode === "module") {
-     baseConfig.build = {
+    baseConfig.build = {
       lib: {
         entry: resolve(__dirname, 'src/components/MapCanvas.component.js'),
-      	name: 'ESnet Network Map',
-      	fileName: "esnet-network-map",
+        name: 'ESnet Network Map',
+        fileName: "esnet-network-map",
       },
       emptyOutDir: false
     };
@@ -52,14 +33,22 @@ export default defineConfig(({mode}) => {
   }
 
   if (mode === "grafana") {
-     baseConfig.build = {
+    baseConfig.build = {
       lib: {
         entry: resolve(__dirname, 'src/module.ts'),
-      	name: 'GrafanaESnetNetworkMap',
-	      formats: ['iife'],
-      	fileName: "module",
+        name: 'GrafanaESnetNetworkMap',
+        // formats: ['iife'],
+        fileName: "module",
       },
-      emptyOutDir: false
+      emptyOutDir: false,
+    };
+    baseConfig.resolve = {
+      alias: [
+        {
+          find: /@grafana\/aws-sdk/,
+          replacement: resolve(__dirname, 'node_modules', '@grafana', 'aws-sdk'),
+        },
+      ],
     };
     return baseConfig as UserConfig;
   }

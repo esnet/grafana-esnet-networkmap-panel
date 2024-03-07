@@ -10,8 +10,6 @@
     "declaration": false,
     "rootDir": "../src",
     "baseUrl": "../src",
-    "typeRoots": ["../node_modules/@types"],
-    "types": ["vitest/globals"],
     "resolveJsonModule": true,
     "esModuleInterop": true
   },
@@ -20,7 +18,6 @@
       "module": "commonjs",
       "target": "es5",
       "esModuleInterop": true,
-      "types": ["vitest/globals"],
     },
     "transpileOnly": true
   },
