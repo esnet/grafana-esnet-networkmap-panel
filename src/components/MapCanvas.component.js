@@ -790,7 +790,8 @@ export class MapCanvas extends BindableHTMLElement {
       }
       // if we have ResizeObserver in our context, do some extra watching
       if(typeof(ResizeObserver) != 'undefined'){
-        const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom.apply(this); });
+        // const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom.apply(this); });
+        const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom(); });
         resizeObserver.observe(this.shadow);
       }
     }

@@ -352,7 +352,7 @@ the implementation utilized by Grafana's plugin-e2e package.
 
 You must specify a username and password as a JSON object under playwright/.auth/credentials.json. At the same time,
 e2e/e2e.config.json should be configured to target a particular dashboard for running the tests upon. Use the included
-e2e.confgi.json.sample as a basis for your own e2e.config.json.
+e2e.config.json.sample as a basis for your own e2e.config.json.
 
 Testids should not have to be changed, although you have the option of doing so. The only requirement is that all testids
 therein be unique.
@@ -374,7 +374,7 @@ To run both component and integration tests:
 $ make test
 ```
 
-You also have the option of running component and integration tests seperately, either using make or Yarn (both pairs
+You also have the option of running component and integration tests separately, either using make or Yarn (both pairs
 of shell commands below do the same thing.)
 
 ```sh

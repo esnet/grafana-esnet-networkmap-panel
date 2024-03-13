@@ -3,19 +3,22 @@ import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana
 import { MapOptions } from './types';
 import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
-import 'components/MapCanvas.component.js';
+import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
-interface Props extends PanelProps<MapOptions> {}
+export interface MapPanelProps extends PanelProps<MapOptions> {
+  fieldConfig: any;
+  options: MapOptions;
+}
 
-export class MapPanel extends Component<Props> {
+export class MapPanel extends Component<MapPanelProps> {
   mapCanvas: any;
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
 
-  constructor(props: Props) {
+  constructor(props: MapPanelProps) {
     super(props);
     this.mapCanvas = React.createRef();
     this.mapjsonCache = {
@@ -31,7 +34,7 @@ export class MapPanel extends Component<Props> {
 
   setDashboardVariables() {
     let self = this;
-    return (event) => {
+    return function (event) {
       let setLocation = {};
       for (let i = 0; i < LAYER_LIMIT; i++) {
         const srcVar = 'var-' + self.props.options.layers[i]['dashboardEdgeSrcVar'];
