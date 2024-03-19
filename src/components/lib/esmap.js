@@ -638,6 +638,13 @@ function renderEdgeControl(g, data, ref, layerId) {
   });
 }
 
+// sort parents. sort all parent nodes before all child nodes
+// so we can reliably render them in the correct order.
+function sortParents(a, b){
+  // 
+  if(a.children && a.children.length && b.children && b.children.length)
+}
+
 function renderNodes(g, data, ref, layerId) {
   const defaultNodeColor = ref.options.layers[layerId]["color"];
   var feature = g.selectAll('g.node').data(data.nodes);
