@@ -68,27 +68,6 @@ pluginTest.describe("plugin testing", () => {
     await expect(page.locator('[data-testid*="Search section"]:first-child')).toBeVisible();
   });
 
-  // TODO: disabled for now, not a target to test, but retained for navigational aide if needed
-  pluginTest.skip(`navigate to dashboard ${targetDashboard}`, async ({ page, targets }: { page: Page, targets: ITargets}) => {
-    await page.goto(getHomepageUrl(targets.orgId));
-
-    // promise for list of dashboards to be populated
-    const searchPromise = page.waitForRequest("**/api/search?limit=1000&**");
-    let search: Request | null = null;
-    searchPromise.then(result => {
-      if (!search && result !== null) {
-        search = result;
-      }
-    });
-
-    await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
-    await page.waitForURL("**/dashboards");
-
-    // click the dashboard item for the target dashboard
-    await page.getByText(targetDashboard).click();
-    await page.waitForURL(`**/d/**/${targetDashboard}?orgId=1`);
-  });
-
   // limited testing of sliding switches for hide/show map canvas features
   // TODO: add additional e2e tests, may refactor into seperate tests
   pluginTest("load plugin edit page - view options", async ({ page, targets }: { page: Page, targets: ITargets}) => {
