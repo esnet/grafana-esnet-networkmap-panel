@@ -29,8 +29,9 @@ export const getHostInfo = (credentials: {username: string, password: string}) =
     }[];
     if (portInfo.length === 1) {
       protocolHostPort = `http://${IPAddress || 'localhost'}:${portInfo[0].HostPort}`;
+      const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
       const basicAuthHeader = {
-        "Authorization": `Basic ${btoa(`${credentials.username}:${credentials.password}`)}`
+        "Authorization": `Basic ${credentialsBuf.toString('base64')}`
       };
       const result = { protocolHostPort, basicAuthHeader};
       return result;

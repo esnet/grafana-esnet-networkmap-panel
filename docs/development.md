@@ -26,7 +26,7 @@ $ yarn install
 3. Configure Grafana to read plugins from the parent directory of the project.
 
 When installed as a service, the most likely place for the config file is `/usr/local/etc/grafana/grafana.ini`
-For exmaple, if the project is located in /Users/myuser/grafana-plugins/grafana-esnet-networkmap-panel, set the
+For example, if the project is located in /Users/myuser/grafana-plugins/grafana-esnet-networkmap-panel, set the
 plugins value to the parent directory:
 
 ```grafana.ini
@@ -40,7 +40,13 @@ Mapping only needs to be done once. Restart Grafana or the container after mappi
 
 4. Build the project once using `make dev`. This will create source maps permit setting of breakpoints in Chrome Debugger during development. Note that this must be run at least once and may require rerunning periodically if the plugin is being developed in the Grafana webapp.
 
-5. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
+5. Install Playwright browsers for testing (this only needs to be done once).
+
+```
+npx playwright install
+```
+
+6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
 
 This will update the files in the dist directory.
 
@@ -48,7 +54,7 @@ This will update the files in the dist directory.
 $ make prod
 ```
 
-3. Run the Yarn script `build_dts` to complete the process of building without signing.
+7. Run the Yarn script `build_dts` to complete the process of building without signing.
 
 This will update the files in the dist directory and readies the contents for Grafana. If Grafana is already running,
 and already has its plugins directory mapped (see step 4), there is no need to restart.
@@ -57,14 +63,14 @@ and already has its plugins directory mapped (see step 4), there is no need to r
 $ yarn run build_dts
 ```
 
-4. Open a browser and navigate to your Grafana instance.
+8. Open a browser and navigate to your Grafana instance.
 
-5. Login and create a new dashboard or navigate to the default one.
+9. Login and create a new dashboard or navigate to the default one.
 
-6. Add a new panel to the dashboard. The plugin should be ready for adding as "Network Map Panel".
+10. Add a new panel to the dashboard. The plugin should be ready for adding as "Network Map Panel".
 
-7. Enter edit mode in the newly added panel. You should be able to view a map (and it's sidebar when enabled) plus work with the
-Grafana sidebar on the right to configure the panel.
+11. Enter edit mode in the newly added panel. You should be able to view a map (and its sidebar when enabled) plus work with the
+Grafana sidebar on the right to configure the panel. Follow the instructions in README.md to configure the Grafana panel.
 
 ### Troubleshooting
 

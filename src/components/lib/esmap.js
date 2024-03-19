@@ -827,6 +827,8 @@ export class EsMap {
     this.lastInteractedType = null; // "nodes" or "edges"
     this.showTooltipSubscription = null;
 
+    this.update = this.update.bind(this);
+
     PubSub.subscribe("snapEdges", (data)=>{
       doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
     }, this.mapCanvas)
@@ -1075,7 +1077,7 @@ export class EsMap {
       layerId++;
     })
     var layerId = 0;
-    this.mapLayers.forEach((g)=>{
+    this.mapLayers.forEach((g) => {
       if(!this?.options?.layers?.[layerId]?.visible){
         layerId++;
         return;
