@@ -16,8 +16,8 @@ The plugin will plot traffic information on the network topology, showing bi-dir
 ## Table of Contents
 
 [Dashboard JSON](#Dashboard-JSON)
+
 [Introductory Tutorial](#Introductory-Tutorial)
-[Testing Requirements](#Testing-Requirements)
 
 ## Dashboard JSON
 
@@ -342,48 +342,3 @@ You should now be looking at the main dashboard view. Let's add another panel:
 ### Save your Dashboard
 
 You should now have a dashboard that visualizes a point-in-time snapshot of your network traffic, along with a line graph that shows the network traffic over the the selected Grafana time range.
-
-## Testing Requirements
-
-Jest and Playwright are used to implement unit and integration testing for the plugin, following as closely as needed to
-the implementation utilized by Grafana's plugin-e2e package.
-
-### Test configuration
-
-You must specify a username and password as a JSON object under playwright/.auth/credentials.json. At the same time,
-e2e/e2e.config.json should be configured to target a particular dashboard for running the tests upon. Use the included
-e2e.config.json.sample as a basis for your own e2e.config.json.
-
-Testids should not have to be changed, although you have the option of doing so. The only requirement is that all testids
-therein be unique.
-
-Sample playwright/.auth/credentials.json:
-
-```json
-{
-    "username": "myGrafanaUser",
-    "password": "myGrafanaPassword"
-}
-```
-
-### Test Execution and Reporting
-
-To run both component and integration tests:
-
-```sh
-$ make test
-```
-
-You also have the option of running component and integration tests separately, either using make or Yarn (both pairs
-of shell commands below do the same thing.)
-
-```sh
-$ make test:component
-$ make test:e2e
-
-$ yarn test
-$ yarn e2e
-```
-
-Integration tests are written with the assumption that Google Chrome is installed. Reconfigure in the playwright.config.ts
-file if a different browser is preferred. Test suite files (*.spec) are included in the e2e folder.

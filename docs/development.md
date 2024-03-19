@@ -1,9 +1,17 @@
 
 ## Development Notes
 
-This project was built in Node 18.19.1 (LTS Hydrogen) and intended to be built using Yarn (1.22.0 or higher).
+This project was built in Node 18.19.1 (LTS Hydrogen) and must built using Yarn (1.22.0 or higher).
 
-### Local development
+## Table of Contents
+
+[Local Development](#local-development)
+
+[Troubleshooting](#troubleshooting)
+
+[Testing Requirements](#testing-requirements)
+
+## Local development
 
 Pre-requisite: For local development, Grafana must be running locally as a service or as a Docker container.
 
@@ -15,11 +23,14 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 Project setup:
 
-Pre-requisites: Both Node 18.19.1 (LTS Hydrogen) and Yarn 1.22.0 or higher must be installed. Later builds may not build or your mileage may vary.
+Pre-requisites: Both Node 18.19.1 (LTS Hydrogen) and Yarn 1.22.0 or higher must be installed. Other versions may not build
+and when they do, stability issues, unexpected failures, or loss of functionality may occur.
+
+It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and manage your Node versions.
 
 2. Install required dependencies via Yarn, as normal:
 
-```
+```sh
 $ yarn install
 ```
 
@@ -42,15 +53,15 @@ Mapping only needs to be done once. Restart Grafana or the container after mappi
 
 5. Install Playwright browsers for testing (this only needs to be done once).
 
-```
-npx playwright install
+```sh
+$ npx playwright install
 ```
 
 6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
 
 This will update the files in the dist directory.
 
-```
+```sh
 $ make prod
 ```
 
@@ -59,7 +70,7 @@ $ make prod
 This will update the files in the dist directory and readies the contents for Grafana. If Grafana is already running,
 and already has its plugins directory mapped (see step 4), there is no need to restart.
 
-```
+```sh
 $ yarn run build_dts
 ```
 
@@ -78,3 +89,61 @@ Q1. I cannot set breakpoints in TypeScript files in the Chrome debugger. What is
 
 A1. It is possible that the project was built using `make prod` without running `make dev` first. `make dev` will create the source
     maps files in the dist directory allowing setting of breakpoints within TypeScript.
+
+## Testing Requirements
+
+[Playwright](https://https://playwright.dev/) and Karma-driven [ShouldJS](https://shouldjs.github.io/) are used to implement integration
+and unit testing for the plugin respectively, following as closely as needed to the implementation utilized by Grafana's plugin-e2e
+package.
+
+### Test configuration
+
+You must specify a username and password as a JSON object under playwright/.auth/credentials.json. At the same time,
+e2e/e2e.config.json should be configured to target a particular dashboard for running the tests upon. Use the included
+e2e.config.json.sample as a basis for your own e2e.config.json.
+
+Testids should not have to be changed, although you have the option of doing so. The only requirement is that all testids
+therein be unique.
+
+Sample playwright/.auth/credentials.json:
+
+```json
+{
+    "username": "myGrafanaUser",
+    "password": "myGrafanaPassword"
+}
+```
+
+### Test Browsers
+
+Browser packages utilized by Playwright must be installed globally in order to run the e2e tests. To install them, open a shell command prompt
+and enter:
+
+```sh
+$ npx playwright install
+```
+
+### Test Execution and Reporting
+
+To run both component and integration tests:
+
+```sh
+$ make test
+```
+
+Prior to running the tests,
+
+You also have the option of running component and integration tests separately, either using make or Yarn (both pairs
+of shell commands below do the same thing.)
+
+```sh
+$ make test:component
+$ make test:e2e
+
+$ yarn test
+$ yarn e2e
+```
+
+Integration tests are written with the assumption the Playwright's own browsers are globally installed in the system
+using `npx playwright install`. Reconfigure in the playwright.config.ts file if a different browser is
+preferred. Test suite files (*.spec.js) are included in the e2e folder.
