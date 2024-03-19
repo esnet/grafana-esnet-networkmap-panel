@@ -640,14 +640,39 @@ function renderEdgeControl(g, data, ref, layerId) {
 
 // sort parents. sort all parent nodes before all child nodes
 // so we can reliably render them in the correct order.
-function sortParents(a, b){
-  // 
-  if(a.children && a.children.length && b.children && b.children.length)
+function traceParents(child, parents){
+    parent = parents[child]
+    if(!parent) return [];
+    let output = parent;
+    output = traceParents(parent[0], parents).concat(output)
+    return output
+}
+// determine sort order for node rendering
+function sortNodesForRender(nodes){
+    let parents = {};
+    nodes.forEach((node)=>{
+        if(node.children){
+            node.children.forEach((child)=>{
+                parents[child] = [node.name];
+            })
+        }
+    });
+    // now we have a list of all of the parents. We need to do grandparents, then great-grandparents...
+    nodes.forEach((node)=>{
+        node["parents"] = traceParents(node.name, parents);
+        node["sort"] = node.parents.concat([node.name]).join(".")
+    });
+    nodes.sort((a, b)=>{
+      if(a.sort <  b.sort) return -1;
+      if(a.sort == b.sort) return 0;
+      if(a.sort >  b.sort) return 1;
+    })
+    return nodes;
 }
 
 function renderNodes(g, data, ref, layerId) {
   const defaultNodeColor = ref.options.layers[layerId]["color"];
-  var feature = g.selectAll('g.node').data(data.nodes);
+  var feature = g.selectAll('g.node').data(sortNodesForRender(data.nodes));
   var div = ref.div;
   feature
     .enter()
