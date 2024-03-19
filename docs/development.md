@@ -1,7 +1,7 @@
 
 ## Development Notes
 
-This project was built in Node 14.21.3 (LTS Fermium) and intended to be built using Yarn (1.22.21).
+This project was built in Node 18.19.1 (LTS Hydrogen) and intended to be built using Yarn (1.22.0 or higher).
 
 ### Local development
 
@@ -15,7 +15,7 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 Project setup:
 
-Pre-requisites: Both Node 14.21.3 (LTS Fermium) and Yarn must be installed. Later builds may not build or your mileage may vary.
+Pre-requisites: Both Node 18.19.1 (LTS Hydrogen) and Yarn 1.22.0 or higher must be installed. Later builds may not build or your mileage may vary.
 
 2. Install required dependencies via Yarn, as normal:
 
