@@ -23,7 +23,6 @@ setup('authenticate', async ({ page }: { page: Page }) => {
   // Sometimes login flow sets cookies in the process of several redirects.
   // Wait for the final URL to ensure that the cookies are actually set.
   // Alternatively, you can wait until the page reaches a state where all cookies are set.
-  // await expect(page.getByRole('button', { name: 'View profile and more' })).toBeVisible();
   await page.waitForURL("**/?orgId=1");
   await expect(page.getByTestId('sidemenu')).toBeVisible();
   // End of authentication steps.

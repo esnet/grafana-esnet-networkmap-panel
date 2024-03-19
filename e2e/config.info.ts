@@ -22,12 +22,12 @@ export const getHostInfo = (credentials: {username: string, password: string}) =
   let protocolHostPort;
   const portKeys = Object.keys(Ports);
 
-  if (portKeys.length === 1) {
+  if (portKeys.length > 0) {
     const portInfo = Ports[portKeys[0]] as {
       HostIp: string;
       HostPort: string;
     }[];
-    if (portInfo.length === 1) {
+    if (portInfo.length > 0) {
       protocolHostPort = `http://${IPAddress || 'localhost'}:${portInfo[0].HostPort}`;
       const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
       const basicAuthHeader = {
