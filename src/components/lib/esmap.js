@@ -322,6 +322,43 @@ function addControlPoint(evt, obj, ref, layerId) {
   }
 }
 
+function doChildSnap(nodeData, layerId, mapCanvas, sendSignal){
+    let mapId = "map-" + mapCanvas.instanceId;
+    let layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
+
+    let prevState = PubSub.last("dragStarted", mapCanvas);
+
+    let ll = {};
+    ll.lat = nodeData['coordinate'][0];
+    ll.lng = nodeData['coordinate'][1];
+
+    let childrenSelector = ".node-child-of-" + nodeData.name;
+    let selector = `#${mapId} ${childrenSelector}`;
+
+    // calculate the delta since last drag event
+    let delta = [
+      nodeData.coordinate[0] - prevState?.node?.coordinate[0],
+      nodeData.coordinate[1] - prevState?.node?.coordinate[1]
+    ];
+    // procedure for updating the children:
+    // get all the children that have "nodeData.name" as a parent
+    d3.selectAll(selector)
+        .attr('d', function(d){
+            let oldNodeData = null;
+            if(!!sendSignal){
+              oldNodeData = JSON.parse(JSON.stringify(d));
+            }
+            if(prevState){
+              d.coordinate[0] += delta[0];
+              d.coordinate[1] += delta[1];
+              doEdgeSnap(d, layerId, mapCanvas, sendSignal);
+            }
+            if(!!sendSignal){
+              PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": oldNodeData }, mapCanvas);
+            }
+        })
+}
+
 function doEdgeSnap(nodeData, layerId, mapCanvas, sendSignal){
     var mapId = "map-" + mapCanvas.instanceId;
     var layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
@@ -389,12 +426,13 @@ function renderNodeControl(g, data, ref, layerId){
 
   function dragged(evt, nodeData) {
     var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", { event: evt, node: {...nodeData} }, ref.svg.node());
+    PubSub.publish("dragStarted", { event: evt, node: JSON.parse(JSON.stringify(nodeData)) }, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     nodeData['coordinate'][0] = ll.lat;
     nodeData['coordinate'][1] = ll.lng;
     doEdgeSnap(nodeData, layerId, ref.mapCanvas, false);
+    doChildSnap(nodeData, layerId, ref.mapCanvas, false);
     //--- rerender stuff
     ref.update();
     setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
@@ -412,6 +450,7 @@ function renderNodeControl(g, data, ref, layerId){
     PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, ref.svg.node());
     PubSub.clearLast("dragStarted", ref.svg.node());
     doEdgeSnap(d, layerId, ref.mapCanvas, true);
+    doChildSnap(d, layerId, ref.mapCanvas, true);
     ref.update();
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
@@ -678,10 +717,13 @@ function renderNodes(g, data, ref, layerId) {
     .enter()
     .append('g')
     .attr('class', function(d){
+      var parentClasses = d.parents.map((p)=>{
+          return "node-child-of-" + p;
+      }).join(" ")
       // sanitize name from the node
       var name = sanitizeName(d.name);
       var layerClass = ` l${layerId}`;
-      return 'node node-' + name + layerClass;
+      return `node node-${name} ${layerClass} ${parentClasses}`;
     })
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")
