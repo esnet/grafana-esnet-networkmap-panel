@@ -1,8 +1,11 @@
 NODE=`which node`
 NPM=`which npm`
 GRAFANA_PATH="node_modules/@grafana/toolkit/bin/grafana-toolkit.js"
-BREW=/usr/local/bin/brew
+BREW=$(which brew)
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
+PROJECT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
+CONTAINER_NAME=esnet-networkmap-panel
+CONTAINER_ID=$(shell docker ps -f name=$(CONTAINER_NAME) -q)
 
 .PHONY: prod
 prod:
@@ -23,9 +26,26 @@ run:
 restart:
 	$(BREW) services restart grafana
 
+.PHONY: compose
+compose:
+	# start grafana docker instance and map project to plugin directory on instance
+	docker-compose up -d
+	# get instance info
+	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
+
 .PHONY: test
-test:
+test: compose
 	yarn test
+	yarn e2e
+
+.PHONY: test\:component
+test\:component:
+	yarn test
+
+.PHONY: test\:e2e
+test\:e2e: compose
+	# run e2e tests
+	yarn e2e
 
 .PHONY: testignore
 testignore:

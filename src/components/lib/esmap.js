@@ -827,6 +827,8 @@ export class EsMap {
     this.lastInteractedType = null; // "nodes" or "edges"
     this.showTooltipSubscription = null;
 
+    this.update = this.update.bind(this);
+
     PubSub.subscribe("snapEdges", (data)=>{
       doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
     }, this.mapCanvas)
@@ -873,19 +875,21 @@ export class EsMap {
       },
       this.mapCanvas)
     }
-    //
     let self = this;
 
-    this.leafletMap.on('moveend', function () {
-      self.update();
+    this.leafletMap.on('moveend', () => {
+      this.update();
     });
-    this.leafletMap.on('viewreset', function () {
-      self.update();
+    this.leafletMap.on('viewreset', () => {
+      this.update();
     });
 
-    function updateOptions(options){
-      self.options = options;
-    }
+    // function updateOptions(options){
+    //   self.options = options;
+    // }
+    const updateOptions = (options) => {
+      this.options = options;
+    };
     PubSub.subscribe("updateOptions", updateOptions, this.svg.node());
 
     function clearSelection(){
@@ -904,33 +908,29 @@ export class EsMap {
     }
     PubSub.subscribe("clearSelection", clearSelection, this.svg.node());
 
-    function updateLastInteractedObject(event){
-      if(event){
-        self.lastInteractedObject = event.object;
-        self.lastInteractedType = event.type;
-      } else {
-        self.lastInteractedObject = null;
-        self.lastInteractedType = null;
-      }
+    const updateLastInteractedObject = (event) => {
+        this.lastInteractedObject = event ? event.object : null;
+        this.lastInteractedType = event ? event.type: null;
     }
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
-    function nudge(latOrLng, amount){
-      if (self.lastInteractedType === null || self.lastInteractedObject === null) return;
-      if (self.lastInteractedType == "nodes"){
+    // function nudge(latOrLng, amount){
+    const nudge = (latOrLng, amount) => {
+      if (this.lastInteractedType === null || this.lastInteractedObject === null) return;
+      if (this.lastInteractedType === "nodes") {
         var idx = 0;
         if(latOrLng == "longitude"){
           idx = 1;
         }
-        self.lastInteractedObject.coordinate[idx] += amount;
-        var ll = self.lastInteractedObject.coordinate;
-        d3.selectAll(".cnxn-"+sanitizeName(self.lastInteractedObject.name))
+        this.lastInteractedObject.coordinate[idx] += amount;
+        let ll = this.lastInteractedObject.coordinate;
+        d3.selectAll(".cnxn-"+sanitizeName(this.lastInteractedObject.name))
             // for each edge that we select:
             .attr('d', function (d) {
               // if we are manipulating the "A" end
               // the index of the point we want is 0
               var idx = 0;
-              if(d.nodeZ == self.lastInteractedObject.name){
+              if (d.nodeZ === this.lastInteractedObject.name){
                 // if we are manipulating the "Z" end
                 // the index of the point we want is the last one
                 idx = d.coordinates.length - 1;
@@ -938,11 +938,11 @@ export class EsMap {
               // manipulate the point
               d.coordinates[idx] = ll;
             })
-        self.update();
+        this.update();
       }
     }
 
-    d3.select("body").on("keydown", function(event, d){
+    d3.select("body").on("keydown", (event, d) => {
       switch(event.key){
         case 'ArrowLeft':
           nudge("longitude", -0.05)
@@ -1057,8 +1057,8 @@ export class EsMap {
       layerId++;
     })
     var layerId = 0;
-    this.mapLayers.forEach((g)=>{
-      if(!this?.options?.layers?.[layerId]?.['visible']){
+    this.mapLayers.forEach((g) => {
+      if(!this?.options?.layers?.[layerId]?.visible){
         layerId++;
         return;
       }

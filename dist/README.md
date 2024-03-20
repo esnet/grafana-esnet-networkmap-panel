@@ -13,6 +13,12 @@ The topology can be either geographically referenced against a geographic tilese
 
 The plugin will plot traffic information on the network topology, showing bi-directional traffic flow between nodes.
 
+## Table of Contents
+
+[Dashboard JSON](#Dashboard-JSON)
+
+[Introductory Tutorial](#Introductory-Tutorial)
+
 ## Dashboard JSON
 
 The Introductory Tutorial below is complete, but lengthy. In an effort to get to a demonstration state a bit more quickly, try using this Grafana Dashboard JSON snippet:

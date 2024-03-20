@@ -6,8 +6,9 @@ import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
 import { testJsonSchema } from './lib/utils.js';
-import { types, BindableHTMLElement } from './lib/rubbercement.js'
+import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
+import testIds from '../constants.js';
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -91,7 +92,7 @@ export class MapCanvas extends BindableHTMLElement {
           center: self.map.leafletMap.getCenter(),
           zoom: self.map.leafletMap.getZoom()
         })
-      } 
+      }
     })());
     PubSub.subscribe("getMapViewport", (() => {
       var self = this;
@@ -99,7 +100,7 @@ export class MapCanvas extends BindableHTMLElement {
         PubSub.publish("returnMapViewport", {
           coordinates: self.map.leafletMap.getBounds()
         })
-      } 
+      }
     })());
     window.addEventListener("resize", ()=>{
       this.recalculateMapZoom();
@@ -118,8 +119,8 @@ export class MapCanvas extends BindableHTMLElement {
 
     const params = utils.getUrlSearchParams();
     if (
-      params.editPanel === null || 
-      params.editPanel === undefined || 
+      params.editPanel === null ||
+      params.editPanel === undefined ||
       !this.options.enableEditing
     ) {
       this.disableEditing();
@@ -150,7 +151,7 @@ export class MapCanvas extends BindableHTMLElement {
   set jsonResults(newResults){
     this._jsonResults = newResults;
   }
-  
+
   get updateTopology(){
     return this._updateTopology;
   }
@@ -351,9 +352,9 @@ export class MapCanvas extends BindableHTMLElement {
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
     }
-    if( wasChanged('showLegend', changed) || 
-        wasChanged('customLegend', changed) || 
-        wasChanged('customLegendValue', changed) || 
+    if( wasChanged('showLegend', changed) ||
+        wasChanged('customLegend', changed) ||
+        wasChanged('customLegendValue', changed) ||
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
@@ -375,7 +376,7 @@ export class MapCanvas extends BindableHTMLElement {
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
         wasChanged('enableScrolling', changed) ||
-        wasChanged('resolveLat', changed) || 
+        wasChanged('resolveLat', changed) ||
         wasChanged('resolveLng', changed)
       ){
       this.shadow.remove();
@@ -417,7 +418,7 @@ export class MapCanvas extends BindableHTMLElement {
       }
     }
     this.sideBar && this.sideBar.render();
-    this.map && this.map.renderMap();    
+    this.map && this.map.renderMap();
   }
 
   updateMapDimensions(newDimensions){
@@ -498,7 +499,7 @@ export class MapCanvas extends BindableHTMLElement {
         }
         if(this._options.tileset.labels){
           L.tileLayer(
-            maplayers.LABELS[this._options.tileset.labels].url, 
+            maplayers.LABELS[this._options.tileset.labels].url,
             maplayers.LABELS[this._options.tileset.labels].attributes).addTo(this.leafletMap);
         }
         if(!window[this.id + "mapPosition"] && this._options.initialViewStrategy === 'viewport'){
@@ -514,9 +515,11 @@ export class MapCanvas extends BindableHTMLElement {
     }
     let zoomIn = this.querySelector(".leaflet-control-zoom-in");
     zoomIn?.classList.add("tight-form-func");
+    zoomIn?.setAttribute("data-testid", testIds.zoomInBtn);
     zoomIn?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     let zoomOut = this.querySelector(".leaflet-control-zoom-out")
     zoomOut?.classList.add("tight-form-func");
+    zoomOut?.setAttribute("data-testid", testIds.zoomOutBtn);
     zoomOut?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     this.leafletMap.on("zoomend", (event)=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
@@ -605,7 +608,7 @@ export class MapCanvas extends BindableHTMLElement {
         .leaflet-control { z-index: ${zIndexLayers[8]}; }
         .leaflet-bottom { z-index: ${zIndexLayers[9]}; }
 
-          #map-${this.instanceId} { 
+          #map-${this.instanceId} {
             font-family: sans-serif;
             position:relative;
             background: ${this.options.background};
@@ -615,7 +618,7 @@ export class MapCanvas extends BindableHTMLElement {
               display: ${ selectedOnlyButtonDisplay }
           }
           ${ this.options.enableNodeAnimation ? `
-          .animated-node { 
+          .animated-node {
             animation-name: throb;
             animation-duration: 1.5s;
             animation-iteration-count: infinite;
@@ -683,8 +686,8 @@ export class MapCanvas extends BindableHTMLElement {
     let output = "";
     if(!this.options.showLegend){
       legendContainer.innerHTML = output;
-      return;      
-    } 
+      return;
+    }
     let columns = [];
     let columnLength = this.options.legendColumnLength ? this.options.legendColumnLength : 3;
     let thresholds = this.options.thresholds;
@@ -787,7 +790,7 @@ export class MapCanvas extends BindableHTMLElement {
       }
       // if we have ResizeObserver in our context, do some extra watching
       if(typeof(ResizeObserver) != 'undefined'){
-        const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom.apply(this); });
+        const resizeObserver = new ResizeObserver(()=>{ this.recalculateMapZoom(); });
         resizeObserver.observe(this.shadow);
       }
     }
@@ -819,7 +822,7 @@ export class MapCanvas extends BindableHTMLElement {
       "#clear_selection@onclick": this.clearSelection,
     })
   }
-  
+
 }
 
 // register component

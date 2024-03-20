@@ -1,0 +1,151 @@
+{
+    "datasource": {
+        "type": "marcusolsson-csv-datasource",
+        "uid": "nU_iqSsVk"
+    },
+    "fieldConfig": {
+        "defaults": {
+            "color": {
+                "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                    {
+                        "color": "green",
+                        "value": null
+                    },
+                    {
+                        "color": "red",
+                        "value": 80
+                    }
+                ]
+            }
+        },
+        "overrides": []
+    },
+    "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+    },
+    "id": 4,
+    "options": {
+        "background": "#EDEDED",
+        "enableEdgeAnimation": true,
+        "enableEditing": true,
+        "enableNodeAnimation": true,
+        "enableScrolling": true,
+        "initialViewStrategy": "static",
+        "layers": [
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "dataFieldLabel": "Volume:",
+                "dstFieldLabel": "To:",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "jsonFromUrl": false,
+                "legend": true,
+                "mapjson": "{\"edges\":[], \"nodes\":[]}",
+                "mapjsonUrl": "",
+                "name": "Layer 1",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "srcFieldLabel": "From:",
+                "visible": true
+            },
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "dataFieldLabel": "Volume:",
+                "dstFieldLabel": "To:",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "jsonFromUrl": false,
+                "legend": true,
+                "mapjson": "{\"edges\":[], \"nodes\":[]}",
+                "mapjsonUrl": "",
+                "name": "Layer 2",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "srcFieldLabel": "From:",
+                "visible": true
+            },
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "dataFieldLabel": "Volume:",
+                "dstFieldLabel": "To:",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "jsonFromUrl": false,
+                "legend": true,
+                "mapjson": "{\"edges\":[], \"nodes\":[]}",
+                "mapjsonUrl": "",
+                "name": "Layer 3",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "srcFieldLabel": "From:",
+                "visible": true
+            }
+        ],
+        "legendColumnLength": 3,
+        "legendDefaultBehavior": "visible",
+        "legendPosition": "bottomleft",
+        "showLegend": true,
+        "showSidebar": true,
+        "showViewControls": true,
+        "thresholds": [
+            {
+                "color": "#73BF69",
+                "value": null
+            },
+            {
+                "color": "#F2495C",
+                "value": 80
+            }
+        ],
+        "tileset": {
+            "geographic": "arcgis"
+        },
+        "viewport": {
+            "center": {
+                "lat": 39,
+                "lng": -98
+            },
+            "zoom": 5
+        },
+        "zIndexBase": 200
+    },
+    "targets": [
+        {
+            "datasource": {
+                "type": "marcusolsson-csv-datasource",
+                "uid": "nU_iqSsVk"
+            },
+            "decimalSeparator": ".",
+            "delimiter": ",",
+            "header": true,
+            "ignoreUnknown": false,
+            "refId": "A",
+            "schema": [
+                {
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "skipRows": 0
+        }
+    ],
+    "title": "Panel Title",
+    "type": "esnet-networkmap-panel"
+}

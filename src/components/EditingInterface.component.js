@@ -2,6 +2,7 @@ import * as pubsub from './lib/pubsub.js';
 import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
+import testIds from '../constants.js'
 
 const LAVENDER = "rgb(202, 149, 229)";
 
@@ -507,7 +508,7 @@ class EditingInterface extends BindableHTMLElement {
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
-                <div class="dialog-form tight-form-func" id="add_node_dialog">
+                <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${testIds.map}">
                   <form id='add_node_form'>
                     <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
                     <table>
@@ -616,18 +617,18 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class='button edit-mode-only tight-form-func' id='edge_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='edge_edit_mode' data-testid='${testIds.editEdgeToggleBtn}'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
-              <div class='button edit-mode-only tight-form-func' id='node_edit_mode'>
+              <div class='button edit-mode-only tight-form-func' id='node_edit_mode' data-testid='${testIds.editNodeToggleBtn}'>
                 Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }
               </div>
             </div>
             <div class="tools-overlay">
-              <div class='button edit-mode-only tight-form-func' id='add_node'>
+              <div class='button edit-mode-only tight-form-func' id='add_node' data-testid='${testIds.addNodeBtn}'>
                 +&nbsp;Node
               </div>
-              <div class='button edit-mode-only tight-form-func' id='add_edge'>
+              <div class='button edit-mode-only tight-form-func' id='add_edge' data-testid='${testIds.addEdgeBtn}'>
                 +&nbsp;Edge
               </div>
               <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer !== null && this._selectedType) ? "display: block" : "display: none" }'>
