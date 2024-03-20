@@ -1387,4 +1387,134 @@ describe( "Class MapCanvas", () => {
         node.getBoundingClientRect().y.should.not.equal(nodeLocation.y);
       }, 50);  // @see EditingInterface.updateLayerNodes: line 236, timeout of 10ms requires > 10ms wait time before validating results
     });
+    it("should render parent-child nodes in the correct order in topologies", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+
+      let newTopology = JSON.parse(JSON.stringify(TOPOLOGY));
+      newTopology[0].nodes = newTopology[0].nodes.concat([
+          {
+              "name": "E-Parent",
+              "meta": { "svg": "<g><rect height='30' width='30' x='-15' y='-15' /></g>" },
+              "coordinate":[52.36,-93.95],
+              "children": ["D-Parent"],
+          },
+          {
+              "name":"D-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["C"],
+          },
+          {
+              "name":"F-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["A"],
+          },
+      ])
+      PubSub.publish("updateMapTopology", newTopology, canvas);
+
+      // this is a proxy/approximation of guaranteeing they're rendered in the correct order.
+      // the "rule" is that parents should render before children.
+      let e_parent_idx = canvas.topology[0].nodes.findIndex((n)=>{ return n.name == "E-Parent" });
+      let d_parent_idx = canvas.topology[0].nodes.findIndex((n)=>{ return n.name == "D-Parent" });
+      let c_idx = canvas.topology[0].nodes.findIndex((n)=>{ return n.name == "C" });
+
+      let f_parent_idx = canvas.topology[0].nodes.findIndex((n)=>{ return n.name == "F-Parent" });
+      let a_idx = canvas.topology[0].nodes.findIndex((n)=>{ return n.name == "A" });
+
+      e_parent_idx.should.be.lessThan(d_parent_idx);
+      e_parent_idx.should.be.lessThan(c_idx);
+      d_parent_idx.should.be.lessThan(c_idx);
+      f_parent_idx.should.be.lessThan(a_idx);
+
+    });
+    it("should support dragging parent-child nodes as groups", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      
+      let newTopology = JSON.parse(JSON.stringify(TOPOLOGY));
+      newTopology[0].nodes = newTopology[0].nodes.concat([
+          {
+              "name": "E-Parent",
+              "meta": { "svg": "<g><rect height='30' width='30' x='-15' y='-15' /></g>" },
+              "coordinate":[52.36,-93.95],
+              "children": ["D-Parent"],
+          },
+          {
+              "name":"D-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["C"],
+          },
+          {
+              "name":"F-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["A"],
+          },
+      ])
+      PubSub.publish("updateMapTopology", newTopology, canvas);
+
+      // set edit mode to 'node'
+      PubSub.publish("updateEditMode", true, canvas);
+      PubSub.publish("setEditMode", { "mode": "node", "value": true }, canvas);
+
+      var nodeC = canvas.querySelector(".node-C");
+      var beforeCoords = nodeC.getBoundingClientRect();
+
+      function movePoint(cPoint, deltaX, deltaY){
+        var originalPos = cPoint.getBoundingClientRect();
+        // create mouse event for down
+        var downEvent = new MouseEvent('mousedown', { bubbles: true, clientX: originalPos.x, clientY: originalPos.y, view: window })
+        // create mouse event for drag
+        var dragEvent = new MouseEvent('mousemove', { bubbles: true, clientX: originalPos.x + deltaX, clientY: originalPos.y + deltaY, view: window })
+        // create mouse event for up
+        var upEvent = new MouseEvent('mouseup', { bubbles: true, clientX: originalPos.x + deltaX, clientY: originalPos.y + deltaY, view: window })
+        cPoint.dispatchEvent(downEvent);
+        cPoint.dispatchEvent(dragEvent);
+        cPoint = canvas.querySelector("circle.control");
+        cPoint.dispatchEvent(upEvent);        
+      }
+
+      // snapshot coordinates for C point and move E point, should change.
+      var nodeC = canvas.querySelector(".node-C");
+      var beforeCoords = nodeC.getBoundingClientRect();
+      // drag a control point for edge with weird name. All good?
+      var cPoint = canvas.querySelector("circle.control.control-point-for-node-E-Parent");
+      movePoint(cPoint, 10, 10)
+
+      var nodeC = canvas.querySelector(".node-C");
+      var afterCoords = nodeC.getBoundingClientRect();
+
+      beforeCoords.x.should.not.equal(afterCoords.x);
+      beforeCoords.y.should.not.equal(afterCoords.y);
+
+
+      // snapshot coordinates for C point and move D point, should change.
+      var nodeC = canvas.querySelector(".node-C");
+      var beforeCoords = nodeC.getBoundingClientRect();
+
+      var cPoint = canvas.querySelector("circle.control.control-point-for-node-D-Parent");
+      movePoint(cPoint, 10, 10)
+
+      var nodeC = canvas.querySelector(".node-C");
+      var afterCoords = nodeC.getBoundingClientRect();
+
+      beforeCoords.x.should.not.equal(afterCoords.x);
+      beforeCoords.y.should.not.equal(afterCoords.y);
+
+
+      // snapshot coordinates for D point and move E point, should change.
+      var nodeD = canvas.querySelector(".node-D-Parent");
+      var beforeCoords = nodeD.getBoundingClientRect();
+      // drag a control point for edge with weird name. All good?
+      var cPoint = canvas.querySelector("circle.control.control-point-for-node-E-Parent");
+      movePoint(cPoint, 10, 10)
+
+      var nodeD = canvas.querySelector(".node-D-Parent");
+      var afterCoords = nodeD.getBoundingClientRect();
+
+      beforeCoords.x.should.not.equal(afterCoords.x);
+      beforeCoords.y.should.not.equal(afterCoords.y);
+
+    });
 } );

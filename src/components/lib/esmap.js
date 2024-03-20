@@ -332,7 +332,7 @@ function doChildSnap(nodeData, layerId, mapCanvas, sendSignal){
     ll.lat = nodeData['coordinate'][0];
     ll.lng = nodeData['coordinate'][1];
 
-    let childrenSelector = ".node-child-of-" + nodeData.name;
+    let childrenSelector = ".node-child-of-" + sanitizeName(nodeData.name);
     let selector = `#${mapId} ${childrenSelector}`;
 
     // calculate the delta since last drag event
@@ -718,7 +718,7 @@ function renderNodes(g, data, ref, layerId) {
     .append('g')
     .attr('class', function(d){
       var parentClasses = d.parents.map((p)=>{
-          return "node-child-of-" + p;
+          return "node-child-of-" + sanitizeName(p);
       }).join(" ")
       // sanitize name from the node
       var name = sanitizeName(d.name);
