@@ -565,8 +565,11 @@ class EditingInterface extends BindableHTMLElement {
                   margin: 0 0.5em 0 0;
                 }
                 .dialog .dialog-form input.button#create_edge, 
-                .dialog .dialog-form input.button#create_node { 
-                  background: rgba(100, 100, 255, 0.5);
+                .dialog .dialog-form input.button#create_node {
+                  background: rgb(56, 113, 220);
+                  font-weight: bold;
+                  color: white;
+                  border: 1px solid rgb(26, 73, 120)
                 }
 
                 .dialog .dialog-form table td {
