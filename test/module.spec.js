@@ -73,11 +73,11 @@ var TOPOLOGY = [
         ]
 
 describe( "Class MapCanvas", () => {
-    afterEach(async function(){
+    afterEach(function(){
         var canvas = document.querySelector("esnet-map-canvas");
         canvas.remove();
     })
-    beforeEach(async function(){  
+    beforeEach(function(){  
         var elem = document.createElement("esnet-map-canvas");
         elem.setAttribute('width', 800);
         elem.setAttribute('height', 400);
@@ -1427,6 +1427,69 @@ describe( "Class MapCanvas", () => {
       d_parent_idx.should.be.lessThan(c_idx);
       f_parent_idx.should.be.lessThan(a_idx);
 
+    });
+    it("should support nodes with multiple parents", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+
+      let newTopology = JSON.parse(JSON.stringify(TOPOLOGY));
+      newTopology[0].nodes = newTopology[0].nodes.concat([
+          {
+              "name": "E-Parent",
+              "meta": { "svg": "<g><rect height='30' width='30' x='-15' y='-15' /></g>" },
+              "coordinate":[52.36,-93.95],
+              "children": ["D-Parent"],
+          },
+          {
+              "name":"D-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["C"],
+          },
+          {
+              "name":"G-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["C"],
+          },
+          {
+              "name":"F-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["A"],
+          },
+      ])
+      PubSub.publish("updateMapTopology", newTopology, canvas);
+
+      var nodeC = canvas.topology[0].nodes.find((n)=>{ return n.name == "C" });
+      nodeC.parents.indexOf("D-Parent").should.be.greaterThan(-1);
+      nodeC.parents.indexOf("E-Parent").should.be.greaterThan(-1);
+      nodeC.parents.indexOf("G-Parent").should.be.greaterThan(-1);
+    })
+    it("should detect parent loops", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+
+      let newTopology = JSON.parse(JSON.stringify(TOPOLOGY));
+      newTopology[0].nodes = newTopology[0].nodes.concat([
+          {
+              "name": "E-Parent",
+              "meta": { "svg": "<g><rect height='30' width='30' x='-15' y='-15' /></g>" },
+              "coordinate":[52.36,-93.95],
+              "children": ["D-Parent"],
+          },
+          {
+              "name":"D-Parent",
+              "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+              "coordinate":[52.26,-93.95],
+              "children": ["E-Parent"],
+          },
+      ])
+      let error = null;
+      try{
+        PubSub.publish("updateMapTopology", newTopology, canvas)
+      } catch(e) {
+        error = e;
+      }
+      (error).should.not.equal(null);
     });
     it("should support dragging parent-child nodes as groups", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");

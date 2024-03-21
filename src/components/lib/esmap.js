@@ -479,7 +479,7 @@ function renderNodeControl(g, data, ref, layerId){
     .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
     .on('dblclick', function(evt, pointData){
-      pointData.layer = "layer" + layerId;
+      pointData.layer = layerId;
       var i=0;
       var spliceIndex = null;
       evt.currentTarget.parentElement.childNodes.forEach(function(item){
@@ -676,14 +676,16 @@ function renderEdgeControl(g, data, ref, layerId) {
     feature.exit().remove();
   });
 }
-
-// sort parents. sort all parent nodes before all child nodes
-// so we can reliably render them in the correct order.
-function traceParents(child, parents){
+const MAX_DEPTH = 10;
+function traceParents(child, parents, depth){
+    if(depth > MAX_DEPTH){
+      throw new Error("Maximum depth exceeeded");
+    }
     parent = parents[child]
     if(!parent) return [];
     let output = parent;
-    output = traceParents(parent[0], parents).concat(output)
+    depth++;
+    output = traceParents(parent[0], parents, depth).concat(output)
     return output
 }
 // determine sort order for node rendering
@@ -692,13 +694,21 @@ function sortNodesForRender(nodes){
     nodes.forEach((node)=>{
         if(node.children){
             node.children.forEach((child)=>{
-                parents[child] = [node.name];
+                if(parents[child]){
+                  parents[child] = parents[child].concat([node.name]);
+                } else {
+                  parents[child] = [node.name];
+                }
             })
         }
     });
     // now we have a list of all of the parents. We need to do grandparents, then great-grandparents...
     nodes.forEach((node)=>{
-        node["parents"] = traceParents(node.name, parents);
+        try {
+          node["parents"] = traceParents(node.name, parents);
+        } catch(e) {
+          throw new Error(`Error while tracing Parents for Node ${node.name}. A Node can't be its own parent or its parent's parent. Children were: [${node.children}]. Please check them for loops.`)
+        }
         node["sort"] = node.parents.concat([node.name]).join(".")
     });
     nodes.sort((a, b)=>{
