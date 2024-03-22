@@ -1,9 +1,13 @@
 export function sanitizeNode(node){
-  return {
+  let output = {
     name: node.name,
     meta: node.meta,
     coordinate: node.coordinate,
   };
+  if(node.children && node.children.length > 0){
+    output["children"] = node.children;
+  }
+  return output;
 };
 
 export function sanitizeEdge(edge){

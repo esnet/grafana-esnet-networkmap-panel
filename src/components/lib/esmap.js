@@ -322,6 +322,43 @@ function addControlPoint(evt, obj, ref, layerId) {
   }
 }
 
+function doChildSnap(nodeData, layerId, mapCanvas, sendSignal){
+    let mapId = "map-" + mapCanvas.instanceId;
+    let layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
+
+    let prevState = PubSub.last("dragStarted", mapCanvas);
+
+    let ll = {};
+    ll.lat = nodeData['coordinate'][0];
+    ll.lng = nodeData['coordinate'][1];
+
+    let childrenSelector = ".node-child-of-" + sanitizeName(nodeData.name);
+    let selector = `#${mapId} ${childrenSelector}`;
+
+    // calculate the delta since last drag event
+    let delta = [
+      nodeData.coordinate[0] - prevState?.node?.coordinate[0],
+      nodeData.coordinate[1] - prevState?.node?.coordinate[1]
+    ];
+    // procedure for updating the children:
+    // get all the children that have "nodeData.name" as a parent
+    d3.selectAll(selector)
+        .attr('d', function(d){
+            let oldNodeData = null;
+            if(!!sendSignal){
+              oldNodeData = JSON.parse(JSON.stringify(d));
+            }
+            if(prevState){
+              d.coordinate[0] += delta[0];
+              d.coordinate[1] += delta[1];
+              doEdgeSnap(d, layerId, mapCanvas, sendSignal);
+            }
+            if(!!sendSignal){
+              PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": oldNodeData }, mapCanvas);
+            }
+        })
+}
+
 function doEdgeSnap(nodeData, layerId, mapCanvas, sendSignal){
     var mapId = "map-" + mapCanvas.instanceId;
     var layerSelector = !mapCanvas.options.multiLayerNodeSnap ? `.l${layerId}` : ``;
@@ -389,12 +426,13 @@ function renderNodeControl(g, data, ref, layerId){
 
   function dragged(evt, nodeData) {
     var mapDiv = ref.leafletMap.getContainer();
-    PubSub.publish("dragStarted", { event: evt, node: {...nodeData} }, ref.svg.node());
+    PubSub.publish("dragStarted", { event: evt, node: JSON.parse(JSON.stringify(nodeData)) }, ref.svg.node());
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
     nodeData['coordinate'][0] = ll.lat;
     nodeData['coordinate'][1] = ll.lng;
     doEdgeSnap(nodeData, layerId, ref.mapCanvas, false);
+    doChildSnap(nodeData, layerId, ref.mapCanvas, false);
     //--- rerender stuff
     ref.update();
     setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
@@ -412,6 +450,7 @@ function renderNodeControl(g, data, ref, layerId){
     PubSub.publish("updateMapNode", {"layer": layerId, "node": d, "oldNode": dragStart.node }, ref.svg.node());
     PubSub.clearLast("dragStarted", ref.svg.node());
     doEdgeSnap(d, layerId, ref.mapCanvas, true);
+    doChildSnap(d, layerId, ref.mapCanvas, true);
     ref.update();
     if(ref.mapCanvas.updateTopology){
       ref.mapCanvas.updateTopology([
@@ -440,7 +479,7 @@ function renderNodeControl(g, data, ref, layerId){
     .attr("data-index", function(d, idx){ return idx; })
     .merge(feature)
     .on('dblclick', function(evt, pointData){
-      pointData.layer = "layer" + layerId;
+      pointData.layer = layerId;
       var i=0;
       var spliceIndex = null;
       evt.currentTarget.parentElement.childNodes.forEach(function(item){
@@ -637,19 +676,64 @@ function renderEdgeControl(g, data, ref, layerId) {
     feature.exit().remove();
   });
 }
+const MAX_DEPTH = 10;
+function traceParents(child, parents, depth){
+    if(depth > MAX_DEPTH){
+      throw new Error("Maximum depth exceeeded");
+    }
+    parent = parents[child]
+    if(!parent) return [];
+    let output = parent;
+    depth++;
+    output = traceParents(parent[0], parents, depth).concat(output)
+    return output
+}
+// determine sort order for node rendering
+function sortNodesForRender(nodes){
+    let parents = {};
+    nodes.forEach((node)=>{
+        if(node.children){
+            node.children.forEach((child)=>{
+                if(parents[child]){
+                  parents[child] = parents[child].concat([node.name]);
+                } else {
+                  parents[child] = [node.name];
+                }
+            })
+        }
+    });
+    // now we have a list of all of the parents. We need to do grandparents, then great-grandparents...
+    nodes.forEach((node)=>{
+        try {
+          node["parents"] = traceParents(node.name, parents);
+        } catch(e) {
+          throw new Error(`Error while tracing Parents for Node ${node.name}. A Node can't be its own parent or its parent's parent. Children were: [${node.children}]. Please check them for loops.`)
+        }
+        node["sort"] = node.parents.concat([node.name]).join(".")
+    });
+    nodes.sort((a, b)=>{
+      if(a.sort <  b.sort) return -1;
+      if(a.sort == b.sort) return 0;
+      if(a.sort >  b.sort) return 1;
+    })
+    return nodes;
+}
 
 function renderNodes(g, data, ref, layerId) {
   const defaultNodeColor = ref.options.layers[layerId]["color"];
-  var feature = g.selectAll('g.node').data(data.nodes);
+  var feature = g.selectAll('g.node').data(sortNodesForRender(data.nodes));
   var div = ref.div;
   feature
     .enter()
     .append('g')
     .attr('class', function(d){
+      var parentClasses = d.parents.map((p)=>{
+          return "node-child-of-" + sanitizeName(p);
+      }).join(" ")
       // sanitize name from the node
       var name = sanitizeName(d.name);
       var layerClass = ` l${layerId}`;
-      return 'node node-' + name + layerClass;
+      return `node node-${name} ${layerClass} ${parentClasses}`;
     })
     .attr('stroke-width', 0.25)
     .attr('stroke', "black")

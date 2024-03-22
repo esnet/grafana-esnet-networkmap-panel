@@ -204,6 +204,9 @@ class EditingInterface extends BindableHTMLElement {
         var nodeLat = this.shadow.querySelector('#node_lat').value;
         var nodeLng = this.shadow.querySelector('#node_lng').value;
 
+        const selectedChildren = document.querySelectorAll('#node_children option:checked');
+        const nodeChildren = Array.from(selectedChildren).map((el) => el.value);
+
         var newNode = {
           name: nodeName,
           color: this.mapCanvas.options?.layers?.[nodeLayer]?.color || LAVENDER,
@@ -213,7 +216,7 @@ class EditingInterface extends BindableHTMLElement {
             template: nodeTooltip,
           },
           coordinate: [parseFloat(nodeLat), parseFloat(nodeLng)],
-          children: [],
+          children: nodeChildren,
         }
 
         this.updateLayerNodes(nodeLayer, newNode, this._spliceIndex);
@@ -342,6 +345,7 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this._selectedLayer];
         } catch (e) {
+            console.log(e);
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }
@@ -395,6 +399,22 @@ class EditingInterface extends BindableHTMLElement {
         this._formTouched = true;
     }
 
+    renderChildNodeOptions(selectedNodeName, children){
+        let childNodeOptions = "";
+
+        let nodeList = this?.mapCanvas?.topology?.[this._selectedLayer]?.nodes || [];
+        for(let i=0; i<nodeList.length; i++){
+            if(nodeList[i].name != selectedNodeName){
+                let isSelected = "";
+                if(children.indexOf(nodeList[i].name) >= 0){
+                    isSelected = "selected"
+                }
+                childNodeOptions += `<option value=${nodeList[i].name} ${isSelected}>${nodeList[i].name}</option>`
+            }
+        }
+        return childNodeOptions
+    }
+
     render(){
         if(!this.shadow){
             this.shadow = document.createElement("div");
@@ -409,8 +429,10 @@ class EditingInterface extends BindableHTMLElement {
         let selectedLayerOptions = "";
 
         for(let i=0; i<utils.LAYER_LIMIT; i++){
-            selectedLayerOptions += `<option value='${i}' ${ this._selectedLayer === i && "selected"}>Layer ${i+1}</option>`;
+            console.log(this._selectedLayer);
+            selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>Layer ${i+1}</option>`;
         }
+
 
         this.shadow.innerHTML = `
             <style>
@@ -463,7 +485,8 @@ class EditingInterface extends BindableHTMLElement {
                 .dialog .dialog-form {
                   border-radius: 5px;
                   padding:20px;
-                  margin: 20px 20%;
+                  margin: 20px auto;
+                  max-width:560px;
                   box-shadow: 3px 3px 13px black;
                   display: none;
                 }
@@ -487,93 +510,152 @@ class EditingInterface extends BindableHTMLElement {
                   color: blue;
                   text-decoration: underline;
                 }
-                .dialog .dialog-form input {
+                .dialog .dialog-form input,
+                .dialog .dialog-form select {
+                  height:30px;
                   border:1px solid #b5b5b5;
                 }
-                .dialog .dialog-form select {
-                  margin-left:10px;
+                .dialog .dialog-form textarea {
+                  border:1px solid #b5b5b5;
+                }
+                .dialog .dialog-form #edge_layer,
+                .dialog .dialog-form #node_layer {
+                    width: 100px;
+                    margin-right:0.5em;
+                }
+                .dialog .dialog-form #node_source,
+                .dialog .dialog-form #node_destination,
+                .dialog .dialog-form #node_name,
+                .dialog .dialog-form #node_display_name {
+                    width:125px;
+                    margin-right:0.5em;
+                }
+                .dialog .dialog-form #node_lat,
+                .dialog .dialog-form #node_lng {
+                    width:70px;
+                    margin-right:0.5em;
+                }
+                .dialog .dialog-form table {
+                    margin-bottom:10px;
+                    width:100%;
+                }
+                .dialog .dialog-form #node_children {
+                    width:150px;
+                    height:80px;
+                    margin-right:0.5em;
+                }
+                .dialog .dialog-form #node_svg {
+                    width:175px;
+                    min-height:80px;
+                    margin-right:0.5em;
+                    font-family: monospace;
+                    font-size:11px;
+                }
+                .dialog .dialog-form #node_tooltip {
+                    width:175px;
+                    min-height:80px;
+                    margin-right:0.5em;
+                    font-family: monospace;
+                    font-size:11px;
                 }
                 .dialog .dialog-form .text-input {
-                  margin-left:10px;
                 }
 
                 .dialog .dialog-form input.button {
                   background: rgba(200, 200, 200, 0.5);
-                  margin: 1em 0.5em 0 0;
+                  margin: 0 0.5em 0 0;
+                }
+                .dialog .dialog-form input.button#create_edge, 
+                .dialog .dialog-form input.button#create_node {
+                  background: rgb(56, 113, 220);
+                  font-weight: bold;
+                  color: white;
+                  border: 1px solid rgb(26, 73, 120)
                 }
 
                 .dialog .dialog-form table td {
-                  padding-bottom:10px;
+                  padding-bottom:0px;
+                }
+
+                .dialog .dialog-form .heading-container {
+                    width: 300px;
+                }
+                .dialog .dialog-form .right-aligned {
+                    text-align:right;
                 }
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
                 <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${testIds.map}">
                   <form id='add_node_form'>
-                    <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
+                    <table>
+                      <tr>
+                        <td class="heading-container" colspan="4">
+                        <h2>${this._selectedType == 'nodes' && this._selectedObject ? "Edit Node" : "Add a Node" }</h2>
+                        </td>
+                        <td class="right-aligned">
+                          <input class='button' type='button' id='create_node_cancel' value='Cancel' />
+                          <input class='button' type='submit' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
+                        </td>
+                      </tr>
+                    </table>
                     <table>
                       <tr>
                         <td>
-                          <label>Layer:</label>
+                          <label for='node_layer'>Layer</label>
                         </td>
+                        <td>
+                          <label for='node_name'>Name / ID</label>
+                        </td>
+                        <td>
+                          <label for='node_display_name'>Display Name</label>
+                        </td>
+                        <td>
+                          <label for="node_lat">Latitude</label>
+                        </td>
+                        <td>
+                          <label for="node_lng">Longitude</label>
+                        </td>
+                      </tr>
+                      <tr>
                         <td>
                           <select id="node_layer">
                             ${selectedLayerOptions}
                           </select>
                         </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Name:</label>
-                        </td>
                         <td>
                           <input class='text-input' id='node_name' type='text' required='required' value='${this.getFieldValue("nodes", "name")}'></input>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Display Name:</label>
                         </td>
                         <td>
                           <input class='text-input' id='node_display_name' type='text' value='${ this.getFieldValue("nodes", "display_name") }'></input>
                         </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Latitude:</label>
-                        </td>
                         <td>
                           <input class='text-input' id='node_lat' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.0") }'></input>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Longitude:</label>
                         </td>
                         <td>
                           <input class='text-input' id='node_lng' type='number' step='0.001' required='required' value='${ this.getFieldValue("nodes", "coordinate.1") }'></input>
                         </td>
                       </tr>
+                    </table>
+                    <table>
                       <tr>
                         <td>
-                          <label>SVG Icon:</label>
+                          <label for="node_children">Child Nodes</label>
                         </td>
+                        <td>
+                          <label for="node_svg">SVG Icon</label>
+                        </td>
+                        <td>
+                          <label for="node_tooltip">Custom Tooltip</label>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><select id='node_children' multiple>${this.renderChildNodeOptions(this.getFieldValue("nodes", "name"), this.getFieldValue("nodes", "children"))}</select></td>
                         <td>
                           <textarea class='text-input' id='node_svg'>${ this.getFieldValue("nodes", "meta.svg") }</textarea>
                         </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Custom Tooltip:</label>
-                        </td>
                         <td>
                           <textarea class='text-input' id='node_tooltip'>${ this.getFieldValue("nodes", "meta.template") }</textarea>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td colspan="2">
-                          <input class='button' type='button' id='create_node_cancel' value='Cancel' />
-                          <input class='button' type='submit' id='create_node' value='${this._selectedType == 'nodes' && this._selectedObject ? "Update Node" : "Add Node" }' />
                         </td>
                       </tr>
                     </table>
@@ -582,35 +664,37 @@ class EditingInterface extends BindableHTMLElement {
                 <!-- add edge dialog -->
                 <div class='dialog-form tight-form-func' id="add_edge_dialog">
                   <form>
-                    <h2>Add an Edge</h2>
+                    <table>
+                        <tr>
+                            <td class='heading-container'>
+                            <h2>Add an Edge</h2>
+                            </td>
+                            <td class="right-aligned">
+                              <input class="button" type="button" id="create_edge_cancel" value="Cancel" />
+                              <input class="button" type="button" id="create_edge" value="Create Edge" />
+                            </td>
+                        </tr>
+                    </table>
                     <table>
                       <tr>
                         <td>
-                          <label>Layer:</label>
+                          <label for="edge_layer">Layer:</label>
                         </td>
+                        <td>
+                          <label for="node_source">Source:</label>
+                        </td>
+                        <td>
+                          <label for="node_destination">Destination:</label>
+                        </td>
+                      </tr>
+                      <tr>
                         <td>
                           <select id="edge_layer">
                             ${selectedLayerOptions}
                           </select>
                         </td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Source:</label>
-                        </td>
                         <td>${ this.renderSrcDstOptions('node_source') }</td>
-                      </tr>
-                      <tr>
-                        <td>
-                          <label>Destination:</label>
-                        </td>
                         <td>${ this.renderSrcDstOptions('node_destination') }</td>
-                      </tr>
-                      <tr>
-                        <td colspan='2'>
-                          <input class="button" type="button" id="create_edge_cancel" value="Cancel" />
-                          <input class="button" type="button" id="create_edge" value="Create Edge" />
-                        </td>
                       </tr>
                     </table>
                   </form>
