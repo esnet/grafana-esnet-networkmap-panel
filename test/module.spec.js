@@ -14,6 +14,7 @@ const PubSub = pubsub.PubSub;
  * @see options.svgArrowRightToLine
  */
 const EXPECTED_NODE_MOUSEOVER_REGEX = /A\s+In Volume(\s+|:\s*)\d+\s+Out Volume(\s+|:\s*)\d+/;
+const APPLY_BTN_SELECTOR = '[title="Apply changes and go back to dashboard"]';
 
 const lavender = "rgb(202, 149, 229)";
 
@@ -813,9 +814,8 @@ describe("Class MapCanvas", () => {
     var newOptions = canvas.options;
     newOptions.layers[1].visible = true;
     PubSub.publish("updateMapOptions", {
-      options: newOptions, changed: [
-        'layers[1].visible',
-      ]
+      options: newOptions,
+      changed: ['layers[1].visible']
     }, canvas);
     // enter editing mode
     PubSub.publish("updateEditMode", true, canvas);
@@ -1019,10 +1019,8 @@ describe("Class MapCanvas", () => {
     newOptions.enableCustomEdgeTooltip = true;
     newOptions.customEdgeTooltip = "<div class='flow-tooltip'>${forward.from} → ${forward.to}</div>";
     PubSub.publish("updateMapOptions", {
-      options: newOptions, changed: [
-        "enableCustomEdgeTooltip",
-
-      ]
+      options: newOptions,
+      changed: ["enableCustomEdgeTooltip"]
     });
     edgeAZ.dispatchEvent(mouseoverEvent);
     var label = canvas.querySelector(".flow-tooltip").innerText.trim();
@@ -1351,7 +1349,16 @@ describe("Class MapCanvas", () => {
     newOptions.viewport.bottom = -90;
     newOptions.viewport.right = 110;
     // set bounding box strategy to 'viewport' and set the viewport coords
-    PubSub.publish("updateMapOptions", { options: newOptions, changed: ["initialViewStrategy", "viewport.top", "viewport.left", "viewport.bottom", "viewport.right"] }, canvas);
+    PubSub.publish("updateMapOptions", {
+      options: newOptions,
+      changed: [
+        "initialViewStrategy",
+        "viewport.top",
+        "viewport.left",
+        "viewport.bottom",
+        "viewport.right"
+      ]
+    }, canvas);
     // dispatch a resize event so the window thinks it has been resized. this should trigger viewport zoom logic.
     var resize = new Event('resize');
     window.dispatchEvent(resize);
@@ -1431,8 +1438,7 @@ describe("Class MapCanvas", () => {
     nodeLatEl.setAttribute('value', newVal);
     nodeLatEl.value = newVal;
 
-    nodeForm.onsubm
-    it(new Event('submit'));
+    nodeForm.onsubmit(new Event('submit'));
 
     // compare before and after for edges and node
 

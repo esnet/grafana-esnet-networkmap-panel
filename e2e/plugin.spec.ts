@@ -72,7 +72,6 @@ pluginTest.describe("plugin testing", () => {
   // TODO: add additional e2e tests, may refactor into seperate tests
   pluginTest("load plugin edit page - view options", async ({ page, targets }: { page: Page, targets: ITargets}) => {
     // load plugin edit page
-    const fnName = "plugin.spec['load plugin edit page - view options']";
     const { targetDashboardUid, targetFolder, targetDashboard, targetPanelId, orgId } = targets;
     const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
     await page.goto(editNetworkMapPanelUrl);
@@ -147,4 +146,63 @@ pluginTest.describe("plugin testing", () => {
     // TODO
   });
 
+  pluginTest.skip("confirm node changes upon clicking Grafana's Apply button", async ({ page, targets }: { page: Page, targets: ITargets}) => {
+    const { targetDashboardUid, targetDashboard, targetPanelId, orgId } = targets;
+    const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
+    await page.goto(editNetworkMapPanelUrl);
+
+    // should already be in edit mode, get a reference to a node
+    const aNodeSelector = ".control-point-for-node-A:first-child";
+    const dragDelta = { dx: 100, dy: 50 };
+
+    await page.waitForSelector(aNodeSelector);
+    const preEditANodeLocator = await page.locator(aNodeSelector);
+    const preEditANodeElHandle = await preEditANodeLocator.elementHandle();
+    const { x: originalX, y: originalY } = (await preEditANodeElHandle?.boundingBox())!;
+    await preEditANodeElHandle?.hover();
+    await page.mouse.down();
+    await page.mouse.move(originalX + dragDelta.dx, originalY + dragDelta.dy);
+    await page.mouse.up();
+
+    // click apply button directly, without exiting edit mode
+    const applyButton = page.getByRole("button", { name: /apply/i});
+    await applyButton.click();
+    expect(page).not.toHaveTitle(/edit panel/i);
+
+    // verify that the ctrl point for the B-C edge is not at original position
+    const postEditANodeEl = await page.waitForSelector(aNodeSelector);
+    const { x: newX, y: newY } = (await postEditANodeEl.boundingBox())!;
+    expect(newX).not.toBe(originalX);
+    expect(newY).not.toBe(originalY);
+  });
+
+  pluginTest("confirm edge changes upon clicking Grafana's Apply button", async ({ page, targets }: { page: Page, targets: ITargets}) => {
+    const { targetDashboardUid, targetDashboard, targetPanelId, orgId } = targets;
+    const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
+    await page.goto(editNetworkMapPanelUrl);
+
+    // should already be in edit mode, get a reference to a edge control point (using B--C)
+    const bcEdgeSelector = ".control-point-for-edge-B--C:nth-child(2)";
+    const dragDelta = { dx: 100, dy: 50 };
+
+    await page.waitForSelector(bcEdgeSelector);
+    const preEditBCEdgeLocator = await page.locator(bcEdgeSelector);
+    const preEditBCEdgeElHandle = await preEditBCEdgeLocator.elementHandle();
+    const { x: originalX, y: originalY } = (await preEditBCEdgeElHandle?.boundingBox())!;
+    await preEditBCEdgeLocator.hover();
+    await page.mouse.down();
+    await page.mouse.move(originalX + dragDelta.dx, originalY + dragDelta.dy);
+    await page.mouse.up();
+
+    // click apply button directly, without exiting edit mode
+    const applyButton = page.getByRole("button", { name: /apply/i});
+    await applyButton.click();
+    expect(page).not.toHaveTitle(/edit panel/i);
+
+    // verify that the ctrl point for the B-C edge is not at original position
+    const postEditBCEdgeEl = await page.waitForSelector(bcEdgeSelector);
+    const { x: newX, y: newY } = (await postEditBCEdgeEl.boundingBox())!;
+    expect(newX).not.toBe(originalX);
+    expect(newY).not.toBe(originalY);
+  });
 });
