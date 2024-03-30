@@ -183,8 +183,14 @@ pluginTest.describe("plugin testing", () => {
     const editNetworkMapPanelUrl = getNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId, true);
     await page.goto(editNetworkMapPanelUrl);
 
-    // get a reference to an edit node
+    // toggle buttons to edit nodes, not edges
     await page.waitForSelector(nodeSelector);
+    const toggleEditEdgesBtn = await page.getByRole('button', { name: 'Edit Edges: Off'});
+    await toggleEditEdgesBtn.click();
+    const toggleEditNodesBtn = await page.getByRole('button', { name: 'Edit Nodes: On'});
+    await toggleEditNodesBtn.click();
+
+    // get a reference to an edit node
     const preEditNodeLocator = await page.locator(nodeSelector);
     const preEditNodeElHandle = await preEditNodeLocator.elementHandle();
     const preEditBox = (await preEditNodeElHandle?.boundingBox())!; // relative to browser viewport
@@ -218,9 +224,9 @@ pluginTest.describe("plugin testing", () => {
 
     const newX = newBrowserX;
     const newY = newBrowserY;
+    console.log(`[${testName}] Node Position in view: old (${originalViewX}, ${originalViewY}); new (${newX}, ${newY})`);
     expect(newX).not.toBe(originalViewX);
     expect(newY).not.toBe(originalViewY);
-    console.log(`[${testName}] Node Position in view: old (${originalViewX}, ${originalViewY}); new (${newX}, ${newY})`);
   });
 
   pluginTest.skip("confirm edge changes upon clicking Grafana's Apply button", async ({ page, targets }: { page: Page, targets: ITargets}) => {

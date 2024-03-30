@@ -914,7 +914,6 @@ export class EsMap {
     }
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
-    // function nudge(latOrLng, amount){
     const nudge = (latOrLng, amount) => {
       if (this.lastInteractedType === null || this.lastInteractedObject === null) return;
       if (this.lastInteractedType === "nodes") {
@@ -959,7 +958,14 @@ export class EsMap {
         default:
           break;
       }
-    })
+    });
+
+    const grafanaToolbar = document.querySelector('.page-toolbar button[title="Apply changes and go back to dashboard"]');
+    if (grafanaToolbar) {
+      grafanaToolbar.addEventListener('click', () => {
+        PubSub.publish('renderMap');
+      });
+    }
   }
 
 
