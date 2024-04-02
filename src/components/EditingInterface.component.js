@@ -345,7 +345,7 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this._selectedLayer];
         } catch (e) {
-            console.log(e);
+          console.debug(e);
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }
@@ -429,7 +429,6 @@ class EditingInterface extends BindableHTMLElement {
         let selectedLayerOptions = "";
 
         for(let i=0; i<utils.LAYER_LIMIT; i++){
-            console.log(this._selectedLayer);
             selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>Layer ${i+1}</option>`;
         }
 
