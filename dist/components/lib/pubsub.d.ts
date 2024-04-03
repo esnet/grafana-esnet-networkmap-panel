@@ -23,5 +23,5 @@ export class PrivateMessageBus {
     clearLast(topic: any, context: any): void;
     setDebug(debug: any, context: any): void;
 }
-export const PubSub: any;
+export var PubSub: any;
 //# sourceMappingURL=pubsub.d.ts.map
