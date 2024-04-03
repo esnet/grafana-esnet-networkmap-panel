@@ -17,6 +17,7 @@ export class MapPanel extends Component<MapPanelProps> {
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
+  subscriptionHandle: any;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -233,7 +234,7 @@ export class MapPanel extends Component<MapPanelProps> {
     return output;
   }
 
-  updateMap() {
+  updateMap(forceRefresh?) {
     const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
@@ -277,7 +278,7 @@ export class MapPanel extends Component<MapPanelProps> {
         nodeValueField: options.layers[layer].nodeValueField,
       })
       // if we have an existing in-memory copy, use it
-      if (this.mapCanvas?.current?.topology?.[layer]){
+      if (!forceRefresh && this.mapCanvas?.current?.topology?.[layer]){
         topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
       } else if (options.layers[layer]['mapjson']) {
         topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
@@ -316,7 +317,23 @@ export class MapPanel extends Component<MapPanelProps> {
     );
   }
   componentDidMount() {
+    const { eventBus, options } = this.props;
     this.updateMap();
+    // @ts-ignore
+    this.subscriptionHandle = eventBus.getStream({type: "panel-edit-finished"}).subscribe((e)=>{
+        if(this.mapCanvas.current){
+          // do this async to ensure that the UI has time to update after conclusion of edit.
+          setTimeout(()=>{
+            if(!options.useConfigurationUrl){
+              this.updateMap(true);
+            }
+          }, 10);
+        }
+    })
+  }
+
+  componentWillUnmount() {
+    this.subscriptionHandle.unsubscribe();
   }
 
   componentDidUpdate() {
@@ -357,6 +374,7 @@ export class MapPanel extends Component<MapPanelProps> {
 
   render() {
     const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
+
 
     let thresholds: any[];
     thresholds = [];

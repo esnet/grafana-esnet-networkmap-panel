@@ -164,5 +164,4 @@ try {
   module.exports.Utils = Utils;
   exports.Utils = Utils;
 } catch (e) {
-  console.debug(e)
 }
