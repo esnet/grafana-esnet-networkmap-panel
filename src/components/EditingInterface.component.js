@@ -345,7 +345,8 @@ class EditingInterface extends BindableHTMLElement {
         try {
           json = this._topology[this._selectedLayer];
         } catch (e) {
-          console.debug(e);
+          this.srcDstOptions = [];
+          return
         }
         this.srcDstOptions = [];
         if(!json || !json.nodes) { this.render(); return; }
