@@ -3,7 +3,7 @@
 ![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
 
 For setting up in Grafana with an example: See [Introductory Tutorial](#introductory-tutorial)
-For development: See [Development Notes](docs/development.md)
+For development: See [Development Notes](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/main/docs/development.md)
 
 # Network Map Panel
 
