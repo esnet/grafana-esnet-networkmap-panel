@@ -28,8 +28,10 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     this.lastOptions = {...this.props.options};
     this.theme = createTheme();
+    let self = this;
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
+    PubSub.subscribe('topologyRefresh', ()=>{ self.updateMap() });
   }
 
   setDashboardVariables() {
