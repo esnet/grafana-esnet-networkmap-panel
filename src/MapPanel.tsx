@@ -317,13 +317,17 @@ export class MapPanel extends Component<MapPanelProps> {
     );
   }
   componentDidMount() {
-    const { eventBus } = this.props;
+    const { eventBus, options } = this.props;
     this.updateMap();
     // @ts-ignore
     this.subscriptionHandle = eventBus.getStream({type: "panel-edit-finished"}).subscribe((e)=>{
         if(this.mapCanvas.current){
           // do this async to ensure that the UI has time to update after conclusion of edit.
-          setTimeout(()=>{ this.updateMap(true); }, 10);
+          setTimeout(()=>{
+            if(!options.useConfigurationUrl){
+              this.updateMap(true);
+            }
+          }, 10);
         }
     })
   }
