@@ -20,7 +20,7 @@ export class MapPanel extends Component<MapPanelProps> {
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
-  eventSubscriber?: Unsubscribable;
+  subscriptionHandle?: Unsubscribable;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -32,9 +32,10 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     this.lastOptions = {...this.props.options};
     this.theme = createTheme();
-    this.eventSubscriber = undefined;
+    // let self = this;
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
+    PubSub.subscribe('topologyRefresh', ()=>{ this.updateMap() });
   }
 
   setDashboardVariables() {
@@ -236,7 +237,7 @@ export class MapPanel extends Component<MapPanelProps> {
     return output;
   }
 
-  updateMap() {
+  updateMap(forceRefresh?) {
     const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
@@ -280,7 +281,7 @@ export class MapPanel extends Component<MapPanelProps> {
         nodeValueField: options.layers[layer].nodeValueField,
       })
       // if we have an existing in-memory copy, use it
-      if (this.mapCanvas?.current?.topology?.[layer]){
+      if (!forceRefresh && this.mapCanvas?.current?.topology?.[layer]){
         topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
       } else if (options.layers[layer]['mapjson']) {
         topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
@@ -320,22 +321,26 @@ export class MapPanel extends Component<MapPanelProps> {
   }
 
   componentDidMount() {
+    const { eventBus, options } = this.props;
     this.updateMap();
-    // this.eventSubscriber = this.props.eventBus.subscribe(RefreshEvent, (event: RefreshEvent) => {
-    //   console.log("[MapPanel] enter observable for RefreshEvent subscription");
-    //   if (event.origin) {
-    //     this.render();
-    //   }
-    // });
-    // console.log("[MapPanel] componentDidMount eventBus subscribed.");
+    // @ts-ignore
+    this.subscriptionHandle = eventBus.getStream({type: "panel-edit-finished"}).subscribe((e)=>{
+        if(this.mapCanvas.current){
+          // do this async to ensure that the UI has time to update after conclusion of edit.
+          setTimeout(()=>{
+            if(!options.useConfigurationUrl){
+              this.updateMap(true);
+            }
+          }, 10);
+        }
+    })
   }
 
-  // componentWillUnmount(): void {
-  //   if (this.eventSubscriber) {
-  //     this.eventSubscriber.unsubscribe();
-  //     console.log("[MapPanel] componentDidMount eventBus unsubscribed.");
-  //   }
-  // }
+  componentWillUnmount() {
+    if (this.subscriptionHandle) {
+      this.subscriptionHandle.unsubscribe();
+    }
+  }
 
   componentDidUpdate() {
     const { options, fieldConfig } = this.props;
@@ -375,6 +380,7 @@ export class MapPanel extends Component<MapPanelProps> {
 
   render() {
     const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
+
 
     let thresholds: any[];
     thresholds = [];

@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
 import { PanelProps } from '@grafana/data';
 import { MapOptions } from './types';
-import 'components/MapCanvas.component.js';
-interface Props extends PanelProps<MapOptions> {
+import './components/MapCanvas.component.js';
+export interface MapPanelProps extends PanelProps<MapOptions> {
+    fieldConfig: any;
+    options: MapOptions;
 }
-export declare class MapPanel extends Component<Props> {
+export declare class MapPanel extends Component<MapPanelProps> {
     mapCanvas: any;
     lastOptions: any;
     theme: any;
     mapjsonCache: any;
-    constructor(props: Props);
+    subscriptionHandle: any;
+    constructor(props: MapPanelProps);
     setDashboardVariables(): (event: any) => void;
     updateCenter: (centerData: any) => void;
     updateMapViewport: (viewportData: any) => void;
@@ -20,8 +23,9 @@ export declare class MapPanel extends Component<Props> {
         resolvedLat: number;
         resolvedLng: number;
     };
-    updateMap(): void;
+    updateMap(forceRefresh?: any): void;
     componentDidMount(): void;
+    componentWillUnmount(): void;
     componentDidUpdate(): void;
     render(): React.ReactElement<{
         options: string;
@@ -32,5 +36,4 @@ export declare class MapPanel extends Component<Props> {
         ref: any;
     }, string | React.JSXElementConstructor<any>>;
 }
-export {};
 //# sourceMappingURL=MapPanel.d.ts.map

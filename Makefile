@@ -9,6 +9,10 @@ CONTAINER_ID=$(shell docker ps -f name=$(CONTAINER_NAME) -q)
 
 .PHONY: prod
 prod:
+	make build
+
+.PHONY: build
+build:
 	yarn test
 	yarn build
 	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/

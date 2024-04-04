@@ -317,6 +317,7 @@ export class MapCanvas extends BindableHTMLElement {
         self.render();
         self.newMap();
         self.sideBar && self.sideBar.render();
+        PubSub.publish("topologyRefresh");
       }
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
@@ -324,7 +325,6 @@ export class MapCanvas extends BindableHTMLElement {
         return
       }
       // otherwise, no hit in cache, let's grab them from the URL
-      // XXX need to send authentication headers here...
       fetch(this.options["configurationUrl"]).then((response)=>{
         response.json().then((config)=>{
           self.optionsCache[self.options["configurationUrl"]] = config;

@@ -20,10 +20,10 @@ export class EsMap {
     lastInteractedObject: any;
     lastInteractedType: any;
     showTooltipSubscription: any;
+    update(): void;
     editEdgeMode(setting: any): any;
     editNodeMode(setting: any): any;
     updateCoordinates(data: any, layerId: any): void;
-    update(): void;
     addNetLayer(idx: any, data: any): any;
 }
 //# sourceMappingURL=esmap.d.ts.map
