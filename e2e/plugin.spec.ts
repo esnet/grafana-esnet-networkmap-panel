@@ -73,11 +73,14 @@ pluginTest.describe("plugin testing", () => {
   pluginTest("dashboards access", async ({ page, targets }: { page: Page, targets: ITargets}) => {
     await page.goto(getHomepageUrl(targets.orgId));
     // click the dashboards button
-    await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
+    const menuHandle = await page.waitForSelector('#mega-menu-toggle');
+    await menuHandle.click();
+    const dashboardLink = await page.getByRole("navigation").getByRole("link", { name: "Dashboards"});
+    await dashboardLink.click();
     await page.waitForURL("**/dashboards");
 
     // Expects page to have an entry with the target dashboard listed
-    await expect(page.locator('[data-testid*="Search section"]:first-child')).toBeVisible();
+    await expect(page.getByPlaceholder("Search for dashboards and folders")).toBeVisible();
   });
 
   // limited testing of sliding switches for hide/show map canvas features
@@ -118,11 +121,16 @@ pluginTest.describe("plugin testing", () => {
     const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");  // TODO: test animations
 
     const sidebarControlLocatorSelector = "div div:has(input[type='checkbox'])";
-    const showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
-    const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test movability
-    const enableMapEditingControl = enableMapEditingControlGroup.locator(sidebarControlLocatorSelector);
-    const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
-    const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
+    // const showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
+    const showViewControlsControl = await showViewControlGroup.getByLabel("Toggle Switch");
+    // const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test movability
+    const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.getByRole("checkbox");
+    // const enableMapEditingControl = enableMapEditingControlGroup.locator(sidebarControlLocatorSelector);
+    const enableMapEditingControl = enableMapEditingControlGroup.getByLabel("Toggle Switch");
+    // const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
+    const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.getByLabel("Toggle Switch");
+    // const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
+    const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.getByLabel("Toggle Switch");
 
     // CHECK DEFAULTS (all enabled/checked)
 
@@ -142,6 +150,9 @@ pluginTest.describe("plugin testing", () => {
 
     // check Show View Controls
     await showViewControlGroup.scrollIntoViewIfNeeded();
+    expect(showViewControlGroup).toBeVisible();
+    // const showViewControlsControl = await showViewControlGroup.getByLabel("Toggle Switch");
+    expect(showViewControlsControl).toBeVisible();
     await showViewControlsControl.click();
     await expect(mapZoomInControl).not.toBeVisible();
     await expect(mapZoomOutControl).not.toBeVisible();
@@ -164,7 +175,7 @@ pluginTest.describe("plugin testing", () => {
 
     // parameters for test
     const nodeSelector = ".node .node-B"; // reference to node to operate test upon
-    const dragDelta = { dx: 100, dy: 50 }; // mouse drag parameters
+    const dragDelta = { dx: 50, dy: -100 }; // mouse drag parameters
 
     // go to view mode
     const viewNetworkMapPanelUrl = getNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId);
@@ -173,11 +184,9 @@ pluginTest.describe("plugin testing", () => {
     // get pre edit view node reference
     const preEditViewNodeEl = await page.waitForSelector(nodeSelector);
     const preEditViewNodeBox = (await preEditViewNodeEl.boundingBox())!;
-    const originalViewBrowserX = preEditViewNodeBox.x + preEditViewNodeBox.width / 2;
-    const originalViewBrowserY = preEditViewNodeBox.y + preEditViewNodeBox.height / 2;
-    const originalViewX = originalViewBrowserX;
-    const originalViewY = originalViewBrowserY;
-    console.log(`[${testName}] Center Position of target node in original view mode ${nodeSelector}: (${originalViewX}, ${originalViewY})`);
+    const originalViewCenterX = preEditViewNodeBox.x + preEditViewNodeBox.width / 2;
+    const originalViewCenterY = preEditViewNodeBox.y + preEditViewNodeBox.height / 2;
+    console.log(`[${testName}] Center Position of target node in original view mode ${nodeSelector}: (${originalViewCenterX}, ${originalViewCenterY})`);
 
     // go to edit mode
     const editNetworkMapPanelUrl = getNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId, true);
@@ -185,48 +194,51 @@ pluginTest.describe("plugin testing", () => {
 
     // toggle buttons to edit nodes, not edges
     await page.waitForSelector(nodeSelector);
-    const toggleEditEdgesBtn = await page.getByRole('button', { name: 'Edit Edges: Off'});
+    const toggleEditEdgesBtn = await page.getByRole('button', { name: 'Edit Edges: On'});
     await toggleEditEdgesBtn.click();
-    const toggleEditNodesBtn = await page.getByRole('button', { name: 'Edit Nodes: On'});
+    const toggleEditNodesBtn = await page.getByRole('button', { name: 'Edit Nodes: Off'});
     await toggleEditNodesBtn.click();
 
     // get a reference to an edit node
     const preEditNodeLocator = await page.locator(nodeSelector);
-    const preEditNodeElHandle = await preEditNodeLocator.elementHandle();
+    const preEditNodeElHandle = await preEditNodeLocator.first();
     const preEditBox = (await preEditNodeElHandle?.boundingBox())!; // relative to browser viewport
-    const originalBrowserX = preEditBox.x + preEditBox.width / 2;
-    const originalBrowserY = preEditBox.y + preEditBox.height / 2;
-    console.log(`[${testName}] Center Position of target node in original edit mode ${nodeSelector}: (${originalBrowserX}, ${originalBrowserY})`);
+    const preEditBoxCenterX = preEditBox.x + preEditBox.width / 2;
+    const preEditBoxCenterY = preEditBox.y + preEditBox.height / 2;
 
-    const originalEditX = originalBrowserX;
-    const originalEditY = originalBrowserY;
+    console.log(`[${testName}] Center Position of target node in original edit mode ${nodeSelector}: (${preEditBoxCenterX}, ${preEditBoxCenterY})`);
 
     // drag and drop node in edit mode to change its position
-
-    await page.mouse.move(originalEditX, originalEditY);
-    await page.mouse.down();
-    await page.mouse.move(originalEditX + dragDelta.dx, originalEditY + dragDelta.dy);
-    await page.mouse.up();
+    await preEditNodeElHandle.dragTo(preEditNodeElHandle, {
+      force: true,
+      targetPosition: {
+        x: preEditBoxCenterX + dragDelta.dx,
+        y: preEditBoxCenterY + dragDelta.dy,
+      }
+    });
+    // await page.mouse.move(preEditBoxCenterX, preEditBoxCenterY);
+    // await page.mouse.down();
+    // await page.mouse.move(preEditBoxCenterX + dragDelta.dx, preEditBoxCenterY + dragDelta.dy);
+    // await page.mouse.up();
+    await page.waitForTimeout(800);
 
     // click apply button directly, without exiting edit mode, should navigate to view mode
-    const applyButton = page.getByRole("button", { name: /apply/i});
+    const applyButton = await page.getByRole("button", { name: /apply/i});
     await applyButton.click();
 
     // apply button, defying convention goes directly to view mode after saving changes (and save btn saves, but stays in edit mode)
-    await page.waitForSelector('.panel-title');
+    await page.waitForSelector('nav');
     expect(page).not.toHaveTitle(/edit panel/i);
 
     // verify that the ctrl point for the B node is not at original position
     const postEditViewNodeEl = await page.waitForSelector(nodeSelector);
     const postEditViewNodeBox = (await postEditViewNodeEl.boundingBox())!;
-    const newBrowserX = postEditViewNodeBox.x + postEditViewNodeBox.width / 2;
-    const newBrowserY = postEditViewNodeBox.y + postEditViewNodeBox.height / 2;
+    const newViewCenterX = postEditViewNodeBox.x + postEditViewNodeBox.width / 2;
+    const newViewCenterY = postEditViewNodeBox.y + postEditViewNodeBox.height / 2;
 
-    const newX = newBrowserX;
-    const newY = newBrowserY;
-    console.log(`[${testName}] Node Position in view: old (${originalViewX}, ${originalViewY}); new (${newX}, ${newY})`);
-    expect(newX).not.toBe(originalViewX);
-    expect(newY).not.toBe(originalViewY);
+    console.log(`[${testName}] Node Position in view: old (${originalViewCenterX}, ${originalViewCenterY}); new (${newViewCenterX}, ${newViewCenterY})`);
+    expect(newViewCenterX).not.toBe(originalViewCenterX);
+    expect(newViewCenterY).not.toBe(originalViewCenterY);
   });
 
   pluginTest.skip("confirm edge changes upon clicking Grafana's Apply button", async ({ page, targets }: { page: Page, targets: ITargets}) => {
@@ -239,13 +251,25 @@ pluginTest.describe("plugin testing", () => {
     const dragDelta = { dx: 100, dy: 50 };
 
     await page.waitForSelector(bcEdgeSelector);
-    const preEditBCEdgeLocator = await page.locator(bcEdgeSelector);
-    const preEditBCEdgeElHandle = await preEditBCEdgeLocator.elementHandle();
-    const { x: originalX, y: originalY } = (await preEditBCEdgeElHandle?.boundingBox())!;
-    await preEditBCEdgeLocator.hover();
-    await page.mouse.down();
-    await page.mouse.move(originalX + dragDelta.dx, originalY + dragDelta.dy);
-    await page.mouse.up();
+    const preEditBCEdgeHandle = await page.locator(bcEdgeSelector).first();
+    const { x: originalX, y: originalY, width: originalW, height: originalH } = (await preEditBCEdgeHandle?.boundingBox())!;
+    await preEditBCEdgeHandle.dragTo(preEditBCEdgeHandle, {
+      force: true,
+      targetPosition: {
+        x: originalX + originalW / 2,
+        y: originalY + originalH / 2,
+      }
+    });
+    // const dragX = originalX + originalW / 2;
+    // const dragY = originalY + originalH / 2;
+    // const dropX = dragX + dragDelta.dx;
+    // const dropY = dragY + dragDelta.dy;
+    // await preEditBCEdgeLocator.hover();
+    // await page.mouse.move(dragX, dragY);
+    // await page.mouse.down();
+    // await page.mouse.move(dropX, dropY);
+    // // await page.mouse.move(dragDelta.dx, dragDelta.dy);
+    // await page.mouse.up();
 
     // click apply button directly, without exiting edit mode
     const applyButton = page.getByRole("button", { name: /apply/i});

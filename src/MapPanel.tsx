@@ -1,15 +1,18 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
+import { PanelProps, createTheme, DataFrameView, getValueFormat, EventBus } from '@grafana/data';
 import { MapOptions } from './types';
 import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
-import { locationService } from '@grafana/runtime';
+import { Unsubscribable } from 'rxjs';
+import { locationService, RefreshEvent } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
+
 export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
+  eventBus: EventBus;
 }
 
 export class MapPanel extends Component<MapPanelProps> {
@@ -17,6 +20,7 @@ export class MapPanel extends Component<MapPanelProps> {
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
+  eventSubscriber?: Unsubscribable;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -28,6 +32,7 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     this.lastOptions = {...this.props.options};
     this.theme = createTheme();
+    this.eventSubscriber = undefined;
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
   }
@@ -313,9 +318,24 @@ export class MapPanel extends Component<MapPanelProps> {
       this.mapCanvas.current
     );
   }
+
   componentDidMount() {
     this.updateMap();
+    // this.eventSubscriber = this.props.eventBus.subscribe(RefreshEvent, (event: RefreshEvent) => {
+    //   console.log("[MapPanel] enter observable for RefreshEvent subscription");
+    //   if (event.origin) {
+    //     this.render();
+    //   }
+    // });
+    // console.log("[MapPanel] componentDidMount eventBus subscribed.");
   }
+
+  // componentWillUnmount(): void {
+  //   if (this.eventSubscriber) {
+  //     this.eventSubscriber.unsubscribe();
+  //     console.log("[MapPanel] componentDidMount eventBus unsubscribed.");
+  //   }
+  // }
 
   componentDidUpdate() {
     const { options, fieldConfig } = this.props;
