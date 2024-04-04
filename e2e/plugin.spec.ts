@@ -203,24 +203,40 @@ pluginTest.describe("plugin testing", () => {
     const preEditNodeLocator = await page.locator(nodeSelector);
     const preEditNodeElHandle = await preEditNodeLocator.first();
     const preEditBox = (await preEditNodeElHandle?.boundingBox())!; // relative to browser viewport
-    const preEditBoxCenterX = preEditBox.x + preEditBox.width / 2;
-    const preEditBoxCenterY = preEditBox.y + preEditBox.height / 2;
+
+     // the containing bounding box encompasses the node and start of label, so only a quarter of width is needed for center offset of node
+    // const preEditBoxCenterX = preEditBox.x + preEditBox.width / 4;
+    // const preEditBoxCenterY = preEditBox.y + preEditBox.height / 2; // half of height is center offset
+    const preEditBoxCenterX = preEditBox.x - preEditBox.width / 2;
+    const preEditBoxCenterY = preEditBox.y;
 
     console.log(`[${testName}] Center Position of target node in original edit mode ${nodeSelector}: (${preEditBoxCenterX}, ${preEditBoxCenterY})`);
 
     // drag and drop node in edit mode to change its position
+
     await preEditNodeElHandle.dragTo(preEditNodeElHandle, {
       force: true,
       targetPosition: {
-        x: preEditBoxCenterX + dragDelta.dx,
-        y: preEditBoxCenterY + dragDelta.dy,
+        x: dragDelta.dx,
+        y: dragDelta.dy,
       }
     });
+    // await preEditNodeElHandle.hover();
     // await page.mouse.move(preEditBoxCenterX, preEditBoxCenterY);
     // await page.mouse.down();
     // await page.mouse.move(preEditBoxCenterX + dragDelta.dx, preEditBoxCenterY + dragDelta.dy);
     // await page.mouse.up();
     await page.waitForTimeout(800);
+    const movedNode = await page.locator(nodeSelector);
+    const movedNodeBox = (await movedNode?.boundingBox())!;
+    const postMoveBoxCenterX = movedNodeBox.x - movedNodeBox.width / 2;
+    const postMoveBoxCenterY = movedNodeBox.y;
+    console.log(`[${testName}] \
+Node Position in edit: pre-move=(${preEditBoxCenterX}, ${preEditBoxCenterY}); \
+post-move=(${postMoveBoxCenterX}, ${postMoveBoxCenterY}) \
+    `);
+    expect(postMoveBoxCenterX).not.toBe(preEditBoxCenterX);
+    expect(postMoveBoxCenterY).not.toBe(preEditBoxCenterY);
 
     // click apply button directly, without exiting edit mode, should navigate to view mode
     const applyButton = await page.getByRole("button", { name: /apply/i});

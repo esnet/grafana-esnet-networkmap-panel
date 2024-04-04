@@ -6,7 +6,7 @@ import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { Unsubscribable } from 'rxjs';
-import { locationService, RefreshEvent } from '@grafana/runtime';
+import { locationService } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
 
 export interface MapPanelProps extends PanelProps<MapOptions> {
