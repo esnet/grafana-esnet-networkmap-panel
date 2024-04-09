@@ -107,10 +107,12 @@ export default class NetworkMap {
         this.mapCanvas.topology.forEach((layer)=>{
           if(!layer || typeof(layer) == "string") return
           for(var e=0; e<layer.edges.length; e++){
-            var endpointId = `endpointId`;
             var edge = layer.edges[e];
-            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][0], layer.nodes);
-            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][1], layer.nodes);
+            var endpointId = this.mapCanvas?.options?.layers?.[l]?.endpointId;
+            var defaultNameA = edge.meta?.endpoint_identifiers?.[endpointId][0] || "UNKNOWN";
+            var defaultNameZ = edge.meta?.endpoint_identifiers?.[endpointId][1] || "UNKNOWN";
+            edge.nodeA = getDisplayName(defaultNameA, layer.nodes);
+            edge.nodeZ = getDisplayName(defaultNameZ, layer.nodes);
           }
           l++; // update the layer index
         });
