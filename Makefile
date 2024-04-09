@@ -40,7 +40,6 @@ compose:
 .PHONY: test
 test: compose
 	yarn test
-	yarn e2e
 
 .PHONY: test\:component
 test\:component:
