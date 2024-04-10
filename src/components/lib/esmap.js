@@ -1042,16 +1042,8 @@ export class EsMap {
         default:
           break;
       }
-    })
-
-    const grafanaToolbar = document.querySelector('.page-toolbar button[title="Apply changes and go back to dashboard"]');
-    if (grafanaToolbar) {
-      grafanaToolbar.addEventListener('click', () => {
-        PubSub.publish('renderMap');
-      });
-    }
+    });
   }
-
 
   editEdgeMode(setting) {
     if (setting === null || setting === undefined) {
