@@ -5,7 +5,6 @@ import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
-import { Unsubscribable } from 'rxjs';
 import { locationService } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
 
@@ -20,7 +19,7 @@ export class MapPanel extends Component<MapPanelProps> {
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
-  subscriptionHandle?: Unsubscribable;
+  subscriptionHandle?: any;
 
   constructor(props: MapPanelProps) {
     super(props);

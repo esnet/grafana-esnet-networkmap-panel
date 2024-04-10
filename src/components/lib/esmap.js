@@ -1042,7 +1042,7 @@ export class EsMap {
         default:
           break;
       }
-    });
+    })
 
     const grafanaToolbar = document.querySelector('.page-toolbar button[title="Apply changes and go back to dashboard"]');
     if (grafanaToolbar) {
