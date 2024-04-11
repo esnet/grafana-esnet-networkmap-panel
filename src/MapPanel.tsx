@@ -31,10 +31,10 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     this.lastOptions = {...this.props.options};
     this.theme = createTheme();
-    // let self = this;
+    let self = this;
     PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
     PubSub.subscribe('returnMapViewport', this.updateMapViewport);
-    PubSub.subscribe('topologyRefresh', ()=>{ this.updateMap() });
+    PubSub.subscribe('topologyRefresh', ()=>{ self.updateMap() });
   }
 
   setDashboardVariables() {
@@ -336,9 +336,7 @@ export class MapPanel extends Component<MapPanelProps> {
   }
 
   componentWillUnmount() {
-    if (this.subscriptionHandle) {
-      this.subscriptionHandle.unsubscribe();
-    }
+    this.subscriptionHandle?.unsubscribe();
   }
 
   componentDidUpdate() {
