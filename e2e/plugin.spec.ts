@@ -120,12 +120,8 @@ pluginTest.describe("plugin testing", () => {
     const enableNodeSelectionAnimationsControlGroup = await page.getByLabel("Enable Node Selection Animations");  // TODO: test animations
     const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");  // TODO: test animations
 
-    const sidebarControlLocatorSelector = "div div:has(input[type='checkbox'])";
     const showViewControlsControl = await showViewControlGroup.getByLabel("Toggle Switch");
-    const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.getByRole("checkbox");
     const enableMapEditingControl = enableMapEditingControlGroup.getByLabel("Toggle Switch");
-    const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.getByLabel("Toggle Switch");
-    const enableEdgeTrafficDirectionAnimationsControl = enableEdgeTrafficDirectionAnimationsControlGroup.getByLabel("Toggle Switch");
 
     // CHECK DEFAULTS (all enabled/checked)
 
@@ -227,8 +223,8 @@ pluginTest.describe("plugin testing", () => {
     expect(page).not.toHaveTitle(/edit panel/i);
 
     // verify that the ctrl point for the B node is not at original position
-    const postEditViewNodeEl = await page.waitForSelector(nodeSelector);
-    const postEditViewNodeBox = (await postEditViewNodeEl.boundingBox())!;
+    const postEditNodeLocator = await page.locator(nodeSelector);
+    const postEditViewNodeBox = (await postEditNodeLocator.boundingBox())!;
     const newViewCenterX = postEditViewNodeBox.x + postEditViewNodeBox.width / 2;
     const newViewCenterY = postEditViewNodeBox.y + postEditViewNodeBox.height / 2;
 
