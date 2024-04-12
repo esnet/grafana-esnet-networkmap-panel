@@ -63,18 +63,16 @@ class SideBar extends BindableHTMLElement {
       if (!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i] || !this.mapCanvas.jsonResults) {
         continue;
       }
-      const legendText = this.mapCanvas.options.layers[i].name || `Layer ${i + 1}`;
-      sidebarLayerContent += `
-        <div class='toggle container' ${ !this.mapCanvas.options.layers[i].legend && "style='display: none;'" }>
-          <label class="switch">
-            <input role="checkbox" aria-labelledby="${legendText}"  type="checkbox" ${ this.mapCanvas.options.layers[i].visible && "checked"} id="sidebar-layer-${i}}">
-            <span class="slider round"></span>
-          </label>
-          <text class="legend-text">${legendText}</text>
-          <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-            JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i][0] ) ? "valid" : `invalid${this.mapCanvas.jsonResults?.[i]?.[1] ? ": " + this.mapCanvas.jsonResults[i][1] : "" }` }
-          </div>
-        </div>`;
+      sidebarLayerContent += `<div class='toggle container' ${ !this.mapCanvas.options.layers[i].legend && "style='display: none;'" }>
+        <label class="switch">
+          <input type="checkbox" ${ this.mapCanvas.options.layers[i].visible && "checked"} id="sidebar-layer-${i}">
+          <span class="slider round"></span>
+        </label>
+        <text class="legend-text">${ this.mapCanvas.options.layers[i].name || "Layer " + (i+1) }</text>
+        <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
+          JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i][0] ) ? "valid" : `invalid${this.mapCanvas.jsonResults?.[i]?.[1] ? ": " + this.mapCanvas.jsonResults[i][1] : "" }` }
+        </div>
+      </div>`
     }
 
     this.shadow.innerHTML = `
