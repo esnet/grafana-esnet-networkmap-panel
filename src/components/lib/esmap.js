@@ -998,7 +998,6 @@ export class EsMap {
     }
     PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
 
-    // function nudge(latOrLng, amount){
     const nudge = (latOrLng, amount) => {
       if (this.lastInteractedType === null || this.lastInteractedObject === null) return;
       if (this.lastInteractedType === "nodes") {
@@ -1043,9 +1042,8 @@ export class EsMap {
         default:
           break;
       }
-    })
+    });
   }
-
 
   editEdgeMode(setting) {
     if (setting === null || setting === undefined) {
