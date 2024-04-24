@@ -2,5 +2,6 @@
     "targetPanelType": "esnet-networkmap-panel",
     "targetDashboard": "network-map-test-dashboard",
     "targetFolder": "network-map-test-folder",
-    "grafanaInstanceName": "esnet-networkmap-panel"
+    "grafanaInstanceName": "esnet-networkmap-panel",
+    "fileId": "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc"
 }

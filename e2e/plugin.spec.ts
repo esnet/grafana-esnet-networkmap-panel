@@ -5,13 +5,10 @@ import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
 import { pluginTest } from './plugin-def';
-import { getFolderDashboardTargets } from './folderDashboardInit';
+import { getFolderDashboardTargets, initCSVDatasource } from './folderDashboardInit';
 
-const { protocolHostPort } = getHostInfo(credentials);
-const { targetDashboard } = e2eConfig;
-
-const getHomepageUrl = (orgId?: string | number) => {
-  const { protocolHostPort } = getHostInfo(credentials);
+const getHomepageUrl = async (orgId?: string | number) => {
+  const { protocolHostPort } = await getHostInfo(credentials);
   if (orgId) {
     return `${protocolHostPort}/?orgId=${orgId}`;
   } else {
@@ -19,8 +16,8 @@ const getHomepageUrl = (orgId?: string | number) => {
   }
 }
 
-const getEditNetworkMapPanelUrl = (targetDashboardUid: string, targetDb: string, panelId: string | number, orgId?: string | number) => {
-    const { protocolHostPort } = getHostInfo(credentials);
+const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: string, panelId: string | number, orgId?: string | number) => {
+    const { protocolHostPort } = await getHostInfo(credentials);
     const paramObj = {
       editPanel: panelId,
       'var-node': 'ALBQ',
@@ -39,12 +36,19 @@ const getEditNetworkMapPanelUrl = (targetDashboardUid: string, targetDb: string,
 pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
+      // setup data source
+      await initCSVDatasource();
+
+      // setup dashboard, including topology data
       const newFixtureObj = await getFolderDashboardTargets();
+      expect(newFixtureObj.targetPanel).not.toBeUndefined();
+
       use(newFixtureObj);
     }
   });
 
   pluginTest("has title", async ({ page }) => {
+    const { protocolHostPort } = await getHostInfo();
     await page.goto(protocolHostPort);
 
     // Expect a title "to contain" a substring.
@@ -52,20 +56,47 @@ pluginTest.describe("plugin testing", () => {
   });
 
   pluginTest("login access", async ({ page, targets }: { page: Page, targets: ITargets }) => {
-    await page.goto(getHomepageUrl(targets.orgId));
+    await page.goto(await getHomepageUrl(targets.orgId));
 
     // Expects page to have a heading with the name of Installation.
     await expect(page.getByText("Welcome to Grafana")).toBeVisible();
   });
 
   pluginTest("dashboards access", async ({ page, targets }: { page: Page, targets: ITargets}) => {
-    await page.goto(getHomepageUrl(targets.orgId));
-    // click the dashboards button
-    await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
-    await page.waitForURL("**/dashboards");
+    const homepageUrl = await getHomepageUrl(targets.orgId);
+    await page.goto(homepageUrl);
+    await page.waitForURL(homepageUrl);
 
-    // Expects page to have an entry with the target dashboard listed
-    await expect(page.locator('[data-testid*="Search section"]:first-child')).toBeVisible();
+    // open the side menu for the dashboards if not already open
+    let dashboardBtn = page.getByTestId(/navigation mega-menu/).getByRole('link', { name: 'Dashboards' });
+    if (!(await dashboardBtn.isVisible())) {
+      console.log("plugin.spec[dashboards access]: dashboardBtn not visible, clicking Toggle menu");
+      const menu = await page.getByTestId(/Toggle menu/);
+      await menu.click();
+    }
+
+    // click the dashboards button
+
+    // get again in case component reloaded after click
+    const { protocolHostPort, version } = await getHostInfo(credentials);
+    const isGrafanaVersionBelow10 = /^[0-9]\..*/.test(version);
+    if (!isGrafanaVersionBelow10) {
+      dashboardBtn = page.getByTestId(/navigation mega-menu/).getByRole('link', { name: 'Dashboards' });
+      const apiResponsePromise = page.waitForResponse(`${protocolHostPort}/api/folders**`);
+      await dashboardBtn.click();
+      await page.waitForURL("**/dashboards");
+
+      // Check table to have an entry with the target dashboard listed after API response
+      await apiResponsePromise;
+      const dbTable = await page.getByRole('cell', { name: /network-map-test-folder/ }).first();
+      expect(dbTable.isVisible()).toBeTruthy();
+    } else {
+      await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
+      await page.waitForURL("**/dashboards");
+
+      // Expects page to have an entry with the target dashboard listed
+      await expect(page.locator('[data-testid*="Search section"]:first-child')).toBeVisible();
+    }
   });
 
   // limited testing of sliding switches for hide/show map canvas features
@@ -74,7 +105,7 @@ pluginTest.describe("plugin testing", () => {
     // load plugin edit page
     const fnName = "plugin.spec['load plugin edit page - view options']";
     const { targetDashboardUid, targetFolder, targetDashboard, targetPanelId, orgId } = targets;
-    const editNetworkMapPanelUrl = `${getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
+    const editNetworkMapPanelUrl = `${await getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
     await page.goto(editNetworkMapPanelUrl);
 
     // wait for page to load up canvas
@@ -100,13 +131,13 @@ pluginTest.describe("plugin testing", () => {
 
     // define Grafana controls/panels for view options
 
-    const showViewControlGroup = await page.getByLabel("Show View Controls");
+    const showViewControlGroup = await page.getByLabel(/Show View Controls/);
     const enableMapScrollingOnDragControlGroup = await page.getByLabel("Enable Map Scrolling on Drag");  // TODO: test movability
     const enableMapEditingControlGroup = await page.getByLabel("Enable Map Editing");
     const enableNodeSelectionAnimationsControlGroup = await page.getByLabel("Enable Node Selection Animations");  // TODO: test animations
     const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");  // TODO: test animations
 
-    const sidebarControlLocatorSelector = "div div:has(input[type='checkbox'])";
+    const sidebarControlLocatorSelector = "div div:has(div input[type='checkbox']) label";
     const showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
     const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test movability
     const enableMapEditingControl = enableMapEditingControlGroup.locator(sidebarControlLocatorSelector);
@@ -130,7 +161,6 @@ pluginTest.describe("plugin testing", () => {
     // CHECK CONTROL ACTIONS (upon click/edit)
 
     // check Show View Controls
-    await showViewControlGroup.scrollIntoViewIfNeeded();
     await showViewControlsControl.click();
     await expect(mapZoomInControl).not.toBeVisible();
     await expect(mapZoomOutControl).not.toBeVisible();
@@ -138,6 +168,7 @@ pluginTest.describe("plugin testing", () => {
     // check enable map editing
     await enableMapEditingControlGroup.scrollIntoViewIfNeeded();
     await enableMapEditingControl.click();
+
     await expect(mapEditEdgeToggleControl).not.toBeVisible();
     await expect(mapEditNodeToggleControl).not.toBeVisible();
     await expect(mapAddEdgeControl).not.toBeVisible();

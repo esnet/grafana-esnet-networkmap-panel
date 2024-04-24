@@ -9,7 +9,7 @@ import networkMapPanel from '../e2e/networkMapPanel.json';
  * @returns {Promise<string>}
  */
 export const getDashboard = async (dbUid: string): Promise<string> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
   const dashboardGetResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${dbUid}`, {
     headers: basicAuthHeader,
   });
@@ -23,7 +23,7 @@ export const getDashboard = async (dbUid: string): Promise<string> => {
  * @returns {Promise<string | undefined>}
  */
 export const getCurrentUser = async (): Promise<string | undefined> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
   try {
     const userResponse: Response = await fetch(`${protocolHostPort}/api/user`, {
       headers: {
@@ -48,7 +48,7 @@ export const getCurrentUser = async (): Promise<string | undefined> => {
  * @returns {Promise<string>} The JSON string for the created dashboard.
  */
 export const createDashboard = async (folderUid: string, dashboardTitle?: string, dashboardUid?: string): Promise<string> => {
-    const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+    const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
     const inObj = {
       dashboard: {
         id: null,
@@ -101,7 +101,7 @@ export const createDashboard = async (folderUid: string, dashboardTitle?: string
  * @return {Promise<{uid: string, id: string}>} An object with UID and ID for the folder, whether it was created or already existing.
  */
 export const createFolder = async (folderTitle: string, folderUid?: string): Promise<{uid: string, id: string}> => {
-    const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+    const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
     const inObj = {"title": folderTitle};
     if (folderUid) {
         inObj['uid'] = folderUid;
@@ -120,3 +120,26 @@ export const createFolder = async (folderTitle: string, folderUid?: string): Pro
         uid: createFolderJsonResponse.uid,
     };
 };
+
+export const updateDashboard = async (folderUid: string, targetDashboard): Promise<string> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+
+  const dbUpdateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
+    method: "post",
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-TypeZ": "application/json",
+    },
+    body: JSON.stringify({
+      dashboard: targetDashboard,
+      folderUid,
+      message: "Populated with flow data from E2E test",
+      overwrite: true
+    })
+  });
+
+  const responseJson = await dbUpdateResponse.json();
+  return responseJson;
+}
+

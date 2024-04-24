@@ -1,18 +1,53 @@
-import { createDashboard, createFolder, getCurrentUser, getDashboard } from './grafana-api';
-import { getHostInfo } from './config.info';
+import { createDashboard, createFolder, getCurrentUser, getDashboard, updateDashboard } from './grafana-api';
+import { getHostInfo, getGoogleSheetInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import e2eConfig from './e2e.config.json';
 import { ITargets } from './interfaces/Targets.interface';
 import { IPanel } from './interfaces/Panel.inteface';
+import { IDataSource } from './interfaces/DataSource.interface';
+import { ITopology } from './interfaces/Topology.interface';
 
 let targetFolderUid;
 let targetDashboardUid;
-const { targetFolder, targetDashboard } = e2eConfig;
+const { targetFolder, targetDashboard, fileId } = e2eConfig;
 
 const pluginTestSetupFnName = 'folder-dashboard.setup.getFolderDashboardTargets';
 
-export const getFolderDashboardTargets = async (): Promise<ITargets> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+export const initCSVDatasource = async (): Promise<IDataSource> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const sheetInfo = getGoogleSheetInfo(fileId);
+  let dataFlowUrl: string;
+  if (typeof(sheetInfo) === 'string') {
+    dataFlowUrl = sheetInfo as string;
+  } else {
+    dataFlowUrl = sheetInfo.flowsUrl;
+  }
+
+  const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
+    method: "POST",
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      "name": "network-traffic-flow",
+      "type": "marcusolsson-csv-datasource",
+      "url": dataFlowUrl,
+      "access": "",
+      "basicAuth": false,
+    })
+  });
+  const jsonResponse = await dataSrcCreateResponse.json();
+  return jsonResponse.datasource;
+}
+
+/**
+ * This creates and populates the folder for the Network Map Panel
+ * @returns
+ */
+export const getFolderDashboardTargets = async (topology?: ITopology): Promise<ITargets> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
 
   // check if folder exists already, if not, create it
   const foldersResponse: Response = await fetch(`${protocolHostPort}/api/folders?limit=1000`, {
@@ -50,7 +85,8 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     throw new Error(`${pluginTestSetupFnName}: cannot resolve targetDashboard, multiple dashboards matched on dashboard search.`);
   }
 
-  const dashboardInfo = JSON.parse(dashboardJsonStr);
+  let dashboardInfo = JSON.parse(dashboardJsonStr);
+  // get target panel
   const targetPanel = (dashboardInfo.dashboard.panels as Array<IPanel>).find(panel => panel.type === e2eConfig.targetPanelType);
   if (!targetPanel) {
     throw new Error(`${pluginTestSetupFnName}: cannot resolve targetPanel, none matching '${e2eConfig.targetPanelType}' found.`);
@@ -62,6 +98,26 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
   let orgId = undefined;
   if (!!currentUserResponseJsonStr) {
     orgId = JSON.parse(currentUserResponseJsonStr).orgId;
+  }
+
+  // set topology if specified
+  if (topology) {
+    dashboardInfo = {
+      ...dashboardInfo,
+      panels: {
+        ...dashboardInfo.panels,
+        options: {
+          ...dashboardInfo.options,
+          layers: [
+            {
+              ...dashboardInfo.options.layers[0],
+              mapjson: JSON.stringify(topology),
+            },
+          ]
+        }
+      }
+    };
+    await updateDashboard(targetFolderUid, dashboardInfo);
   }
 
   const targetsFixtureObj = {
