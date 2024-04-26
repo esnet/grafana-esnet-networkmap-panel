@@ -70,7 +70,6 @@ pluginTest.describe("plugin testing", () => {
     // open the side menu for the dashboards if not already open
     let dashboardBtn = page.getByTestId(/navigation mega-menu/).getByRole('link', { name: 'Dashboards' });
     if (!(await dashboardBtn.isVisible())) {
-      console.log("plugin.spec[dashboards access]: dashboardBtn not visible, clicking Toggle menu");
       const menu = await page.getByTestId(/Toggle menu/);
       await menu.click();
     }
@@ -82,14 +81,15 @@ pluginTest.describe("plugin testing", () => {
     const isGrafanaVersionBelow10 = /^[0-9]\..*/.test(version);
     if (!isGrafanaVersionBelow10) {
       dashboardBtn = page.getByTestId(/navigation mega-menu/).getByRole('link', { name: 'Dashboards' });
-      const apiResponsePromise = page.waitForResponse(`${protocolHostPort}/api/folders**`);
+      const apiResponsePromise = page.waitForResponse(`${protocolHostPort}/api/search**`);
       await dashboardBtn.click();
-      await page.waitForURL("**/dashboards");
+      expect(page.url().endsWith("/dashboards")).toBeTruthy();
 
       // Check table to have an entry with the target dashboard listed after API response
       await apiResponsePromise;
-      const dbTable = await page.getByRole('cell', { name: /network-map-test-folder/ }).first();
-      expect(dbTable.isVisible()).toBeTruthy();
+      const dbTable = await page.getByRole('table');
+      const dbCell = dbTable.getByRole('cell', { name: /network-map-test-folder/ });
+      await expect(dbCell).toBeVisible();
     } else {
       await page.getByRole("link").and(page.getByLabel("Dashboards")).click();
       await page.waitForURL("**/dashboards");

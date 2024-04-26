@@ -14,6 +14,7 @@ const { targetFolder, targetDashboard, fileId } = e2eConfig;
 const pluginTestSetupFnName = 'folder-dashboard.setup.getFolderDashboardTargets';
 
 export const initCSVDatasource = async (): Promise<IDataSource> => {
+  const fnName = "folderDashboardInit.initCSVDatasource";
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
   const sheetInfo = getGoogleSheetInfo(fileId);
   let dataFlowUrl: string;
@@ -23,22 +24,29 @@ export const initCSVDatasource = async (): Promise<IDataSource> => {
     dataFlowUrl = sheetInfo.flowsUrl;
   }
 
-  const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
-    method: "POST",
-    headers: {
-      ...basicAuthHeader,
-      "Accept": "application/json",
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      "name": "network-traffic-flow",
-      "type": "marcusolsson-csv-datasource",
-      "url": dataFlowUrl,
-      "access": "",
-      "basicAuth": false,
-    })
-  });
-  const jsonResponse = await dataSrcCreateResponse.json();
+  let jsonResponse;
+  try {
+    const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
+      method: "POST",
+      headers: {
+        ...basicAuthHeader,
+        "Accept": "application/json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        "name": "network-traffic-flow",
+        "type": "marcusolsson-csv-datasource",
+        "url": dataFlowUrl,
+        "access": "",
+        "basicAuth": false,
+      })
+    });
+    jsonResponse = await dataSrcCreateResponse.json();
+  } catch (e) {
+    console.error(`[${fnName}: Error ${e.message}`);
+    console.error(`[${fnName}: init data source response:\n${JSON.stringify(jsonResponse, null, 2)}`);
+  }
+
   return jsonResponse.datasource;
 }
 

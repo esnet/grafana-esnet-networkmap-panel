@@ -10,7 +10,7 @@ setup('authenticate', async ({ page }: { page: Page }) => {
   // Perform authentication steps. Replace these actions with your own.
   let skipBtn: Locator | null = null;
   const isGrafanaVersionBelow10 = /^[0-9]\..*/.test(version);
-  console.log(`[auth.setup.authenticate]: version = ${version}`);
+  console.log(`[auth.setup.authenticate]: Detected Grafana version ${version}`);
   if (!isGrafanaVersionBelow10) {
     await page.goto(`${protocolHostPort}/login`);
     await page.getByLabel('Username input field').or(page.getByTestId(/Username input field/)).fill(credentials.username);
