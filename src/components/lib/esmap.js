@@ -70,6 +70,7 @@ function sanitizeName(name){
 function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
   const edgeWidth = ref.options.layers[layerId].edgeWidth;
+  const endpointId = ref.options.layers[layerId].endpointId;
   const defaultEdgeColor = ref.options.layers[layerId].color;
   var azLines = g.selectAll('path.edge-az').data(data.edges);
 
@@ -188,8 +189,8 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
       var connections = " cnxn-"+name.split("--").join(" cnxn-");
-      if(d.meta?.endpoint_identifiers?.pops && d.meta.endpoint_identifiers.pops?.length){
-        connections += " cnxn-"+d.meta.endpoint_identifiers.pops.join(" cnxn-");
+      if(d.meta?.endpoint_identifiers?.[endpointId] && d.meta.endpoint_identifiers[endpointId]?.length){
+        connections += " cnxn-"+d.meta.endpoint_identifiers[endpointId].join(" cnxn-");
       }
       var layerClass = ' l'+layerId;
       return 'edge edge-za edge-za-' + name + connections + layerClass;
@@ -838,7 +839,7 @@ function sortNodes(nodes){
     return nodes;
 }
 
-function sortEdges(edges, sortedNodes){
+function sortEdges(edges, sortedNodes, endpointId){
   // a map of node name to node
   let nodeMap = {};
   // populate the map
@@ -847,13 +848,13 @@ function sortEdges(edges, sortedNodes){
   })
   // find the max sort of the set of pops for this edge, adding one.
   edges.forEach((edge)=>{
-    let popSortValues = [500]; // very large default, edges rendered at the back.
+    let nodeSortValues = [500]; // very large default, edges rendered at the back.
     // in the case that we have endpoint identifier data, look up each and find a correct sort
-    if(edge?.meta?.endpoint_identifiers?.pops){
-      popSortValues = edge?.meta?.endpoint_identifiers?.pops?.map((pop)=>{ return nodeMap[pop]?.sort || 0 });
+    if(edge?.meta?.endpoint_identifiers?.[endpointId]){
+      nodeSortValues = edge?.meta?.endpoint_identifiers?.[endpointId]?.map((nodeName)=>{ return nodeMap[nodeName]?.sort || 0 });
     }
-    let maxPopSortValue = Math.max.apply(Math, popSortValues);
-    edge.sort = maxPopSortValue + 1;
+    let maxNodeSortValue = Math.max.apply(Math, nodeSortValues);
+    edge.sort = maxNodeSortValue + 1;
   })
   edges.sort((a, b)=>{
       if(a.sort <  b.sort) return 1;
@@ -863,9 +864,9 @@ function sortEdges(edges, sortedNodes){
   return edges
 }
 
-function annotateSortOrder(data){
+function annotateSortOrder(data, endpointId){
   let sortedNodes = sortNodes(data.nodes)
-  let sortedEdges = sortEdges(data.edges, sortedNodes)
+  let sortedEdges = sortEdges(data.edges, sortedNodes, endpointId);
 }
 
 function calcTranslation(distance, targetPoint, pointA, pointB) {
@@ -1218,7 +1219,7 @@ export class EsMap {
         controlpoint_g.selectAll('*').remove();
       }
       // annotate data with the proper "z-index" order, respecting parent-child relationships.
-      annotateSortOrder(data);
+      annotateSortOrder(data, this?.options?.layers?.[layerId]?.endpointId);
       // render nodes and edges
       renderNodes(topology_g, data, this, layerId);
       renderEdges(topology_g, data, this, layerId, this.mapCanvas.options);

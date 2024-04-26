@@ -142,7 +142,7 @@ let layerOptions = {
     category: "Layer ${i+1}: Basic Options",
     showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     description: 'Which topology "meta" field should be used to match topology nodes to query data?',
-    defaultValue: 'pops',
+    defaultValue: 'names',
   },
   "layers[${i}].edgeWidth": {
     editor: "slider",
