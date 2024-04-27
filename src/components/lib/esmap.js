@@ -795,11 +795,12 @@ function traceParents(child, parents, depth){
 }
 function countGenerations(nodes, nodeName, generations){
     let children = nodes[nodeName].children
-    if(children){
+    if(children && children.length > 0){
       let childrensGenerations = children.map((child)=>{
         return countGenerations(nodes, child, generations + 1)
       })
-      return Math.max.apply(Math, childrensGenerations);
+      let retval = Math.max.apply(Math, childrensGenerations);
+      return retval;
     }
     return generations
 }
