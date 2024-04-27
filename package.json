@@ -73,7 +73,6 @@
   "dependencies": {
     "@emotion/css": "11.10.5",
     "d3": "^7.0.0",
-    "leaflet": "^1.7.1",
     "react": "17.0.2",
     "react-dom": "17.0.2",
     "tslib": "2.4.1"

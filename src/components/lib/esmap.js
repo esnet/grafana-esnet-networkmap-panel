@@ -5,6 +5,7 @@ import * as d3_import from './d3.min.js';
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
 import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options.js";
+import * as L from "./leaflet-src.esm.js";
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
