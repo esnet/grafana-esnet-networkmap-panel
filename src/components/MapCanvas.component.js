@@ -9,14 +9,10 @@ import { testJsonSchema } from './lib/utils.js';
 import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
 import testIds from '../constants.js';
+import * as L from "./lib/leaflet-src.esm.js";
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
-
-var L = window['L'];
-if(typeof require !== "undefined"){
-  var L = require('./lib/leaflet.js');
-}
 
 // plus-one-pixel for each map tile. this makes the tiles
 // overlap slightly to avoid fractional zoom artefacts

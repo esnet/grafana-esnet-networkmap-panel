@@ -6,7 +6,7 @@ export class MapCanvas extends BindableHTMLElement {
     _selection: boolean;
     _remoteLoaded: boolean;
     map: NetworkMap | null;
-    leafletMap: any;
+    leafletMap: L.Map | null;
     set jsonResults(arg: any);
     get jsonResults(): any;
     legendMinimized: boolean;
@@ -52,7 +52,7 @@ export class MapCanvas extends BindableHTMLElement {
     recalculateMapZoom(): void;
     updateCenter(centerData: any): void;
     toggleLayer(layerData: any): void;
-    getCurrentLeafletMap(): any;
+    getCurrentLeafletMap(): L.Map;
     destroyMap(): void;
     homeMap(): void;
     newMap(): void;
@@ -71,4 +71,5 @@ export class MapCanvas extends BindableHTMLElement {
 }
 import { BindableHTMLElement } from "./lib/rubbercement.js";
 import NetworkMap from "./NetworkMap.js";
+import * as L from "./lib/leaflet-src.esm.js";
 //# sourceMappingURL=MapCanvas.component.d.ts.map

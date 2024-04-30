@@ -1,5 +1,6 @@
 import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
+import * as L from "./lib/leaflet-src.esm.js";
 import { LAYER_LIMIT } from './lib/utils.js'
 const PubSub = pubsub.PubSub;
 
@@ -27,12 +28,6 @@ var locationService = { "partial": function(query){
     const updatedUrl = location.toString();
     window.history.pushState(null, "", updatedUrl);
 } }
-// require is only defined in the webpack context, not ES6
-var L = window['L'];
-try {
-  var L = require('./lib/leaflet.js');
-} catch (e) {
-}
 
 export default class NetworkMap {
   /**

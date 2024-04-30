@@ -5,6 +5,7 @@ import * as d3_import from './d3.min.js';
 const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
 import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options.js";
+import * as L from "./leaflet-src.esm.js";
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -70,6 +71,7 @@ function sanitizeName(name){
 function renderEdges(g, data, ref, layerId, options) {
   var div = ref.div;
   const edgeWidth = ref.options.layers[layerId].edgeWidth;
+  const endpointId = ref.options.layers[layerId].endpointId;
   const defaultEdgeColor = ref.options.layers[layerId].color;
   var azLines = g.selectAll('path.edge-az').data(data.edges);
 
@@ -188,8 +190,8 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('class', function (d) {
       var name = sanitizeName(d.name);
       var connections = " cnxn-"+name.split("--").join(" cnxn-");
-      if(d.meta?.endpoint_identifiers?.pops && d.meta.endpoint_identifiers.pops?.length){
-        connections += " cnxn-"+d.meta.endpoint_identifiers.pops.join(" cnxn-");
+      if(d.meta?.endpoint_identifiers?.[endpointId] && d.meta.endpoint_identifiers[endpointId]?.length){
+        connections += " cnxn-"+d.meta.endpoint_identifiers[endpointId].join(" cnxn-");
       }
       var layerClass = ' l'+layerId;
       return 'edge edge-za edge-za-' + name + connections + layerClass;
@@ -676,58 +678,16 @@ function renderEdgeControl(g, data, ref, layerId) {
     feature.exit().remove();
   });
 }
-const MAX_DEPTH = 10;
-function traceParents(child, parents, depth){
-    if(depth > MAX_DEPTH){
-      throw new Error("Maximum depth exceeeded");
-    }
-    parent = parents[child]
-    if(!parent) return [];
-    let output = parent;
-    depth++;
-    output = traceParents(parent[0], parents, depth).concat(output)
-    return output
-}
-// determine sort order for node rendering
-function sortNodesForRender(nodes){
-    let parents = {};
-    nodes.forEach((node)=>{
-        if(node.children){
-            node.children.forEach((child)=>{
-                if(parents[child]){
-                  parents[child] = parents[child].concat([node.name]);
-                } else {
-                  parents[child] = [node.name];
-                }
-            })
-        }
-    });
-    // now we have a list of all of the parents. We need to do grandparents, then great-grandparents...
-    nodes.forEach((node)=>{
-        try {
-          node["parents"] = traceParents(node.name, parents);
-        } catch(e) {
-          throw new Error(`Error while tracing Parents for Node ${node.name}. A Node can't be its own parent or its parent's parent. Children were: [${node.children}]. Please check them for loops.`)
-        }
-        node["sort"] = node.parents.concat([node.name]).join(".")
-    });
-    nodes.sort((a, b)=>{
-      if(a.sort <  b.sort) return -1;
-      if(a.sort == b.sort) return 0;
-      if(a.sort >  b.sort) return 1;
-    })
-    return nodes;
-}
 
 function renderNodes(g, data, ref, layerId) {
   const defaultNodeColor = ref.options.layers[layerId]["color"];
-  var feature = g.selectAll('g.node').data(sortNodesForRender(data.nodes));
+  var feature = g.selectAll('g.node').data(data.nodes);
   var div = ref.div;
   feature
     .enter()
     .append('g')
     .attr('class', function(d){
-      var parentClasses = d.parents.map((p)=>{
+      var parentClasses = d.parents?.map((p)=>{
           return "node-child-of-" + sanitizeName(p);
       }).join(" ")
       // sanitize name from the node
@@ -819,6 +779,96 @@ function renderNodes(g, data, ref, layerId) {
   });
 
   feature.exit().remove();
+}
+
+const MAX_DEPTH = 10;
+function traceParents(child, parents, depth){
+    if(depth > MAX_DEPTH){
+      throw new Error("Maximum depth exceeeded");
+    }
+    parent = parents[child]
+    if(!parent) return [];
+    let output = parent;
+    depth++;
+    output = traceParents(parent[0], parents, depth).concat(output)
+    return output
+}
+function countGenerations(nodes, nodeName, generations){
+    let children = nodes[nodeName].children
+    if(children && children.length > 0){
+      let childrensGenerations = children.map((child)=>{
+        return countGenerations(nodes, child, generations + 1)
+      })
+      let retval = Math.max.apply(Math, childrensGenerations);
+      return retval;
+    }
+    return generations
+}
+// determine sort order for node rendering
+function sortNodes(nodes){
+    // hash of parent name to child list
+    let parents = {};
+    // hash of node name to node value
+    let nodeMap = {};
+    nodes.forEach((node)=>{
+        if(node.children){
+            node.children.forEach((child)=>{
+                if(parents[child]){
+                  parents[child] = parents[child].concat([node.name]);
+                } else {
+                  parents[child] = [node.name];
+                }
+            })
+        }
+        node.sort = 0;
+        nodeMap[node.name] = node;
+    });
+    // now we have a list of all of the parents. We need to do grandparents, then great-grandparents...
+    nodes.forEach((node)=>{
+        try {
+          node["parents"] = traceParents(node.name, parents);
+        } catch(e) {
+          throw new Error(`Error while tracing Parents for Node ${node.name}. A Node can't be its own parent or its parent's parent. Children were: [${node.children}]. Please check them for loops.`)
+        }
+        // score 2 points for each generation below this node
+        node["sort"] = countGenerations(nodeMap, node["name"], 0) * 2;
+    });
+    nodes.sort((a, b)=>{
+      if(a.sort <  b.sort) return 1;
+      if(a.sort == b.sort) return 0;
+      if(a.sort >  b.sort) return -1;
+    })
+    return nodes;
+}
+
+function sortEdges(edges, sortedNodes, endpointId){
+  // a map of node name to node
+  let nodeMap = {};
+  // populate the map
+  sortedNodes.forEach((node)=>{
+    nodeMap[node.name] = node
+  })
+  // find the max sort of the set of pops for this edge, adding one.
+  edges.forEach((edge)=>{
+    let nodeSortValues = [500]; // very large default, edges rendered at the back.
+    // in the case that we have endpoint identifier data, look up each and find a correct sort
+    if(edge?.meta?.endpoint_identifiers?.[endpointId]){
+      nodeSortValues = edge?.meta?.endpoint_identifiers?.[endpointId]?.map((nodeName)=>{ return nodeMap[nodeName]?.sort || 0 });
+    }
+    let maxNodeSortValue = Math.max.apply(Math, nodeSortValues);
+    edge.sort = maxNodeSortValue + 1;
+  })
+  edges.sort((a, b)=>{
+      if(a.sort <  b.sort) return 1;
+      if(a.sort == b.sort) return 0;
+      if(a.sort >  b.sort) return -1;
+  })
+  return edges
+}
+
+function annotateSortOrder(data, endpointId){
+  let sortedNodes = sortNodes(data.nodes)
+  let sortedEdges = sortEdges(data.edges, sortedNodes, endpointId);
 }
 
 function calcTranslation(distance, targetPoint, pointA, pointB) {
@@ -1132,6 +1182,8 @@ export class EsMap {
     data.edges = newEdges;
   }
 
+
+
   //--- loop through data and map objects and refresh them
   update() {
     this.mapCanvas.options.enableScrolling && this.leafletMap.dragging.enable();
@@ -1146,8 +1198,7 @@ export class EsMap {
         layerId++;
         return;
       }
-      var edge_g = g.select('g.edge');
-      var node_g = g.select('g.node');
+      let topology_g = g.select('g.topology');
       var controlpoint_g = g.select('g.cp');
       var data = this.data[layerId];
 
@@ -1169,8 +1220,15 @@ export class EsMap {
         //  delete all the control point g children
         controlpoint_g.selectAll('*').remove();
       }
-      renderNodes(node_g, data, this, layerId);
-      renderEdges(edge_g, data, this, layerId, this.mapCanvas.options);
+      // annotate data with the proper "z-index" order, respecting parent-child relationships.
+      annotateSortOrder(data, this?.options?.layers?.[layerId]?.endpointId);
+      // render nodes and edges
+      renderNodes(topology_g, data, this, layerId);
+      renderEdges(topology_g, data, this, layerId, this.mapCanvas.options);
+      // select all nodes and edges,
+      let nodesAndEdges = topology_g.selectAll('g.node, path.edge');
+      // then sort them into the proper z-index order
+      nodesAndEdges.sort((a, b)=>{ return b.sort - a.sort });
       layerId++;
     })
   }
@@ -1187,8 +1245,7 @@ export class EsMap {
     var map_g = this.svg.append('g').attr('class', 'esmap');
     ref.mapLayers[idx] = map_g;
 
-    var edge_g = map_g.append('g').attr('class', 'edge');
-    var node_g = map_g.append('g').attr('class', 'node');
+    var topology_g = map_g.append('g').attr('class', 'topology');
     var cp_g = map_g.append('g').attr('class', 'cp');
 
     //--- render layer and ensure events are hooked up to map
