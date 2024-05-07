@@ -340,6 +340,12 @@ export class MapCanvas extends BindableHTMLElement {
     }
     if(wasChanged('configurationUrl', changed)){
       this._options['configurationUrl'] = options['configurationUrl'];
+      // show loading curtain
+      this._remoteLoaded = false;
+      this.shadow.remove();
+      this.shadow = null;
+      this.render();
+      // fetch remote data
       this.maybeFetchOptions();
       return;
     }

@@ -406,6 +406,7 @@ export class MapPanel extends Component<MapPanelProps> {
     options.zIndexBase = 200;
     this._configurationUrl = options.configurationUrl;
     options.configurationUrl = replaceVariables(options.configurationUrl);
+    this.lastOptions.configurationUrl = options.configurationUrl;
 
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
     return React.createElement('esnet-map-canvas', {
