@@ -279,4 +279,6 @@ svg .control.control-selected {
   100% { opacity:1.0 }
 }
 
+.loading-overlay, .error-overlay { background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; }
+
 `
