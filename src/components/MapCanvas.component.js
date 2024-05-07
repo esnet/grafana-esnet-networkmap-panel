@@ -338,6 +338,11 @@ export class MapCanvas extends BindableHTMLElement {
       this.maybeFetchOptions();
       return
     }
+    if(wasChanged('configurationUrl', changed)){
+      this._options['configurationUrl'] = options['configurationUrl'];
+      this.maybeFetchOptions();
+      return;
+    }
 
     // options is sparse -- it includes only updated options.
     // here we merge the options into the in-memory copy

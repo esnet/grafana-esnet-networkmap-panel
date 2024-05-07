@@ -18,6 +18,8 @@ export class MapPanel extends Component<MapPanelProps> {
   theme: any;
   mapjsonCache: any;
   subscriptionHandle: any;
+  variableChangeHandle: any;
+  _configurationUrl: any;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -110,7 +112,7 @@ export class MapPanel extends Component<MapPanelProps> {
     this.props.onOptionsChange(update);
   };
 
-  calculateOptionsChanges = () => {
+  calculateOptionsChanges = (currOptions) => {
     let changed: string[];
     changed = [];
 
@@ -136,7 +138,7 @@ export class MapPanel extends Component<MapPanelProps> {
       'customNodeTooltip',
       'customEdgeTooltip',
       'useConfigurationUrl',
-
+      'configurationUrl',
       'resolvedLat',
       'resolvedLng',
     ];
@@ -157,7 +159,7 @@ export class MapPanel extends Component<MapPanelProps> {
     }
     optionsToWatch.forEach((option) => {
       let lastValue = resolvePath(this.lastOptions, option);
-      let currentValue = resolvePath(this.props.options, option);
+      let currentValue = resolvePath(currOptions, option);
       if(option === 'thresholds'){
         // test these for relative equality; this object memory ref changes on each option change.
         lastValue = JSON.stringify(lastValue);
@@ -165,13 +167,13 @@ export class MapPanel extends Component<MapPanelProps> {
       }
       if (lastValue !== currentValue) {
         if (option === 'background') {
-          this.props.options.background = this.theme.visualization.getColorByName(this.props.options.background);
+          this.props.options.background = this.theme.visualization.getColorByName(currOptions.background);
         }
         if(Array.isArray(this.props.options[option])){
           let newOption = [...resolvePath(this.props.options, option)];
           setPath(this.lastOptions, option, newOption);
         } else {
-          setPath(this.lastOptions, option, resolvePath(this.props.options, option));
+          setPath(this.lastOptions, option, resolvePath(currOptions, option));
         }
         changed.push(option);
       }
@@ -330,16 +332,32 @@ export class MapPanel extends Component<MapPanelProps> {
           }, 10);
         }
     })
+    // @ts-ignore
+    this.variableChangeHandle = eventBus.getStream({type: "refresh"}).subscribe((e)=>{
+        if(this.mapCanvas.current){
+          setTimeout(()=>{
+              this.componentDidUpdate();
+          }, 10);
+        }
+    })
   }
 
   componentWillUnmount() {
-    this.subscriptionHandle.unsubscribe();
+    if(this.subscriptionHandle){
+      this.subscriptionHandle.unsubscribe();
+    }
+    if(this.variableChangeHandle){
+      this.variableChangeHandle.unsubscribe();
+    }
   }
 
   componentDidUpdate() {
-    const { options, fieldConfig } = this.props;
+    let { options, fieldConfig, replaceVariables } = this.props;
 
-    let changed = this.calculateOptionsChanges();
+    options = JSON.parse(JSON.stringify(options));
+    options.configurationUrl = replaceVariables(this._configurationUrl);
+
+    let changed = this.calculateOptionsChanges(options);
 
     if(changed.indexOf("useConfigurationUrl") >= 0){
       if(!options.useConfigurationUrl){
@@ -373,8 +391,8 @@ export class MapPanel extends Component<MapPanelProps> {
   }
 
   render() {
-    const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
-
+    let { options, width, height, data, replaceVariables, fieldConfig } = this.props;
+    options = JSON.parse(JSON.stringify(options));
 
     let thresholds: any[];
     thresholds = [];
@@ -386,6 +404,8 @@ export class MapPanel extends Component<MapPanelProps> {
     });
     options.thresholds = thresholds;
     options.zIndexBase = 200;
+    this._configurationUrl = options.configurationUrl;
+    options.configurationUrl = replaceVariables(options.configurationUrl);
 
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
     return React.createElement('esnet-map-canvas', {
