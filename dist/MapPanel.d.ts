@@ -12,12 +12,14 @@ export declare class MapPanel extends Component<MapPanelProps> {
     theme: any;
     mapjsonCache: any;
     subscriptionHandle: any;
+    variableChangeHandle: any;
+    _configurationUrl: any;
     constructor(props: MapPanelProps);
     setDashboardVariables(): (event: any) => void;
     updateCenter: (centerData: any) => void;
     updateMapViewport: (viewportData: any) => void;
     updateMapJson: (mapData: any) => void;
-    calculateOptionsChanges: () => string[];
+    calculateOptionsChanges: (currOptions: any) => string[];
     toggleLayer: (layer: any, value: any) => void;
     resolveLatLngFromVars(options: any, data: any, replaceVariables: any): {
         resolvedLat: number;
