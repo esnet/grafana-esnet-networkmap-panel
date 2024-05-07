@@ -326,6 +326,13 @@ export class MapCanvas extends BindableHTMLElement {
           self.optionsCache[self.options["configurationUrl"]] = config;
           populateOptionsAndTopology();
         })
+      }).catch((err)=>{
+        self._remoteLoaded = true;
+        self._remoteLoadError = true;
+        self._remoteLoadErrorMessage = `Remote URL:\n${this.options['configurationUrl']}\n\nError Message:\n${err}`;
+        self.shadow.remove();
+        self.shadow = null;
+        self.render();
       })
     }
   }
@@ -766,7 +773,21 @@ export class MapCanvas extends BindableHTMLElement {
 
 
       <div id='map-${this.instanceId}'>
-        <div class="loading-overlay" style="background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">Loading Topology Data...</div>
+        <div class="loading-overlay" style="display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">
+          Loading Topology Data...
+        </div>
+        <div class="error-overlay" style="display: ${ !this._remoteLoadError ? "none" : "flex"}">
+          <div style='width:50%; margin:auto; padding-top:10px;'>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style='margin: 0 3px -7px 0'>
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>
+          </svg>
+          An error occured while loading Topology Data<br /><br />
+          Check your network connection.<br /><br />
+
+          Error details:<br />
+          <pre>${ this._remoteLoadErrorMessage }</pre>
+          </div>
+        </div>
         <div class='home-overlay'>
             <div class="button tight-form-func" id="home_map" ${ !this.options.showViewControls ? "style='display:none;'" : "" }>
               🏠
