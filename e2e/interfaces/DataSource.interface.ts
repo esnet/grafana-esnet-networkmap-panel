@@ -18,4 +18,5 @@ export interface IDataSource {
     secureJsonFields: any;
     version: number;
     readOnly: boolean;
+    uid: string;
 }

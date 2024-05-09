@@ -4,8 +4,10 @@ import e2eConfig from '../e2e/e2e.config.json';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
-import { pluginTest } from './plugin-def';
+import { IDashboard, pluginTest } from './plugin-def';
 import { getFolderDashboardTargets, initCSVDatasource } from './folderDashboardInit';
+import { IDataSource } from './interfaces/DataSource.interface';
+import { ITopology } from './interfaces/Topology.interface';
 
 const getHomepageUrl = async (orgId?: string | number) => {
   const { protocolHostPort } = await getHostInfo(credentials);
@@ -16,7 +18,7 @@ const getHomepageUrl = async (orgId?: string | number) => {
   }
 }
 
-const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: string, panelId: string | number, orgId?: string | number) => {
+const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: IDashboard | string, panelId: string | number, orgId?: string | number) => {
     const { protocolHostPort } = await getHostInfo(credentials);
     const paramObj = {
       editPanel: panelId,
@@ -30,17 +32,28 @@ const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: s
       acc.push(`${param}=${val}`);
       return acc;
     }, [] as string[]);
-    return `${protocolHostPort}/d/${targetDashboardUid}/${targetDb}?${paramArr.join('&')}`;
+    const targetDbTitle = typeof targetDb == 'string' ? targetDb : targetDb.title;
+    return `${protocolHostPort}/d/${targetDashboardUid}/${targetDbTitle}?${paramArr.join('&')}`;
 };
 
 pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
-      // setup data source
-      await initCSVDatasource();
+      // setup data source, but only if it doesn't already exist
+      const { dataSource, topologyUrl } = await initCSVDatasource();
 
-      // setup dashboard, including topology data
-      const newFixtureObj = await getFolderDashboardTargets();
+      // get topology
+      const topologyResponse: Response = await fetch(topologyUrl, {
+        redirect: 'follow'
+      });
+      const topologyResponseText = (await topologyResponse.text());
+      const topology: ITopology = JSON.parse(topologyResponseText);
+
+      // setup dashboard, including topology data from datasource uid
+      const newFixtureObj = await getFolderDashboardTargets({
+        topology,
+        uid: dataSource.uid
+      });
       expect(newFixtureObj.targetPanel).not.toBeUndefined();
 
       use(newFixtureObj);
@@ -87,6 +100,7 @@ pluginTest.describe("plugin testing", () => {
 
       // Check table to have an entry with the target dashboard listed after API response
       await apiResponsePromise;
+      await page.getByLabel(/View as List/).click();
       const dbTable = await page.getByRole('table');
       const dbCell = dbTable.getByRole('cell', { name: /network-map-test-folder/ });
       await expect(dbCell).toBeVisible();
@@ -105,7 +119,8 @@ pluginTest.describe("plugin testing", () => {
     // load plugin edit page
     const fnName = "plugin.spec['load plugin edit page - view options']";
     const { targetDashboardUid, targetFolder, targetDashboard, targetPanelId, orgId } = targets;
-    const editNetworkMapPanelUrl = `${await getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard, targetPanelId, orgId)}`;
+    expect(targetDashboard).toBeDefined();
+    const editNetworkMapPanelUrl = `${await getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard!, targetPanelId, orgId)}`;
     await page.goto(editNetworkMapPanelUrl);
 
     // wait for page to load up canvas

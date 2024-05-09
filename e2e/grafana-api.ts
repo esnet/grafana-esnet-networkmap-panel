@@ -1,93 +1,89 @@
 import { getHostInfo } from "./config.info";
 import credentials from '../playwright/.auth/credentials.json';
 import networkMapPanel from '../e2e/networkMapPanel.json';
+import { IDataSource } from "./interfaces/DataSource.interface";
+import { IOrganization, makeDashboard } from "./plugin-def";
+
+interface Dashboard {
+  dataSource: Partial<IDataSource>;
+  title: string;
+  uid: string;
+  [key: string]: any;
+}
 
 /**
- * Returns a Promise for a JSON string containing detailed information about a single dashboard by its assigned uid.
+ * Returns a Promise for a JSON string containing detailed information about a single dashboard, fetched by
+ * its assigned uid.
+ *
  * The response fetched contains information about the various panels, options, and other configuration.
+ *
+ * If no dashboard for the given dbUid exists, null is returned.
  * @param {dbUid} string        The UID for the dashboard
  * @returns {Promise<string>}
+ * @throws {Error}
  */
-export const getDashboard = async (dbUid: string): Promise<string> => {
+export const getDashboard = async (dbUid: string): Promise<string | null> => {
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
-  const dashboardGetResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${dbUid}`, {
-    headers: basicAuthHeader,
-  });
-  const responseJson = await dashboardGetResponse.json();
+  let responseJson: string | null = null;
+  try {
+    const dashboardGetResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${dbUid}`, {
+      headers: basicAuthHeader,
+    });
+    if (dashboardGetResponse.ok) {
+      responseJson = await dashboardGetResponse.json();
+    } else if (dashboardGetResponse.status === 404) {
+      responseJson = null;
+    }
+  } catch (e) {
+    console.error(`[grafana-api.getDashboard]: Error: ${e.message}`);
+    responseJson = '';
+  }
   return JSON.stringify(responseJson);
 }
 
 /**
- * Returns information about the current logged in user as a JSON string. If no information is available or the user
- * is not logged in, a stack trace is issued and the Promise resolves with undefined.
- * @returns {Promise<string | undefined>}
+ * Returns the organization of the current user
+ * @returns {IOrganization}      The JSON string descripting the id, name, and address for the current users organiztion.
  */
-export const getCurrentUser = async (): Promise<string | undefined> => {
+export const getCurrentOrg = async (): Promise<IOrganization> => {
+  const fnName = "createDashboard";
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
-  try {
-    const userResponse: Response = await fetch(`${protocolHostPort}/api/user`, {
-      headers: {
-        ...basicAuthHeader,
-        'Content-Type': 'application/json'
-      }
-    });
-    const responseJsonStr = JSON.stringify(await userResponse.json(), null, 2);
-    return responseJsonStr;
-  } catch (e) {
-    console.trace(`grafana-api.getCurrentUser: Error in fetching current user: ${e.message}`);
-    return undefined;
-  }
+
+  const currentOrgResponse: Response = await fetch(`${protocolHostPort}/api/org`, {
+    headers: basicAuthHeader
+  });
+  const orgResponseJson = await currentOrgResponse.json();
+  return orgResponseJson;
 }
 
 /**
  * Creates a new dashboard with the given title and optional UID.
- * @param {string} folderUid                    The UID of the folder to create the dashboard in.
- * @param {string|undefined} dashboardTitle     Optional. Title for the dashboard. If one is not given,
- *                                              the title 'network-map-test-dashboard' will be assigned.
- * @param {string|undefined} dashboardUid       Optional. A given UID for the created dashboard.
+ * @param {string} folderUid                         The UID of the folder to create the dashboard in.
+ * @param {Partial<Dashboard>|undefined} dbParams    Optional. Used to set dashboard parameters explicitly upon creation.
+ *                                                   If a title is no provided, 'network-map-test-dashboard' will be assigned.
  * @returns {Promise<string>} The JSON string for the created dashboard.
  */
-export const createDashboard = async (folderUid: string, dashboardTitle?: string, dashboardUid?: string): Promise<string> => {
+export const createDashboard = async (folderUid: string, dbParams?: Partial<Dashboard>): Promise<string> => {
+    const fnName = "createDashboard";
     const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+    const panels = [networkMapPanel];
+    if (dbParams && dbParams?.dataSource?.uid) {
+      console.log(`${fnName}: Overriding dataSource.uid with that generated from created dataSource ${dbParams.dataSource.uid}`)
+      panels[0].datasource.uid = dbParams.dataSource.uid;
+    }
+    const defaultDashboard = makeDashboard();
     const inObj = {
-      dashboard: {
-        id: null,
-        uid: dashboardUid,
-        type: "db",
-        editable: true,
-        fiscalYearStartMonth: 0,
-        graphTooltip: 0,
-        links: [],
-        liveNow: false,
-        title: dashboardTitle || 'network-map-test-dashboard',
-        tags: [],
-        panels: [networkMapPanel],
-        refresh: "",
-        revision: 1,
-        schemaVersion: 38,
-        style: "dark",
-        templating: {
-            list: []
-        },
-        time: {
-            from: "now-6h",
-            to: "now"
-        },
-        timepicker: {},
-        timezone: "",
-        version: 4,
-        weekStart: ""
-      },
+      dashboard: defaultDashboard,
       folderUid,
-      message: "",
-      overwrite: true,
     };
+    const body = JSON.stringify(inObj, null, 2);
+    console.log(`[grafana-api.createDashboard]: Creating dashboard\n${body}`);
     const dashboardCreateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
-      method: 'post',
-      body: JSON.stringify(inObj),
+      method: "POST",
+      body,
       headers: {
         ...basicAuthHeader,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       }
     });
     const dashboardCreateResponseJson = await dashboardCreateResponse.json();
@@ -104,14 +100,14 @@ export const createFolder = async (folderTitle: string, folderUid?: string): Pro
     const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
     const inObj = {"title": folderTitle};
     if (folderUid) {
-        inObj['uid'] = folderUid;
+        inObj["uid"] = folderUid;
     }
     const folderCreateResponse: Response = await fetch(`${protocolHostPort}/api/folders`, {
-        method: "post",
+        method: "POST",
         body: JSON.stringify(inObj),
         headers: {
             ...basicAuthHeader,
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
         }
     });
     const createFolderJsonResponse = await folderCreateResponse.json();
@@ -123,20 +119,21 @@ export const createFolder = async (folderTitle: string, folderUid?: string): Pro
 
 export const updateDashboard = async (folderUid: string, targetDashboard): Promise<string> => {
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const inObj ={
+    dashboard: targetDashboard.dashboard,
+    folderUid,
+    message: "Populated panel item",
+    overwrite: true
+  };
 
   const dbUpdateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
-    method: "post",
+    method: "POST",
     headers: {
       ...basicAuthHeader,
       "Accept": "application/json",
-      "Content-TypeZ": "application/json",
+      "Content-Type": "application/json",
     },
-    body: JSON.stringify({
-      dashboard: targetDashboard,
-      folderUid,
-      message: "Populated with flow data from E2E test",
-      overwrite: true
-    })
+    body: JSON.stringify(inObj)
   });
 
   const responseJson = await dbUpdateResponse.json();

@@ -12,16 +12,10 @@ if (!grafanaInfo) {
 }
 const { IPAddress, Ports } = grafanaInfo?.NetworkSettings;
 
-export const getGoogleSheetInfo = (fileId: string, sheetName?: string): string | { topologyUrl: string; flowsUrl: string } => {
-  const baseUrl = `https://docs.google.com/spreadsheets/d/${fileId}/gviz/tq?tqx=out:csv`;
-  if (sheetName) {
-    return `${baseUrl}/&sheet=${sheetName}`;
-  } else {
-    return {
-      topologyUrl: `${baseUrl}&sheet=Topology`,
-      flowsUrl: `${baseUrl}&sheet=--`
-    };
-  }
+export const getGoogleSheetInfo = (fileId: string): string => {
+  const flowsUrl = `https://docs.google.com/spreadsheets/d/${fileId}/gviz/tq?tqx=out:csv`;
+
+  return flowsUrl;
 };
 
 /**
@@ -47,11 +41,16 @@ export const getHostInfo = async (credentials?: {username: string, password: str
         const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
         basicAuthHeader["Authorization"] = `Basic ${credentialsBuf.toString('base64')}`;
       }
-      const response: Response = await fetch(`${protocolHostPort}/api/health`);
-      if (response.status !== 200) {
-        throw new Error(`${fnName}: cannot derive API health response from Grafana server for version`);
+      let version;
+      try {
+        const response: Response = await fetch(`${protocolHostPort}/api/health`);
+        if (response.status !== 200) {
+          throw new Error(`${fnName}: cannot derive API health response from Grafana server for version`);
+        }
+        version = (await response.json()).version;
+      } catch (e) {
+        console.error(`${fnName}: Error: ${e.message}`);
       }
-      const { version } = await response.json();
       const result = { protocolHostPort, version, basicAuthHeader: {} };
       if (Object.keys(basicAuthHeader).length > 0) {
         result.basicAuthHeader = basicAuthHeader;
