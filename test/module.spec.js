@@ -114,7 +114,7 @@ describe( "Class MapCanvas", () => {
             "layers": [
                 {
                     "visible":true,
-                    "endpointId":"pops",
+                    "endpointId":"names",
                     "nodeWidth":4,
                     "edgeWidth":1.5,
                     "pathOffset":1.5,
@@ -123,7 +123,7 @@ describe( "Class MapCanvas", () => {
                 },
                 {
                     "visible":false,
-                    "endpointId":"pops",
+                    "endpointId":"names",
                     "nodeWidth":5,
                     "edgeWidth":3,
                     "pathOffset":3,
@@ -132,7 +132,7 @@ describe( "Class MapCanvas", () => {
                 },
                 {
                     "visible":false,
-                    "endpointId":"pops",
+                    "endpointId":"names",
                     "nodeHighlight":"red",
                     "nodeWidth":6.5,
                     "edgeWidth":2,
