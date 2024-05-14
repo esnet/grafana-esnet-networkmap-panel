@@ -20,7 +20,8 @@ const lavender = "rgb(202, 149, 229)";
 var TOPOLOGY = [
             {
                 "edges":[
-                    {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                    {"name":"A--B","meta":{
+                        "endpoint_identifiers":{"names":["A","B"]}},
                         "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                         "children":[],
                         "azColor":lavender,
@@ -28,7 +29,7 @@ var TOPOLOGY = [
                         "layer":1,
                     },
                     {"name":"B--C","meta":{
-                        "endpoint_identifiers":{"pops":["B","C"]}},
+                        "endpoint_identifiers":{"names":["B","C"]}},
                         "coordinates":[[34.59,-96.06],[37.99,-93.86],[42.16,-93.95]],
                         "children":[],
                         "azColor":lavender,
@@ -36,7 +37,7 @@ var TOPOLOGY = [
                         "layer":1
                     },
                     {"name":"A--C","meta":{
-                        "endpoint_identifiers":{"pops":["A","C"]}},
+                        "endpoint_identifiers":{"names":["A","C"]}},
                         "coordinates":[[39.02,-105.99],[41.90,-100.72],[42.16,-93.95]],
                         "children":[],
                         "azColor":lavender,
