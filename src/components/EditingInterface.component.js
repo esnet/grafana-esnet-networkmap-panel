@@ -274,7 +274,6 @@ class EditingInterface extends BindableHTMLElement {
           name: node_source + '--' + node_destination,
           meta: {
             endpoint_identifiers: {
-              pops: [node_source, node_destination],
             },
           },
           layer: edge_layer,
@@ -283,6 +282,9 @@ class EditingInterface extends BindableHTMLElement {
           coordinates: coordinates,
           children: [],
         };
+
+        let endpointId = this.mapCanvas.options?.layers?.[edge_layer]?.endpointId
+        newEdge.meta.endpoint_identifiers[endpointId] = [node_source, node_destination];
 
         mapJson[edge_layer].edges.push(newEdge);
 

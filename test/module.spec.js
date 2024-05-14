@@ -920,7 +920,7 @@ describe( "Class MapCanvas", () => {
                     "name":"Z--L",
                     "meta":{
                       "endpoint_identifiers":{
-                        "pops":["Z","L"]
+                        "names":["Z","L"]
                       },
                       "template": "${labels.src} ABCDEF ${labels.dst} GHIJKL"
                     },
@@ -933,7 +933,7 @@ describe( "Class MapCanvas", () => {
                     "name":"A--Z",
                     "meta":{
                       "endpoint_identifiers":{
-                        "pops":["A","Z"]
+                        "names":["A","Z"]
                       }
                     },
                     "coordinates":[[30.02,-105.99],[34.52,-105.99],[39.02,-105.99]],
@@ -996,7 +996,7 @@ describe( "Class MapCanvas", () => {
                     "name":"Node A, Inc.--Node B - Inc.",
                     "meta":{
                       "endpoint_identifiers":{
-                        "pops":["Node A, Inc.","Node B - Inc."]
+                        "names":["Node A, Inc.","Node B - Inc."]
                       }
                     },
                     "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
