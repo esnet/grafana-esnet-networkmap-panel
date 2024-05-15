@@ -1,4 +1,4 @@
-import { getHostInfo } from "./config.info";
+import { getGoogleSheetInfo, getHostInfo } from "./config.info";
 import credentials from '../playwright/.auth/credentials.json';
 import networkMapPanel from '../e2e/networkMapPanel.json';
 import { IDataSource } from "./interfaces/DataSource.interface";
@@ -9,6 +9,78 @@ interface Dashboard {
   title: string;
   uid: string;
   [key: string]: any;
+}
+
+const DEFAULT_DATASOURCE_NAME = "network-traffic-flow";
+
+/**
+ * Creates a datasource. optionally initializing with traffic flow data from a Google sheet, given by its fileId.
+ * If one already exists for the given URL the fileId resolves to, the matching datasource is returned unless the
+ * forceCreate flag is set.
+ *
+ * @param {string | null} fileId
+ * @param {boolean} forceCreate
+ * @returns
+ */
+export const createDatasource = async (fileId?: string, forceCreate = false): Promise<IDataSource> => {
+  const fnName = "folderDashboardInit.initCSVDatasource";
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  let dataFlowUrl: string | null = null;
+  if (fileId) {
+    dataFlowUrl = getGoogleSheetInfo(fileId);
+  }
+
+  let resultDataSource;
+  try {
+    const jsonHeaders = {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    };
+
+    // check if datasource exists already
+    const dataSrcCheckResponse: Response = await fetch(`${protocolHostPort}/api/datasources/name/${DEFAULT_DATASOURCE_NAME}`, {
+      headers: {
+        ...basicAuthHeader,
+        ...jsonHeaders
+      },
+      redirect: "follow"
+    });
+
+    if (dataSrcCheckResponse.ok) {
+      // if exists, return info
+      resultDataSource = await dataSrcCheckResponse.json();
+      console.log(`[${fnName}] Fetched Existing Datasource:\n`, JSON.stringify(resultDataSource, null, 2));
+    } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404) {
+      // if does not exist, create it
+      const inObj = {
+        name: DEFAULT_DATASOURCE_NAME,
+        type: "marcusolsson-csv-datasource",
+        access: "proxy"
+      };
+      // initialize with data url
+      if (dataFlowUrl) {
+        inObj["url"] = dataFlowUrl;
+      }
+      const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
+        method: "POST",
+        headers: {
+          ...basicAuthHeader,
+          ...jsonHeaders
+        },
+        redirect: 'follow',
+        body: JSON.stringify(inObj)
+      });
+      const jsonResponse = await dataSrcCreateResponse.json();
+      resultDataSource = jsonResponse.datasource;
+      console.log(`[${fnName}] Create New Datasource:\n`, JSON.stringify(resultDataSource, null, 2));
+    } else if (!dataSrcCheckResponse.ok) {
+      throw new Error(`HTTP Response ${dataSrcCheckResponse.status}: ${dataSrcCheckResponse.statusText}`);
+    }
+  } catch (e) {
+    console.error(`[${fnName}]: Error ${e.message}`);
+  }
+
+  return resultDataSource;
 }
 
 /**
@@ -87,6 +159,7 @@ export const createDashboard = async (folderUid: string, dbParams?: Partial<Dash
       }
     });
     const dashboardCreateResponseJson = await dashboardCreateResponse.json();
+    console.log(`[Create Dashboard] Result:\n`, JSON.stringify(dashboardCreateResponseJson, null, 2));
     return JSON.stringify(dashboardCreateResponseJson);
   };
   
@@ -137,6 +210,7 @@ export const updateDashboard = async (folderUid: string, targetDashboard): Promi
   });
 
   const responseJson = await dbUpdateResponse.json();
+  console.log(`[Update Dashboard]:\n`, JSON.stringify(responseJson, null, 2));
   return responseJson;
 }
 

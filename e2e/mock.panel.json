@@ -57,7 +57,18 @@
                 "name": "Layer 1",
                 "nodeWidth": 5,
                 "pathOffset": 3,
-                "visible": true
+                "visible": true,
+
+                "jsonFromUrl": false,
+                "mapjsonUrl": "",
+                "nodeHighlight": "",
+                "srcField": "",
+                "dstField": "",
+                "inboundValueField": "",
+                "outboundValueField": "",
+                "nodeThresholds": "",
+                "nodeNameMatchField": "",
+                "nodeValueField": ""
             },
             {
                 "color": "grey",
@@ -115,7 +126,10 @@
             },
             "zoom": 5
         },
-        "zIndexBase": 200
+        "zIndexBase": 200,
+        "latitudeVar": "40",
+        "longitudeVar": "-40",
+        "editMode": false
     },
     "targets": [
         {

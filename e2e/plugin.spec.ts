@@ -1,13 +1,13 @@
-import { expect, Request, Page } from '@playwright/test';
+import { expect, Page } from '@playwright/test';
 import testIds from '../src/constants';
-import e2eConfig from '../e2e/e2e.config.json';
+import { topologySheetUrl as topologyUrl } from '../e2e/e2e.config.json';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
 import { IDashboard, pluginTest } from './plugin-def';
-import { getFolderDashboardTargets, initCSVDatasource } from './folderDashboardInit';
-import { IDataSource } from './interfaces/DataSource.interface';
+import { getFolderDashboardTargets } from './folderDashboardInit';
 import { ITopology } from './interfaces/Topology.interface';
+import { createDatasource } from './grafana-api';
 
 const getHomepageUrl = async (orgId?: string | number) => {
   const { protocolHostPort } = await getHostInfo(credentials);
@@ -39,8 +39,8 @@ const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: I
 pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
-      // setup data source, but only if it doesn't already exist
-      const { dataSource, topologyUrl } = await initCSVDatasource();
+      // setup data source
+      const dataSource = await createDatasource(topologyUrl);
 
       // get topology
       const topologyResponse: Response = await fetch(topologyUrl, {
@@ -50,10 +50,13 @@ pluginTest.describe("plugin testing", () => {
       const topology: ITopology = JSON.parse(topologyResponseText);
 
       // setup dashboard, including topology data from datasource uid
+      console.log(`[pluginTest.use]: Binding dataSource.uid = ${dataSource.uid} with topology`);
       const newFixtureObj = await getFolderDashboardTargets({
         topology,
         uid: dataSource.uid
       });
+
+      // check panel is populated
       expect(newFixtureObj.targetPanel).not.toBeUndefined();
 
       use(newFixtureObj);
@@ -100,7 +103,8 @@ pluginTest.describe("plugin testing", () => {
 
       // Check table to have an entry with the target dashboard listed after API response
       await apiResponsePromise;
-      await page.getByLabel(/View as List/).click();
+      // const asListLocator = await page.getByTitle(/View as list/);
+      // asListLocator.click();
       const dbTable = await page.getByRole('table');
       const dbCell = dbTable.getByRole('cell', { name: /network-map-test-folder/ });
       await expect(dbCell).toBeVisible();
@@ -132,7 +136,7 @@ pluginTest.describe("plugin testing", () => {
 
     // check title
     const titleSuffix = '\\s+-\\s+Dashboards\\s+-\\s+Grafana';
-    const expectedTitleRegExp = new RegExp(`Edit\\s+panel\\s+-\\s+${targetDashboard}\\s+-\\s+${targetFolder}${titleSuffix}`);
+    const expectedTitleRegExp = new RegExp(`Edit\\s+panel\\s+-\\s+${targetDashboard?.title}\\s+-\\s+${targetFolder}${titleSuffix}`);
     const actualTitle = await page.title();
     await expect(expectedTitleRegExp.test(actualTitle)).toBeTruthy();
 
