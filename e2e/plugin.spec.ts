@@ -50,7 +50,6 @@ pluginTest.describe("plugin testing", () => {
       const topology: ITopology = JSON.parse(topologyResponseText);
 
       // setup dashboard, including topology data from datasource uid
-      console.log(`[pluginTest.use]: Binding dataSource.uid = ${dataSource.uid} with topology`);
       const newFixtureObj = await getFolderDashboardTargets({
         topology,
         uid: dataSource.uid

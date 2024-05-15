@@ -49,7 +49,6 @@ export const createDatasource = async (fileId?: string, forceCreate = false): Pr
     if (dataSrcCheckResponse.ok) {
       // if exists, return info
       resultDataSource = await dataSrcCheckResponse.json();
-      console.log(`[${fnName}] Fetched Existing Datasource:\n`, JSON.stringify(resultDataSource, null, 2));
     } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404) {
       // if does not exist, create it
       const inObj = {
@@ -72,7 +71,6 @@ export const createDatasource = async (fileId?: string, forceCreate = false): Pr
       });
       const jsonResponse = await dataSrcCreateResponse.json();
       resultDataSource = jsonResponse.datasource;
-      console.log(`[${fnName}] Create New Datasource:\n`, JSON.stringify(resultDataSource, null, 2));
     } else if (!dataSrcCheckResponse.ok) {
       throw new Error(`HTTP Response ${dataSrcCheckResponse.status}: ${dataSrcCheckResponse.statusText}`);
     }
@@ -140,7 +138,6 @@ export const createDashboard = async (folderUid: string, dbParams?: Partial<Dash
     const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
     const panels = [networkMapPanel];
     if (dbParams && dbParams?.dataSource?.uid) {
-      console.log(`${fnName}: Overriding dataSource.uid with that generated from created dataSource ${dbParams.dataSource.uid}`)
       panels[0].datasource.uid = dbParams.dataSource.uid;
     }
     const defaultDashboard = makeDashboard();
@@ -149,7 +146,6 @@ export const createDashboard = async (folderUid: string, dbParams?: Partial<Dash
       folderUid,
     };
     const body = JSON.stringify(inObj, null, 2);
-    console.log(`[grafana-api.createDashboard]: Creating dashboard\n${body}`);
     const dashboardCreateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
       method: "POST",
       body,
@@ -159,7 +155,6 @@ export const createDashboard = async (folderUid: string, dbParams?: Partial<Dash
       }
     });
     const dashboardCreateResponseJson = await dashboardCreateResponse.json();
-    console.log(`[Create Dashboard] Result:\n`, JSON.stringify(dashboardCreateResponseJson, null, 2));
     return JSON.stringify(dashboardCreateResponseJson);
   };
   
@@ -210,7 +205,6 @@ export const updateDashboard = async (folderUid: string, targetDashboard): Promi
   });
 
   const responseJson = await dbUpdateResponse.json();
-  console.log(`[Update Dashboard]:\n`, JSON.stringify(responseJson, null, 2));
   return responseJson;
 }
 

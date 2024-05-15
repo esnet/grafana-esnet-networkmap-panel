@@ -126,9 +126,8 @@ export const getFolderDashboardTargets = async (params?: INetworkPanelParams): P
   // invoke API update
   try {
     const updateResult = await updateDashboard(targetFolderUid, dashboardInfo);
-    console.log(`[${fnName}] Dashboard update result:\n`, JSON.stringify(updateResult, null, 2));
   } catch (e) {
-    console.log(`[${fnName}] Dashboard update error:\n`, e.message);
+    console.error(`[${fnName}] Dashboard update error:\n`, e.message);
   }
 
   const targetsFixtureObj = {
