@@ -156,7 +156,7 @@ pluginTest.describe("plugin testing", () => {
     const enableEdgeTrafficDirectionAnimationsControlGroup = await page.getByLabel("Enable Edge Traffic Direction Animations");  // TODO: test animations
 
     const sidebarControlLocatorSelector = "div div:has(div input[type='checkbox']) label";
-    let showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
+    const showViewControlsControl = showViewControlGroup.locator(sidebarControlLocatorSelector);
     const enableMapScrollingOnDragControl = enableMapScrollingOnDragControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test movability
     const enableMapEditingControl = enableMapEditingControlGroup.locator(sidebarControlLocatorSelector);
     const enableNodeSelectionAnimationsControl = enableNodeSelectionAnimationsControlGroup.locator(sidebarControlLocatorSelector);  // TODO: test animations
@@ -179,7 +179,7 @@ pluginTest.describe("plugin testing", () => {
     // CHECK CONTROL ACTIONS (upon click/edit)
 
     // check Show View Controls, reassign to avoid target closure
-    showViewControlsControl = page.locator('[id="View Options"] > div > div:nth-child(2) > div label').first();
+    // showViewControlsControl = page.locator('[id="View Options"] > div > div:nth-child(2) > div label').first();
     await showViewControlsControl.click();
     await expect(mapZoomInControl).not.toBeVisible();
     await expect(mapZoomOutControl).not.toBeVisible();
