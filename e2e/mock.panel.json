@@ -1,0 +1,158 @@
+{
+    "datasource": {
+        "type": "marcusolsson-csv-datasource",
+        "uid": "bdk95xlce6i9sc"
+    },
+    "fieldConfig": {
+        "defaults": {
+            "color": {
+                "mode": "thresholds"
+            },
+            "mappings": [],
+            "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                    {
+                        "color": "green",
+                        "value": null
+                    },
+                    {
+                        "color": "red",
+                        "value": 80
+                    }
+                ]
+            }
+        },
+        "overrides": []
+    },
+    "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+    },
+    "id": 1,
+    "options": {
+        "background": "#EDEDED",
+        "configurationUrl": "",
+        "customEdgeTooltip": "\n  <div class=\"flow-tooltip\">\n    <strong>\n      ${forward.from} → ${forward.to}\n      <br />\n      Rate: ${forward.dataPoint}\n    </strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <span>\n      ${reverse.from} → ${reverse.to}\n      <br />\n      Rate: ${reverse.dataPoint}\n    </span>\n  </div>\n",
+        "customNodeTooltip": "\n  <div class=\"flow-tooltip\">\n    <strong>${name}</strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <strong>In Volume: ${inValue}</strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <strong>Out Volume: ${outValue}</strong>\n  </div>\n",
+        "enableCustomEdgeTooltip": false,
+        "enableCustomNodeTooltip": false,
+        "enableEdgeAnimation": true,
+        "enableEditing": true,
+        "enableNodeAnimation": true,
+        "enableScrolling": true,
+        "initialViewStrategy": "static",
+        "layers": [
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "legend": true,
+                "mapjson": "{\"edges\":[{\"name\":\"A--B\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"A\",\"B\"]}},\"coordinates\":[[37.54457732085584,-98.525390625],[41.409775832009565,-89.69238281250001]],\"children\":[]},{\"name\":\"C--B\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"C\",\"B\"]}},\"coordinates\":[[39.027718840211605,-105.64453125000001],[41.409775832009565,-89.69238281250001]],\"children\":[]},{\"name\":\"A--C\",\"meta\":{\"endpoint_identifiers\":{\"pops\":[\"A\",\"C\"]}},\"coordinates\":[[37.54457732085584,-98.525390625],[39.027718840211605,-105.64453125000001]],\"children\":[]}],\"nodes\":[{\"name\":\"A\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[37.54457732085584,-98.525390625]},{\"name\":\"B\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[41.409775832009565,-89.69238281250001]},{\"name\":\"C\",\"meta\":{\"display_name\":\"\",\"svg\":\"\",\"template\":\"\"},\"coordinate\":[39.027718840211605,-105.64453125000001]}]}",
+                "name": "Layer 1",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "visible": true,
+
+                "jsonFromUrl": false,
+                "mapjsonUrl": "",
+                "nodeHighlight": "",
+                "srcField": "",
+                "dstField": "",
+                "inboundValueField": "",
+                "outboundValueField": "",
+                "nodeThresholds": "",
+                "nodeNameMatchField": "",
+                "nodeValueField": ""
+            },
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "legend": true,
+                "mapjson": "{\"edges\":[],\"nodes\":[]}",
+                "name": "Layer 2",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "visible": true
+            },
+            {
+                "color": "grey",
+                "dashboardEdgeDstVar": "dest",
+                "dashboardEdgeSrcVar": "source",
+                "dashboardNodeVar": "node",
+                "edgeWidth": 3,
+                "endpointId": "pops",
+                "legend": true,
+                "mapjson": "{\"edges\":[],\"nodes\":[]}",
+                "name": "Layer 3",
+                "nodeWidth": 5,
+                "pathOffset": 3,
+                "visible": true
+            }
+        ],
+        "legendColumnLength": 3,
+        "legendDefaultBehavior": "visible",
+        "legendPosition": "bottomleft",
+        "showLegend": true,
+        "showSidebar": true,
+        "showViewControls": true,
+        "thresholds": [
+            {
+                "color": "#73BF69",
+                "value": null
+            },
+            {
+                "color": "#F2495C",
+                "value": 80
+            }
+        ],
+        "tileset": {
+            "geographic": "arcgis"
+        },
+        "useConfigurationUrl": false,
+        "viewport": {
+            "center": {
+                "lat": 39,
+                "lng": -98
+            },
+            "zoom": 5
+        },
+        "zIndexBase": 200,
+        "latitudeVar": "40",
+        "longitudeVar": "-40",
+        "editMode": false
+    },
+    "targets": [
+        {
+            "datasource": {
+                "type": "marcusolsson-csv-datasource",
+                "uid": "bdk95xlce6i9sc"
+            },
+            "decimalSeparator": ".",
+            "delimiter": ",",
+            "header": true,
+            "ignoreUnknown": false,
+            "refId": "A",
+            "schema": [
+                {
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "skipRows": 0
+        }
+    ],
+    "title": "Panel Title",
+    "type": "esnet-networkmap-panel",
+    "mode": "",
+    "content": ""
+}
