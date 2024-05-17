@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
+import { PanelProps, createTheme, DataFrameView, getValueFormat, EventBus } from '@grafana/data';
 import { MapOptions } from './types';
 import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
@@ -7,9 +7,11 @@ import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
+
 export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
+  eventBus: EventBus;
 }
 
 export class MapPanel extends Component<MapPanelProps> {
@@ -17,7 +19,7 @@ export class MapPanel extends Component<MapPanelProps> {
   lastOptions: any;
   theme: any;
   mapjsonCache: any;
-  subscriptionHandle: any;
+  subscriptionHandle?: any;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -316,6 +318,7 @@ export class MapPanel extends Component<MapPanelProps> {
       this.mapCanvas.current
     );
   }
+
   componentDidMount() {
     const { eventBus, options } = this.props;
     this.updateMap();
@@ -333,7 +336,7 @@ export class MapPanel extends Component<MapPanelProps> {
   }
 
   componentWillUnmount() {
-    this.subscriptionHandle.unsubscribe();
+    this.subscriptionHandle?.unsubscribe();
   }
 
   componentDidUpdate() {

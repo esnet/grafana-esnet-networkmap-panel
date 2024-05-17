@@ -701,10 +701,10 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div class='button edit-mode-only tight-form-func' id='edge_edit_mode' data-testid='${testIds.editEdgeToggleBtn}'>
+              <div role='button' aria-label='Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='edge_edit_mode' data-testid='${testIds.editEdgeToggleBtn}'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
-              <div class='button edit-mode-only tight-form-func' id='node_edit_mode' data-testid='${testIds.editNodeToggleBtn}'>
+              <div role='button' aria-label='Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='node_edit_mode' data-testid='${testIds.editNodeToggleBtn}'>
                 Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }
               </div>
             </div>

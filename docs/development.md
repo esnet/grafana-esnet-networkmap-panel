@@ -2,6 +2,8 @@
 ## Development Notes
 
 This project was built in Node 18.19.1 (LTS Hydrogen) and must built using Yarn (1.22.0 or higher).
+It is capable of running under Node 16 16.20.2 (LTS Gallium), but 18 must be utilized to successfully
+execute end-to-end (E2E) testing.
 
 ## Table of Contents
 
@@ -36,7 +38,7 @@ $ yarn install
 
 3. Configure Grafana to read plugins from the parent directory of the project.
 
-When installed as a service, the most likely place for the config file is `/usr/local/etc/grafana/grafana.ini`
+When installed as a service, the most likely place for the configuration file is `/usr/local/etc/grafana/grafana.ini`
 For example, if the project is located in /Users/myuser/grafana-plugins/grafana-esnet-networkmap-panel, set the
 plugins value to the parent directory:
 
@@ -49,7 +51,10 @@ dist directory to the correct location.
 
 Mapping only needs to be done once. Restart Grafana or the container after mapping is complete.
 
-4. Build the project once using `make dev`. This will create source maps permit setting of breakpoints in Chrome Debugger during development. Note that this must be run at least once and may require rerunning periodically if the plugin is being developed in the Grafana webapp.
+4. Build the project once using `make dev`. This will create source maps permit setting of breakpoints in Chrome Debugger during development.
+
+Note that this must be run at least once and may require rerunning periodically if the plugin is being developed in the Grafana webapp.
+Also, only component testing will be run. Integration E2E tests must be run separately.
 
 5. Install Playwright browsers for testing (this only needs to be done once).
 
@@ -65,7 +70,7 @@ This will update the files in the dist directory.
 $ make prod
 ```
 
-7. Run the Yarn script `build_dts` to complete the process of building without signing.
+7. Run the Yarn script `build_dts` to complete the process of building without signing. (This step is not needed if signing is working.)
 
 This will update the files in the dist directory and readies the contents for Grafana. If Grafana is already running,
 and already has its plugins directory mapped (see step 4), there is no need to restart.
@@ -102,9 +107,6 @@ You must specify a username and password as a JSON object under playwright/.auth
 e2e/e2e.config.json should be configured to target a particular dashboard for running the tests upon. Use the included
 e2e.config.json.sample as a basis for your own e2e.config.json.
 
-Testids should not have to be changed, although you have the option of doing so. The only requirement is that all testids
-therein be unique.
-
 Sample playwright/.auth/credentials.json:
 
 ```json
@@ -116,8 +118,8 @@ Sample playwright/.auth/credentials.json:
 
 ### Test Browsers
 
-Browser packages utilized by Playwright must be installed globally in order to run the e2e tests. To install them, open a shell command prompt
-and enter:
+Browser packages utilized by Playwright must be installed globally in order to run the E2E integration tests. To install them,
+open a shell command prompt and enter:
 
 ```sh
 $ npx playwright install
