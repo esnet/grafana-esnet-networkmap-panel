@@ -10,10 +10,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js environment for build
         uses: actions/setup-node@v2.1.2
         with:
-          node-version: "15.x"
+          node-version: "18.x"
 
       - name: Get yarn cache directory path
         id: yarn-cache-dir-path
@@ -40,8 +40,18 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
+      - name: Setup Node.js environment for run
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: "15.x"
+
       - name: Build and test frontend
         run: yarn build
+
+      - name: Setup Node.js environment for build
+        uses: actions/setup-node@v2.1.2
+        with:
+          node-version: "18.x"
 
       - name: E2E testing
         run: yarn e2e
