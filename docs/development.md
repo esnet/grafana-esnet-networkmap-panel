@@ -2,8 +2,8 @@
 ## Development Notes
 
 This project was built in Node 18.19.1 (LTS Hydrogen) and must built using Yarn (1.22.0 or higher).
-It is capable of running under Node 16 16.20.2 (LTS Gallium), but 18 must be utilized to successfully
-execute end-to-end (E2E) testing.
+It is capable of being built and run under Node 15.14.0 or later, but to successfully execute
+end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen) or later is required.
 
 ## Table of Contents
 
@@ -150,3 +150,20 @@ $ yarn e2e
 Integration tests are written with the assumption the Playwright's own browsers are globally installed in the system
 using `npx playwright install`. Reconfigure in the playwright.config.ts file if a different browser is
 preferred. Test suite files (*.spec.js) are included in the e2e folder.
+
+### Continuous Integration (CI)
+
+The project is currently configured to run CI on ubuntu-latest but only with component testing on PR pushes to the
+branch 'master' and with PR branches targeting master. However no master branch is currently under SCM.
+
+Actions supported are...
+- Setup Node.js environment
+- Get yarn cache directory path
+- Cache yarn cache
+- Cache node_modules
+- Install dependencies
+- Build and test frontend (aka component testing)
+- Check for backend
+- Setup Go environment
+- Test backend
+- Build backend
