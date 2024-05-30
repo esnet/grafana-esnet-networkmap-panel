@@ -60,7 +60,6 @@ jobs:
       - name: E2E testing
         run: |
           make test:e2e
-          npx playwright show-report
 
       - name: Check for backend
         id: check-for-backend
