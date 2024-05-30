@@ -50,7 +50,7 @@ jobs:
 
       - name: Install E2E dependencies
         run: |
-          npx playwright install
+          npx playwright install --with-deps
 
       - name: Setup E2E testing parameters
         run: |
