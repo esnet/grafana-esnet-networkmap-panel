@@ -49,12 +49,13 @@ jobs:
           node-version: "18.x"
 
       - name: Install E2E dependencies
-        run: npx playwright test
+        run: |
+          npx playwright install
 
       - name: Setup E2E testing parameters
         run: |
           mkdir -p ./playwright/.auth
-          echo "{\"username\": \"admin\", \"password\": \"admin\" }" >> ./playwright/.auth/credentials.json
+          echo "{\"username\": \"admin\", \"password\": \"admin\" }" > ./playwright/.auth/credentials.json
 
       - name: E2E testing
         run: |
