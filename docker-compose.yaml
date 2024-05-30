@@ -1,5 +1,7 @@
 services:
   grafana:
+    environment:
+      - GF_INSTALL_PLUGINS=marcusolsson-csv-datasource
     container_name: 'esnet-networkmap-panel'
     build:
       context: ./.config

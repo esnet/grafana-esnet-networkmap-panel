@@ -25,9 +25,8 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 Project setup:
 
-Pre-requisites: Both Node 16.20.2 (LTS Gallium) and Yarn 1.22.0 or higher must be installed for development.
-If you need to run end-to-end integration tests, you will need Node 18.20.1 (LTS Hydrogen) or higher.
-Other versions may not build and when they do, stability issues, unexpected failures, or loss of functionality may occur.
+Pre-requisites: Both Node v15.14.0 and Yarn 1.22.0 or higher must be installed. Other versions may not build
+and when they do, stability issues, unexpected failures, or loss of functionality may occur.
 
 It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and manage your Node versions.
 
@@ -150,6 +149,21 @@ $ yarn e2e
 Integration tests are written with the assumption the Playwright's own browsers are globally installed in the system
 using `npx playwright install`. Reconfigure in the playwright.config.ts file if a different browser is
 preferred. Test suite files (*.spec.js) are included in the e2e folder.
+
+### Test Dependencies
+
+In order to run populated with sample traffic flow and topology data, a Google Sheet file ID and sheet URL are required
+to be published publicly. Configure both in e2e/e2e.config.json, for instance:
+
+```json
+{
+    ...
+    "fileId": "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc",
+    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=tsv"
+}
+```
+
+The above values are already configured by default in the JSON file.
 
 ### Continuous Integration (CI)
 
