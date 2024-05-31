@@ -37,6 +37,8 @@ const getEditNetworkMapPanelUrl = async (targetDashboardUid: string, targetDb: I
 };
 
 pluginTest.describe("plugin testing", () => {
+  pluginTest.describe.configure({ mode: "serial" });
+
   pluginTest.use({
     targets: async ({}, use) => {
       // setup data source
