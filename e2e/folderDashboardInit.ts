@@ -1,18 +1,29 @@
-import { createDashboard, createFolder, getCurrentUser, getDashboard } from './grafana-api';
-import { getHostInfo } from './config.info';
+import { createDashboard, createFolder, getCurrentOrg, getDashboard, updateDashboard } from './grafana-api';
+import { getHostInfo, getGoogleSheetInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import e2eConfig from './e2e.config.json';
+import mockPanelImport from './mock.panel.json';
 import { ITargets } from './interfaces/Targets.interface';
-import { IPanel } from './interfaces/Panel.inteface';
+import { INetworkPanelParams } from './interfaces/PanelParams.interface';
+import { IDashboardResponse, INetworkMapPanel, IOrganization, IPanel } from './plugin-def';
 
 let targetFolderUid;
 let targetDashboardUid;
-const { targetFolder, targetDashboard } = e2eConfig;
+const { targetFolder, targetDashboard: targetDashboardTitle, targetPanelType } = e2eConfig;
+const mockPanel: INetworkMapPanel = mockPanelImport as INetworkMapPanel;
 
 const pluginTestSetupFnName = 'folder-dashboard.setup.getFolderDashboardTargets';
 
-export const getFolderDashboardTargets = async (): Promise<ITargets> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+/**
+ * This creates and populates the folder for the Network Map Panel
+ *
+ * @param {INetworkPanelParams|undefined} params       Optional. Allow setting either a topology and data source or both.
+ *
+ * @returns {Promise<ITargets>}
+ */
+export const getFolderDashboardTargets = async (params?: INetworkPanelParams): Promise<ITargets> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const fnName = 'folderDashboardInit.getFolderDashboardTargets';
 
   // check if folder exists already, if not, create it
   const foldersResponse: Response = await fetch(`${protocolHostPort}/api/folders?limit=1000`, {
@@ -31,17 +42,21 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
   }
 
   // check if dashboard exists already, if not create it
-  const dashboardSearchResponse: Response = await fetch(`${protocolHostPort}/api/search?folderIds=${folderId}&type=dash-db&query=${targetDashboard}`, {
+  const dashboardSearchResponse: Response = await fetch(`${protocolHostPort}/api/search?folderIds=${folderId}&type=dash-db&query=${targetDashboardTitle}`, {
     headers: basicAuthHeader
   });
   const dashboardSearchResponseJson = await dashboardSearchResponse.json();
   let dashboardJsonStr;
   targetDashboardUid = 'pending';
   if (dashboardSearchResponseJson.length === 0) {
-    const targetDashboardJsonStr = await createDashboard(targetFolderUid, targetDashboard);  // store targetDashboardId for later
-    const createdDashboard = JSON.parse(targetDashboardJsonStr);
-    targetDashboardUid = createdDashboard.uid;
-    dashboardJsonStr = await getDashboard(createdDashboard.uid);
+    const targetDashboardJsonStr = await createDashboard(targetFolderUid, {
+      title: targetDashboardTitle
+    });
+
+    // store targetDashboardUid for later
+    const targetDashboard = JSON.parse(targetDashboardJsonStr);
+    targetDashboardUid = targetDashboard.uid;
+    dashboardJsonStr = await getDashboard(targetDashboardUid);
   } else if (dashboardSearchResponseJson.length === 1) {
     const targetIdx = 0;
     targetDashboardUid = dashboardSearchResponseJson[targetIdx].uid;
@@ -50,18 +65,69 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     throw new Error(`${pluginTestSetupFnName}: cannot resolve targetDashboard, multiple dashboards matched on dashboard search.`);
   }
 
-  const dashboardInfo = JSON.parse(dashboardJsonStr);
-  const targetPanel = (dashboardInfo.dashboard.panels as Array<IPanel>).find(panel => panel.type === e2eConfig.targetPanelType);
+  // get the created or fetched dashboard
+  let dashboardInfo: IDashboardResponse = JSON.parse(dashboardJsonStr);
+
+  // get ref to panels in dashboard
+  let currentPanels: INetworkMapPanel[] = [];
+  let targetPanel = dashboardInfo?.dashboard?.panels?.find(panel => panel.type === targetPanelType);
   if (!targetPanel) {
-    throw new Error(`${pluginTestSetupFnName}: cannot resolve targetPanel, none matching '${e2eConfig.targetPanelType}' found.`);
+    // add panel to dashboard
+    if (dashboardInfo.dashboard?.panels) {
+      currentPanels = dashboardInfo.dashboard?.panels as INetworkMapPanel[];
+    }
+    let panelCount = currentPanels.length;
+    currentPanels.push({
+      ...mockPanel,
+      datasource: {
+        ...mockPanel.datasource,
+        uid: `${params?.uid}`
+      },
+    });
+    targetPanel = currentPanels[panelCount];
   }
-  const targetPanelId = targetPanel.id as number;
+  const targetPanelId = targetPanel!.id as number;
 
   // get org id
-  const currentUserResponseJsonStr = await getCurrentUser();
+  const currentOrg: IOrganization = await getCurrentOrg();
   let orgId = undefined;
-  if (!!currentUserResponseJsonStr) {
-    orgId = JSON.parse(currentUserResponseJsonStr).orgId;
+  if (!!currentOrg) {
+    orgId = currentOrg.id;
+  }
+
+  // update dashboard values data structure w/ topology and traffic flow data if specified into panel
+  if (params) {
+    // topology
+    if (params.topology) {
+      const { panels } = dashboardInfo.dashboard || {panels: currentPanels};
+      const updatedPanels: INetworkMapPanel[] = [];
+      for (const panel of panels) {
+        if (panel.type === "esnet-networkmap-panel") {
+          let { options, datasource } = panel as INetworkMapPanel;
+          // assigns the topology
+          options.layers[0].mapjson = JSON.stringify(params.topology);
+          // traffic flow data from a data source
+          if (params.uid) {
+            datasource = {
+              type: "marcusolsson-csv-datasource",
+              uid: params.uid
+            }
+          }
+        }
+        updatedPanels.push(panel as INetworkMapPanel);
+      }
+      dashboardInfo.dashboard = {
+        ...dashboardInfo.dashboard,
+        panels: updatedPanels,
+      };
+    }
+  }
+
+  // invoke API update
+  try {
+    const updateResult = await updateDashboard(targetFolderUid, dashboardInfo);
+  } catch (e) {
+    console.error(`[${fnName}] Dashboard update error:\n`, e.message);
   }
 
   const targetsFixtureObj = {
@@ -69,7 +135,7 @@ export const getFolderDashboardTargets = async (): Promise<ITargets> => {
     targetFolderUid,
     targetPanelId,
     targetFolder,
-    targetDashboard,
+    targetDashboard: dashboardInfo.dashboard,
     targetPanel,
     orgId
   };
