@@ -1,9 +1,8 @@
 
 ## Development Notes
 
-This project was built in Node 18.19.1 (LTS Hydrogen) and must built using Yarn (1.22.0 or higher).
-It is capable of being built and run under Node 15.14.0 or later, but to successfully execute
-end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen) or later is required.
+This project was built in Node 16.20.2 (LTS Gallium) and must built using Yarn (1.22.0 or higher).
+In order to successfully execute end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen) or later is required.
 
 ## Table of Contents
 
@@ -25,14 +24,17 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 Project setup:
 
-Pre-requisites: Both Node v15.14.0 and Yarn 1.22.0 or higher must be installed. Other versions may not build
-and when they do, stability issues, unexpected failures, or loss of functionality may occur.
+Pre-requisites: Both Node v16.20.2 (LTS Gallium) or later, plus Yarn 1.22.0 or higher must be installed.
+Other versions may not build and when they do, stability issues, unexpected failures, or loss of functionality may occur.
 
 It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and manage your Node versions.
 
 2. Install required dependencies via Yarn, as normal:
 
 ```sh
+$ node --version        # check your current version, if the current node version is already v16.20.2, skip to yarn
+$ nvm install 16.20.2   # this only has to be done once if using nvm, skip to yarn after installation
+$ nvm use 16.20.2       # do this each time if your current node version differs
 $ yarn install
 ```
 
@@ -59,7 +61,7 @@ Also, only component testing will be run. Integration E2E tests must be run sepa
 5. Install Playwright browsers for testing (this only needs to be done once).
 
 ```sh
-$ npx playwright install
+$ npx playwright install      # only needs to be done once
 ```
 
 6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
@@ -130,6 +132,9 @@ $ npx playwright install
 To run both component and integration tests:
 
 ```sh
+$ node --version        # check your node version
+$ nvm install 18.20.1   # if not installed, only needs to be done once, then skip to make
+$ nvm use 18.20.1       # if you have installed it but the current node is not matching 18.20.1, switch to it
 $ make test
 ```
 
@@ -139,11 +144,11 @@ You also have the option of running component and integration tests separately, 
 of shell commands below do the same thing.)
 
 ```sh
-$ make test:component
-$ make test:e2e
+$ make test:component   # component testing can run on v16.20.2 or later
+$ make test:e2e         # E2E testing requires 18.20.1 or later
 
-$ yarn test
-$ yarn e2e
+$ yarn test             # component testing can run on v16.20.2 or later
+$ yarn e2e              # E2E testing requires 18.20.1 or later
 ```
 
 Integration tests are written with the assumption the Playwright's own browsers are globally installed in the system
@@ -170,14 +175,19 @@ The above values are already configured by default in the JSON file.
 The project is currently configured to run CI on ubuntu-latest but only with component testing on PR pushes to the
 branch 'master' and with PR branches targeting master. However no master branch is currently under SCM.
 
-Actions supported are...
-- Setup Node.js environment
-- Get yarn cache directory path
-- Cache yarn cache
-- Cache node_modules
-- Install dependencies
-- Build and test frontend (aka component testing)
-- Check for backend
-- Setup Go environment
-- Test backend
-- Build backend
+The CI workflow job consists of several steps in order...
+
+1. Setup Node.js environment for build
+2. Get yarn cache directory path
+3. Cache yarn cache
+4. Cache node_modules
+5. Install dependencies
+6. Build and test frontend (aka component testing)
+7. Setup Node.js environment for E2E testing
+8. Install E2E dependencies
+9. Setup E2E testing parameters
+10. E2E testing
+11. Check for backend
+12. Setup Go environment
+13. Test backend
+14. Build backend
