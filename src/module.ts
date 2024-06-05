@@ -22,6 +22,10 @@ const customEditors = {
   "ViewportCoordinateButton": ViewportCoordinateButton
 }
 
+const DEFAULT_LAYER_OPTIONS = {
+  color: "gray"
+}
+
 export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
 function checkBools(settings: object) {
@@ -125,7 +129,7 @@ let layerOptions = {
     category: "Layer ${i+1}: Basic Options",
     showIf: { "useConfigurationUrl": false, "layers[${i}].visible": true},
     description: 'The default color for nodes and links on Layer ${i+1}',
-    defaultValue: 'grey',
+    defaultValue: DEFAULT_LAYER_OPTIONS.color,
   },
   "layers[${i}].mapjson": {
     name: 'Layer ${i+1} Map data (json)',

@@ -4,5 +4,5 @@
     "targetFolder": "network-map-test-folder",
     "grafanaInstanceName": "esnet-networkmap-panel",
     "fileId": "1K_nZcu4yzPXBuOR3nO8NkbSCxMnvWtu37H9cGagkQgc",
-    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=tsv"
+    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=csv"
 }

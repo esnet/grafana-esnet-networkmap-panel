@@ -1,13 +1,13 @@
 import { expect, Page } from '@playwright/test';
 import testIds from '../src/constants';
-import { topologySheetUrl as topologyUrl } from '../e2e/e2e.config.json';
+import { topologySheetUrl as topologyUrl, fileId } from '../e2e/e2e.config.json';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
 import { IDashboard, pluginTest } from './plugin-def';
 import { getFolderDashboardTargets } from './folderDashboardInit';
-import { ITopology } from './interfaces/Topology.interface';
 import { createDatasource } from './grafana-api';
+import { removeRepeats } from '../test/utils';
 
 const getHomepageUrl = async (orgId?: string | number) => {
   const { protocolHostPort } = await getHostInfo(credentials);
@@ -42,15 +42,16 @@ pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
       // setup data source
-      const dataSource = await createDatasource(topologyUrl);
+      const dataSource = await createDatasource(fileId);
 
       // get topology
       const topologyResponse: Response = await fetch(topologyUrl, {
         redirect: 'follow'
       });
-      const topologyResponseText = (await topologyResponse.text());
-      const topology: ITopology = JSON.parse(topologyResponseText);
+      let topologyResponseEscaped = await topologyResponse.text();
+      const topologyResponseUnescaped = removeRepeats(topologyResponseEscaped, '"', true);
 
+      const topology = JSON.parse(topologyResponseUnescaped);
       // setup dashboard, including topology data from datasource uid
       const newFixtureObj = await getFolderDashboardTargets({
         topology,
@@ -72,7 +73,7 @@ pluginTest.describe("plugin testing", () => {
     await expect(page).toHaveTitle(/Grafana/);
   });
 
-  pluginTest("login access", async ({ page, targets }: { page: Page, targets: ITargets }) => {
+  pluginTest ("login access", async ({ page, targets }: { page: Page, targets: ITargets }) => {
     await page.goto(await getHomepageUrl(targets.orgId));
 
     // Expects page to have a heading with the name of Installation.
@@ -199,4 +200,14 @@ pluginTest.describe("plugin testing", () => {
     // TODO
   });
 
+  pluginTest("test coloration", () => {
+    // on first render of a topology loaded from a remote URL
+
+
+    // on render of a 'normal' topology
+
+    // in a partial match situation
+
+    // in situations where something other than 'POPs' are used as a matching criterion
+  });
 });
