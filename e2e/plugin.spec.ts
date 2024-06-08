@@ -1,6 +1,6 @@
 import { expect, Page } from '@playwright/test';
 import testIds from '../src/constants';
-import { topologySheetUrl as topologyUrl, fileId } from '../e2e/e2e.config.json';
+import { topologySheetUrl as topologyUrl, flowSheetUrl as flowUrl } from '../e2e/e2e.config.json';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
@@ -42,7 +42,7 @@ pluginTest.describe("plugin testing", () => {
   pluginTest.use({
     targets: async ({}, use) => {
       // setup data source
-      const dataSource = await createDatasource(fileId);
+      const dataSource = await createDatasource();
 
       // get topology
       const topologyResponse: Response = await fetch(topologyUrl, {
@@ -54,6 +54,8 @@ pluginTest.describe("plugin testing", () => {
       const topology = JSON.parse(topologyResponseUnescaped);
       // setup dashboard, including topology data from datasource uid
       const newFixtureObj = await getFolderDashboardTargets({
+        url: flowUrl,
+        queryType: 'tsv',
         topology,
         uid: dataSource.uid
       });

@@ -22,13 +22,10 @@ const DEFAULT_DATASOURCE_NAME = "network-traffic-flow";
  * @param {boolean} forceCreate
  * @returns
  */
-export const createDatasource = async (fileId?: string, forceCreate = false): Promise<IDataSource> => {
+export const createDatasource = async (forceCreate = false): Promise<IDataSource> => {
   const fnName = "folderDashboardInit.initCSVDatasource";
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
-  let dataFlowUrl: string | null = null;
-  if (fileId) {
-    dataFlowUrl = getGoogleSheetInfo(fileId);
-  }
+  let dataFlowUrl: string | null = getGoogleSheetInfo();
 
   let resultDataSource;
   try {
@@ -46,27 +43,24 @@ export const createDatasource = async (fileId?: string, forceCreate = false): Pr
       redirect: "follow"
     });
 
-    if (dataSrcCheckResponse.ok) {
+    if (dataSrcCheckResponse.ok && !forceCreate) {
       // if exists, return info
       resultDataSource = await dataSrcCheckResponse.json();
-    } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404) {
-      // if does not exist, create it
+    } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404 || forceCreate) {
+      // if does not exist or forced to create, create it
       const inObj = {
         name: DEFAULT_DATASOURCE_NAME,
-        type: "marcusolsson-csv-datasource",
+        type: "yesoreyeram-infinity-datasource",
         access: "proxy"
       };
-      // initialize with data url
-      if (dataFlowUrl) {
-        inObj["url"] = dataFlowUrl;
-      }
+      // no need to use URL, that is specified at the dashboard level
+      // post url to grafana API for data source config
       const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
         method: "POST",
         headers: {
           ...basicAuthHeader,
           ...jsonHeaders
         },
-        redirect: 'follow',
         body: JSON.stringify(inObj)
       });
       const jsonResponse = await dataSrcCreateResponse.json();

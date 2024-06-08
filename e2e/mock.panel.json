@@ -1,6 +1,6 @@
 {
     "datasource": {
-        "type": "marcusolsson-csv-datasource",
+        "type": "yesoreyeram-infinity-datasource",
         "uid": "bdk95xlce6i9sc"
     },
     "fieldConfig": {
@@ -134,7 +134,7 @@
     "targets": [
         {
             "datasource": {
-                "type": "marcusolsson-csv-datasource",
+                "type": "yesoreyeram-infinity-datasource",
                 "uid": "bdk95xlce6i9sc"
             },
             "decimalSeparator": ".",

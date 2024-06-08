@@ -24,4 +24,13 @@ export interface INetworkPanelParams {
      * The uid of the data source for the network map panel overall
      */
     uid?: string;
+    /**
+     * The URL to configure for the panel's query.
+     * @var
+     */
+    url?: string;
+    /**
+     * The query type to configure for the panel's query.
+     */
+    queryType?: string;
 }

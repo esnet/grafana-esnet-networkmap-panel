@@ -1,6 +1,7 @@
 import { PlaywrightTestArgs, PlaywrightTestOptions, PlaywrightWorkerArgs, PlaywrightWorkerOptions, TestType, test as base } from '@playwright/test';
 import { ITargets } from './interfaces/Targets.interface';
 import { MapOptions } from '../src/types';
+import { IDataSource } from './interfaces/DataSource.interface';
 
 export type PluginTestOptions = {
   targets: ITargets;
@@ -19,6 +20,7 @@ export interface IPanel {
   id: number;
   mode: string;
   content: string;
+  targets?: ITarget[];
 }
 
 /**
@@ -26,7 +28,7 @@ export interface IPanel {
  */
 export interface INetworkMapPanel extends IPanel {
   options: MapOptions;
-  datasource: { type: string; uid: string; }
+  datasource: Partial<IDataSource>;
 }
 
 export type TimeRange = { to: string; from: string; };
@@ -91,6 +93,30 @@ export interface IDashboard {
   schemaVersion: number;
   version: number;
   panels: IPanel[];
+  targets: ITarget[];
+}
+
+export interface ITarget {
+  columns?: string[];
+  datasource: Partial<IDataSource>;
+  decimalSeparator: string;
+  delimiter: string;
+  filters?: any[];
+  format?: string;
+  global_query_id?: string;
+  header: boolean;
+  ignoreUnknown: boolean;
+  refId: string;
+  root_selector?: string;
+  schema: any[];
+  skipRows?: number;
+  source?: string;
+  type?: string;
+  url?: string;
+  url_options?: {
+    data: string;
+    method: string;
+  }
 }
 
 export interface IOrganization {

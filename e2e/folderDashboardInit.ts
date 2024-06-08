@@ -1,11 +1,11 @@
 import { createDashboard, createFolder, getCurrentOrg, getDashboard, updateDashboard } from './grafana-api';
-import { getHostInfo, getGoogleSheetInfo } from './config.info';
+import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import e2eConfig from './e2e.config.json';
 import mockPanelImport from './mock.panel.json';
 import { ITargets } from './interfaces/Targets.interface';
 import { INetworkPanelParams } from './interfaces/PanelParams.interface';
-import { IDashboardResponse, INetworkMapPanel, IOrganization, IPanel } from './plugin-def';
+import { IDashboardResponse, INetworkMapPanel, IOrganization, IPanel, ITarget } from './plugin-def';
 
 let targetFolderUid;
 let targetDashboardUid;
@@ -53,8 +53,10 @@ export const getFolderDashboardTargets = async (params?: INetworkPanelParams): P
       title: targetDashboardTitle
     });
 
-    // store targetDashboardUid for later
+    // configure query
     const targetDashboard = JSON.parse(targetDashboardJsonStr);
+
+    // store targetDashboardUid for later
     targetDashboardUid = targetDashboard.uid;
     dashboardJsonStr = await getDashboard(targetDashboardUid);
   } else if (dashboardSearchResponseJson.length === 1) {
@@ -97,6 +99,75 @@ export const getFolderDashboardTargets = async (params?: INetworkPanelParams): P
 
   // update dashboard values data structure w/ topology and traffic flow data if specified into panel
   if (params) {
+    // query settings
+    if (params.url || params.queryType) {
+      let updatedTargetPartial;
+      const baseTarget = {
+        columns: [],
+        filters: [],
+        format: "table",
+        global_query_id: "",
+        root_selector: "",
+        skipRows: 0
+      }
+      if (Array.isArray(dashboardInfo.dashboard.targets)) {
+        updatedTargetPartial = {
+          ...baseTarget,
+          ...dashboardInfo.dashboard.targets[0],
+        };
+      } else {
+        updatedTargetPartial = baseTarget;
+      }
+
+      if (params.url) {
+        updatedTargetPartial.url = params.url;
+      }
+      if (params.queryType) {
+        updatedTargetPartial.type = params.queryType;
+      }
+
+      const panelCount = dashboardInfo.dashboard.panels.length;
+      const panelIdx = dashboardInfo.dashboard.panels.findIndex(panel => panel.type === "esnet-network-mappanel");
+      let panelsArr: IPanel[] = [];
+
+      // iterate through panels in dashboard
+      for (let currPanelIdx = 0; currPanelIdx < panelCount; currPanelIdx++) {
+
+        // in each panel's targets find all targets with infinity datasource
+        const currPanel = dashboardInfo.dashboard.panels[currPanelIdx];
+        const targetCount = currPanel.targets?.length ?? 0;
+        const panelTargetIdxs: number[] | undefined = currPanel.targets?.reduce((acc: number[], target: ITarget, targetIdx: number) => {
+          if (target.datasource.type === "yesoreyeram-infinity-datasource") {
+            acc.push(targetIdx);
+          }
+          return acc;
+        }, [] as number[]);
+
+        // iterate through all infinity targets, updating those with param url and type...
+        const targetArr: ITarget[] = [];
+        for (let currTargetIdx = 0; currTargetIdx < targetCount; currTargetIdx++) {
+          let currTarget = currPanel.targets![currTargetIdx];
+          if (panelTargetIdxs && panelTargetIdxs.includes(currPanelIdx)) {
+            currTarget = {
+              ...currTarget,
+              ...updatedTargetPartial,
+            };
+          }
+          targetArr.push(currTarget);
+        }
+
+        // set panel's targets
+        currPanel.targets = targetArr;
+        // add panel to results
+        panelsArr.push(currPanel);
+      }
+
+      // update container for dashboard prior to API invocation
+      dashboardInfo.dashboard = {
+        ...dashboardInfo.dashboard,
+        panels: panelsArr
+      };
+    }
     // topology
     if (params.topology) {
       const { panels } = dashboardInfo.dashboard || {panels: currentPanels};
@@ -109,7 +180,7 @@ export const getFolderDashboardTargets = async (params?: INetworkPanelParams): P
           // traffic flow data from a data source
           if (params.uid) {
             datasource = {
-              type: "marcusolsson-csv-datasource",
+              type: "yesoreyeram-infinity-datasource",
               uid: params.uid
             }
           }

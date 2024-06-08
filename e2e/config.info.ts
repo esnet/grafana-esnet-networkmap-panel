@@ -2,7 +2,7 @@ import dockerInfo from '../e2e/grafana-docker.json';
 import e2eConfig from '../e2e/e2e.config.json';
 
 const moduleName = 'config.info';
-const { fileId } = e2eConfig;
+const { flowSheetUrl } = e2eConfig;
 const targetGrafanaInstanceName = e2eConfig.grafanaInstanceName || "grafana";
 const grafanaInfo = (dockerInfo as Array<any>).find(nfo => nfo.Name == `/${targetGrafanaInstanceName}`);
 if (!grafanaInfo) {
@@ -12,8 +12,8 @@ if (!grafanaInfo) {
 }
 const { IPAddress, Ports } = grafanaInfo?.NetworkSettings;
 
-export const getGoogleSheetInfo = (fileId: string): string => {
-  const flowsUrl = `https://docs.google.com/spreadsheets/d/${fileId}/gviz/tq?tqx=out:csv`;
+export const getGoogleSheetInfo = (): string => {
+  const flowsUrl = flowSheetUrl;
 
   return flowsUrl;
 };
