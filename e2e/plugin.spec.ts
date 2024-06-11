@@ -1,4 +1,4 @@
-import { expect, Page } from '@playwright/test';
+import { ElementHandle, expect, Locator, Page } from '@playwright/test';
 import testIds from '../src/constants';
 import { topologySheetUrl as topologyUrl, flowSheetUrl as flowUrl } from '../e2e/e2e.config.json';
 import { getHostInfo } from './config.info';
@@ -8,6 +8,7 @@ import { IDashboard, pluginTest } from './plugin-def';
 import { getFolderDashboardTargets } from './folderDashboardInit';
 import { createDatasource } from './grafana-api';
 import { removeRepeats } from '../test/utils';
+import { BasicColors } from './enums/BasicColors.enum';
 
 const getHomepageUrl = async (orgId?: string | number) => {
   const { protocolHostPort } = await getHostInfo(credentials);
@@ -202,11 +203,34 @@ pluginTest.describe("plugin testing", () => {
     // TODO
   });
 
-  pluginTest("test coloration", () => {
-    // on first render of a topology loaded from a remote URL
+  pluginTest("test coloration on default load", async ({ page, targets }: { page: Page, targets: ITargets}) => {
+    // load plugin edit page
+    const fnName = "plugin.spec['est coloration on default load']";
+    const { targetDashboardUid, targetFolder, targetDashboard, targetPanelId, orgId } = targets;
+    expect(targetDashboard).toBeDefined();
+    const editNetworkMapPanelUrl = `${await getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard!, targetPanelId, orgId)}`;
+    await page.goto(editNetworkMapPanelUrl);
 
+    // wait for page to load up canvas
+    const mapEditorCanvas = await page.waitForSelector("[aria-label='Panel editor content'] esnet-map-canvas");
+
+    // on first render of a topology loaded from a remote URL - default should be gray
+    const layer1DefaultColorDropdownSelector = '[id="Layer 1: Basic Options"] > div:nth-child(3) > div:nth-child(2) > div > .css-efx5mg';
+    const layer1DefaultColorDropdown = await page.locator(layer1DefaultColorDropdownSelector);
+    const layer1DefaultColorDropdownSelected = await layer1DefaultColorDropdown.innerText();
+    await expect(layer1DefaultColorDropdownSelected).toBe(BasicColors.GREY);
+
+    const edgesLocator: Locator = await page.locator('.edge > path');
+    const edgeHandles: ElementHandle<Node>[] = await edgesLocator.elementHandles();
+    const handleCount = edgeHandles.length;
+    for (let handleIdx = 0; handleIdx < handleCount; handleIdx++) {
+      const currentHandle: ElementHandle<Node> = edgeHandles[handleIdx];
+      const strokeColor = await currentHandle.getAttribute("stroke");
+      await expect(strokeColor).toBe(BasicColors.GREY);
+    }
 
     // on render of a 'normal' topology
+
 
     // in a partial match situation
 
