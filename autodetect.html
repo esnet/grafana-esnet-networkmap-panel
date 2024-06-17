@@ -1,0 +1,145 @@
+<html>
+<head>
+    <title>Embedded Map Demonstration Page</title>
+    <script type="module">
+        import "./src/components/MapCanvas.component.js";
+    </script>
+
+    <script type="module">
+        import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
+        var parsedData = {};
+        var lavender = "rgb(202, 149, 229)";
+        var options = {
+            "initialViewStrategy": "viewport",
+            "showSidebar": false,
+            "showViewControls": true,
+            "enableEdgeAnimation": true,
+            "enableNodeAnimation": true,
+            "enableScrolling": true,
+            "enableEditing": true,
+            "background":"#EDEDED",
+            "multiLayerNodeSnap": false,
+            "viewport": {
+                "top": 33,
+                "left": -141,
+                "bottom": 43,
+                "right": -41,
+                "center": {
+                    "lat":38.68,
+                    "lng":-96.96,
+                },
+                "zoom":3.5
+            },
+            "tileset": {
+                // global options
+                // this string corresponds to options in RenderMap.js
+                "geographic":"esri.shaded",
+                // this string (or null) corresponds to options in RenderMap.js
+                "boundaries":null,
+                // this string (or null) corresponds to options in RenderMap.js
+                "labels": null,
+            },
+            "layers": [
+                {
+                    // layer 1 rendering options
+                    "visible":true,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeWidth":4,
+                    "edgeWidth":2,
+                    "pathOffset":2,
+                    "name":"Core Topology",
+                    "autodetect": {
+                        "autodetectTopology": "true",
+                        "dstNameColumn": "dst_name",
+                        "dstLatitudeColumn": "dst_latitude",
+                        "dstLongitudeColumn": "dst_longitude",
+                        "srcNameColumn": "src_name",
+                        "srcLatitudeColumn": "src_latitude",
+                        "srcLongitudeColumn": "src_longitude",
+                    },
+                    "name":"Autodetected",
+                    "legend":true,
+                },
+            ]
+        };
+        var data = [
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":52,"src_longitude":21,"src_name":"NCBJ.pl","count":16},
+            {"dst_latitude":40,"dst_longitude":-74,"dst_name":"PPPL","src_latitude":43,"src_longitude":12,"src_name":"Cineca","count":4},
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","count":1},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","count":32},
+            {"dst_latitude":40,"dst_longitude":-72,"dst_name":"BNL","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":148},
+            {"dst_latitude":40,"dst_longitude":-74,"dst_name":"GFDL-Z","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":1},
+            {"dst_latitude":37,"dst_longitude":-76,"dst_name":"JeffersonLab","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":13},
+            {"dst_latitude":38,"dst_longitude":-78,"dst_name":"Caltech","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":3},
+            {"dst_latitude":29,"dst_longitude":-82,"dst_name":"UFlorida","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":12},
+            {"dst_latitude":34,"dst_longitude":-86,"dst_name":"NASA","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":1},
+            {"dst_latitude":40,"dst_longitude":-86,"dst_name":"Purdue","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":82},
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":372},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":586},
+            {"dst_latitude":40,"dst_longitude":-96,"dst_name":"UNLincoln","src_latitude":46,"src_longitude":6,"src_name":"CERN","count":452},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":50,"src_longitude":4,"src_name":"IIHE.be","count":45},
+        ]; 
+        var canvas = document.createElement("esnet-map-canvas");
+        var optionsElem = document.createElement('textarea');
+        var dataElem = document.createElement('textarea');
+
+        canvas.setAttribute('id', "demonstration-element");
+        canvas.setAttribute('height', 400);
+        canvas.options = options;
+        canvas.data = data;
+        canvas.updateOptions = function(options){
+            optionsElem.value = JSON.stringify(options);
+        }
+        canvas.updateTopology = function(topology){
+            var cleanTopology = [];
+            for(var i=0; i<3; i++){
+                if(topology[i]){
+                    cleanTopology[i] = sanitizeTopology(topology[i]);
+                }
+            }
+            dataElem.value = JSON.stringify(cleanTopology);
+        }
+        document.getElementById("mapContainer").append(canvas);
+
+        dataElem.value = JSON.stringify(data);
+        dataElem.style = "height: 300px; width: 100%;";
+        dataElem.onChange = function(event){
+            canvas.topology = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapDataContainer").append(dataElem);
+
+        optionsElem.value = JSON.stringify(options);
+        optionsElem.style = "height: 300px; width: 100%;";
+        optionsElem.onChange = function(event){
+            canvas.options = JSON.parse(event.target.value);
+        }
+        document.getElementById("mapOptionsContainer").append(optionsElem);
+
+    </script>
+
+</head>
+<body>
+    <table style='width:100%;'>
+        <tr>
+            <th colspan='3'>
+                <h1>Autodetected Topology Demonstration page</h1>
+            </th>
+        <tr>
+            <td colspan='2' style='width:80%;'>
+                <div id='mapContainer'>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style='width:40%'>Map Data</td>
+            <td style='width:40%'>Map Options</td>
+            <td style='width:20%'></td>
+        </tr>
+        <tr>
+            <td id='mapDataContainer'></td>
+            <td id='mapOptionsContainer'></td>
+        </tr>
+    </table>
+</body>
+</html>
