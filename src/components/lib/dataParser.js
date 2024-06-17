@@ -2,6 +2,16 @@ import { DataFrameView } from '@grafana/data';
 
 const ENDPOINT_DELIMITER = '--';
 
+export function toDataFrames(data){
+  let dataFrames = [];
+
+  data.series.forEach(function (series) {
+    dataFrames.push(new DataFrameView(series));
+  });
+
+  return dataFrames;
+}
+
 export function parseData(data, mapData, colors, fields, layer) {
   // helper function to parse grafana colors
   function fixColor(color) {
@@ -104,11 +114,7 @@ export function parseData(data, mapData, colors, fields, layer) {
     }
   });
 
-  let dataFrames = [];
-
-  data.series.forEach(function (series) {
-    dataFrames.push(new DataFrameView(series));
-  });
+  let dataFrames = toDataFrames(data);
   var srcKey = fields.srcField;
   var dstKey = fields.dstField;
   var inboundKey = fields.inboundValueField;

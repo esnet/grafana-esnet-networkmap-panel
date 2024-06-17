@@ -24,7 +24,7 @@ export interface LayerOptions {
 }
 
 export interface MapOptions {
-  useConfigurationUrl: boolean;
+  topologySource: string;
   configurationUrl: string;
   background: string;
   initialViewStrategy: string;

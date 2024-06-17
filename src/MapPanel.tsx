@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat } from '@grafana/data';
 import { MapOptions } from './types';
-import { parseData } from './components/lib/dataParser';
+import { parseData, toDataFrames } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
@@ -137,7 +137,7 @@ export class MapPanel extends Component<MapPanelProps> {
       'enableCustomEdgeTooltip',
       'customNodeTooltip',
       'customEdgeTooltip',
-      'useConfigurationUrl',
+      'topologySource',
       'configurationUrl',
       'resolvedLat',
       'resolvedLng',
@@ -156,6 +156,12 @@ export class MapPanel extends Component<MapPanelProps> {
       optionsToWatch.push(`layers[${i}].dstFieldLabel`);
       optionsToWatch.push(`layers[${i}].srcFieldLabel`);
       optionsToWatch.push(`layers[${i}].dataFieldLabel`);
+      optionsToWatch.push(`layers[${i}].autodetect.dstNameColumn`);
+      optionsToWatch.push(`layers[${i}].autodetect.dstLatitudeColumn`);
+      optionsToWatch.push(`layers[${i}].autodetect.dstLongitudeColumn`);
+      optionsToWatch.push(`layers[${i}].autodetect.srcNameColumn`);
+      optionsToWatch.push(`layers[${i}].autodetect.srcLatitudeColumn`);
+      optionsToWatch.push(`layers[${i}].autodetect.srcLongitudeColumn`);
     }
     optionsToWatch.forEach((option) => {
       let lastValue = resolvePath(this.lastOptions, option);
@@ -197,9 +203,7 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     if (this.props.options.initialViewStrategy === 'variables') {
       let frames: any[];
-      frames = data.series.map((series) => {
-        return new DataFrameView(series);
-      });
+      frames = toDataFrames(data);
       const toResolve = {
         latitudeVar: 'resolvedLat',
         longitudeVar: 'resolvedLng',
@@ -249,6 +253,17 @@ export class MapPanel extends Component<MapPanelProps> {
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
+    if(data.state === "Done"){
+      let frames = toDataFrames(data);
+      let output = []
+      frames.forEach((frame)=>{
+        frame.forEach((row) => {
+          output.push(JSON.parse(JSON.stringify(row)));
+        })
+      })
+      this.mapCanvas.current.data = output
+      this.mapCanvas.current.autodetectTopology();
+    }
 
     let colors: any[] = [];
     let fields: any[] = [];
@@ -295,6 +310,7 @@ export class MapPanel extends Component<MapPanelProps> {
         // use this outside of a Grafana context.
         // @ts-ignore
         topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer);
+        debugger; 
       } catch(e) {
         // ensure that the mapcanvas has jsonResults set up so it can collect errors.
         if(!this.mapCanvas.current.jsonResults){
@@ -326,7 +342,7 @@ export class MapPanel extends Component<MapPanelProps> {
         if(this.mapCanvas.current){
           // do this async to ensure that the UI has time to update after conclusion of edit.
           setTimeout(()=>{
-            if(!options.useConfigurationUrl){
+            if(options.topologySource !== "url"){
               this.updateMap(true);
             }
           }, 10);
@@ -359,8 +375,8 @@ export class MapPanel extends Component<MapPanelProps> {
 
     let changed = this.calculateOptionsChanges(options);
 
-    if(changed.indexOf("useConfigurationUrl") >= 0){
-      if(!options.useConfigurationUrl){
+    if(changed.indexOf("topologySource") >= 0){
+      if(options.topologySource !== "url"){
         let thresholds: any[];
         thresholds = [];
         fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
