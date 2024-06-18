@@ -3,6 +3,7 @@ import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js'
 import testIds from '../constants.js'
+import DOMPurify from 'dompurify';
 
 const LAVENDER = "rgb(202, 149, 229)";
 
@@ -207,12 +208,19 @@ class EditingInterface extends BindableHTMLElement {
         const selectedChildren = document.querySelectorAll('#node_children option:checked');
         const nodeChildren = Array.from(selectedChildren).map((el) => el.value);
 
+        // ensure we're in an svg context for dompurify (crappy hack)
+        nodeSvg = `<svg>${nodeSvg}</svg>`;
+        // explicitly allow foreignobject for complex map nodes (still filters e.g. <script>)
+        var svgContent = DOMPurify.sanitize(nodeSvg, {ADD_TAGS: ["foreignobject"]});
+        // excise start/end svg tags (crappy hack)
+        svgContent = svgContent.replace(/^<svg>/, "").replace(/<\/svg>$/, "")
+
         var newNode = {
           name: nodeName,
           color: this.mapCanvas.options?.layers?.[nodeLayer]?.color || LAVENDER,
           meta: {
             display_name: nodeDisplayName,
-            svg: nodeSvg,
+            svg: svgContent,
             template: nodeTooltip,
           },
           coordinate: [parseFloat(nodeLat), parseFloat(nodeLng)],
