@@ -32,8 +32,8 @@
         "path": "img/networkmap.png"
       }
     ],
-    "version": "2.0.8",
-    "updated": "2024-05-07"
+    "version": "2.0.9",
+    "updated": "2024-05-14"
   },
   "dependencies": {
     "grafanaDependency": ">=9.0.0",

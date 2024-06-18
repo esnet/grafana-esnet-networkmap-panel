@@ -602,8 +602,6 @@ export class MapCanvas extends BindableHTMLElement {
     mapstyle.innerHTML = `
       <style>
 
-        /* this is to bring grafana panel header on top leaflet layers */
-        .panel-header:hover { z-index: ${zIndexLayers[9]}; }
         div.tooltip-hover { z-index: 1000; position:absolute; }
         .home-overlay { z-index: ${zIndexLayers[8]}; }
         .legend {  z-index: ${zIndexLayers[8]}; }

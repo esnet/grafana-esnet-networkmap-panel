@@ -12,6 +12,7 @@ export class BindableHTMLElement extends HTMLElement {
             let [selector, event] = key.split("@");
             // use JS built-in 'apply' to set "this" keyword properly for callbacks.
             let element = self.shadow.querySelector(selector)
+            if(!element) return
             element[event] = function(){
                 bindings[key].apply(self, arguments) 
             };
