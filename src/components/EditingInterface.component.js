@@ -173,7 +173,10 @@ class EditingInterface extends BindableHTMLElement {
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
-        this._selectedLayer = 0;
+        // if we've arrived here from the edge dialog, don't reset layer state information...
+        if(this.dialog != "edge"){
+            this._selectedLayer = 0;
+        }
         this._selectedObject = null;
         this._spliceIndex = null;
         this.dialog = "node";
@@ -374,7 +377,7 @@ class EditingInterface extends BindableHTMLElement {
         if (this.srcDstOptions.length === 0) {
           return `<div class="no-node-message">
               The Layer You&apos;ve Selected has no Nodes.
-              <div class="add-node-link">
+              <div class="add_node_link">
                 Add Node
               </div>
             </div>`;
@@ -516,7 +519,7 @@ class EditingInterface extends BindableHTMLElement {
                 .dialog .dialog-form .no-node-message {
                   padding-left:10px;
                 }
-                .dialog .dialog-form .add-node-link {
+                .dialog .dialog-form .add_node_link {
                   color: blue;
                   text-decoration: underline;
                 }
@@ -739,7 +742,7 @@ class EditingInterface extends BindableHTMLElement {
             "#dialog@onmouseup": this.enableScrolling,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
-            //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
+            ".add_node_link@onclick": this.showAddNodeDialog, // sometimes null... TODO
             "#add_node@onclick": this.showAddNodeDialog,
             "#add_node_form@onsubmit": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,
