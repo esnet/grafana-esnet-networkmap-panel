@@ -1,6 +1,6 @@
 import { ElementHandle, expect, Locator, Page } from '@playwright/test';
 import testIds from '../src/constants';
-import { topologySheetUrl as topologyUrl, flowSheetUrl as flowUrl } from '../e2e/e2e.config.json';
+import { topologySheetUrl as topologyUrl, flowSheetUrl as flowUrl } from './e2e.config.json';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';
 import { ITargets } from './interfaces/Targets.interface';
@@ -49,10 +49,8 @@ pluginTest.describe("plugin testing", () => {
       const topologyResponse: Response = await fetch(topologyUrl, {
         redirect: 'follow'
       });
-      let topologyResponseEscaped = await topologyResponse.text();
-      const topologyResponseUnescaped = removeRepeats(topologyResponseEscaped, '"', true);
 
-      const topology = JSON.parse(topologyResponseUnescaped);
+      const topology = JSON.parse(await topologyResponse.text());
       // setup dashboard, including topology data from datasource uid
       const newFixtureObj = await getFolderDashboardTargets({
         url: flowUrl,

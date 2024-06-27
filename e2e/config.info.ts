@@ -1,5 +1,6 @@
 import dockerInfo from '../e2e/grafana-docker.json';
 import e2eConfig from '../e2e/e2e.config.json';
+import { IHostPort } from '../e2e/interfaces/HostPort.interface';
 
 const moduleName = 'config.info';
 const { flowSheetUrl } = e2eConfig;
@@ -10,7 +11,8 @@ if (!grafanaInfo) {
   const err = `${moduleName}: No Docker instance named "${targetGrafanaInstanceName}" could be found. ${configInstr}`;
   throw new Error(err);
 }
-const { IPAddress, Ports } = grafanaInfo?.NetworkSettings;
+const { IPAddress } = grafanaInfo?.NetworkSettings;
+const { HostConfig } = grafanaInfo;
 
 export const getGoogleSheetInfo = (): string => {
   const flowsUrl = flowSheetUrl;
@@ -27,39 +29,39 @@ export const getGoogleSheetInfo = (): string => {
 export const getHostInfo = async (credentials?: {username: string, password: string}) => {
   const fnName = 'auth.setup.getHostInfo';
   let protocolHostPort;
-  const portKeys = Object.keys(Ports);
+  const bindingsObj: { [key: string]: IHostPort[] } = HostConfig.PortBindings;
+  const portKeys = Object.entries(bindingsObj).reduce((acc: IHostPort[], [bindingKey, bindingList]) => {
+    if (bindingKey === "3000/tcp") {
+      acc.push(...bindingList);
+    }
+    return acc;
+  }, []);
 
   if (portKeys.length > 0) {
-    const portInfo = Ports[portKeys[0]] as {
-      HostIp: string;
-      HostPort: string;
-    }[];
-    if (portInfo.length > 0) {
-      protocolHostPort = `http://${IPAddress || 'localhost'}:${portInfo[0].HostPort}`;
-      let basicAuthHeader = {};
-      if (credentials) {
-        const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
-        basicAuthHeader["Authorization"] = `Basic ${credentialsBuf.toString('base64')}`;
-      }
-      let version;
-      try {
-        const response: Response = await fetch(`${protocolHostPort}/api/health`);
-        if (response.status !== 200) {
-          throw new Error(`${fnName}: cannot derive API health response from Grafana server for version`);
-        }
-        version = (await response.json()).version;
-      } catch (e) {
-        console.error(`${fnName}: Error: ${e.message}`);
-      }
-      const result = { protocolHostPort, version, basicAuthHeader: {} };
-      if (Object.keys(basicAuthHeader).length > 0) {
-        result.basicAuthHeader = basicAuthHeader;
-      }
-      return result;
-    } else {
-      throw new Error(`${fnName}: cannot derive port number from Docker NetworkSettings.Ports inspection:\n${JSON.stringify(Ports)}`)
+    const portInfo = portKeys[0] as IHostPort;
+
+    protocolHostPort = `http://${IPAddress || 'localhost'}:${portInfo.HostPort}`;
+    let basicAuthHeader = {};
+    if (credentials) {
+      const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
+      basicAuthHeader["Authorization"] = `Basic ${credentialsBuf.toString('base64')}`;
     }
+    let version;
+    try {
+      const response: Response = await fetch(`${protocolHostPort}/api/health`);
+      if (response.status !== 200) {
+        throw new Error(`${fnName}: cannot derive API health response from Grafana server for version`);
+      }
+      version = (await response.json()).version;
+    } catch (e) {
+      console.error(`${fnName}: Error: ${e.message}`);
+    }
+    const result = { protocolHostPort, version, basicAuthHeader: {} };
+    if (Object.keys(basicAuthHeader).length > 0) {
+      result.basicAuthHeader = basicAuthHeader;
+    }
+    return result;
   } else {
-    throw new Error(`${fnName}: cannot derive port number from Docker NetworkSettings.Ports inspection:\n${JSON.stringify(Ports)}`)
+    throw new Error(`${fnName}: cannot derive port number from Docker HostConfig.PortBindings inspection:\n${JSON.stringify(HostConfig.PortBindings)}`)
   }
 };

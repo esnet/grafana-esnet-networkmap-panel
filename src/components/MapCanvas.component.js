@@ -322,15 +322,25 @@ export class MapCanvas extends BindableHTMLElement {
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
         populateOptionsAndTopology();
-        return
+        return;
       }
       // otherwise, no hit in cache, let's grab them from the URL
-      fetch(this.options["configurationUrl"]).then((response)=>{
-        response.json().then((config)=>{
-          self.optionsCache[self.options["configurationUrl"]] = config;
-          populateOptionsAndTopology();
-        })
-      })
+      const jsonResponseHandler = (config) => {
+        self.optionsCache[self.optoins["configurationUrl"]] = config;
+        populateOptionsAndTopology();
+      };
+
+      fetch(this.options["configurationUrl"]).then((response) => {
+        if (response.ok) {
+          response.json().then(jsonResponseHandler);
+        } else if (response.status >= 300 && response.status < 400 && response.headers["location"]) {
+          fetch(response.headers["location"]).then((res) => {
+            if (res.ok) {
+              res.json().then(jsonResponseHandler);
+            }
+          });
+        }
+      });
     }
   }
 

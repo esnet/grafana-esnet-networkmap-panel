@@ -3,6 +3,6 @@
     "targetDashboard": "network-map-test-dashboard",
     "targetFolder": "network-map-test-folder",
     "grafanaInstanceName": "esnet-networkmap-panel",
-    "flowSheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsv",
-    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=csv"
+    "flowSheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsvhttps://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsv",
+    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=tsv"
 }
