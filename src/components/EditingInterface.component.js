@@ -1,8 +1,9 @@
 import * as pubsub from './lib/pubsub.js';
 import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
-import { BindableHTMLElement } from './lib/rubbercement.js'
-import testIds from '../constants.js'
+import { BindableHTMLElement } from './lib/rubbercement.js';
+import testIds from '../constants.js';
+import { signals } from '../signals.js';
 
 const LAVENDER = "rgb(202, 149, 229)";
 
@@ -23,12 +24,7 @@ class EditingInterface extends BindableHTMLElement {
 
     // connect component
     connectedCallback() {
-      this.setEditMode(PubSub.last("setEditMode", this));
-      PubSub.subscribe("setEditMode", (evtData)=>{ 
-        this.setEditMode(evtData);
-        this.render();
-      }, this)
-
+      this.setEditMode(this.mapCanvas.lastValue(signals.private.EDIT));
 
       this.setEditNodeData(this.mapCanvas.lastValue(signals.private.EDIT_NODE_DIALOG_VISIBLE));
       this.mapCanvas.listen(signals.private.EDIT_NODE_DIALOG_VISIBLE, (evtData)=>{ 
@@ -58,8 +54,8 @@ class EditingInterface extends BindableHTMLElement {
             this._nodeEditMode = false;
         }
         if(evtData && evtData['mode'] === "edge"){
-            this._nodeEditMode = false;
             this._edgeEditMode = evtData['value'];
+            this._nodeEditMode = false;
         } 
         if(evtData && evtData['mode'] === "node"){
             this._edgeEditMode = false;
@@ -70,9 +66,9 @@ class EditingInterface extends BindableHTMLElement {
     }
 
     setEditing(newMode){
-        this._editMode = PubSub.last("updateEditMode", this);
+        this._editMode = this.mapCanvas.lastValue(signals.EDITING_SET);
         if(newMode && !this._edgeEditMode && !this._nodeEditMode){
-            PubSub.publish("setEditMode", { "mode": "edge", "value": true }, this);
+            this.setEditMode({ mode: "edge", value: true });
         }
     }      
 
@@ -161,12 +157,12 @@ class EditingInterface extends BindableHTMLElement {
     toggleNodeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
         this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
-        this.mapCanvas.setEditMode({ "mode": "node", "value": !this._nodeEditMode });
+        this.setEditMode({ "mode": "node", "value": !this._nodeEditMode });
     }
     toggleEdgeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
         this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
-        this.mapCanvas.setEditMode({ "mode": "edge", "value": !this._edgeEditMode });
+        this.setEditMode({ "mode": "edge", "value": !this._edgeEditMode });
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
