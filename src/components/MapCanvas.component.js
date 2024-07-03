@@ -10,6 +10,7 @@ import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
 import testIds from '../constants.js';
 import * as L from "./lib/leaflet-src.esm.js";
+import { signals } from '../signals.js';
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -160,6 +161,7 @@ map.setEditMode
   }
   setOptions(newValue){
     this._options = newValue;
+    this.emit(signals.OPTIONS_UPDATED, newValue);
     return newValue;
   }
 
@@ -258,17 +260,18 @@ map.setEditMode
   }
 
   disableEditing(){
-    PubSub.publish("updateEditMode", false, this);
-    if(!!PubSub.last("setEditMode", this)){
-      PubSub.publish("setEditMode", null, this);
+    this.editingInterface?.setEditing(false);
+    if(!!this.lastValue(signals.private.EDIT_MODE_SET)){
+      this.emit(signals.private.EDIT_MODE_SET, null);
     }
-    if(!!PubSub.last("setEditSelection", this)){
-      PubSub.publish("setEditSelection", null, this);
+    if(!!this.lastValue(signals.EDIT_SELECTION_SET)){
+      this.emit(signals.EDIT_SELECTION_SET, null);
     }
   }
 
   enableEditing(){
-    PubSub.publish("updateEditMode", true, this);
+    this.emit(signals.EDITING_SET, true, this);
+    this.editingInterface?.setEditing(true);
   }
 
   enableScrolling(){
