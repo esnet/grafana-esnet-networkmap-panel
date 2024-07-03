@@ -742,7 +742,7 @@ class EditingInterface extends BindableHTMLElement {
             "#dialog@onmouseup": this.enableScrolling,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
-            ".add_node_link@onclick": this.showAddNodeDialog, // sometimes null... TODO
+            ".add_node_link@onclick": this.showAddNodeDialog,
             "#add_node@onclick": this.showAddNodeDialog,
             "#add_node_form@onsubmit": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,
