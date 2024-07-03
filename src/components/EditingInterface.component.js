@@ -1,9 +1,9 @@
 import * as pubsub from './lib/pubsub.js';
 import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
-import { BindableHTMLElement } from './lib/rubbercement.js'
-import testIds from '../constants.js'
-import DOMPurify from 'dompurify';
+import { BindableHTMLElement } from './lib/rubbercement.js';
+import testIds from '../constants.js';
+import DOMPurify from './lib/purify.es.mjs';
 
 const LAVENDER = "rgb(202, 149, 229)";
 
