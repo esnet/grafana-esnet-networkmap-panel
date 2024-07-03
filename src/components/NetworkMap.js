@@ -55,7 +55,6 @@ export default class NetworkMap {
       d3.curveNatural);
 
     PubSub.subscribe("setEditMode", this.setEditMode, this);
-    PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
 
   dispatchEvent(event){

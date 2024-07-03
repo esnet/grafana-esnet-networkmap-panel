@@ -1,0 +1,261 @@
+<html>
+<head>
+    <title>Embedded Map Demonstration Page</title>
+    <script type="module">
+        import "./src/components/MapCanvas.component.js";
+    </script>
+</head>
+<body>
+    <table style='width:100%;'>
+        <tr>
+            <th colspan='3'>
+                <h1>Embedded Map Demonstration page</h1>
+            </th>
+        <tr>
+            <td colspan='2' style='width:80%;'>
+                <div id='mapContainer'>
+                    <esnet-map-canvas id='mapCanvas' height='400'>
+                    </esnet-map-canvas>
+                </div>
+            </td>
+            <td style='width:20%'>
+                <a href='/?editPanel=true'>Edit Mode On</a><br />
+                <a href='/'>Edit Mode Off</a><br />
+                <input type="button" onClick="test()" value='test click'>
+            </td>
+        </tr>
+        <tr>
+            <td style='width:40%'>Map Data</td>
+            <td style='width:40%'>Map Options</td>
+            <td style='width:20%'></td>
+        </tr>
+        <tr>
+            <td id='mapDataContainer'>
+                <textarea id='topologyText' style='height:300px; width:100%;'>
+                </textarea>
+            </td>
+            <td id='mapOptionsContainer'>
+                <textarea id='optionsText' style='height:300px; width:100%;'>
+                </textarea>
+            </td>
+        </tr>
+    </table>
+
+    <script type="module">
+        import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
+        import { signals } from "./src/signals.js"
+        var parsedData = {};
+        var lavender = "rgb(202, 149, 229)"
+        var topology = [
+            {
+                "name": "Test Layer",
+                "layer": "test-layer",
+                "pathLayout": {
+                    "type": "curveCardinal",
+                    "tension": 0.6
+                },
+                "edges":[
+                    {
+                        "name": "A--B",
+                        "meta": {
+                            "capacity": 100000000000,
+                            "endpoint_identifiers": {
+                                "pops": ["A","B"]
+                            }
+                        },
+                        "azDisplayValue": "9.0141 Gbps",
+                        "zaDisplayValue": "3.1506 Gbps",
+                        "coordinates": [
+                            [49.02,-105.99],
+                            [45.81,-101.77],
+                            [44.59,-96.06]
+                        ],
+                        "children": [],
+                    },
+                    {
+                        "name": "B--C",
+                        "meta": {
+                            "capacity": 100000000000,
+                            "endpoint_identifiers": {
+                                "pops": ["B","C"]
+                            }
+                        },
+                        "azDisplayValue": "9.898 Gbps",
+                        "zaDisplayValue": "1.727 Gbps",
+                        "coordinates":[[44.59,-96.06],[47.99,-93.86],[52.16,-93.95]],
+                        "children":[],
+                    },
+                    {
+                        "name": "A--C",
+                        "meta": {
+                            "capacity": 100000000000,
+                            "endpoint_identifiers": {
+                                "pops": ["A","C"]
+                            }
+                        },
+                        "azDisplayValue": "8.9017 Gbps",
+                        "zaDisplayValue": "3.5614 Gbps",
+                        "coordinates":[[49.02,-105.99],[51.90,-100.72],[52.16,-93.95]],
+                        "children":[],
+                    },
+                    {
+                        "name": "A--D-Parent",
+                        "meta": {
+                            "capacity": 100000000000,
+                            "endpoint_identifiers": {
+                                "pops": ["A","D-Parent"]
+                            }
+                        },
+                        "azDisplayValue": "8.9017 Gbps",
+                        "zaDisplayValue": "3.5614 Gbps",
+                        "coordinates":[[49.02,-105.99],[48,-99]],
+                        "children":[],
+                    }
+                ],
+                "nodes":[
+                        {
+                            "name":"A",
+                            "meta":{},
+                            "coordinate":[49.02,-105.99],
+                        },
+                        {
+                            "name":"B",
+                            "meta":{},
+                            "coordinate":[44.59,-96.06],
+                        },
+                        {
+                            "name":"C",
+                            "meta":{},
+                            "coordinate":[52.16,-93.95],
+                        },
+                        {
+                            "name":"D-Parent",
+                            "meta":{ "svg": "<g><rect height='100' width='100' x='-50' y='-50 ' style='fill:#AAA; border:2px solid black;' /></g>"},
+                            "coordinate":[48,-99],
+                            "children": ["A", "B"]
+                        },
+                        {
+                            "name": "E-Parent",
+                            "meta": { "svg": "<g><rect height='30' width='30' x='-15' y='-15' /></g>" },
+                            "coordinate":[52.36,-93.95],
+                            "children": ["D-Parent"],
+                        },
+                        {
+                            "name":"D-Parent",
+                            "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+                            "coordinate":[52.26,-93.95],
+                            "children": ["C"],
+                        },
+                        {
+                            "name":"F-Parent",
+                            "meta":{ "svg": "<g><rect height='20' width='20' x='-10' y='-10' /></g>" },
+                            "coordinate":[52.26,-93.95],
+                            "children": ["A"],
+                        },
+                ]
+            },
+        ];
+        var options = {
+            "initialViewStrategy": "viewport",
+            "showSidebar": false,
+            "showViewControls": true,
+            "enableEdgeAnimation": true,
+            "enableNodeAnimation": true,
+            "enableScrolling": true,
+            "enableEditing": true,
+            "background":"#EDEDED",
+            "multiLayerNodeSnap": false,
+            "viewport": {
+                "top": 33,
+                "left": -141,
+                "bottom": 43,
+                "right": -41,
+                "center": {
+                    "lat":38.68,
+                    "lng":-96.96,
+                },
+                "zoom":3.5
+            },
+            "tileset": {
+                // global options
+                // this string corresponds to options in RenderMap.js
+                "geographic":"esri.shaded",
+                // this string (or null) corresponds to options in RenderMap.js
+                "boundaries":"toner.boundaries",
+                // this string (or null) corresponds to options in RenderMap.js
+                "labels": null,
+            },
+            "layers": [
+                {
+                    // layer 1 rendering options
+                    "visible":true,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeWidth":4,
+                    "edgeWidth":2,
+                    "pathOffset":2,
+                    "name":"Core Topology",
+                    "legend":true,
+                },
+                {
+                    // layer 2 rendering options
+                    "visible":false,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeWidth":5,
+                    "edgeWidth":3,
+                    "pathOffset":3,
+                    "name":"Site Topology",
+                    "legend":true,
+                },
+                {
+                    // layer 3 rendering options
+                    "visible":false,
+                    "color": lavender,
+                    "endpointId":"pops",
+                    "nodeHighlight":"red",
+                    "nodeWidth":6.5,
+                    "edgeWidth":2,
+                    "pathOffset":1.5,
+                    "name":"Peer Topology",
+                    "legend":true,
+                }
+            ]
+        };
+
+        var canvas = document.getElementById("mapCanvas");
+        var optionsElem = document.getElementById('optionsText');
+        var topologyElem = document.getElementById('topologyText');
+
+        canvas.setTopology(topology);
+        canvas.setOptions(options);
+
+        const receiveOptionsUpdates = function(options){
+            optionsElem.value = JSON.stringify(options);
+        }
+        const receiveTopologyUpdates = function(topology){
+            var cleanTopology = [];
+            for(var i=0; i<3; i++){
+                if(topology[i]){
+                    cleanTopology[i] = sanitizeTopology(topology[i]);
+                }
+            }
+            topologyElem.value = JSON.stringify(cleanTopology);
+        }
+
+        console.log("signals", signals);
+        canvas.listen(signals.TOPOLOGY_UPDATED, receiveTopologyUpdates);
+        canvas.listen(signals.OPTIONS_UPDATED, receiveOptionsUpdates);
+
+        topologyElem.onChange = function(event){
+            canvas.setTopology(JSON.parse(event.target.value));
+        }
+
+        optionsElem.onChange = function(event){
+            canvas.options = JSON.parse(event.target.value);
+        }
+
+    </script>
+
+</body>
+</html>

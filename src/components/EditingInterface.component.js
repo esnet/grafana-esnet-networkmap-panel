@@ -29,11 +29,12 @@ class EditingInterface extends BindableHTMLElement {
         this.render();
       }, this)
 
-      this.setEditNodeData(PubSub.last("showEditNodeDialog", this));
-      PubSub.subscribe("showEditNodeDialog", (evtData)=>{ 
+
+      this.setEditNodeData(this.mapCanvas.lastValue(signals.private.EDIT_NODE_DIALOG_VISIBLE));
+      this.mapCanvas.listen(signals.private.EDIT_NODE_DIALOG_VISIBLE, (evtData)=>{ 
         this.setEditNodeData(evtData);
         this.render();
-      }, this);
+      });
 
       this.setEditSelection(PubSub.last('setEditSelection', this));
       PubSub.subscribe('setEditSelection', (evtData)=>{
@@ -159,16 +160,13 @@ class EditingInterface extends BindableHTMLElement {
     // event bindings
     toggleNodeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("setEditSelection", null, this);
-        PubSub.publish("setEditMode", { "mode": "node", "value": !this._nodeEditMode }, this);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
+        this.mapCanvas.setEditMode({ "mode": "node", "value": !this._nodeEditMode });
     }
     toggleEdgeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("setEditSelection", null, this);
-        PubSub.publish("setEditMode", { "mode": "edge", "value": !this._edgeEditMode }, this);
-    }
-    recalcPaths(){
-        PubSub.publish('recalcPaths', null, this);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
+        this.mapCanvas.setEditMode({ "mode": "edge", "value": !this._edgeEditMode });
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
@@ -187,7 +185,7 @@ class EditingInterface extends BindableHTMLElement {
     }
     hideDialogs(e){
         e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("showEditNodeDialog", null, this)
+        this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, null);
     }
     showSrcDst(event){
         this.selectedLayer = event.target.value;
@@ -225,24 +223,26 @@ class EditingInterface extends BindableHTMLElement {
     updateLayerNodes(layer, node, spliceIndex){
         if(spliceIndex === null){
             this._topology[layer].nodes.push(node);
-            PubSub.publish("createMapNode", {"layer": layer, "node": node }, this);
+            this.mapCanvas.emit(signals.NODE_CREATED, {"layer": layer, "node": node });
         } else {
             let oldNode = this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
-            PubSub.publish("updateMapNode", {"layer": layer, "node": node, "oldNode": oldNode }, this);
+            this.mapCanvas.emit(signals.NODE_UPDATED, {"layer": layer, "node": node, "oldNode": oldNode });
         }
         var defaultLayer = {"nodes":[], "edges": []};
         const mapJson = [];
         for(let i=0; i<utils.LAYER_LIMIT; i++){
             mapJson.push(this._topology[i] || defaultLayer);
         }
-        PubSub.publish("updateTopology", mapJson, this);
+        this.mapCanvas.setTopology(mapJson);
+        // this doesn't do quite the same thing...
+        // PubSub.publish("updateTopology", mapJson, this);
 
         this.updateTopology && this.updateTopology(mapJson);
-        PubSub.publish("showEditNodeDialog", null, this)
+        this.mapCanvas.emit(signals.EDIT_NODE_DIALOG_VISIBLE, null);
 
         setTimeout(()=>{
-            PubSub.publish("snapEdges", {"node": node, "layer": layer.replace("layer", "") }, this);
-            PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
+            this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer.replace("layer", "") });
+            this.mapCanvas.map.renderMap(); // repaint re-renders the topology layers
         }, 10);
     }
     createMapEdge(e){
@@ -301,11 +301,7 @@ class EditingInterface extends BindableHTMLElement {
         this.updateTopology && this.updateTopology(mapJson);
         this.dialog = false;
         setTimeout(function () {
-          PubSub.publish(
-            'renderMap', // the renderMap signal triggers a re-render of json layers
-            mapJson,
-            this
-          );
+            this.mapCanvas.map.renderMap();
         }, 100);
     }
 

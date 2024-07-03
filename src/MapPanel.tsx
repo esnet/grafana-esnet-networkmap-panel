@@ -309,14 +309,10 @@ export class MapPanel extends Component<MapPanelProps> {
     this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
     PubSub.publish('hideTooltip', null, this.mapCanvas.current);
 
-    PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
-    PubSub.subscribe(
-      'updateTopologyData',
-      () => {
+    this.mapCanvas.current.listen(signals.VARIABLES_SET, this.setDashboardVariables());
+    this.mapCanvas.current.listen(signals.TOPOLOGY_UPDATED, () => {
         this.updateMapJson(this.mapCanvas.current['topology']);
-      },
-      this.mapCanvas.current
-    );
+    })
   }
   componentDidMount() {
     const { eventBus, options } = this.props;
@@ -377,7 +373,7 @@ export class MapPanel extends Component<MapPanelProps> {
         this.mapCanvas.current.shadow.remove();
         this.mapCanvas.current.shadow = null;
         this.mapCanvas.current.render();
-        this.mapCanvas.current.newMap();
+        this.mapCanvas.current.refresh();
         this.mapCanvas.current.topology = null;
 
       }

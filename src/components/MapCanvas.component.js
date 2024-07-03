@@ -45,6 +45,22 @@ const ATTRIBUTES = {
 // web component
 export class MapCanvas extends BindableHTMLElement {
 
+/*
+// internal/imperative
+map.clearSelection
+"clearSelection"
+map.setEditMode
+"setEditMode"
+map.setEditSelection
+"setEditSelection"
+map.setSelection
+"setSelection"
+map.setEditMode
+"updateEditMode"
+
+*/
+
+
   constructor() {
     super();
     this.instanceId = Math.random().toString(16).substr(2, 8);
@@ -60,27 +76,30 @@ export class MapCanvas extends BindableHTMLElement {
     this.optionsCache = {};
   }
 
+
+  setSelection(data) {
+    this.selection = true;
+    this.emit(signals.SELECTION_SET, data);
+  }
+  showTooltip(data) {
+    this.emit(signals.TOOLTIP_VISIBLE, data);
+  }
+  hideTooltip(){
+    this.emit(signals.TOOLTIP_HIDDEN);
+  }
+  showEditNodeDialog(data){
+    this.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, data);
+  }
   // connect component
   connectedCallback() {
-    var bus = new PrivateMessageBus(this);
-    bus.setID(this.id, this);
+    this.pubsub = new PrivateMessageBus(this);
+    this.pubsub.setID(this.id, this);
 
-    PubSub.subscribe('destroyMap', this.destroyMap, this);
-    PubSub.subscribe('newMap', this.newMap, this);
-    PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
     PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
     PubSub.subscribe('updateTopology', () => { this.updateTopology && this.updateTopology(this.topology) }, this);
-    PubSub.subscribe('disableScrolling', ()=>{ this.disableScrolling() }, this);
-    PubSub.subscribe('enableScrolling', ()=>{ this.enableScrolling() }, this);
-    PubSub.subscribe("setSelection", function(d){
-        this.selection = true;
-    }, this);
-    PubSub.subscribe("clearSelection", function(){
-        this.selection = false;
-    }, this);
     PubSub.subscribe('getMapCenterAndZoom', (() => {
       var self = this;
       return () => {
@@ -129,18 +148,22 @@ export class MapCanvas extends BindableHTMLElement {
   get topology() {
     return this._topology;
   }
-  set topology(newValue){
+  setTopology(newValue){
     this._topology = newValue;
+    this.emit(signals.TOPOLOGY_UPDATED, newValue);
     return newValue;
   }
 
   get options() {
-    return this._options;
+    if(!!this._options){ return this._options; }
+    return {};
   }
-  set options(newValue){
+  setOptions(newValue){
     this._options = newValue;
     return newValue;
   }
+
+
   get jsonResults(){
     return this._jsonResults;
   }
@@ -187,7 +210,7 @@ export class MapCanvas extends BindableHTMLElement {
   }
   set startlat(newValue){
     this._startlat = newValue;
-    this.newMap();
+    this.refresh();
     return newValue;
   }
   get startlng(){
@@ -195,7 +218,7 @@ export class MapCanvas extends BindableHTMLElement {
   }
   set startlng(newValue){
     this._startlng = newValue;
-    this.newMap();
+    this.refresh();
     return newValue;
   }
   set selection(newValue){
@@ -204,6 +227,16 @@ export class MapCanvas extends BindableHTMLElement {
   }
   get selection(){
       return this._selection;
+  }
+
+  listen(signal, callback){
+    this.pubsub.subscribe(signal, callback, this);
+  }
+  emit(signal, data){
+    this.pubsub.publish(signal, data, this);
+  }
+  lastValue(signal){
+    this.pubsub.last(signal, this);
   }
 
 
@@ -218,8 +251,10 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   clearSelection(){
-      PubSub.publish('setVariables', null, this);
-      PubSub.publish('clearSelection', null, this);
+    this.selection = false;
+    this.pubsub.clearLast(signals.SELECTION_SET);
+    this.emit(signals.VARIABLES_SET, null);
+    this.emit(signals.SELECTION_CLEARED, null);
   }
 
   disableEditing(){
@@ -238,14 +273,16 @@ export class MapCanvas extends BindableHTMLElement {
 
   enableScrolling(){
     this.leafletMap && this.leafletMap.dragging.enable();
+    this.emit(signals.SCROLLING_TOGGLED, true);
   }
 
   disableScrolling(){
     this.leafletMap && this.leafletMap.dragging.disable();
+    this.emit(signals.SCROLLING_TOGGLED, false);
   }
 
   maybeFetchOptions(){
-    if(this.options["useConfigurationUrl"]){
+    if(this.options?.useConfigurationUrl){
       let self = this;
       let maskedKeys = {
         "showLegend": "masked",
@@ -311,9 +348,8 @@ export class MapCanvas extends BindableHTMLElement {
         self.shadow.remove();
         self.shadow = null;
         self.render();
-        self.newMap();
+        self.refresh();
         self.sideBar && self.sideBar.render();
-        PubSub.publish("topologyRefresh");
       }
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
@@ -384,7 +420,7 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow.remove();
       this.shadow = null;
       this.render();
-      this.newMap();
+      this.refresh();
     }
     if(
         wasChanged('showSidebar', changed) ||
@@ -396,14 +432,14 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow.remove();
       this.shadow = null;
       this.render();
-      this.newMap();
+      this.refresh();
     }
     if (
       wasChanged('tileset.geographic', changed) ||
       wasChanged('tileset.boundaries', changed) ||
       wasChanged('tileset.labels', changed)
     ) {
-      this.newMap();
+      this.refresh();
     } else {
       this.map && this.map.renderMap();
     }
@@ -477,7 +513,7 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
       newValue.layers[layerData.layer] = { visible: layerData.visible };
     }
-    this.map.renderMapLayers();
+    this.map.renderMap();
     this._updateOptions && this._updateOptions(newValue);
   }
   getCurrentLeafletMap(){
@@ -559,14 +595,15 @@ export class MapCanvas extends BindableHTMLElement {
     }
     // needs research
     PubSub.clearTopicCallbacks('');
+    this.emit(signals.MAP_DESTROYED);
   }
 
   homeMap(){
     window[this.id + "mapPosition"] = null;
-    this.newMap();
+    this.refresh();
   }
 
-  newMap(){
+  refresh(){
       var edgeEditMode = false;
       var nodeEditMode = false;
       if(this.topology){
@@ -584,6 +621,7 @@ export class MapCanvas extends BindableHTMLElement {
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this); // implicitly calls getCurrentLeafletMap()
+      this.emit(signals.MAP_CREATED);
       this.map.renderMap();
       var lastEditMode = PubSub.last('setEditMode', this);
       PubSub.publish('setEditMode', lastEditMode, this);
@@ -841,7 +879,7 @@ export class MapCanvas extends BindableHTMLElement {
       }
     }
     if(!this.map && this.options && this.topology){
-      this.newMap();
+      this.refresh();
     }
 
     this.map && this.map.renderMap();

@@ -89,7 +89,8 @@ function renderEdges(g, data, ref, layerId, options) {
       thisEdge.classed("animated-edge", true);
     }
 
-    PubSub.publish("hideTooltip", null, ref.svg.node());
+    ref.mapCanvas.hideTooltip();
+    //PubSub.publish("hideTooltip", null, ref.svg.node());
 
     var template = ref.options.enableCustomEdgeTooltip ? ref.options.customEdgeTooltip : defaultEdgeTooltip;
 
@@ -103,12 +104,14 @@ function renderEdges(g, data, ref, layerId, options) {
 
     var text = renderTemplate(template, renderData);
 
-    PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
+    ref.mapCanvas.showTooltip(event, text);
+    //PubSub.publish("showTooltip", { "event": event, "text": text }, ref.svg.node());
   }
 
   const doEdgeMouseOut = (event, d) => {
     var start = new Date();
-    PubSub.publish("hideTooltip", null, ref.svg.node());
+    ref.mapCanvas.hideTooltip();
+    //PubSub.publish("hideTooltip", null, ref.svg.node());
 
     const thisEdge = d3.select(event.target);
     var color = d.azColor ? d.azColor : defaultEdgeColor // assume it's an A-Z edge by default, and get the a-z color
@@ -151,7 +154,7 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
       event.stopPropagation();
-      PubSub.publish("clearSelection", null, ref.svg.node())
+      ref.mapCanvas.clearSelection();
       const selectionData = {
         selection: d,
         event: event,
@@ -159,8 +162,8 @@ function renderEdges(g, data, ref, layerId, options) {
         type: "edge",
         instance: ref.mapCanvas.id,
       }
-      PubSub.publish("setVariables", d, ref.svg.node());
-      PubSub.publish("setSelection", selectionData, ref.svg.node());
+      ref.mapCanvas.emit(signals.VARIABLES_SET, d);
+      ref.mapCanvas.setSelection(selectionData);
       PubSub.global.publish("setSelection", selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
@@ -202,15 +205,16 @@ function renderEdges(g, data, ref, layerId, options) {
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
       event.stopPropagation();
-      PubSub.publish("clearSelection", null, ref.svg.node())
+      ref.mapCanvas.clearSelection();
       const selectionData = {
         selection: d,
         event: event,
         layer: layerId,
         type: "edge",
       }
-      PubSub.publish("setVariables", d, ref.svg.node());
-      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
+      ref.mapCanvas.emit(signals.VARIABLES_SET, d);
+      ref.mapCanvas.setSelection(selectionData);
+      //PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
       PubSub.global.publish("setSelection", selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
@@ -257,12 +261,13 @@ function renderEdges(g, data, ref, layerId, options) {
       })
   }
 
-  PubSub.subscribe("setSelection", selectEdge, ref.svg.node());
-  PubSub.subscribe("clearSelection", function(){
-    PubSub.clearLast("setSelection", ref.svg.node());
-    PubSub.global.clearLast("setSelection");
-  }, ref.svg.node())
-  var selection = PubSub.last("setSelection", ref.svg.node());
+  ref.mapCanvas.listen(signals.SELECTION_SET, selectEdge);
+  ref.mapCanvas.listen(signals.SELECTION_CLEARED, function(){
+    ref.mapCanvas.pubsub.clearLast(signals.SELECTION_SET, ref.svg.node());
+    PubSub.global.clearLast(signals.SELECTION_SET);
+  })
+
+  var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET);
   if(selection && selection.type=="edge"){
     selectEdge(selection);
   }
@@ -274,10 +279,9 @@ function deleteControlPoint(evt, d, edgeData, ref, layerId){
     if(edgeData.coordinates[i] == d){
       var oldEdgeData = JSON.parse(JSON.stringify(edgeData));
       edgeData.coordinates.splice(i, 1);
-      PubSub.publish("updateMapEdge", {"layer": layerId, "edge": edgeData, "oldEdge": oldEdgeData }, ref.svg.node());
-      PubSub.publish("updateMapTopology", ref.data, ref.svg.node());
-      PubSub.publish("refresh", null, ref.svg.node());
-      PubSub.publish("updateTopologyData", null, ref.svg.node());
+      ref.mapCanvas.updateMapEdge({"layer": layerId, "edge": edgeData, "oldEdge": oldEdgeData });
+      ref.mapCanvas.setTopology(ref.data);
+      ref.mapCanvas.render();
       break;
     }
   }
@@ -320,6 +324,7 @@ function addControlPoint(evt, obj, ref, layerId) {
     coordinates = tmp.concat(coordinates.slice(splicePoint));
     obj.__data__.coordinates = coordinates;
     ref.update();
+    ref.mapCanvas.
     PubSub.publish("updateMapEdge", {"layer": layerId, "edge": obj.__data__, "oldEdge": oldEdgeData }, ref.svg.node());
   }
 }
@@ -437,7 +442,7 @@ function renderNodeControl(g, data, ref, layerId){
     doChildSnap(nodeData, layerId, ref.mapCanvas, false);
     //--- rerender stuff
     ref.update();
-    setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
+    setNodeEditSelection(ref.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET))
   }
 
   function endDrag(evt, d) {
@@ -510,17 +515,17 @@ function renderNodeControl(g, data, ref, layerId){
     })
     .on('mousedown', function(evt, pointData){
       evt.stopPropagation();
-      PubSub.publish("setEditSelection", {
+      ref.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, {
         "object": pointData,
         "index": Number(evt.target.getAttribute("data-index")),
         "layer": Number(evt.target.getAttribute("data-layer")),
         "type": "nodes"
-      }, ref.svg.node());
+      });
     })
     .call(d3.drag().on('drag', dragged).on('end', endDrag));
 
-  setNodeEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
-  PubSub.subscribe("setEditSelection", setNodeEditSelection, ref.svg.node());
+  setNodeEditSelection(ref.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET))
+  ref.mapCanvas.listen(signals.private.EDIT_SELECTION_SET, setNodeEditSelection);
 
   g.selectAll('circle').attr('transform', function (d) {
     var ll = L.latLng(d.coordinate);
@@ -561,7 +566,7 @@ function renderEdgeControl(g, data, ref, layerId) {
       var idx = Number(evt.target.getAttribute("data-index"));
       var layer = Number(evt.target.getAttribute("data-layer"));
       let editSelection = {"object": edgeData, "type": "edges", "index": idx, "layer": layer};
-      PubSub.publish("setEditSelection", editSelection, ref.svg.node());
+      ref.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, editSelection);
     })
     //--- when mouse is on the dot, make sure d3 gets the event and dont let map pan
     .on('mouseenter', function () {
@@ -579,8 +584,9 @@ function renderEdgeControl(g, data, ref, layerId) {
           .classed("control-selected", true);
     }
   }
-  setEditSelection(PubSub.last("setEditSelection", ref.svg.node()))
-  PubSub.subscribe("setEditSelection", setEditSelection, ref.svg.node());
+
+  setEditSelection(ref.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET));
+  ref.mapCanvas.listen(signals.private.EDIT_SELECTION_SET, setEditSelection);
 
   lines.exit().remove();
 
@@ -588,7 +594,7 @@ function renderEdgeControl(g, data, ref, layerId) {
 
   function dragged(evt, d, edgeData, idx, layerId) {
     PubSub.publish("dragStarted", {event: evt, edge: { ...edgeData } }, ref.svg.node());
-    PubSub.publish("setEditSelection", {"object": edgeData, "type": "edges", "index": idx, "layer": layerId}, ref.svg.node());
+    ref.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, {"object": edgeData, "type": "edges", "index": idx, "layer": layerId});
     var mapDiv = ref.leafletMap.getContainer();
     //--- set the control points to the new Lat lng
     var ll = ref.leafletMap.containerPointToLatLng(L.point(d3.pointer(evt, mapDiv)));
@@ -651,7 +657,7 @@ function renderEdgeControl(g, data, ref, layerId) {
           "layer": layerId,
           "type": "edges"
         }
-        PubSub.publish("setEditSelection", editSelection, ref.svg.node());
+        ref.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, editSelection);
       })
       .call(d3.drag()
         .on('drag', function(evt, d){ dragged(evt, d, edgeData, idx, layerId); })
@@ -723,14 +729,14 @@ function renderNodes(g, data, ref, layerId) {
       PubSub.publish("hideTooltip", null, ref.svg.node());
     })
     .on('mousedown', function(event, d){
-      PubSub.publish("clearSelection", null, ref.svg.node())
+      ref.mapCanvas.clearSelection();
       const selectionData = {
         selection: d,
         event: event,
         layer: layerId,
         type: "node",
       }
-      PubSub.publish("setSelection", selectionData, ref.svg.node()); // send signal locally
+      this.mapCanvas.setSelection(selectionData);
     })
     .select(function(d){
       return this.childNodes[0];
@@ -761,12 +767,13 @@ function renderNodes(g, data, ref, layerId) {
         .classed('animated-node', true);
 
       if(selectionData && selectionData.type=='node'){
-        PubSub.publish("setVariables", selectionData, ref.svg.node());
+        ref.mapCanvas.emit(signals.VARIABLES_SET, selectionData);
       }
   }
 
-  PubSub.subscribe("setSelection", selectNode, ref.svg.node());
-  var selection = PubSub.last("setSelection", ref.svg.node());
+
+  ref.mapCanvas.listen(signals.SELECTION_SET, selectNode);
+  var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET, ref.svg.node());
   if(selection && selection.type=="node"){
     selectNode(selection);
   }
@@ -963,12 +970,12 @@ export class EsMap {
 
     this.update = this.update.bind(this);
 
-    PubSub.subscribe("snapEdges", (data)=>{
+    this.mapCanvas.listen(signals.EDGE_SNAP, (data)=>{
       doEdgeSnap(data.node, data.layer, this.mapCanvas, false)
-    }, this.mapCanvas)
+    })
 
     if (!this.mapCanvas.options.showSidebar) {
-      PubSub.subscribe("showTooltip", (data) => {
+      this.mapCanvas.listen(signals.TOOLTIP_VISIBLE, (data)=>{
         if (this.mapCanvas.options.showSidebar) {
           return;
         }
@@ -999,8 +1006,8 @@ export class EsMap {
         var evaluatedStyle = `${topOrBottom}:${offsetY}px; ${leftOrRight}:${offsetX}px;`;
         elem.setAttribute("style", evaluatedStyle);
 
-      },
-      this.svg.node())
+      })
+      this.mapCanvas.listen(signals.TOOLTIP_HIDDEN)
       PubSub.subscribe("hideTooltip",function(){
         var elems = document.querySelectorAll("#tooltip-hover");
         elems.forEach((elem)=>{
@@ -1040,13 +1047,7 @@ export class EsMap {
         .classed('animated-node', false)
         .classed('node', true)
     }
-    PubSub.subscribe("clearSelection", clearSelection, this.svg.node());
-
-    const updateLastInteractedObject = (event) => {
-        this.lastInteractedObject = event ? event.object : null;
-        this.lastInteractedType = event ? event.type: null;
-    }
-    PubSub.subscribe("updateLastInteractedObject", updateLastInteractedObject, this.svg.node());
+    this.mapCanvas.listen(signals.SELECTION_CLEARED, clearSelection);
 
     // function nudge(latOrLng, amount){
     const nudge = (latOrLng, amount) => {
