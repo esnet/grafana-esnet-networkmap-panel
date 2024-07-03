@@ -6,6 +6,7 @@ const d3 = window['d3'] || d3_import;
 import { render as renderTemplate } from "./rubbercement.js"
 import { defaultEdgeTooltip, defaultNodeTooltip } from "../../options.js";
 import * as L from "./leaflet-src.esm.js";
+import { signals } from '../../signals.js';
 
 // functions to calculate bearings between two points
 // Converts from degrees to radians.
@@ -1007,14 +1008,12 @@ export class EsMap {
         elem.setAttribute("style", evaluatedStyle);
 
       })
-      this.mapCanvas.listen(signals.TOOLTIP_HIDDEN)
-      PubSub.subscribe("hideTooltip",function(){
+      this.mapCanvas.listen(signals.TOOLTIP_HIDDEN,function(){
         var elems = document.querySelectorAll("#tooltip-hover");
         elems.forEach((elem)=>{
           elem.remove();
         })
-      },
-      this.mapCanvas)
+      });
     }
     let self = this;
 
