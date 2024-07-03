@@ -21,7 +21,7 @@ export const signals = {
     SCROLLING_TOGGLED: "scrolling toggled",
     SELECTION_SET: "selection set",
     VARIABLES_SET: "variables set",
-    EDIT_MODE_SET: "edit mode set",
+    EDITING_SET: "editing set",
     LAYER_TOGGLED: "layer toggled",
 
     DRAG_STARTED: "drag started",
@@ -36,6 +36,7 @@ export const signals = {
         EDIT_SELECTION_SET: "edit selection set",
         EDIT_EDGE_TOGGLED: "edit edge toggled",
         EDIT_NODE_TOGGLED: "edit node toggled",
+        EDIT_MODE_SET: "edit mode set",
     }
 }
 
@@ -67,3 +68,4 @@ how/why does this differ from getMapCenterAndZoom?
 "returnMapCenterAndZoom"
 "returnMapViewport"
 
+*/
