@@ -316,8 +316,8 @@ map.setEditMode
     if(["node", "edge", null].indexOf(mode) < 0){
       throw new Error("Edit mode must be 'edge', 'node' or null");
     }
-    this.emit(signals.EDITING_SET, mode);
     this.editingInterface?.setEditing(mode);
+    this.emit(signals.EDITING_SET, mode);
   }
 
   enableScrolling(){
