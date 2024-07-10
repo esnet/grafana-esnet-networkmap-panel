@@ -75,6 +75,51 @@ map.setEditMode
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
     this.optionsCache = {};
+    this.pubsub = new PrivateMessageBus(this);
+
+    this._optionsToWatch = [
+      'background',
+      'tileset.geographic',
+      'tileset.boundaries',
+      'tileset.labels',
+      'showSidebar',
+      'showViewControls',
+      'showLegend',
+      'customLegend',
+      'customLegendValue',
+      'legendColumnLength',
+      'legendPosition',
+      'thresholds',
+      'enableScrolling',
+      'enableEditing',
+      'enableNodeAnimation',
+      'enableEdgeAnimation',
+      'enableCustomNodeTooltip',
+      'enableCustomEdgeTooltip',
+      'customNodeTooltip',
+      'customEdgeTooltip',
+      'useConfigurationUrl',
+      'configurationUrl',
+      'resolvedLat',
+      'resolvedLng',
+      'multiLayerNodeSnap',
+    ];
+    for(let i=0; i<utils.LAYER_LIMIT; i++){
+      this._optionsToWatch.push.apply([
+        `layers[${i}].visible`,
+        `layers[${i}].color`,
+        `layers[${i}].endpointId`,
+        `layers[${i}].nodeHighlight`,
+        `layers[${i}].nodeWidth`,
+        `layers[${i}].mapjson`,
+        `layers[${i}].edgeWidth`,
+        `layers[${i}].pathOffset`,
+        `layers[${i}].name`,
+        `layers[${i}].legend`,
+        `layers[${i}].dstFieldLabel`,
+        `layers[${i}].srcFieldLabel`,
+        `layers[${i}].dataFieldLabel`]);
+    }
   }
 
 
@@ -82,25 +127,19 @@ map.setEditMode
     this.selection = true;
     this.emit(signals.SELECTION_SET, data);
   }
-  showTooltip(data) {
-    this.emit(signals.TOOLTIP_VISIBLE, data);
+  showTooltip(event, text) {
+    this.emit(signals.TOOLTIP_VISIBLE, {event: event, text: text});
   }
   hideTooltip(){
     this.emit(signals.TOOLTIP_HIDDEN);
   }
-  showEditNodeDialog(data){
-    this.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, data);
+  showEditNodeDialog(node, nodeIdx, layer){
+    this.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, {object: node, index: nodeIdx, layer: layer, type: "nodes"});
   }
   // connect component
   connectedCallback() {
-    this.pubsub = new PrivateMessageBus(this);
     this.pubsub.setID(this.id, this);
 
-    PubSub.subscribe('toggleLayer', this.toggleLayer, this);
-    PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
-    PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
-    PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
-    PubSub.subscribe('updateTopology', () => { this.updateTopology && this.updateTopology(this.topology) }, this);
     PubSub.subscribe('getMapCenterAndZoom', (() => {
       var self = this;
       return () => {
@@ -133,16 +172,7 @@ map.setEditMode
     }
     this.maybeFetchOptions();
 
-    const params = utils.getUrlSearchParams();
-    if (
-      params.editPanel === null ||
-      params.editPanel === undefined ||
-      !this.options.enableEditing
-    ) {
-      this.disableEditing();
-    } else {
-        this.enableEditing();
-    }
+    this.setEditModeFromUrl();
     this.render();
   }
 
@@ -150,8 +180,11 @@ map.setEditMode
     return this._topology;
   }
   setTopology(newValue){
+    // if we already have a topology set, we should re-render.
+    const render = this._topology;
     this._topology = newValue;
     this.emit(signals.TOPOLOGY_UPDATED, newValue);
+    render && this.render();
     return newValue;
   }
 
@@ -159,9 +192,34 @@ map.setEditMode
     if(!!this._options){ return this._options; }
     return {};
   }
+  setEditModeFromUrl(){
+    const params = utils.getUrlSearchParams();
+    if (
+      params.editPanel === null ||
+      params.editPanel === undefined ||
+      !this.options.enableEditing
+    ) {
+      this.setEditMode(null);
+    } else {
+      this.setEditMode("edge");
+    }
+  }
+  calculateOptionsChanges(newOptions){
+    let changed = [];
+    this._optionsToWatch.forEach((option) => {
+      let lastValue = utils.resolvePath(this._options, option);
+      let currentValue = utils.resolvePath(newOptions, option);
+      if (lastValue !== currentValue) {
+        changed.push(option);
+      }
+    });
+    return changed;
+  };
   setOptions(newValue){
     this._options = newValue;
-    this.emit(signals.OPTIONS_UPDATED, newValue);
+    this.updateMapOptions({ options: newValue, changed: this.calculateOptionsChanges() });
+    this.setEditModeFromUrl();
+    this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
     return newValue;
   }
 
@@ -171,15 +229,6 @@ map.setEditMode
   }
   set jsonResults(newResults){
     this._jsonResults = newResults;
-  }
-
-  get updateTopology(){
-    return this._updateTopology;
-  }
-  set updateTopology(newValue){
-    this._updateTopology = newValue;
-    if(this.editingInterface) this.editingInterface.updateTopology = newValue;
-    return newValue;
   }
 
   get updateOptions(){
@@ -238,7 +287,10 @@ map.setEditMode
     this.pubsub.publish(signal, data, this);
   }
   lastValue(signal){
-    this.pubsub.last(signal, this);
+    return this.pubsub.last(signal, this);
+  }
+  clearLast(signal){
+    return this.pubsub.clearLast(signal, this);
   }
 
 
@@ -254,24 +306,18 @@ map.setEditMode
 
   clearSelection(){
     this.selection = false;
-    this.pubsub.clearLast(signals.SELECTION_SET);
+    this.clearLast(signals.SELECTION_SET);
     this.emit(signals.VARIABLES_SET, null);
     this.emit(signals.SELECTION_CLEARED, null);
+    PubSub.global.clearLast(signals.SELECTION_SET);
   }
 
-  disableEditing(){
-    this.editingInterface?.setEditing(false);
-    if(!!this.lastValue(signals.private.EDIT_MODE_SET)){
-      this.emit(signals.private.EDIT_MODE_SET, null);
+  setEditMode(mode){
+    if(["node", "edge", null].indexOf(mode) < 0){
+      throw new Error("Edit mode must be 'edge', 'node' or null");
     }
-    if(!!this.lastValue(signals.EDIT_SELECTION_SET)){
-      this.emit(signals.EDIT_SELECTION_SET, null);
-    }
-  }
-
-  enableEditing(){
-    this.emit(signals.EDITING_SET, true, this);
-    this.editingInterface?.setEditing(true);
+    this.emit(signals.EDITING_SET, mode);
+    this.editingInterface?.setEditing(mode);
   }
 
   enableScrolling(){
@@ -301,6 +347,7 @@ map.setEditMode
         "enableScrolling": "masked",
         "showViewControls": "masked",
         "thresholds": "masked",
+        "multiLayerNodeSnap": "masked",
       }
       let maskedLayerKeys = {
         "nodeThresholds": "masked",
@@ -340,7 +387,7 @@ map.setEditMode
         })
         // never allow editing on a configuration populated from a URL
         self._options.enableEditing = false;
-        self.disableEditing();
+        self.setEditMode("edge");
         let topo = [];
         for(var i=0; i<newOptions.layers.length; i++){
           topo.push(JSON.parse(newOptions.layers[i].mapjson));
@@ -378,22 +425,23 @@ map.setEditMode
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
+    function wasChanged(option, changes){
+      return changes.indexOf(option) >= 0;
+    }
 
     if(wasChanged('useConfigurationUrl', changed)){
       this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
       this.maybeFetchOptions();
-      return
     }
     if(wasChanged('configurationUrl', changed)){
       this._options['configurationUrl'] = options['configurationUrl'];
       // show loading curtain
       this._remoteLoaded = false;
-      this.shadow.remove();
+      this.shadow?.remove();
       this.shadow = null;
       this.render();
       // fetch remote data
       this.maybeFetchOptions();
-      return;
     }
 
     // options is sparse -- it includes only updated options.
@@ -402,9 +450,6 @@ map.setEditMode
       utils.setPath(this._options, k, utils.resolvePath(options, k)) ;
     })
 
-    function wasChanged(option, changes){
-      return changes.indexOf(option) >= 0;
-    }
     if( wasChanged('showLegend', changed) ||
         wasChanged('customLegend', changed) ||
         wasChanged('customLegendValue', changed) ||
@@ -416,9 +461,9 @@ map.setEditMode
     }
     if(wasChanged('enableEditing', changed)){
       if(!options.enableEditing){
-        this.disableEditing();
+        this.setEditMode(null);
       } else {
-        this.enableEditing();
+        this.setEditMode("edge");
       }
       this.shadow.remove();
       this.shadow = null;
@@ -607,8 +652,6 @@ map.setEditMode
   }
 
   refresh(){
-      var edgeEditMode = false;
-      var nodeEditMode = false;
       if(this.topology){
         this.jsonResults = this.topology.map((layer)=>{
           return testJsonSchema(layer);
@@ -626,8 +669,8 @@ map.setEditMode
       this.map = new NetworkMap(this); // implicitly calls getCurrentLeafletMap()
       this.emit(signals.MAP_CREATED);
       this.map.renderMap();
-      var lastEditMode = PubSub.last('setEditMode', this);
-      PubSub.publish('setEditMode', lastEditMode, this);
+      var lastEditMode = this.lastValue(signals.private.EDIT_MODE_SET);
+      this.emit(signals.private.EDIT_MODE_SET, lastEditMode);
   }
 
   renderStyle(){
@@ -848,14 +891,13 @@ map.setEditMode
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
       if(this.editingInterface){
-        this.editingInterface.mapCanvas = this;
+        this.editingInterface.setMapCanvas(this);
         this.editingInterface.topology = this.topology;
-        this.editingInterface.updateTopology = this.updateTopology;
       }
 
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       if(this.sideBar){
-        this.sideBar.mapCanvas = this;
+        this.sideBar.setMapCanvas(this);
       }
       // if we have ResizeObserver in our context, do some extra watching
       if(typeof(ResizeObserver) != 'undefined'){
