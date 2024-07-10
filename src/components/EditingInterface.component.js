@@ -24,34 +24,40 @@ class EditingInterface extends BindableHTMLElement {
 
     // connect component
     connectedCallback() {
-      this.setEditMode(this.mapCanvas.lastValue(signals.private.EDIT));
-
-      this.setEditNodeData(this.mapCanvas.lastValue(signals.private.EDIT_NODE_DIALOG_VISIBLE));
-      this.mapCanvas.listen(signals.private.EDIT_NODE_DIALOG_VISIBLE, (evtData)=>{ 
-        this.setEditNodeData(evtData);
-        this.render();
-      });
-
-      this.setEditSelection(PubSub.last('setEditSelection', this));
-      PubSub.subscribe('setEditSelection', (evtData)=>{
-          this.setEditSelection(evtData);
-          this.render();
-      }, this);
-
-      this.setEditing(PubSub.last("updateEditMode", this));
-      PubSub.subscribe('updateEditMode', (newMode)=>{
-        this.setEditing(newMode);
-        this.render();
-      }, this);
-
       this.render();
     }
 
+    setMapCanvas(mapCanvas){
+        this.mapCanvas = mapCanvas;
+        this.setEditMode(this.mapCanvas.lastValue(signals.private.EDIT));
+
+        this.setEditNodeData(this.mapCanvas.lastValue(signals.private.EDIT_NODE_DIALOG_VISIBLE));
+        this.mapCanvas.listen(signals.private.EDIT_NODE_DIALOG_VISIBLE, (evtData)=>{
+            this.setEditNodeData(evtData);
+            this.render();
+        });
+
+        this.setEditSelection(this.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET));
+        this.mapCanvas.listen(signals.private.EDIT_SELECTION_SET, (evtData)=>{
+            this.setEditSelection(evtData);
+            this.render();
+        });
+
+        this.setEditing(this.mapCanvas.lastValue(signals.EDITING_SET, this));
+        this.mapCanvas.listen(signals.EDITING_SET, (newMode)=>{
+            this.setEditing(newMode);
+            this.render();
+        });
+    }
 
     setEditMode(evtData){
         if(evtData === null || evtData === undefined){
             this._edgeEditMode = false;
             this._nodeEditMode = false;
+            this._selectedObject = null;
+            this._selectedLayer = null;
+            this._dialog = null;
+            this._spliceIndex = null;
         }
         if(evtData && evtData['mode'] === "edge"){
             this._edgeEditMode = evtData['value'];
@@ -61,20 +67,25 @@ class EditingInterface extends BindableHTMLElement {
             this._edgeEditMode = false;
             this._nodeEditMode = evtData['value'];
         }
-        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editEdgeMode(this._edgeEditMode);
-        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editNodeMode(this._nodeEditMode);
+        this.mapCanvas?.map?.esmap?.editEdgeMode(this._edgeEditMode);
+        this.mapCanvas?.map?.esmap?.editNodeMode(this._nodeEditMode);
     }
 
-    setEditing(newMode){
-        this._editMode = this.mapCanvas.lastValue(signals.EDITING_SET);
-        if(newMode && !this._edgeEditMode && !this._nodeEditMode){
-            this.setEditMode({ mode: "edge", value: true });
+    setEditing(mode){
+        if(!mode){
+          this._editMode = false;
+          this.setEditMode(null);
+        } else {
+          this._editMode = true;
+          this.setEditMode({ mode: mode, value: true })
         }
-    }      
+        this.render();
+    }
 
     setEditNodeData(evtData){
         if(evtData){
             this._selectedObject = evtData['object'];
+            this._selectedType = evtData['type'];
             this._spliceIndex = evtData['index'];
             this.selectedLayer = evtData['layer'];
             this._dialog = "node";            
@@ -88,7 +99,7 @@ class EditingInterface extends BindableHTMLElement {
             this._formTouched = false;
             this._selectedObject = null;
             this._spliceIndex = null;
-            this._selectedLayer = null;
+            this._selectedLayer = 0;
             this._selectedType = null;
             return
         }
@@ -142,13 +153,6 @@ class EditingInterface extends BindableHTMLElement {
     get selectedLayer(){
         return this._selectedLayer;
     }
-    set updateTopology(newValue){
-        this._updateTopology = newValue;
-        this.setSrcDstOptions();
-    }
-    get updateTopology(){
-        return this._updateTopology;
-    }
     // end setters and getters
     //////////////////////////////////
 
@@ -156,19 +160,22 @@ class EditingInterface extends BindableHTMLElement {
     // event bindings
     toggleNodeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
         this.setEditMode({ "mode": "node", "value": !this._nodeEditMode });
+        this.render();
     }
     toggleEdgeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
         this.setEditMode({ "mode": "edge", "value": !this._edgeEditMode });
+        this.render();
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
         this._selectedLayer = 0;
         this._selectedObject = null;
         this._spliceIndex = null;
+        this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, {object: null, index: null, layer: this._selectedLayer, type: "nodes"});
         this.dialog = "node";
     }
     showAddEdgeDialog(e){
@@ -177,11 +184,13 @@ class EditingInterface extends BindableHTMLElement {
         this._selectedObject = null;
         this._spliceIndex = null;
         this.setSrcDstOptions();
+        this.mapCanvas.emit(signals.private.EDIT_EDGE_DIALOG_VISIBLE, {object: null, index: null, layer: this._selectedLayer, type: "edges"});
         this.dialog = "edge";
     }
     hideDialogs(e){
-        e.stopPropagation(); // avoid bug in leaflet
+        e?.stopPropagation(); // avoid bug in leaflet
         this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, null);
+        this.mapCanvas.emit(signals.private.EDIT_EDGE_DIALOG_VISIBLE, null);
     }
     showSrcDst(event){
         this.selectedLayer = event.target.value;
@@ -230,11 +239,8 @@ class EditingInterface extends BindableHTMLElement {
             mapJson.push(this._topology[i] || defaultLayer);
         }
         this.mapCanvas.setTopology(mapJson);
-        // this doesn't do quite the same thing...
-        // PubSub.publish("updateTopology", mapJson, this);
 
-        this.updateTopology && this.updateTopology(mapJson);
-        this.mapCanvas.emit(signals.EDIT_NODE_DIALOG_VISIBLE, null);
+        this.hideDialogs();
 
         setTimeout(()=>{
             this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer.replace("layer", "") });
@@ -284,18 +290,16 @@ class EditingInterface extends BindableHTMLElement {
 
         mapJson[edge_layer].edges.push(newEdge);
 
-        PubSub.publish("createMapEdge", {
+        this.mapCanvas.emit(signals.EDGE_CREATED, {
             "layer": edge_layer,
             "source": node_source,
             "destination": node_destination,
             "edge": newEdge
-        }, this);
+        });
 
-        PubSub.publish("updateTopology", mapJson, this);
-        PubSub.publish('updateMapTopology', mapJson, this);
+        this.mapCanvas.setTopology(mapJson);
+        this.hideDialogs();
 
-        this.updateTopology && this.updateTopology(mapJson);
-        this.dialog = false;
         setTimeout(function () {
             this.mapCanvas.map.renderMap();
         }, 100);
@@ -306,15 +310,13 @@ class EditingInterface extends BindableHTMLElement {
         var topology = this.mapCanvas.topology;
         var deleted = topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
         if(this._selectedType == "edges"){
-            PubSub.publish("deleteMapEdge", {"edge": deleted[0], "layer":this._selectedLayer}, this)
+            this.mapCanvas.emit(signals.EDGE_DELETED, {"edge": deleted[0], "layer":this._selectedLayer})
         }
         if(this._selectedType == "nodes"){
-            PubSub.publish("deleteMapNode", {"node": deleted[0], "layer":this._selectedLayer}, this)
+            this.mapCanvas.emit(signals.NODE_DELETED, {"node": deleted[0], "layer":this._selectedLayer})
         }
-        PubSub.publish("updateTopology", topology, this);
-        PubSub.publish("updateMapTopology", topology, this);
-        PubSub.publish("refresh", null, this);
-        PubSub.publish("updateTopologyData", null, this);
+        this.mapCanvas.setTopology(topology);
+        this.mapCanvas.refresh();
         this._selectedLayer = null;
         this._selectedType = null;
         this._spliceIndex = null;
@@ -324,12 +326,12 @@ class EditingInterface extends BindableHTMLElement {
 
     disableScrolling(evt){
         evt.stopPropagation();
-        PubSub.publish("disableScrolling", null, this);
+        this.mapCanvas.disableScrolling();
     }
 
     enableScrolling(evt){
         evt.stopPropagation();
-        PubSub.publish("enableScrolling", null, this);
+        this.mapCanvas.enableScrolling();
     }
     // end eventbindings
     /////////////////////////////
@@ -379,16 +381,11 @@ class EditingInterface extends BindableHTMLElement {
         return "";
     }
     getFieldValue(objType, fieldName){
-        var target = null;
+        let target = null;
         if(this._selectedType == objType && !!this._selectedObject){
             target = this._selectedObject
         }
-        var fields = fieldName.split(".");
-        for (var field of fields){
-            if(!target) return this.toString(target);
-            target = target[field]
-        }
-        return this.toString(target);
+        return this.toString(utils.resolvePath(target, fieldName));
     }
     markFormTouched(){
         this._formTouched = true;
@@ -426,7 +423,6 @@ class EditingInterface extends BindableHTMLElement {
         for(let i=0; i<utils.LAYER_LIMIT; i++){
             selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>Layer ${i+1}</option>`;
         }
-
 
         this.shadow.innerHTML = `
             <style>
