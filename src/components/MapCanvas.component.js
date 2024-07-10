@@ -69,6 +69,7 @@ map.setEditMode
     this._options = null;
     this._selection = false;
     this._remoteLoaded = false;
+    this._data = null;
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = [false, false, false];
@@ -98,7 +99,7 @@ map.setEditMode
       'enableCustomEdgeTooltip',
       'customNodeTooltip',
       'customEdgeTooltip',
-      'useConfigurationUrl',
+      'topologySource',
       'configurationUrl',
       'resolvedLat',
       'resolvedLng',
@@ -118,7 +119,14 @@ map.setEditMode
         `layers[${i}].legend`,
         `layers[${i}].dstFieldLabel`,
         `layers[${i}].srcFieldLabel`,
-        `layers[${i}].dataFieldLabel`]);
+        `layers[${i}].dataFieldLabel`,
+        `layers[${i}].autodetect.dstNameColumn`,
+        `layers[${i}].autodetect.dstLatitudeColumn`,
+        `layers[${i}].autodetect.dstLongitudeColumn`,
+        `layers[${i}].autodetect.srcNameColumn`,
+        `layers[${i}].autodetect.srcLatitudeColumn`,
+        `layers[${i}].autodetect.srcLongitudeColumn`,
+      ]);
     }
   }
 
@@ -222,16 +230,6 @@ map.setEditMode
     this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
     return newValue;
   }
-  get data(){
-    return this._edgeData;
-  }
-  setData(newData){
-    this._edgeData = newData;
-    this.matchEdgeData();
-    this.emit(signals.DATA_UPDATED, JSON.parse(JSON.stringify(this._edgeData)));
-    return this._edgeData;
-  }
-
 
   get jsonResults(){
     return this._jsonResults;
@@ -282,11 +280,21 @@ map.setEditMode
     return newValue;
   }
   set selection(newValue){
-      this._selection = newValue;
-      this.renderStyle();
+    this._selection = newValue;
+    this.renderStyle();
   }
   get selection(){
-      return this._selection;
+    return this._selection;
+  }
+
+  get data(){
+    return this._data;
+  }
+  setData(newData){
+    this._data = newData;
+    this.matchEdgeData();
+    this.emit(signals.DATA_UPDATED, JSON.parse(JSON.stringify(this._edgeData)));
+    return this._edgeData;
   }
 
   listen(signal, callback){
@@ -340,7 +348,7 @@ map.setEditMode
   }
 
   maybeFetchOptions(){
-    if(this.options?.useConfigurationUrl){
+    if(this.options?.topologySource == "url"){
       let self = this;
       let maskedKeys = {
         "showLegend": "masked",
@@ -438,8 +446,8 @@ map.setEditMode
       return changes.indexOf(option) >= 0;
     }
 
-    if(wasChanged('useConfigurationUrl', changed)){
-      this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
+    if(wasChanged('topologySource', changed)){
+      this._options['topologySource'] = options['topologySource'];
       this.maybeFetchOptions();
     }
     if(wasChanged('configurationUrl', changed)){
@@ -573,6 +581,60 @@ map.setEditMode
     this.map.renderMap();
     this._updateOptions && this._updateOptions(newValue);
   }
+
+  autodetectTopology(){
+    if(!this._data) return;
+    if(this._options.topologySource == "autodetect"){
+      this.options.enableEditing = false;
+      for(let i=0; i<this._options?.layers.length; i++){
+        if(this._topology?.[i]?.autodetected){ continue }
+        let layerTopology = { "nodes": [], "edges": [], "nodeHash": {}, "pathLayout": { "type": "curveBasis" }, "autodetected": true }
+        console.log("attempting to auto-detect topology...", layerTopology, this.data && this.data.length);
+        this._data.forEach((edge)=>{
+          this._options.layers[i].endpointId = "names";
+
+          let autodetectOptions = this._options?.layers[i].autodetect;
+          if(!autodetectOptions) return;
+          let srcNameKey = autodetectOptions.srcNameColumn;
+          let srcLatKey = autodetectOptions.srcLatitudeColumn;
+          let srcLngKey = autodetectOptions.srcLongitudeColumn;
+          let dstNameKey = autodetectOptions.dstNameColumn;
+          let dstLatKey = autodetectOptions.dstLatitudeColumn;
+          let dstLngKey = autodetectOptions.dstLongitudeColumn;
+
+          let source = {
+            "name": srcNameKey && edge[srcNameKey] ? edge[srcNameKey] : `${edge[srcLatKey]}:${edge[srcLngKey]}`,
+            "coordinate": [parseFloat(edge[srcLatKey]), parseFloat(edge[srcLngKey])],
+            "meta": {},
+          };
+          let dest = {
+            "name": dstNameKey && edge[dstNameKey] ? edge[dstNameKey] : `${edge[dstLatKey]}:${edge[dstLngKey]}`,
+            "coordinate": [parseFloat(edge[dstLatKey]), parseFloat(edge[dstLngKey])],
+            "meta": {},
+          };
+          console.log(source.name, dest.name, edge)
+          layerTopology["nodeHash"][source.name] = source;
+          layerTopology["nodeHash"][dest.name] = dest;
+          let y_dist = source.coordinate[0] - dest.coordinate[0];
+          let x_dist = source.coordinate[1] - dest.coordinate[1];
+          let distance = Math.sqrt((x_dist**2) + (y_dist**2));
+          let midpoint = [dest.coordinate[0] + (y_dist/2 + (0.12 * distance)),  dest.coordinate[1] + (x_dist/2)];
+          let edgeObj = {
+            "name": `${source.name}--${dest.name}`,
+            "coordinates": [source.coordinate, midpoint, dest.coordinate],
+            "meta": { "endpoint_identifiers": { "names": [source.name, dest.name] } }
+          }
+          layerTopology["edges"].push(edgeObj);
+        })
+        layerTopology["nodes"] = Object.values(layerTopology["nodeHash"]);
+        if(!this._topology){
+          this._topology = []
+        }
+        this._topology[i] = layerTopology;
+      }
+    }
+  }
+
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options?.viewport?.center?.lat, this.startlng || this._options?.viewport?.center?.lng];
@@ -848,6 +910,8 @@ map.setEditMode
   }
 
   render(){
+    // if any of our layer are auto-detected, detect and create a topology from them
+    this.autodetectTopology();
     if(!this.shadow){
       this._selection = !!PubSub.last("setSelection", this);
       this.shadow = document.createElement("div");
@@ -864,7 +928,7 @@ map.setEditMode
 
 
       <div id='map-${this.instanceId}'>
-        <div class="loading-overlay" style="display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">
+        <div class="loading-overlay" style="display: ${ this.options["topologySource"] != "url" || !!this._remoteLoaded ? "none" : "flex"}">
           Loading Topology Data...
         </div>
         <div class="error-overlay" style="display: ${ !this._remoteLoadError ? "none" : "flex"}">
@@ -891,7 +955,7 @@ map.setEditMode
           <div id='legend-container'>
           </div>
         </div>
-        ${ this.options.enableEditing ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
+        ${ this.options.enableEditing && this.options.topologySource == "json" ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
       </div>
       ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
       this.mapContainer = this.shadow.querySelector(`#map-${this.instanceId}`);
@@ -930,10 +994,10 @@ map.setEditMode
         this.mapContainer.style.width = "100%";
       }
     }
+
     if(!this.map && this.options && this.topology){
       this.refresh();
     }
-
     this.map && this.map.renderMap();
     this.bindEvents({
       "#home_map@onclick": this.homeMap,

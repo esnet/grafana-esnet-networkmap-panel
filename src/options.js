@@ -49,6 +49,21 @@ export const BaseTilesets = [
   },
 ]
 
+export const TopologySources = [
+  {
+    label: "Manual (Local JSON)",
+    value: "json"
+  },
+  {
+    label: "Load from URL",
+    value: "url"
+  },
+  {
+    label: "Autodetect from Data",
+    value: "autodetect"
+  }
+]
+
 export const PoliticalBoundaryTilesets = [
   {
     label: '[No Political Boundaries]',
