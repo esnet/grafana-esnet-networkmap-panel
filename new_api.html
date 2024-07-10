@@ -222,6 +222,9 @@
                 }
             ]
         };
+        const edgeData = [
+            
+        ]
 
         var canvas = document.getElementById("mapCanvas");
         var optionsElem = document.getElementById('optionsText');
@@ -247,6 +250,7 @@
 
         canvas.setTopology(topology);
         canvas.setOptions(options);
+        canvas.setData(edgeData);
 
         topologyElem.onChange = function(event){
             canvas.setTopology(JSON.parse(event.target.value));

@@ -222,6 +222,15 @@ map.setEditMode
     this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
     return newValue;
   }
+  get data(){
+    return this._edgeData;
+  }
+  setData(newData){
+    this._edgeData = newData;
+    this.matchEdgeData();
+    this.emit(signals.DATA_UPDATED, JSON.parse(JSON.stringify(this._edgeData)));
+    return this._edgeData;
+  }
 
 
   get jsonResults(){
