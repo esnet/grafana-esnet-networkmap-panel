@@ -112,74 +112,7 @@ export class MapPanel extends Component<MapPanelProps> {
     this.props.onOptionsChange(update);
   };
 
-  calculateOptionsChanges = (currOptions) => {
-    let changed: string[];
-    changed = [];
-
-    const optionsToWatch = [
-      'background',
-      'tileset.geographic',
-      'tileset.boundaries',
-      'tileset.labels',
-      'showSidebar',
-      'showViewControls',
-      'showLegend',
-      'customLegend',
-      'customLegendValue',
-      'legendColumnLength',
-      'legendPosition',
-      'thresholds',
-      'enableScrolling',
-      'enableEditing',
-      'enableNodeAnimation',
-      'enableEdgeAnimation',
-      'enableCustomNodeTooltip',
-      'enableCustomEdgeTooltip',
-      'customNodeTooltip',
-      'customEdgeTooltip',
-      'useConfigurationUrl',
-      'configurationUrl',
-      'resolvedLat',
-      'resolvedLng',
-    ];
-    for(let i=0; i<LAYER_LIMIT; i++){
-      optionsToWatch.push(`layers[${i}].visible`);
-      optionsToWatch.push(`layers[${i}].color`);
-      optionsToWatch.push(`layers[${i}].endpointId`);
-      optionsToWatch.push(`layers[${i}].nodeHighlight`);
-      optionsToWatch.push(`layers[${i}].nodeWidth`);
-      optionsToWatch.push(`layers[${i}].mapjson`);
-      optionsToWatch.push(`layers[${i}].edgeWidth`);
-      optionsToWatch.push(`layers[${i}].pathOffset`);
-      optionsToWatch.push(`layers[${i}].name`);
-      optionsToWatch.push(`layers[${i}].legend`);
-      optionsToWatch.push(`layers[${i}].dstFieldLabel`);
-      optionsToWatch.push(`layers[${i}].srcFieldLabel`);
-      optionsToWatch.push(`layers[${i}].dataFieldLabel`);
-    }
-    optionsToWatch.forEach((option) => {
-      let lastValue = resolvePath(this.lastOptions, option);
-      let currentValue = resolvePath(currOptions, option);
-      if(option === 'thresholds'){
-        // test these for relative equality; this object memory ref changes on each option change.
-        lastValue = JSON.stringify(lastValue);
-        currentValue = JSON.stringify(currentValue);
-      }
-      if (lastValue !== currentValue) {
-        if (option === 'background') {
-          this.props.options.background = this.theme.visualization.getColorByName(currOptions.background);
-        }
-        if(Array.isArray(this.props.options[option])){
-          let newOption = [...resolvePath(this.props.options, option)];
-          setPath(this.lastOptions, option, newOption);
-        } else {
-          setPath(this.lastOptions, option, resolvePath(currOptions, option));
-        }
-        changed.push(option);
-      }
-    });
-    return changed;
-  };
+  
 
   // A function to turn layers on or off. Takes in the layer and boolean value
   // Used in SideBar.tsx
@@ -245,7 +178,7 @@ export class MapPanel extends Component<MapPanelProps> {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
 
-    this.mapCanvas.current.updateTopology = this.updateMapJson;
+    this.mapCanvas.current.listen(signals.TOPOLOGY_UPDATED, this.updateMapJson);
 
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
