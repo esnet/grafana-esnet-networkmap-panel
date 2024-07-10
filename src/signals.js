@@ -30,6 +30,7 @@ export const signals = {
     EDGE_SNAP: "edge snap",
     TOOLTIP_VISIBLE: "tooltip visible",
     TOOLTIP_HIDDEN: "tooltip hidden",
+
     private: {
         EDIT_NODE_DIALOG_VISIBLE: "edit node dialog visible",
         EDIT_EDGE_DIALOG_VISIBLE: "edge edge dialog visible",
@@ -37,35 +38,6 @@ export const signals = {
         EDIT_EDGE_TOGGLED: "edit edge toggled",
         EDIT_NODE_TOGGLED: "edit node toggled",
         EDIT_MODE_SET: "edit mode set",
+        DRAG_STARTED: "drag started",
     }
 }
-
-/*
-
-map.getCenterAndZoom
-map.getMapViewport
-"getMapCenterAndZoom"
-"getMapViewport"
-
-
-"toggleNodeEdit"
-
-"dragStarted"
-"snapEdges"
-"updateMapDimensions"
-
-// how do these differ?
-"updateOptions"
-"updateMapOptions"
-
-  // wow how do these differ?
-"updateMapTopology"
-"updateTopology"
-"updateTopologyData"
-
-how/why does this differ from getMapCenterAndZoom?
-// hopefully these can all
-"returnMapCenterAndZoom"
-"returnMapViewport"
-
-*/
