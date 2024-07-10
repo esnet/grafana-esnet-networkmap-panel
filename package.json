@@ -1,6 +1,6 @@
 {
   "name": "esnet-networkmap-panel",
-  "version": "2.0.9",
+  "version": "2.0.10",
   "description": "Network Map Panel",
   "repository": "https://github.com/esnet/grafana-esnet-networkmap-panel",
   "scripts": {
@@ -40,6 +40,7 @@
     "@types/node": "18.11.9",
     "copy-webpack-plugin": "9.0.1",
     "css-loader": "6.7.1",
+    "dompurify": "^3.1.5",
     "emotion": "11.0.0",
     "eslint-webpack-plugin": "3.2.0",
     "fork-ts-checker-webpack-plugin": "7.2.13",

@@ -4,6 +4,7 @@ const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js';
 import testIds from '../constants.js';
 import { signals } from '../signals.js';
+import DOMPurify from './lib/purify.es.mjs';
 
 const LAVENDER = "rgb(202, 149, 229)";
 
@@ -172,7 +173,10 @@ class EditingInterface extends BindableHTMLElement {
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
-        this._selectedLayer = 0;
+        // if we've arrived here from the edge dialog, don't reset layer state information...
+        if(this.dialog != "edge"){
+            this._selectedLayer = 0;
+        }
         this._selectedObject = null;
         this._spliceIndex = null;
         this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, {object: null, index: null, layer: this._selectedLayer, type: "nodes"});
@@ -210,12 +214,19 @@ class EditingInterface extends BindableHTMLElement {
         const selectedChildren = document.querySelectorAll('#node_children option:checked');
         const nodeChildren = Array.from(selectedChildren).map((el) => el.value);
 
+        // ensure we're in an svg context for dompurify (crappy hack)
+        nodeSvg = `<svg>${nodeSvg}</svg>`;
+        // explicitly allow foreignobject for complex map nodes (still filters e.g. <script>)
+        var svgContent = DOMPurify.sanitize(nodeSvg, {ADD_TAGS: ["foreignobject"]});
+        // excise start/end svg tags (crappy hack)
+        svgContent = svgContent.replace(/^<svg>/, "").replace(/<\/svg>$/, "")
+
         var newNode = {
           name: nodeName,
           color: this.mapCanvas.options?.layers?.[nodeLayer]?.color || LAVENDER,
           meta: {
             display_name: nodeDisplayName,
-            svg: nodeSvg,
+            svg: svgContent,
             template: nodeTooltip,
           },
           coordinate: [parseFloat(nodeLat), parseFloat(nodeLng)],
@@ -360,7 +371,7 @@ class EditingInterface extends BindableHTMLElement {
         if (this.srcDstOptions.length === 0) {
           return `<div class="no-node-message">
               The Layer You&apos;ve Selected has no Nodes.
-              <div class="add-node-link">
+              <div class="add_node_link">
                 Add Node
               </div>
             </div>`;
@@ -496,7 +507,7 @@ class EditingInterface extends BindableHTMLElement {
                 .dialog .dialog-form .no-node-message {
                   padding-left:10px;
                 }
-                .dialog .dialog-form .add-node-link {
+                .dialog .dialog-form .add_node_link {
                   color: blue;
                   text-decoration: underline;
                 }
@@ -719,7 +730,7 @@ class EditingInterface extends BindableHTMLElement {
             "#dialog@onmouseup": this.enableScrolling,
             "#edge_edit_mode@onclick": this.toggleEdgeEdit,
             "#node_edit_mode@onclick": this.toggleNodeEdit,
-            //".add_node_link@onclick": this.showAddNodeDialog(), // sometimes null... TODO
+            ".add_node_link@onclick": this.showAddNodeDialog,
             "#add_node@onclick": this.showAddNodeDialog,
             "#add_node_form@onsubmit": this.updateMapNodes,
             "#create_node_cancel@onclick": this.hideDialogs,

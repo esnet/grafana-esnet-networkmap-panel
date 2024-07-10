@@ -14,6 +14,7 @@ module.exports = function( config ) {
             { pattern: "test/*.js", type: "module"},
             // files tests rely on
             { pattern: "src/**/*.js", type: "module", included: true, served: true },
+            { pattern: "src/**/*.mjs", type: "module", included: true, served: true },
         ],
         exclude: [
             "src/components/lib/leaflet.js",
