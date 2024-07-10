@@ -1,7 +1,8 @@
 import * as pubsub from './lib/pubsub.js';
 import * as utils from "./lib/utils.js";
 const PubSub = pubsub.PubSub;
-import { BindableHTMLElement } from './lib/rubbercement.js'
+import { BindableHTMLElement } from './lib/rubbercement.js';
+import { signals } from "../signals.js";
 
 class SideBar extends BindableHTMLElement {
 
@@ -12,13 +13,13 @@ class SideBar extends BindableHTMLElement {
         "options": {},
         "editingInterface": {}
     }
-    PubSub.subscribe("updateEditMode", this.render, this);
-    PubSub.subscribe("showTooltip", this.showTooltip, this);
-    PubSub.subscribe("hideTooltip", this.hideTooltip, this);
   }
 
-  set mapCanvas(newValue) {
+  setMapCanvas(newValue) {
     this._mapCanvas = newValue;
+    this._mapCanvas.listen(signals.TOOLTIP_VISIBLE, this.showTooltip);
+    this._mapCanvas.listen(signals.TOOLTIP_HIDDEN, this.hideTooltip);
+    this._mapCanvas.listen(signals.EDITING_SET, ()=>{ this.render() });
     this.render();
   }
 
@@ -30,7 +31,10 @@ class SideBar extends BindableHTMLElement {
     var element = event.target;
     var layer = element.id.split("-")[2];
     var value = element.checked;
-    PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
+
+    const evtData = {"layer": layer, "visible": value};
+    this.mapCanvas.emit(signals.LAYER_TOGGLED, evtData);
+    this.mapCanvas.toggleLayer(evtData);
   }
 
   showTooltip(data) {
