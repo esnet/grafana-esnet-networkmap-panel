@@ -2,6 +2,7 @@ import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
 import * as L from "./lib/leaflet-src.esm.js";
 import { LAYER_LIMIT } from './lib/utils.js'
+import { signals } from "../signals.js";
 const PubSub = pubsub.PubSub;
 
 // these imports are the result of very significant trial and error.
@@ -54,7 +55,7 @@ export default class NetworkMap {
       this.sideBar,
       d3.curveNatural);
 
-    PubSub.subscribe("setEditMode", this.setEditMode, this);
+    this.mapCanvas.listen(signals.EDIT_MODE_SET, function(mode){ this.setEditMode(mode) });
   }
 
   dispatchEvent(event){
@@ -73,8 +74,8 @@ export default class NetworkMap {
 
   setEditMode(mode) {
     if(mode == "edge"){
-      this.setEdgeEdit(false);
       this.setEdgeEdit(!this.esmap.editEdges);
+      this.setNodeEdit(false);
     }
     if(mode=="node"){
       this.setEdgeEdit(false);
