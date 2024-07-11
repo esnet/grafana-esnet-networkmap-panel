@@ -926,8 +926,8 @@ export class EsMap {
     this.mapLayers = [];
     this.curves = []; // specific edge curves for each layer
     this.lineGen = d3.line().curve(curve); // the default curve we'll use to render edges
-    this.editEdges = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editEdgeMode;
-    this.editNodes = this.mapCanvas.editingInterface && this.mapCanvas.editingInterface.editNodeMode;
+    this.editEdges = this.mapCanvas?.editingInterface?.editEdgeMode;
+    this.editNodes = this.mapCanvas?.editingInterface?.editNodeMode;
     this.div = div;
     this.lastInteractedObject = null; // the last object that the user interacted with
                                       // used for nudging and deletion via keyboard
@@ -1143,8 +1143,8 @@ export class EsMap {
   //--- loop through data and map objects and refresh them
   update() {
     this.mapCanvas.options.enableScrolling && this.leafletMap.dragging.enable();
-    this.editEdges = this.mapCanvas.editingInterface._edgeEditMode;
-    this.editNodes = this.mapCanvas.editingInterface._nodeEditMode;
+    this.editEdges = this.mapCanvas?.editingInterface?.edgeEditMode;
+    this.editNodes = this.mapCanvas?.editingInterface?.nodeEditMode;
     var layerId = 0;
     this.data.forEach((data)=>{
       this.updateCoordinates(data, layerId);

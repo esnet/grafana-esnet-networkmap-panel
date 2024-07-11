@@ -107,7 +107,7 @@ describe( "Class MapCanvas", () => {
                       "boundaries": null,
                       "labels": null,
                     },
-                    "useConfigurationUrl": false,
+                    "topologySource": "json",
                     "configurationUrl": "",
                     "edgeWidth":3,
                     "editMode":true,
