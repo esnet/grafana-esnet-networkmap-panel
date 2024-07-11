@@ -12,16 +12,18 @@
                 <h1>Embedded Map Demonstration page</h1>
             </th>
         <tr>
+            <td style='width:20%'>
+                <a href='?editPanel=true'>Edit Mode On</a>&nbsp;&nbsp; 
+                <a href='?'>Edit Mode Off</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+
+                <a href="/autodetect.html">Autodetect Demo</a>
+            </td>
+        <tr>
             <td colspan='2' style='width:80%;'>
                 <div id='mapContainer'>
                     <esnet-map-canvas id='mapCanvas' height='400'>
                     </esnet-map-canvas>
                 </div>
-            </td>
-            <td style='width:20%'>
-                <a href='/new_api.html?editPanel=true'>Edit Mode On</a><br />
-                <a href='/new_api.html?'>Edit Mode Off</a><br />
-                <input type="button" onClick="test()" value='test click'>
             </td>
         </tr>
         <tr>
@@ -165,6 +167,7 @@
             "enableEditing": true,
             "background":"#EDEDED",
             "multiLayerNodeSnap": false,
+            "topologySource": "json",
             "viewport": {
                 "top": 33,
                 "left": -141,
@@ -222,9 +225,6 @@
                 }
             ]
         };
-        const edgeData = [
-            
-        ]
 
         var canvas = document.getElementById("mapCanvas");
         var optionsElem = document.getElementById('optionsText');
@@ -233,7 +233,7 @@
         console.log("Available signals:", signals);
 
         const receiveOptionsUpdates = function(options){
-            optionsElem.value = JSON.stringify(options);
+            optionsElem.value = JSON.stringify(options, null, "  ");
         }
         const receiveTopologyUpdates = function(topology){
             var cleanTopology = [];
@@ -242,7 +242,7 @@
                     cleanTopology[i] = sanitizeTopology(topology[i]);
                 }
             }
-            topologyElem.value = JSON.stringify(cleanTopology);
+            topologyElem.value = JSON.stringify(cleanTopology, null, "  ");
         }
 
         canvas.listen(signals.TOPOLOGY_UPDATED, receiveTopologyUpdates);
@@ -250,14 +250,14 @@
 
         canvas.setTopology(topology);
         canvas.setOptions(options);
-        canvas.setData(edgeData);
 
-        topologyElem.onChange = function(event){
+        topologyElem.onchange = function(event){
+            console.log("change", event)
             canvas.setTopology(JSON.parse(event.target.value));
         }
 
-        optionsElem.onChange = function(event){
-            canvas.options = JSON.parse(event.target.value);
+        optionsElem.onchange = function(event){
+            canvas.setOptions(JSON.parse(event.target.value));
         }
 
     </script>
