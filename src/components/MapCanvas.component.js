@@ -50,14 +50,10 @@ export class MapCanvas extends BindableHTMLElement {
 // internal/imperative
 map.clearSelection
 "clearSelection"
-map.setEditMode
-"setEditMode"
 map.setEditSelection
 "setEditSelection"
 map.setSelection
 "setSelection"
-map.setEditMode
-"updateEditMode"
 
 */
 
@@ -77,7 +73,7 @@ map.setEditMode
     this.userChangedMapFrame = false;
     this.optionsCache = {};
     this.pubsub = new PrivateMessageBus(this);
-
+    this._trafficFormat = utils.formatBits;
     this._optionsToWatch = [
       'background',
       'tileset.geographic',
@@ -200,6 +196,14 @@ map.setEditMode
     if(!!this._options){ return this._options; }
     return {};
   }
+  setOptions(newValue){
+    this._options = newValue;
+    this.updateMapOptions({ options: newValue, changed: this.calculateOptionsChanges() });
+    this.matchTraffic();
+    this.setEditModeFromUrl();
+    this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
+    return newValue;
+  }
   setEditModeFromUrl(){
     const params = utils.getUrlSearchParams();
     if (
@@ -223,13 +227,6 @@ map.setEditMode
     });
     return changed;
   };
-  setOptions(newValue){
-    this._options = newValue;
-    this.updateMapOptions({ options: newValue, changed: this.calculateOptionsChanges() });
-    this.setEditModeFromUrl();
-    this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
-    return newValue;
-  }
 
   get jsonResults(){
     return this._jsonResults;
@@ -287,14 +284,53 @@ map.setEditMode
     return this._selection;
   }
 
-  get data(){
-    return this._data;
+  get traffic(){
+    return this._traffic;
   }
-  setData(newData){
-    this._data = newData;
-    this.matchEdgeData();
-    this.emit(signals.DATA_UPDATED, JSON.parse(JSON.stringify(this._edgeData)));
-    return this._edgeData;
+  setTraffic(newData){
+    this._traffic = newData;
+    if(this._options?.topologySource == "autodetect"){
+      for(let i=0; i<utils.LAYER_LIMIT; i++){
+        if(this._topology?.[i]?.autodetected){
+          delete this._topology[i].autodetected;
+        }
+      }
+      this.render();
+    }
+    this.matchTraffic();
+    this.emit(signals.TRAFFIC_UPDATED, JSON.parse(JSON.stringify(this._traffic)));
+    return this._traffic;
+  }
+
+  matchTraffic(){
+    this._options?.layers?.forEach((layerOptions, layerIdx)=>{
+      this._traffic?.forEach((row)=>{
+        // get a reference to the topology for this layer
+        let layerTopology = this._topology[layerIdx];
+        // build a hash to avoid n*m*o complexity
+        // make a hash of "name": "index"
+        // where the index gets us the element of the original array
+        let topologyHash = {}
+        layerTopology.edges.forEach((edge, edgeIdx)=>{
+          topologyHash[edge.name] = edgeIdx;
+        })
+        let edgeNameSelector = `${row[layerOptions.srcField]}--${row[layerOptions.dstField]}`;
+        // set the A-Z traffic sample for this row in the original array by looking up its index
+        let targetEdge = layerTopology.edges[topologyHash[edgeNameSelector]];
+        if(!targetEdge){ return }
+        targetEdge.azValue = row[layerOptions.outboundValueField];
+        targetEdge.azDisplayValue = this._trafficFormat(row[layerOptions.outboundValueField]);
+        targetEdge.zaTraffic = row[layerOptions.inboundValueField]
+        targetEdge.zaDisplayValue = this._trafficFormat(row[layerOptions.inboundValueField]);
+      })
+    })
+  }
+
+  setTrafficFormat(fn){
+    this._trafficFormat = fn;
+  }
+  get trafficFormat(){
+    return this._trafficFormat;
   }
 
   listen(signal, callback){
@@ -583,14 +619,14 @@ map.setEditMode
   }
 
   autodetectTopology(){
-    if(!this._data) return;
+    if(!this._traffic) return;
     if(this._options.topologySource == "autodetect"){
       this.options.enableEditing = false;
       for(let i=0; i<this._options?.layers.length; i++){
         if(this._topology?.[i]?.autodetected){ continue }
         let layerTopology = { "nodes": [], "edges": [], "nodeHash": {}, "pathLayout": { "type": "curveBasis" }, "autodetected": true }
-        console.log("attempting to auto-detect topology...", layerTopology, this.data && this.data.length);
-        this._data.forEach((edge)=>{
+
+        this._traffic.forEach((edge)=>{
           this._options.layers[i].endpointId = "names";
 
           let autodetectOptions = this._options?.layers[i].autodetect;
@@ -612,7 +648,7 @@ map.setEditMode
             "coordinate": [parseFloat(edge[dstLatKey]), parseFloat(edge[dstLngKey])],
             "meta": {},
           };
-          console.log(source.name, dest.name, edge)
+
           layerTopology["nodeHash"][source.name] = source;
           layerTopology["nodeHash"][dest.name] = dest;
           let y_dist = source.coordinate[0] - dest.coordinate[0];
