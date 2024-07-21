@@ -16,11 +16,11 @@ export class EsMap {
     editEdges: any;
     editNodes: any;
     div: any;
-    options: any;
     lastInteractedObject: any;
     lastInteractedType: any;
     showTooltipSubscription: any;
     update(): void;
+    destroy(): void;
     editEdgeMode(setting: any): any;
     editNodeMode(setting: any): any;
     updateCoordinates(data: any, layerId: any): void;

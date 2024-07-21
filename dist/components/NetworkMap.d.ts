@@ -11,6 +11,7 @@ export default class NetworkMap {
     svgLayer: any;
     sideBar: any;
     esmap: es.EsMap;
+    destroy(): void;
     dispatchEvent(event: any): any;
     setEdgeEdit(bool: any): void;
     setNodeEdit(bool: any): void;
