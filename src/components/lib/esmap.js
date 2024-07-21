@@ -101,7 +101,6 @@ function renderEdges(g, data, ref, layerId) {
       forward: isAZ ? forward : reverse,
       reverse: isAZ ? reverse : forward,
     };
-
     var text = renderTemplate(template, renderData);
 
     ref.mapCanvas.showTooltip(event, text);
@@ -162,7 +161,7 @@ function renderEdges(g, data, ref, layerId) {
       }
       ref.mapCanvas.emit(signals.VARIABLES_SET, d);
       ref.mapCanvas.setSelection(selectionData);
-      PubSub.global.publish("setSelection", selectionData); // send signal globally
+      PubSub.global.publish(signals.SELECTION_SET, selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
     .on('mouseout', doEdgeMouseOut);
@@ -212,13 +211,15 @@ function renderEdges(g, data, ref, layerId) {
       }
       ref.mapCanvas.emit(signals.VARIABLES_SET, d);
       ref.mapCanvas.setSelection(selectionData);
-      PubSub.global.publish("setSelection", selectionData); // send signal globally
+      PubSub.global.publish(signals.SELECTION_SET, selectionData); // send signal globally
     })
     .on('mouseover', doEdgeMouseOver)
     .on('mouseout', doEdgeMouseOut);
   zaLines.exit().remove();
 
   function selectEdge(selectionData){
+      if(!selectionData || selectionData.type!='edge') return;
+
       var dashes = document.querySelectorAll(".dash-selected, .dash-over");
       for(var i=0; i<dashes.length; i++){
           dashes[i].remove();
@@ -226,8 +227,7 @@ function renderEdges(g, data, ref, layerId) {
       // deselect old edges
       d3.selectAll(".selected")
         .classed('selected', false)
-        .classed('animated-edge', false)
-        .classed('edge', true);
+        .classed('animated-edge', false);
       // sanitize name from the edge
       var name = sanitizeName(selectionData.selection.name);
       var mapId = "map-" + ref.mapCanvas.instanceId;
@@ -261,9 +261,7 @@ function renderEdges(g, data, ref, layerId) {
   ref.mapCanvas.listen(signals.SELECTION_SET, selectEdge);
 
   var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET);
-  if(selection && selection.type=="edge"){
-    selectEdge(selection);
-  }
+  selectEdge(selection);
 
 }
 
@@ -725,15 +723,15 @@ function renderNodes(g, data, ref, layerId) {
 
 
   function selectNode(selectionData){
-      d3.selectAll(".selected")
-        .classed('selected', false)
-        .classed('animated-node', false)
-
-      d3.select(`.l${selectionData.layer}.node-${sanitizeName(selectionData.selection.name)} .scale-container`)
-        .classed('selected', true)
-        .classed('animated-node', true);
-
       if(selectionData && selectionData.type=='node'){
+        d3.selectAll(".selected")
+          .classed('selected', false)
+          .classed('animated-node', false)
+
+        d3.select(`.l${selectionData.layer}.node-${sanitizeName(selectionData.selection.name)} .scale-container`)
+          .classed('selected', true)
+          .classed('animated-node', true);
+
         ref.mapCanvas.emit(signals.VARIABLES_SET, selectionData);
       }
   }
@@ -741,9 +739,7 @@ function renderNodes(g, data, ref, layerId) {
 
   ref.mapCanvas.listen(signals.SELECTION_SET, selectNode);
   var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET, ref.svg.node());
-  if(selection && selection.type=="node"){
-    selectNode(selection);
-  }
+  selectNode(selection);
 
 
   g.selectAll('g.node').attr('transform', function (d) {
@@ -951,6 +947,10 @@ export class EsMap {
         var offsetY = data.event.clientY - mapBounds.top;
         var offsetX = data.event.clientX - mapBounds.left;
 
+        document.querySelectorAll(".tooltip-hover").forEach((elem)=>{
+          elem.remove();
+        })
+
         var elem = document.createElement("div");
         elem.setAttribute("id", "tooltip-hover");
         elem.setAttribute("class", "tight-form-func tooltip-hover");
@@ -998,7 +998,6 @@ export class EsMap {
         .classed('selected', false)
       d3.selectAll(".animated-edge")
         .classed('animated-edge', false)
-        .classed('edge', true)
       d3.selectAll(".animated-node")
         .classed('animated-node', false)
     }
@@ -1052,6 +1051,12 @@ export class EsMap {
     })
   }
 
+  destroy(){
+    this.mapLayers.forEach((g) => {
+      let topology_g = g.select('g.topology');
+      topology_g.remove();
+    });
+  }
 
   editEdgeMode(setting) {
     if (setting === null || setting === undefined) {
