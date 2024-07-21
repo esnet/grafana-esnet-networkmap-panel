@@ -31,6 +31,12 @@ export const signals = {
     TOOLTIP_VISIBLE: "tooltip visible",
     TOOLTIP_HIDDEN: "tooltip hidden",
 
+    REQUEST_MAP_CENTER_AND_ZOOM: "request map center and zoom",
+    RETURN_MAP_CENTER_AND_ZOOM: "return map center and zoom",
+
+    REQUEST_VIEWPORT: "request viewport",
+    RETURN_VIEWPORT: "return viewport",
+
     private: {
         EDIT_NODE_DIALOG_VISIBLE: "edit node dialog visible",
         EDIT_EDGE_DIALOG_VISIBLE: "edge edge dialog visible",
