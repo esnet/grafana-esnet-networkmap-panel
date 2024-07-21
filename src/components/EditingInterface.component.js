@@ -44,7 +44,7 @@ class EditingInterface extends BindableHTMLElement {
             this.render();
         });
 
-        this.setEditing(this.mapCanvas.lastValue(signals.EDITING_SET, this));
+        this.setEditing(this.mapCanvas.lastValue(signals.EDITING_SET));
         this.mapCanvas.listen(signals.EDITING_SET, (newMode)=>{
             this.setEditing(newMode);
             this.render();
@@ -67,6 +67,10 @@ class EditingInterface extends BindableHTMLElement {
         if(evtData && evtData['mode'] === "node"){
             this._edgeEditMode = false;
             this._nodeEditMode = evtData['value'];
+        }
+        if(evtData && evtData['mode'] === "off"){
+            this._edgeEditMode = false;
+            this._nodeEditMode = false;
         }
         this.mapCanvas?.map?.esmap?.editEdgeMode(this._edgeEditMode);
         this.mapCanvas?.map?.esmap?.editNodeMode(this._nodeEditMode);
@@ -162,14 +166,14 @@ class EditingInterface extends BindableHTMLElement {
     toggleNodeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
         this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
-        this.setEditMode({ "mode": "node", "value": !this._nodeEditMode });
-        this.render();
+        const lastEditMode = this.mapCanvas.lastValue(signals.EDITING_SET);
+        this.mapCanvas.setEditMode(lastEditMode === "node" ? "off" : "node");
     }
     toggleEdgeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
         this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
-        this.setEditMode({ "mode": "edge", "value": !this._edgeEditMode });
-        this.render();
+        const lastEditMode = this.mapCanvas.lastValue(signals.EDITING_SET);
+        this.mapCanvas.setEditMode(lastEditMode === "edge" ? "off" : "edge");
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
@@ -255,7 +259,7 @@ class EditingInterface extends BindableHTMLElement {
 
         setTimeout(()=>{
             this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer.replace("layer", "") });
-            this.mapCanvas.map.renderMap(); // repaint re-renders the topology layers
+            this.mapCanvas?.map?.renderMap(); // repaint re-renders the topology layers
         }, 10);
     }
     createMapEdge(e){
@@ -312,7 +316,7 @@ class EditingInterface extends BindableHTMLElement {
         this.hideDialogs();
 
         setTimeout(function () {
-            this.mapCanvas.map.renderMap();
+            this.mapCanvas?.map?.renderMap();
         }, 100);
     }
 

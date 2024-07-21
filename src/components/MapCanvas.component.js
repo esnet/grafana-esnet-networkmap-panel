@@ -15,6 +15,8 @@ import { signals } from '../signals.js';
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
 
+const EDGE_DELIMITER = "--";
+
 // plus-one-pixel for each map tile. this makes the tiles
 // overlap slightly to avoid fractional zoom artefacts
 // in webkit-based browser. Deep discussion on the topic:
@@ -102,7 +104,7 @@ map.setSelection
       'multiLayerNodeSnap',
     ];
     for(let i=0; i<utils.LAYER_LIMIT; i++){
-      this._optionsToWatch.push.apply([
+      this._optionsToWatch = this._optionsToWatch.concat([
         `layers[${i}].visible`,
         `layers[${i}].color`,
         `layers[${i}].endpointId`,
@@ -116,6 +118,7 @@ map.setSelection
         `layers[${i}].dstFieldLabel`,
         `layers[${i}].srcFieldLabel`,
         `layers[${i}].dataFieldLabel`,
+        `layers[${i}].nodeThresholds`,
         `layers[${i}].autodetect.dstNameColumn`,
         `layers[${i}].autodetect.dstLatitudeColumn`,
         `layers[${i}].autodetect.dstLongitudeColumn`,
@@ -144,19 +147,19 @@ map.setSelection
   connectedCallback() {
     this.pubsub.setID(this.id, this);
 
-    PubSub.subscribe('getMapCenterAndZoom', (() => {
+    PubSub.global.subscribe(signals.REQUEST_MAP_CENTER_AND_ZOOM, (() => {
       var self = this;
       return () => {
-        PubSub.publish("returnMapCenterAndZoom", {
+        PubSub.global.publish(signals.RETURN_MAP_CENTER_AND_ZOOM, {
           center: self.map.leafletMap.getCenter(),
           zoom: self.map.leafletMap.getZoom()
         })
       }
     })());
-    PubSub.subscribe("getMapViewport", (() => {
+    PubSub.global.subscribe(signals.REQUEST_VIEWPORT, (() => {
       var self = this;
       return () => {
-        PubSub.publish("returnMapViewport", {
+        PubSub.publish(signals.RETURN_VIEWPORT, {
           coordinates: self.map.leafletMap.getBounds()
         })
       }
@@ -197,8 +200,10 @@ map.setSelection
     return {};
   }
   setOptions(newValue){
+    let changes = this.calculateOptionsChanges(newValue);
     this._options = newValue;
-    this.updateMapOptions({ options: newValue, changed: this.calculateOptionsChanges() });
+    if(!changes.length) return;
+    this.updateMapOptions({ options: newValue, changed: changes });
     this.matchTraffic();
     this.setEditModeFromUrl();
     this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
@@ -213,7 +218,7 @@ map.setSelection
     ) {
       this.setEditMode(null);
     } else {
-      this.setEditMode("edge");
+      this.setEditMode(this.lastValue(signals.EDITING_SET) || "edge");
     }
   }
   calculateOptionsChanges(newOptions){
@@ -298,39 +303,129 @@ map.setSelection
       this.render();
     }
     this.matchTraffic();
+    this.render();
     this.emit(signals.TRAFFIC_UPDATED, JSON.parse(JSON.stringify(this._traffic)));
     return this._traffic;
   }
 
   matchTraffic(){
     this._options?.layers?.forEach((layerOptions, layerIdx)=>{
+      // get a reference to the topology for this layer
+      let layerTopology = this._topology?.[layerIdx];
+
+      // if this topology doesn't have a layer... 
+      // or if we don't have any traffic data...
+      // the rest of this algorithm doesn't make sense.
+      if(!layerTopology || !this._traffic || !this._traffic.length){ return }
+
+      // build a hash to avoid n*m*o complexity
+      // make a hash of "name": "index"
+      // where the index gets us the element of the original array
+      let edgeHash = {}
+      layerTopology?.edges?.forEach((edge, edgeIdx)=>{
+        let endpointIds = edge.meta.endpoint_identifiers[layerOptions.endpointId];
+        if(endpointIds?.length > 1){
+          // Find A and Z node
+          edge.nodeA = endpointIds[0];
+          edge.nodeZ = endpointIds[1];
+          // create names
+          edge._matchname = `${edge.nodeA}${EDGE_DELIMITER}${edge.nodeZ}`;
+        } else {
+          edge._matchname = `${endpointIds?.[0]}`
+        }
+        edgeHash[edge._matchname] = edgeIdx;
+      })
+      
+      // initialize all nodes with default color and 0 the traffic
+      let nodeHash = {}
+      layerTopology?.nodes?.forEach((node, nodeIdx) => {
+        if(!node.hasOwnProperty("inTraffic")) { node.inTraffic = 0; }
+        if(!node.hasOwnProperty("outTraffic")) { node.outTraffic = 0; }
+        node.color = layerOptions.color;
+        nodeHash[node.name] = nodeIdx
+      });
+      // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
+      if(!layerOptions.srcField && !layerOptions.dstField){ return; }
       this._traffic?.forEach((row)=>{
-        // get a reference to the topology for this layer
-        let layerTopology = this._topology[layerIdx];
-        // build a hash to avoid n*m*o complexity
-        // make a hash of "name": "index"
-        // where the index gets us the element of the original array
-        let topologyHash = {}
-        layerTopology.edges.forEach((edge, edgeIdx)=>{
-          topologyHash[edge.name] = edgeIdx;
-        })
-        let edgeNameSelector = `${row[layerOptions.srcField]}--${row[layerOptions.dstField]}`;
-        // set the A-Z traffic sample for this row in the original array by looking up its index
-        let targetEdge = layerTopology.edges[topologyHash[edgeNameSelector]];
+        // match for the case where we have A--Z in order
+        let forwardEdgeSelector = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
+        // match for the case where we have Z--A, reversed
+        let reverseEdgeSelector = `${row[layerOptions.dstField]}${EDGE_DELIMITER}${row[layerOptions.srcField]}`;
+        // match for the case where we have a row with a single metadata point such as a specific edge identifier
+        let singleIdSelector = `${row[layerOptions.srcField]}`;
+        // set the traffic sample by forward match
+        let targetEdge = layerTopology.edges[edgeHash[forwardEdgeSelector]];
+        let values = { in: layerOptions.inboundValueField, out: layerOptions.outboundValueField };
+        // set the traffic sample by reverse match if no match yet
+        if(!targetEdge){
+          targetEdge = layerTopology.edges[edgeHash[reverseEdgeSelector]];
+          // be sure to reverse directionality of match
+          values = { out: layerOptions.inboundValueField, in: layerOptions.outboundValueField };
+        }
+        // set the traffic sample by single-point match if no match yet. Use forward directionality
+        if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
+        // if no match at all, don't mark up this edge with match data.
+
         if(!targetEdge){ return }
-        targetEdge.azValue = row[layerOptions.outboundValueField];
-        targetEdge.azDisplayValue = this._trafficFormat(row[layerOptions.outboundValueField]);
-        targetEdge.zaTraffic = row[layerOptions.inboundValueField]
-        targetEdge.zaDisplayValue = this._trafficFormat(row[layerOptions.inboundValueField]);
+        targetEdge.azValue = row[values.in];
+        targetEdge.azDisplayValue = this._trafficFormat(row[values.in]);
+        targetEdge.azColor = this._trafficColor(row[values.in], this._options.thresholds, layerOptions.color);
+        targetEdge.zaValue = row[values.out];
+        targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
+        targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
+
+        // set up a hash of node ids
+        let nodeIds = {
+          out: `${row[layerOptions.srcField]}`,
+          in: `${row[layerOptions.dstField]}`,
+        }
+
+        // sum the traffic onto the node for each matching edge
+        const directions = ["in", "out"]
+        directions.forEach((direction)=>{
+          let targetNode = layerTopology.nodes[nodeHash[nodeIds[direction]]];
+          if(targetNode){
+            targetNode[`${direction}Traffic`] += row[values[direction]];
+          }
+        })
+      })
+      // as a final step for nodes, convert the traffic sums to formatted labels
+      // and color the node based on the max traffic (in vs out)
+      layerTopology?.nodes?.forEach((node, nodeIdx)=>{
+        let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
+        node.inValue = this._trafficFormat(node.inTraffic);
+        node.outValue = this._trafficFormat(node.outTraffic);
+        node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
       })
     })
+
   }
 
   setTrafficFormat(fn){
     this._trafficFormat = fn;
+    this.matchTraffic();
   }
   get trafficFormat(){
     return this._trafficFormat;
+  }
+
+  _trafficColor(value, thresholds, defaultValue){
+    let output = defaultValue;
+    if(thresholds?.steps){
+      thresholds = thresholds.steps;
+    }
+    thresholds?.forEach((threshold)=>{
+      if(value >= threshold.value){
+        output = threshold.color;
+      }
+    })
+    return output
+  }
+  setTrafficColor(fn){
+    this._trafficColor = fn;
+  }
+  get trafficColor(){
+    return this._trafficColor;
   }
 
   listen(signal, callback){
@@ -366,10 +461,9 @@ map.setSelection
   }
 
   setEditMode(mode){
-    if(["node", "edge", null].indexOf(mode) < 0){
-      throw new Error("Edit mode must be 'edge', 'node' or null");
+    if(["node", "edge", "off", null].indexOf(mode) < 0){
+      throw new Error("Edit mode must be 'edge', 'node', 'off' or null");
     }
-    this.editingInterface?.setEditing(mode);
     this.emit(signals.EDITING_SET, mode);
   }
 
@@ -446,7 +540,6 @@ map.setSelection
           topo.push(JSON.parse(newOptions.layers[i].mapjson));
         }
         self._topology = topo;
-        self.topology = topo;
         self._remoteLoaded = true;
         self.shadow.remove();
         self.shadow = null;
@@ -516,7 +609,7 @@ map.setSelection
       if(!options.enableEditing){
         this.setEditMode(null);
       } else {
-        this.setEditMode("edge");
+        this.setEditMode(this.lastValue(signals.EDITING_SET) || "edge");
       }
       this.shadow.remove();
       this.shadow = null;
@@ -748,6 +841,10 @@ map.setSelection
       this.leafletMap.remove();
       this.leafletMap = null;
     }
+    if(this.map){
+      this.map.destroy();
+      this.map = null;
+    }
     // needs research
     PubSub.clearTopicCallbacks('');
     this.emit(signals.MAP_DESTROYED);
@@ -949,7 +1046,7 @@ map.setSelection
     // if any of our layer are auto-detected, detect and create a topology from them
     this.autodetectTopology();
     if(!this.shadow){
-      this._selection = !!PubSub.last("setSelection", this);
+      this._selection = !!this.lastValue(signals.SELECTION_SET);
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       this.shadow.innerHTML = `
@@ -1031,7 +1128,7 @@ map.setSelection
       }
     }
 
-    if(!this.map && this.options && this.topology){
+    if(!this.map && this._options && this.topology){
       this.refresh();
     }
     this.map && this.map.renderMap();
