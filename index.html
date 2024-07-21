@@ -252,7 +252,6 @@
         canvas.setOptions(options);
 
         topologyElem.onchange = function(event){
-            console.log("change", event)
             canvas.setTopology(JSON.parse(event.target.value));
         }
 
