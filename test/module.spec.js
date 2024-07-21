@@ -217,7 +217,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should allow users to change the map layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var newOptions = canvas.options;
+      var newOptions = JSON.parse(JSON.stringify(canvas.options));
       newOptions.tileset['geographic'] = "usgs";
 
       canvas.setOptions(newOptions);
@@ -232,7 +232,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should allow users to change the political boundary layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var newOptions = canvas.options;
+      var newOptions = JSON.parse(JSON.stringify(canvas.options));
       newOptions.tileset['boundaries'] = 'toner.boundaries';
       canvas.setOptions(newOptions);
       var i=0;
@@ -246,7 +246,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should allow users to change the political label layer tileset", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      var newOptions = canvas.options;
+      var newOptions = JSON.parse(JSON.stringify(canvas.options));
       newOptions.tileset['labels'] = 'toner.labels';
       canvas.setOptions(newOptions);
       var i=0;
@@ -406,10 +406,10 @@ describe( "Class MapCanvas", () => {
     it("should allow users to remove layer toggles", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
       // set option boolean
-      var newOptions = canvas.options;
-      newOptions.layers[0]['legend'] = false;
-      newOptions.layers[1]['legend'] = false;
-      newOptions.layers[2]['legend'] = false;
+      var newOptions = JSON.parse(JSON.stringify(canvas.options));
+      newOptions.layers[0].legend = false;
+      newOptions.layers[1].legend = false;
+      newOptions.layers[2].legend = false;
       // update options
       canvas.setOptions(newOptions);
       // check that no toggle visible for layer toggle we turned off
@@ -555,7 +555,8 @@ describe( "Class MapCanvas", () => {
       var newTopology = canvas.topology;
       newTopology[1] = newTopology[0];
       newTopology[2] = newTopology[0];
-      var newOptions = canvas.options;
+      canvas.setTopology(newTopology);
+      var newOptions = JSON.parse(JSON.stringify(canvas.options));
       newOptions.layers[2]['edgeWidth'] = 5;
       newOptions.layers[0]['visible'] = false;
       newOptions.layers[1]['visible'] = false;
@@ -1083,8 +1084,9 @@ describe( "Class MapCanvas", () => {
       node = canvas.querySelector(".animated-node");
       style = window.getComputedStyle(node);
       let animationWhileTrue = style.animation;
-      let newOptions = canvas.options;
+      let newOptions = {...canvas.options};
       newOptions['enableNodeAnimation'] = false;
+      let changes = canvas.calculateOptionsChanges(newOptions);
       canvas.setOptions(newOptions);
       node = canvas.querySelector(".animated-node");
       style = window.getComputedStyle(node);
