@@ -58,6 +58,11 @@ export default class NetworkMap {
     this.mapCanvas.listen(signals.EDIT_MODE_SET, function(mode){ this.setEditMode(mode) });
   }
 
+  destroy(){
+    this.esmap.destroy();
+    this.esmap = null;
+  }
+
   dispatchEvent(event){
     return this.mapCanvas.dispatchEvent(event);
   }
@@ -104,8 +109,12 @@ export default class NetworkMap {
           for(var e=0; e<layer.edges.length; e++){
             var endpointId = `endpointId`;
             var edge = layer.edges[e];
-            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][0], layer.nodes);
-            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][1], layer.nodes);
+            if(!edge.nodeA){
+              edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId]?.[0], layer.nodes);
+            }
+            if(!edge.nodeZ){
+              edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId]?.[1], layer.nodes);
+            }
           }
           l++; // update the layer index
         });
