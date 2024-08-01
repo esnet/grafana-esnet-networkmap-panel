@@ -353,13 +353,18 @@ map.setSelection
       // or if we don't have any traffic data...
       // the rest of this algorithm doesn't make sense.
       if(!layerTopology || !this._traffic || !this._traffic.length){ return }
+      if(!layerOptions.visible){ return }
 
       // build a hash to avoid n*m*o complexity
       // make a hash of "name": "index"
       // where the index gets us the element of the original array
       let edgeHash = {}
       layerTopology?.edges?.forEach((edge, edgeIdx)=>{
-        let endpointIds = edge.meta.endpoint_identifiers[layerOptions.endpointId];
+        let endpointId = layerOptions.endpointId;
+        if(this._options.topologySource === "autodetect"){
+          endpointId = "names";
+        }
+        let endpointIds = edge.meta.endpoint_identifiers[endpointId];
         if(endpointIds?.length > 1){
           // Find A and Z node
           edge.nodeA = endpointIds[0];
@@ -372,16 +377,17 @@ map.setSelection
         edgeHash[edge._matchname] = edgeIdx;
       })
       
+      // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
+      if(!layerOptions.srcField && !layerOptions.dstField){ return; }
+
       // initialize all nodes with default color and 0 the traffic
       let nodeHash = {}
       layerTopology?.nodes?.forEach((node, nodeIdx) => {
-        if(!node.hasOwnProperty("inTraffic")) { node.inTraffic = 0; }
-        if(!node.hasOwnProperty("outTraffic")) { node.outTraffic = 0; }
+        node.inTraffic = 0;
+        node.outTraffic = 0;
         node.color = layerOptions.color;
         nodeHash[node.name] = nodeIdx
       });
-      // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
-      if(!layerOptions.srcField && !layerOptions.dstField){ return; }
       this._traffic?.forEach((row)=>{
         // match for the case where we have A--Z in order
         let forwardEdgeSelector = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
@@ -403,7 +409,6 @@ map.setSelection
         // set the traffic sample by single-point match if no match yet. Use forward directionality
         if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
         // if no match at all, don't mark up this edge with match data.
-
         if(!targetEdge){ return }
         targetEdge.azValue = row[values.in];
         targetEdge.azDisplayValue = this._trafficFormat(row[values.in]);
@@ -411,7 +416,6 @@ map.setSelection
         targetEdge.zaValue = row[values.out];
         targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
         targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
-
         // do the accounting for nodes
         // in value should be added to the A node's in and the Z node's out
         layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
