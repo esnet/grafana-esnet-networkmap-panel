@@ -289,11 +289,47 @@ map.setSelection
     return this._selection;
   }
 
+  filterTraffic(newData){
+    let output = [];
+    let outputHash = {};
+    this._options?.layers?.forEach((layerOptions, layerIdx)=>{
+      if(!layerOptions) return
+      newData.forEach((row)=>{
+        if(!layerOptions?.srcField && !layerOptions?.dstField) return
+        let edgeName = null;
+        // match for for the case where both src and dst fields are set for the layer
+        if(layerOptions?.srcField && layerOptions?.dstField){
+          edgeName = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
+        }
+        // match for the case where we have a row with a single metadata point as src
+        if(!edgeName){
+          edgeName = `${row[layerOptions.srcField]}`;
+        }
+        // match for the case where we have a row with a single metadata point as dst
+        if(!edgeName){
+          edgeName = `${row[layerOptions.dstField]}`;
+        }
+        if(!outputHash[edgeName]){
+          outputHash[edgeName] = row;
+        }
+      })
+    })
+    Object.keys(outputHash).forEach((key)=>{
+      output.push(outputHash[key]);
+    });
+    if(output.length < 1){
+      // in the case that we failed completely, return the input
+      return newData;
+    }
+    // otherwise, we have valid output, return it.
+    return output
+  }
+
   get traffic(){
     return this._traffic;
   }
   setTraffic(newData){
-    this._traffic = newData;
+    this._traffic = this.filterTraffic(newData);
     if(this._options?.topologySource == "autodetect"){
       for(let i=0; i<utils.LAYER_LIMIT; i++){
         if(this._topology?.[i]?.autodetected){
@@ -356,11 +392,13 @@ map.setSelection
         // set the traffic sample by forward match
         let targetEdge = layerTopology.edges[edgeHash[forwardEdgeSelector]];
         let values = { in: layerOptions.inboundValueField, out: layerOptions.outboundValueField };
+        let edgeIsReversed = false;
         // set the traffic sample by reverse match if no match yet
         if(!targetEdge){
           targetEdge = layerTopology.edges[edgeHash[reverseEdgeSelector]];
           // be sure to reverse directionality of match
-          values = { out: layerOptions.inboundValueField, in: layerOptions.outboundValueField };
+          values = { in: layerOptions.outboundValueField, out: layerOptions.inboundValueField };
+          edgeIsReversed = true;
         }
         // set the traffic sample by single-point match if no match yet. Use forward directionality
         if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
@@ -374,20 +412,13 @@ map.setSelection
         targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
         targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
 
-        // set up a hash of node ids
-        let nodeIds = {
-          out: `${row[layerOptions.srcField]}`,
-          in: `${row[layerOptions.dstField]}`,
-        }
-
-        // sum the traffic onto the node for each matching edge
-        const directions = ["in", "out"]
-        directions.forEach((direction)=>{
-          let targetNode = layerTopology.nodes[nodeHash[nodeIds[direction]]];
-          if(targetNode){
-            targetNode[`${direction}Traffic`] += row[values[direction]];
-          }
-        })
+        // do the accounting for nodes
+        // in value should be added to the A node's in and the Z node's out
+        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
+        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
+        // out value should be added to the A node's out and the Z node's in
+        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
+        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["inTraffic"] += row[values.out];
       })
       // as a final step for nodes, convert the traffic sums to formatted labels
       // and color the node based on the max traffic (in vs out)
