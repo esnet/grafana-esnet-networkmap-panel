@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, getValueFormat, DataFrameView } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField } from '@grafana/data';
 import { MapOptions } from './types';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
@@ -17,7 +17,11 @@ export function toDataFrames(data){
   let dataFrames = [] as any[];
 
   data.series.forEach(function (series) {
-    dataFrames.push(new DataFrameView(series));
+    // get frame and ensure it's sorted by timestamp
+    const { timeIndex } = getTimeField(series);
+    const sortedFrame = sortDataFrame(series, timeIndex, true);
+    let frame = new DataFrameView(sortedFrame);
+    dataFrames.push(frame);
   });
 
   return dataFrames;
