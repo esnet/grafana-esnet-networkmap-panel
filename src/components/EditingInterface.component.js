@@ -3,6 +3,7 @@ import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js';
 import testIds from '../constants.js';
+import { signals } from '../signals.js';
 import DOMPurify from './lib/purify.es.mjs';
 
 const LAVENDER = "rgb(202, 149, 229)";
@@ -10,7 +11,6 @@ const LAVENDER = "rgb(202, 149, 229)";
 class EditingInterface extends BindableHTMLElement {
     constructor(topology) {
         super();
-        this._topology = {};
         this.srcDstOptions = [];
         this._editMode = null;
         this._edgeEditMode = false; // edge edit turned on when we enter edit mode.
@@ -24,61 +24,72 @@ class EditingInterface extends BindableHTMLElement {
 
     // connect component
     connectedCallback() {
-      this.setEditMode(PubSub.last("setEditMode", this));
-      PubSub.subscribe("setEditMode", (evtData)=>{ 
-        this.setEditMode(evtData);
-        this.render();
-      }, this)
-
-      this.setEditNodeData(PubSub.last("showEditNodeDialog", this));
-      PubSub.subscribe("showEditNodeDialog", (evtData)=>{ 
-        this.setEditNodeData(evtData);
-        this.render();
-      }, this);
-
-      this.setEditSelection(PubSub.last('setEditSelection', this));
-      PubSub.subscribe('setEditSelection', (evtData)=>{
-          this.setEditSelection(evtData);
-          this.render();
-      }, this);
-
-      this.setEditing(PubSub.last("updateEditMode", this));
-      PubSub.subscribe('updateEditMode', (newMode)=>{
-        this.setEditing(newMode);
-        this.render();
-      }, this);
-
       this.render();
     }
 
+    setMapCanvas(mapCanvas){
+        this.mapCanvas = mapCanvas;
+        this.setEditMode(this.mapCanvas.lastValue(signals.private.EDIT));
+
+        this.setEditNodeData(this.mapCanvas.lastValue(signals.private.EDIT_NODE_DIALOG_VISIBLE));
+        this.mapCanvas.listen(signals.private.EDIT_NODE_DIALOG_VISIBLE, (evtData)=>{
+            this.setEditNodeData(evtData);
+            this.render();
+        });
+
+        this.setEditSelection(this.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET));
+        this.mapCanvas.listen(signals.private.EDIT_SELECTION_SET, (evtData)=>{
+            this.setEditSelection(evtData);
+            this.render();
+        });
+
+        this.setEditing(this.mapCanvas.lastValue(signals.EDITING_SET));
+        this.mapCanvas.listen(signals.EDITING_SET, (newMode)=>{
+            this.setEditing(newMode);
+            this.render();
+        });
+    }
 
     setEditMode(evtData){
         if(evtData === null || evtData === undefined){
             this._edgeEditMode = false;
             this._nodeEditMode = false;
+            this._selectedObject = null;
+            this._selectedLayer = null;
+            this._dialog = null;
+            this._spliceIndex = null;
         }
         if(evtData && evtData['mode'] === "edge"){
-            this._nodeEditMode = false;
             this._edgeEditMode = evtData['value'];
+            this._nodeEditMode = false;
         } 
         if(evtData && evtData['mode'] === "node"){
             this._edgeEditMode = false;
             this._nodeEditMode = evtData['value'];
         }
-        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editEdgeMode(this._edgeEditMode);
-        this.mapCanvas && this.mapCanvas.map && this.mapCanvas.map.esmap.editNodeMode(this._nodeEditMode);
+        if(evtData && evtData['mode'] === "off"){
+            this._edgeEditMode = false;
+            this._nodeEditMode = false;
+        }
+        this.mapCanvas?.map?.esmap?.editEdgeMode(this._edgeEditMode);
+        this.mapCanvas?.map?.esmap?.editNodeMode(this._nodeEditMode);
     }
 
-    setEditing(newMode){
-        this._editMode = PubSub.last("updateEditMode", this);
-        if(newMode && !this._edgeEditMode && !this._nodeEditMode){
-            PubSub.publish("setEditMode", { "mode": "edge", "value": true }, this);
+    setEditing(mode){
+        if(!mode){
+          this._editMode = false;
+          this.setEditMode(null);
+        } else {
+          this._editMode = true;
+          this.setEditMode({ mode: mode, value: true })
         }
-    }      
+        this.render();
+    }
 
     setEditNodeData(evtData){
         if(evtData){
             this._selectedObject = evtData['object'];
+            this._selectedType = evtData['type'];
             this._spliceIndex = evtData['index'];
             this.selectedLayer = evtData['layer'];
             this._dialog = "node";            
@@ -92,7 +103,7 @@ class EditingInterface extends BindableHTMLElement {
             this._formTouched = false;
             this._selectedObject = null;
             this._spliceIndex = null;
-            this._selectedLayer = null;
+            this._selectedLayer = 0;
             this._selectedType = null;
             return
         }
@@ -132,26 +143,12 @@ class EditingInterface extends BindableHTMLElement {
     get dialog(){
         return this._dialog;
     }
-    set topology(newValue){
-        this._topology = newValue;
-        this.render();
-    }
-    get topology(){
-        return this._topology;
-    }
     set selectedLayer(newValue){
         this._selectedLayer = newValue;
         this.setSrcDstOptions();
     }
     get selectedLayer(){
         return this._selectedLayer;
-    }
-    set updateTopology(newValue){
-        this._updateTopology = newValue;
-        this.setSrcDstOptions();
-    }
-    get updateTopology(){
-        return this._updateTopology;
     }
     // end setters and getters
     //////////////////////////////////
@@ -160,16 +157,15 @@ class EditingInterface extends BindableHTMLElement {
     // event bindings
     toggleNodeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("setEditSelection", null, this);
-        PubSub.publish("setEditMode", { "mode": "node", "value": !this._nodeEditMode }, this);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
+        const lastEditMode = this.mapCanvas.lastValue(signals.EDITING_SET);
+        this.mapCanvas.setEditMode(lastEditMode === "node" ? "off" : "node");
     }
     toggleEdgeEdit(e){
         e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("setEditSelection", null, this);
-        PubSub.publish("setEditMode", { "mode": "edge", "value": !this._edgeEditMode }, this);
-    }
-    recalcPaths(){
-        PubSub.publish('recalcPaths', null, this);
+        this.mapCanvas.emit(signals.private.EDIT_SELECTION_SET, null);
+        const lastEditMode = this.mapCanvas.lastValue(signals.EDITING_SET);
+        this.mapCanvas.setEditMode(lastEditMode === "edge" ? "off" : "edge");
     }
     showAddNodeDialog(e){
         e.stopPropagation(); // avoid bug in leaflet
@@ -179,6 +175,7 @@ class EditingInterface extends BindableHTMLElement {
         }
         this._selectedObject = null;
         this._spliceIndex = null;
+        this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, {object: null, index: null, layer: this._selectedLayer, type: "nodes"});
         this.dialog = "node";
     }
     showAddEdgeDialog(e){
@@ -187,11 +184,13 @@ class EditingInterface extends BindableHTMLElement {
         this._selectedObject = null;
         this._spliceIndex = null;
         this.setSrcDstOptions();
+        this.mapCanvas.emit(signals.private.EDIT_EDGE_DIALOG_VISIBLE, {object: null, index: null, layer: this._selectedLayer, type: "edges"});
         this.dialog = "edge";
     }
     hideDialogs(e){
-        e.stopPropagation(); // avoid bug in leaflet
-        PubSub.publish("showEditNodeDialog", null, this)
+        e?.stopPropagation(); // avoid bug in leaflet
+        this.mapCanvas.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, null);
+        this.mapCanvas.emit(signals.private.EDIT_EDGE_DIALOG_VISIBLE, null);
     }
     showSrcDst(event){
         this.selectedLayer = event.target.value;
@@ -234,26 +233,27 @@ class EditingInterface extends BindableHTMLElement {
         this._formTouched = false;
     }
     updateLayerNodes(layer, node, spliceIndex){
-        if(spliceIndex === null){
-            this._topology[layer].nodes.push(node);
-            PubSub.publish("createMapNode", {"layer": layer, "node": node }, this);
-        } else {
-            let oldNode = this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
-            PubSub.publish("updateMapNode", {"layer": layer, "node": node, "oldNode": oldNode }, this);
-        }
+        const newTopology = [];
         var defaultLayer = {"nodes":[], "edges": []};
-        const mapJson = [];
         for(let i=0; i<utils.LAYER_LIMIT; i++){
-            mapJson.push(this._topology[i] || defaultLayer);
+            newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
         }
-        PubSub.publish("updateTopology", mapJson, this);
+        // coerce to int
+        layer = +layer;
+        if(spliceIndex === null){
+            newTopology[layer].nodes.push(node);
+            this.mapCanvas.emit(signals.NODE_CREATED, {"layer": layer, "node": node });
+        } else {
+            let oldNode = newTopology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+            this.mapCanvas.emit(signals.NODE_UPDATED, {"layer": layer, "node": node, "oldNode": oldNode });
+        }
+        this.mapCanvas.setTopology(newTopology);
 
-        this.updateTopology && this.updateTopology(mapJson);
-        PubSub.publish("showEditNodeDialog", null, this)
+        this.hideDialogs();
 
         setTimeout(()=>{
-            PubSub.publish("snapEdges", {"node": node, "layer": layer.replace("layer", "") }, this);
-            PubSub.publish('renderMap', mapJson, this); // repaint re-renders the topology layers
+            this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer });
+            this.mapCanvas?.map?.renderMap(); // repaint re-renders the topology layers
         }, 10);
     }
     createMapEdge(e){
@@ -262,23 +262,19 @@ class EditingInterface extends BindableHTMLElement {
         var node_source = this.shadow.querySelector('#node_source').value;
         var node_destination = this.shadow.querySelector('#node_destination').value;
 
-        var mapJson = [];
-
-        for (var i = 0; i < utils.LAYER_LIMIT; i++) {
-          try {
-            mapJson[i] = this._topology[i];
-          } catch (e) {
-            mapJson[i] = { nodes: [], edges: [] };
-          }
+        const newTopology = [];
+        var defaultLayer = {"nodes":[], "edges": []};
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
         }
 
         var coordinates = [null, null];
-        for (let i = 0; i < mapJson[edge_layer].nodes.length; i++) {
-          if (mapJson[edge_layer].nodes[i].name === node_source) {
-            coordinates[0] = mapJson[edge_layer].nodes[i].coordinate;
+        for (let i = 0; i < newTopology[edge_layer].nodes.length; i++) {
+          if (newTopology[edge_layer].nodes[i].name === node_source) {
+            coordinates[0] = newTopology[edge_layer].nodes[i].coordinate;
           }
-          if (mapJson[edge_layer].nodes[i].name === node_destination) {
-            coordinates[1] = mapJson[edge_layer].nodes[i].coordinate;
+          if (newTopology[edge_layer].nodes[i].name === node_destination) {
+            coordinates[1] = newTopology[edge_layer].nodes[i].coordinate;
           }
         }
         let newEdge = {
@@ -297,26 +293,20 @@ class EditingInterface extends BindableHTMLElement {
         let endpointId = this.mapCanvas.options?.layers?.[edge_layer]?.endpointId
         newEdge.meta.endpoint_identifiers[endpointId] = [node_source, node_destination];
 
-        mapJson[edge_layer].edges.push(newEdge);
+        newTopology[edge_layer].edges.push(newEdge);
 
-        PubSub.publish("createMapEdge", {
+        this.mapCanvas.emit(signals.EDGE_CREATED, {
             "layer": edge_layer,
             "source": node_source,
             "destination": node_destination,
             "edge": newEdge
-        }, this);
+        });
 
-        PubSub.publish("updateTopology", mapJson, this);
-        PubSub.publish('updateMapTopology', mapJson, this);
+        this.mapCanvas.setTopology(newTopology);
+        this.hideDialogs();
 
-        this.updateTopology && this.updateTopology(mapJson);
-        this.dialog = false;
         setTimeout(function () {
-          PubSub.publish(
-            'renderMap', // the renderMap signal triggers a re-render of json layers
-            mapJson,
-            this
-          );
+            this.mapCanvas?.map?.renderMap();
         }, 100);
     }
 
@@ -325,15 +315,13 @@ class EditingInterface extends BindableHTMLElement {
         var topology = this.mapCanvas.topology;
         var deleted = topology[this._selectedLayer][this._selectedType].splice(this._spliceIndex, 1);
         if(this._selectedType == "edges"){
-            PubSub.publish("deleteMapEdge", {"edge": deleted[0], "layer":this._selectedLayer}, this)
+            this.mapCanvas.emit(signals.EDGE_DELETED, {"edge": deleted[0], "layer":this._selectedLayer})
         }
         if(this._selectedType == "nodes"){
-            PubSub.publish("deleteMapNode", {"node": deleted[0], "layer":this._selectedLayer}, this)
+            this.mapCanvas.emit(signals.NODE_DELETED, {"node": deleted[0], "layer":this._selectedLayer})
         }
-        PubSub.publish("updateTopology", topology, this);
-        PubSub.publish("updateMapTopology", topology, this);
-        PubSub.publish("refresh", null, this);
-        PubSub.publish("updateTopologyData", null, this);
+        this.mapCanvas.setTopology(topology);
+        this.mapCanvas.refresh();
         this._selectedLayer = null;
         this._selectedType = null;
         this._spliceIndex = null;
@@ -343,12 +331,12 @@ class EditingInterface extends BindableHTMLElement {
 
     disableScrolling(evt){
         evt.stopPropagation();
-        PubSub.publish("disableScrolling", null, this);
+        this.mapCanvas.disableScrolling();
     }
 
     enableScrolling(evt){
         evt.stopPropagation();
-        PubSub.publish("enableScrolling", null, this);
+        this.mapCanvas.enableScrolling();
     }
     // end eventbindings
     /////////////////////////////
@@ -356,7 +344,7 @@ class EditingInterface extends BindableHTMLElement {
     setSrcDstOptions(){
         let json = { nodes: [] };
         try {
-          json = this._topology[this._selectedLayer];
+          json = this.mapCanvas._topology[this._selectedLayer];
         } catch (e) {
           this.srcDstOptions = [];
           return
@@ -398,16 +386,11 @@ class EditingInterface extends BindableHTMLElement {
         return "";
     }
     getFieldValue(objType, fieldName){
-        var target = null;
+        let target = null;
         if(this._selectedType == objType && !!this._selectedObject){
             target = this._selectedObject
         }
-        var fields = fieldName.split(".");
-        for (var field of fields){
-            if(!target) return this.toString(target);
-            target = target[field]
-        }
-        return this.toString(target);
+        return this.toString(utils.resolvePath(target, fieldName));
     }
     markFormTouched(){
         this._formTouched = true;
@@ -445,7 +428,6 @@ class EditingInterface extends BindableHTMLElement {
         for(let i=0; i<utils.LAYER_LIMIT; i++){
             selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>Layer ${i+1}</option>`;
         }
-
 
         this.shadow.innerHTML = `
             <style>

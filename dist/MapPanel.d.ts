@@ -6,9 +6,11 @@ export interface MapPanelProps extends PanelProps<MapOptions> {
     fieldConfig: any;
     options: MapOptions;
 }
+export declare function toDataFrames(data: any): any[];
 export declare class MapPanel extends Component<MapPanelProps> {
     mapCanvas: any;
     lastOptions: any;
+    lastTopology: any;
     theme: any;
     mapjsonCache: any;
     subscriptionHandle: any;
@@ -18,19 +20,18 @@ export declare class MapPanel extends Component<MapPanelProps> {
     setDashboardVariables(): (event: any) => void;
     updateCenter: (centerData: any) => void;
     updateMapViewport: (viewportData: any) => void;
-    updateMapJson: (mapData: any) => void;
-    calculateOptionsChanges: (currOptions: any) => string[];
+    updateTopologyEditor: (mapData: any) => void;
     toggleLayer: (layer: any, value: any) => void;
     resolveLatLngFromVars(options: any, data: any, replaceVariables: any): {
         resolvedLat: number;
         resolvedLng: number;
     };
+    resolveNodeThresholds(options: any): any;
     updateMap(forceRefresh?: any): void;
     componentDidMount(): void;
     componentWillUnmount(): void;
     componentDidUpdate(): void;
     render(): React.ReactElement<{
-        options: string;
         width: number;
         height: number;
         startlat: number;

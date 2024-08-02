@@ -79,7 +79,11 @@ const getLastValue = (topic, messageBus)=>{
     if(messageBus.debug){
         console.debug("returning last value for", topic, "from bus with id #", messageBus.instanceId);
     }
-    return JSON.parse(localStorage.getItem(accessor));
+    try {
+        return JSON.parse(localStorage.getItem(`${messageBus.instanceId}.lastEvents.${topic}`));
+    } catch(e) {
+        return undefined;
+    }
 }
 
 const clearLastValue = (topic, messageBus)=>{

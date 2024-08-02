@@ -10,9 +10,12 @@ import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
 import testIds from '../constants.js';
 import * as L from "./lib/leaflet-src.esm.js";
+import { signals } from '../signals.js';
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
+
+const EDGE_DELIMITER = "--";
 
 // plus-one-pixel for each map tile. this makes the tiles
 // overlap slightly to avoid fractional zoom artefacts
@@ -52,48 +55,100 @@ export class MapCanvas extends BindableHTMLElement {
     this._options = null;
     this._selection = false;
     this._remoteLoaded = false;
+    this._data = null;
     this.map = null;
     this.leafletMap = null;
     this.jsonResults = [false, false, false];
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
     this.optionsCache = {};
+    this.pubsub = new PrivateMessageBus(this);
+    this._trafficFormat = utils.formatBits;
+    this._optionsToWatch = [
+      'background',
+      'tileset.geographic',
+      'tileset.boundaries',
+      'tileset.labels',
+      'showSidebar',
+      'showViewControls',
+      'showLegend',
+      'customLegend',
+      'customLegendValue',
+      'legendColumnLength',
+      'legendPosition',
+      'legendDefaultBehavior',
+      'thresholds',
+      'enableScrolling',
+      'enableEditing',
+      'enableNodeAnimation',
+      'enableEdgeAnimation',
+      'enableCustomNodeTooltip',
+      'enableCustomEdgeTooltip',
+      'customNodeTooltip',
+      'customEdgeTooltip',
+      'topologySource',
+      'configurationUrl',
+      'resolvedLat',
+      'resolvedLng',
+      'multiLayerNodeSnap',
+    ];
+    for(let i=0; i<utils.LAYER_LIMIT; i++){
+      this._optionsToWatch = this._optionsToWatch.concat([
+        `layers[${i}].visible`,
+        `layers[${i}].color`,
+        `layers[${i}].endpointId`,
+        `layers[${i}].nodeHighlight`,
+        `layers[${i}].nodeWidth`,
+        `layers[${i}].mapjson`,
+        `layers[${i}].edgeWidth`,
+        `layers[${i}].pathOffset`,
+        `layers[${i}].name`,
+        `layers[${i}].legend`,
+        `layers[${i}].dstFieldLabel`,
+        `layers[${i}].srcFieldLabel`,
+        `layers[${i}].dataFieldLabel`,
+        `layers[${i}].nodeThresholds`,
+        `layers[${i}].autodetect.dstNameColumn`,
+        `layers[${i}].autodetect.dstLatitudeColumn`,
+        `layers[${i}].autodetect.dstLongitudeColumn`,
+        `layers[${i}].autodetect.srcNameColumn`,
+        `layers[${i}].autodetect.srcLatitudeColumn`,
+        `layers[${i}].autodetect.srcLongitudeColumn`,
+      ]);
+    }
   }
 
+
+  setSelection(data) {
+    this.selection = true;
+    this.emit(signals.SELECTION_SET, data);
+  }
+  showTooltip(event, text) {
+    this.emit(signals.TOOLTIP_VISIBLE, {event: event, text: text});
+  }
+  hideTooltip(){
+    this.emit(signals.TOOLTIP_HIDDEN);
+  }
+  showEditNodeDialog(node, nodeIdx, layer){
+    this.emit(signals.private.EDIT_NODE_DIALOG_VISIBLE, {object: node, index: nodeIdx, layer: layer, type: "nodes"});
+  }
   // connect component
   connectedCallback() {
-    var bus = new PrivateMessageBus(this);
-    bus.setID(this.id, this);
+    this.pubsub.setID(this.id, this);
 
-    PubSub.subscribe('destroyMap', this.destroyMap, this);
-    PubSub.subscribe('newMap', this.newMap, this);
-    PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
-    PubSub.subscribe('toggleLayer', this.toggleLayer, this);
-    PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
-    PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
-    PubSub.subscribe('updateMapDimensions', this.updateMapDimensions, this);
-    PubSub.subscribe('updateTopology', () => { this.updateTopology && this.updateTopology(this.topology) }, this);
-    PubSub.subscribe('disableScrolling', ()=>{ this.disableScrolling() }, this);
-    PubSub.subscribe('enableScrolling', ()=>{ this.enableScrolling() }, this);
-    PubSub.subscribe("setSelection", function(d){
-        this.selection = true;
-    }, this);
-    PubSub.subscribe("clearSelection", function(){
-        this.selection = false;
-    }, this);
-    PubSub.subscribe('getMapCenterAndZoom', (() => {
+    PubSub.global.subscribe(signals.REQUEST_MAP_CENTER_AND_ZOOM, (() => {
       var self = this;
       return () => {
-        PubSub.publish("returnMapCenterAndZoom", {
+        PubSub.global.publish(signals.RETURN_MAP_CENTER_AND_ZOOM, {
           center: self.map.leafletMap.getCenter(),
           zoom: self.map.leafletMap.getZoom()
         })
       }
     })());
-    PubSub.subscribe("getMapViewport", (() => {
+    PubSub.global.subscribe(signals.REQUEST_VIEWPORT, (() => {
       var self = this;
       return () => {
-        PubSub.publish("returnMapViewport", {
+        PubSub.publish(signals.RETURN_VIEWPORT, {
           coordinates: self.map.leafletMap.getBounds()
         })
       }
@@ -108,53 +163,70 @@ export class MapCanvas extends BindableHTMLElement {
     if(!this.options && this.getAttribute("options")){
       this.options = JSON.parse(this.getAttribute("options"));
     }
-    if(this.options && this.options.legendDefaultBehavior){
+    if(this.options?.legendDefaultBehavior){
       this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
     this.maybeFetchOptions();
 
-    const params = utils.getUrlSearchParams();
-    if (
-      params.editPanel === null ||
-      params.editPanel === undefined ||
-      !this.options.enableEditing
-    ) {
-      this.disableEditing();
-    } else {
-        this.enableEditing();
-    }
+    this.setEditModeFromUrl();
     this.render();
   }
 
   get topology() {
     return this._topology;
   }
-  set topology(newValue){
+  setTopology(newValue){
+    // if we already have a topology set, we should re-render.
+    const render = this._topology;
     this._topology = newValue;
+    this.emit(signals.TOPOLOGY_UPDATED, newValue);
+    render && this.render();
     return newValue;
   }
 
   get options() {
-    return this._options;
+    if(!!this._options){ return this._options; }
+    return {};
   }
-  set options(newValue){
+  setOptions(newValue){
+    let changes = this.calculateOptionsChanges(newValue);
     this._options = newValue;
+    if(!changes.length) return;
+    this.updateMapOptions({ options: newValue, changed: changes });
+    this.matchTraffic();
+    this.setEditModeFromUrl();
+    this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
     return newValue;
   }
+  setEditModeFromUrl(){
+    const params = utils.getUrlSearchParams();
+    if (
+      params.editPanel === null ||
+      params.editPanel === undefined ||
+      !this.options.enableEditing
+    ) {
+      this.setEditMode(null);
+    } else {
+      this.setEditMode(this.lastValue(signals.EDITING_SET) || "edge");
+    }
+  }
+  calculateOptionsChanges(newOptions){
+    let changed = [];
+    this._optionsToWatch.forEach((option) => {
+      let lastValue = utils.resolvePath(this._options, option);
+      let currentValue = utils.resolvePath(newOptions, option);
+      if (lastValue !== currentValue) {
+        changed.push(option);
+      }
+    });
+    return changed;
+  };
+
   get jsonResults(){
     return this._jsonResults;
   }
   set jsonResults(newResults){
     this._jsonResults = newResults;
-  }
-
-  get updateTopology(){
-    return this._updateTopology;
-  }
-  set updateTopology(newValue){
-    this._updateTopology = newValue;
-    if(this.editingInterface) this.editingInterface.updateTopology = newValue;
-    return newValue;
   }
 
   get updateOptions(){
@@ -187,7 +259,7 @@ export class MapCanvas extends BindableHTMLElement {
   }
   set startlat(newValue){
     this._startlat = newValue;
-    this.newMap();
+    this.refresh();
     return newValue;
   }
   get startlng(){
@@ -195,15 +267,202 @@ export class MapCanvas extends BindableHTMLElement {
   }
   set startlng(newValue){
     this._startlng = newValue;
-    this.newMap();
+    this.refresh();
     return newValue;
   }
   set selection(newValue){
-      this._selection = newValue;
-      this.renderStyle();
+    this._selection = newValue;
+    this.renderStyle();
   }
   get selection(){
-      return this._selection;
+    return this._selection;
+  }
+
+  filterTraffic(newData){
+    let output = [];
+    let outputHash = {};
+    this._options?.layers?.forEach((layerOptions, layerIdx)=>{
+      if(!layerOptions) return
+      newData.forEach((row)=>{
+        if(!layerOptions?.srcField && !layerOptions?.dstField) return
+        let edgeName = null;
+        // match for for the case where both src and dst fields are set for the layer
+        if(layerOptions?.srcField && layerOptions?.dstField){
+          edgeName = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
+        }
+        // match for the case where we have a row with a single metadata point as src
+        if(!edgeName){
+          edgeName = `${row[layerOptions.srcField]}`;
+        }
+        // match for the case where we have a row with a single metadata point as dst
+        if(!edgeName){
+          edgeName = `${row[layerOptions.dstField]}`;
+        }
+        if(!outputHash[edgeName]){
+          outputHash[edgeName] = row;
+        }
+      })
+    })
+    Object.keys(outputHash).forEach((key)=>{
+      output.push(outputHash[key]);
+    });
+    if(output.length < 1){
+      // in the case that we failed completely, return the input
+      return newData;
+    }
+    // otherwise, we have valid output, return it.
+    return output
+  }
+
+  get traffic(){
+    return this._traffic;
+  }
+  setTraffic(newData){
+    this._traffic = this.filterTraffic(newData);
+    if(this._options?.topologySource == "autodetect"){
+      for(let i=0; i<utils.LAYER_LIMIT; i++){
+        if(this._topology?.[i]?.autodetected){
+          delete this._topology[i].autodetected;
+        }
+      }
+      this.render();
+    }
+    this.matchTraffic();
+    this.render();
+    this.emit(signals.TRAFFIC_UPDATED, JSON.parse(JSON.stringify(this._traffic)));
+    return this._traffic;
+  }
+
+  matchTraffic(){
+    this._options?.layers?.forEach((layerOptions, layerIdx)=>{
+      // get a reference to the topology for this layer
+      let layerTopology = this._topology?.[layerIdx];
+
+      // if this topology doesn't have a layer... 
+      // or if we don't have any traffic data...
+      // the rest of this algorithm doesn't make sense.
+      if(!layerTopology || !this._traffic || !this._traffic.length){ return }
+      if(!layerOptions.visible){ return }
+
+      // build a hash to avoid n*m*o complexity
+      // make a hash of "name": "index"
+      // where the index gets us the element of the original array
+      let edgeHash = {}
+      layerTopology?.edges?.forEach((edge, edgeIdx)=>{
+        let endpointId = layerOptions.endpointId;
+        if(this._options?.topologySource === "autodetect"){
+          endpointId = "names";
+        }
+        let endpointIds = edge.meta.endpoint_identifiers[endpointId];
+        if(endpointIds?.length > 1){
+          // Find A and Z node
+          edge.nodeA = endpointIds[0];
+          edge.nodeZ = endpointIds[1];
+          // create names
+          edge._matchname = `${edge.nodeA}${EDGE_DELIMITER}${edge.nodeZ}`;
+        } else {
+          edge._matchname = `${endpointIds?.[0]}`
+        }
+        edgeHash[edge._matchname] = edgeIdx;
+      })
+      
+      // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
+      if(!layerOptions.srcField && !layerOptions.dstField){ return; }
+
+      // initialize all nodes with default color and 0 the traffic
+      let nodeHash = {}
+      layerTopology?.nodes?.forEach((node, nodeIdx) => {
+        node.inTraffic = 0;
+        node.outTraffic = 0;
+        node.color = layerOptions.color;
+        nodeHash[node.name] = nodeIdx
+      });
+      this._traffic?.forEach((row)=>{
+        // match for the case where we have A--Z in order
+        let forwardEdgeSelector = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
+        // match for the case where we have Z--A, reversed
+        let reverseEdgeSelector = `${row[layerOptions.dstField]}${EDGE_DELIMITER}${row[layerOptions.srcField]}`;
+        // match for the case where we have a row with a single metadata point such as a specific edge identifier
+        let singleIdSelector = `${row[layerOptions.srcField]}`;
+        // set the traffic sample by forward match
+        let targetEdge = layerTopology.edges[edgeHash[forwardEdgeSelector]];
+        let values = { in: layerOptions.inboundValueField, out: layerOptions.outboundValueField };
+        let edgeIsReversed = false;
+        // set the traffic sample by reverse match if no match yet
+        if(!targetEdge){
+          targetEdge = layerTopology.edges[edgeHash[reverseEdgeSelector]];
+          // be sure to reverse directionality of match
+          values = { in: layerOptions.outboundValueField, out: layerOptions.inboundValueField };
+          edgeIsReversed = true;
+        }
+        // set the traffic sample by single-point match if no match yet. Use forward directionality
+        if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
+        // if no match at all, don't mark up this edge with match data.
+        if(!targetEdge){ return }
+        targetEdge.azValue = row[values.in];
+        targetEdge.azDisplayValue = this._trafficFormat(row[values.in]);
+        targetEdge.azColor = this._trafficColor(row[values.in], this._options.thresholds, layerOptions.color);
+        targetEdge.zaValue = row[values.out];
+        targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
+        targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
+        // do the accounting for nodes
+        // in value should be added to the A node's in and the Z node's out
+        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
+        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
+        // out value should be added to the A node's out and the Z node's in
+        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
+        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["inTraffic"] += row[values.out];
+      })
+      // as a final step for nodes, convert the traffic sums to formatted labels
+      // and color the node based on the max traffic (in vs out)
+      layerTopology?.nodes?.forEach((node, nodeIdx)=>{
+        let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
+        node.inValue = this._trafficFormat(node.inTraffic);
+        node.outValue = this._trafficFormat(node.outTraffic);
+        node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
+      })
+    })
+
+  }
+
+  setTrafficFormat(fn){
+    this._trafficFormat = fn;
+    this.matchTraffic();
+  }
+  get trafficFormat(){
+    return this._trafficFormat;
+  }
+
+  _trafficColor(value, thresholds, defaultValue){
+    let output = defaultValue;
+    if(thresholds?.steps){
+      thresholds = thresholds.steps;
+    }
+    thresholds?.forEach((threshold)=>{
+      if(value >= threshold.value){
+        output = threshold.color;
+      }
+    })
+    return output
+  }
+  setTrafficColor(fn){
+    this._trafficColor = fn;
+  }
+  get trafficColor(){
+    return this._trafficColor;
+  }
+
+  listen(signal, callback){
+    this.pubsub.subscribe(signal, callback, this);
+  }
+  emit(signal, data){
+    this.pubsub.publish(signal, data, this);
+  }
+  lastValue(signal){
+    return this.pubsub.last(signal, this);
+  }
+  clearLast(signal){
+    return this.pubsub.clearLast(signal, this);
   }
 
 
@@ -218,34 +477,32 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   clearSelection(){
-      PubSub.publish('setVariables', null, this);
-      PubSub.publish('clearSelection', null, this);
+    this.selection = false;
+    this.clearLast(signals.SELECTION_SET);
+    this.emit(signals.VARIABLES_SET, null);
+    this.emit(signals.SELECTION_CLEARED, null);
+    PubSub.global.clearLast(signals.SELECTION_SET);
   }
 
-  disableEditing(){
-    PubSub.publish("updateEditMode", false, this);
-    if(!!PubSub.last("setEditMode", this)){
-      PubSub.publish("setEditMode", null, this);
+  setEditMode(mode){
+    if(["node", "edge", "off", null].indexOf(mode) < 0){
+      throw new Error("Edit mode must be 'edge', 'node', 'off' or null");
     }
-    if(!!PubSub.last("setEditSelection", this)){
-      PubSub.publish("setEditSelection", null, this);
-    }
-  }
-
-  enableEditing(){
-    PubSub.publish("updateEditMode", true, this);
+    this.emit(signals.EDITING_SET, mode);
   }
 
   enableScrolling(){
     this.leafletMap && this.leafletMap.dragging.enable();
+    this.emit(signals.SCROLLING_TOGGLED, true);
   }
 
   disableScrolling(){
     this.leafletMap && this.leafletMap.dragging.disable();
+    this.emit(signals.SCROLLING_TOGGLED, false);
   }
 
   maybeFetchOptions(){
-    if(this.options["useConfigurationUrl"]){
+    if(this.options?.topologySource == "url"){
       let self = this;
       let maskedKeys = {
         "showLegend": "masked",
@@ -261,6 +518,7 @@ export class MapCanvas extends BindableHTMLElement {
         "enableScrolling": "masked",
         "showViewControls": "masked",
         "thresholds": "masked",
+        "multiLayerNodeSnap": "masked",
       }
       let maskedLayerKeys = {
         "nodeThresholds": "masked",
@@ -300,20 +558,18 @@ export class MapCanvas extends BindableHTMLElement {
         })
         // never allow editing on a configuration populated from a URL
         self._options.enableEditing = false;
-        self.disableEditing();
+        self.setEditMode("edge");
         let topo = [];
         for(var i=0; i<newOptions.layers.length; i++){
           topo.push(JSON.parse(newOptions.layers[i].mapjson));
         }
         self._topology = topo;
-        self.topology = topo;
         self._remoteLoaded = true;
         self.shadow.remove();
         self.shadow = null;
         self.render();
-        self.newMap();
+        self.refresh();
         self.sideBar && self.sideBar.render();
-        PubSub.publish("topologyRefresh");
       }
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
@@ -339,22 +595,23 @@ export class MapCanvas extends BindableHTMLElement {
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
+    function wasChanged(option, changes){
+      return changes.indexOf(option) >= 0;
+    }
 
-    if(wasChanged('useConfigurationUrl', changed)){
-      this._options['useConfigurationUrl'] = options['useConfigurationUrl'];
+    if(wasChanged('topologySource', changed)){
+      this._options['topologySource'] = options['topologySource'];
       this.maybeFetchOptions();
-      return
     }
     if(wasChanged('configurationUrl', changed)){
       this._options['configurationUrl'] = options['configurationUrl'];
       // show loading curtain
       this._remoteLoaded = false;
-      this.shadow.remove();
+      this.shadow?.remove();
       this.shadow = null;
       this.render();
       // fetch remote data
       this.maybeFetchOptions();
-      return;
     }
 
     // options is sparse -- it includes only updated options.
@@ -363,9 +620,6 @@ export class MapCanvas extends BindableHTMLElement {
       utils.setPath(this._options, k, utils.resolvePath(options, k)) ;
     })
 
-    function wasChanged(option, changes){
-      return changes.indexOf(option) >= 0;
-    }
     if( wasChanged('showLegend', changed) ||
         wasChanged('customLegend', changed) ||
         wasChanged('customLegendValue', changed) ||
@@ -375,16 +629,20 @@ export class MapCanvas extends BindableHTMLElement {
       ){
       this.renderLegend();
     }
+    if(wasChanged('legendDefaultBehavior', changed)){
+      this.legendMinimized = options.legendDefaultBehavior === "minimized";
+      this.renderLegend();
+    }
     if(wasChanged('enableEditing', changed)){
       if(!options.enableEditing){
-        this.disableEditing();
+        this.setEditMode(null);
       } else {
-        this.enableEditing();
+        this.setEditMode(this.lastValue(signals.EDITING_SET) || "edge");
       }
       this.shadow.remove();
       this.shadow = null;
       this.render();
-      this.newMap();
+      this.refresh();
     }
     if(
         wasChanged('showSidebar', changed) ||
@@ -396,14 +654,14 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow.remove();
       this.shadow = null;
       this.render();
-      this.newMap();
+      this.refresh();
     }
     if (
       wasChanged('tileset.geographic', changed) ||
       wasChanged('tileset.boundaries', changed) ||
       wasChanged('tileset.labels', changed)
     ) {
-      this.newMap();
+      this.refresh();
     } else {
       this.map && this.map.renderMap();
     }
@@ -477,9 +735,63 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
       newValue.layers[layerData.layer] = { visible: layerData.visible };
     }
-    this.map.renderMapLayers();
+    this.map.renderMap();
     this._updateOptions && this._updateOptions(newValue);
   }
+
+  autodetectTopology(){
+    if(!this._traffic) return;
+    if(this._options?.topologySource == "autodetect"){
+      this.options.enableEditing = false;
+      for(let i=0; i<this._options?.layers.length; i++){
+        if(this._topology?.[i]?.autodetected){ continue }
+        let layerTopology = { "nodes": [], "edges": [], "nodeHash": {}, "pathLayout": { "type": "curveBasis" }, "autodetected": true }
+
+        this._traffic.forEach((edge)=>{
+          this._options.layers[i].endpointId = "names";
+
+          let autodetectOptions = this._options?.layers[i].autodetect;
+          if(!autodetectOptions) return;
+          let srcNameKey = autodetectOptions.srcNameColumn;
+          let srcLatKey = autodetectOptions.srcLatitudeColumn;
+          let srcLngKey = autodetectOptions.srcLongitudeColumn;
+          let dstNameKey = autodetectOptions.dstNameColumn;
+          let dstLatKey = autodetectOptions.dstLatitudeColumn;
+          let dstLngKey = autodetectOptions.dstLongitudeColumn;
+
+          let source = {
+            "name": srcNameKey && edge[srcNameKey] ? edge[srcNameKey] : `${edge[srcLatKey]}:${edge[srcLngKey]}`,
+            "coordinate": [parseFloat(edge[srcLatKey]), parseFloat(edge[srcLngKey])],
+            "meta": {},
+          };
+          let dest = {
+            "name": dstNameKey && edge[dstNameKey] ? edge[dstNameKey] : `${edge[dstLatKey]}:${edge[dstLngKey]}`,
+            "coordinate": [parseFloat(edge[dstLatKey]), parseFloat(edge[dstLngKey])],
+            "meta": {},
+          };
+
+          layerTopology["nodeHash"][source.name] = source;
+          layerTopology["nodeHash"][dest.name] = dest;
+          let y_dist = source.coordinate[0] - dest.coordinate[0];
+          let x_dist = source.coordinate[1] - dest.coordinate[1];
+          let distance = Math.sqrt((x_dist**2) + (y_dist**2));
+          let midpoint = [dest.coordinate[0] + (y_dist/2 + (0.12 * distance)),  dest.coordinate[1] + (x_dist/2)];
+          let edgeObj = {
+            "name": `${source.name}--${dest.name}`,
+            "coordinates": [source.coordinate, midpoint, dest.coordinate],
+            "meta": { "endpoint_identifiers": { "names": [source.name, dest.name] } }
+          }
+          layerTopology["edges"].push(edgeObj);
+        })
+        layerTopology["nodes"] = Object.values(layerTopology["nodeHash"]);
+        if(!this._topology){
+          this._topology = []
+        }
+        this._topology[i] = layerTopology;
+      }
+    }
+  }
+
   getCurrentLeafletMap(){
     if(!this.leafletMap){
       var centerCoords = [this.startlat || this._options?.viewport?.center?.lat, this.startlng || this._options?.viewport?.center?.lng];
@@ -557,18 +869,21 @@ export class MapCanvas extends BindableHTMLElement {
       this.leafletMap.remove();
       this.leafletMap = null;
     }
+    if(this.map){
+      this.map.destroy();
+      this.map = null;
+    }
     // needs research
     PubSub.clearTopicCallbacks('');
+    this.emit(signals.MAP_DESTROYED);
   }
 
   homeMap(){
     window[this.id + "mapPosition"] = null;
-    this.newMap();
+    this.refresh();
   }
 
-  newMap(){
-      var edgeEditMode = false;
-      var nodeEditMode = false;
+  refresh(){
       if(this.topology){
         this.jsonResults = this.topology.map((layer)=>{
           return testJsonSchema(layer);
@@ -584,9 +899,10 @@ export class MapCanvas extends BindableHTMLElement {
       // destroys the in-RAM map, and unsubscribes all signals
       this.destroyMap && this.destroyMap();
       this.map = new NetworkMap(this); // implicitly calls getCurrentLeafletMap()
+      this.emit(signals.MAP_CREATED);
       this.map.renderMap();
-      var lastEditMode = PubSub.last('setEditMode', this);
-      PubSub.publish('setEditMode', lastEditMode, this);
+      var lastEditMode = this.lastValue(signals.private.EDIT_MODE_SET);
+      this.emit(signals.private.EDIT_MODE_SET, lastEditMode);
   }
 
   renderStyle(){
@@ -755,8 +1071,10 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   render(){
+    // if any of our layer are auto-detected, detect and create a topology from them
+    this.autodetectTopology();
     if(!this.shadow){
-      this._selection = !!PubSub.last("setSelection", this);
+      this._selection = !!this.lastValue(signals.SELECTION_SET);
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       this.shadow.innerHTML = `
@@ -771,7 +1089,7 @@ export class MapCanvas extends BindableHTMLElement {
 
 
       <div id='map-${this.instanceId}'>
-        <div class="loading-overlay" style="display: ${ !this.options["useConfigurationUrl"] || !!this._remoteLoaded ? "none" : "flex"}">
+        <div class="loading-overlay" style="display: ${ this.options["topologySource"] != "url" || !!this._remoteLoaded ? "none" : "flex"}">
           Loading Topology Data...
         </div>
         <div class="error-overlay" style="display: ${ !this._remoteLoadError ? "none" : "flex"}">
@@ -798,21 +1116,20 @@ export class MapCanvas extends BindableHTMLElement {
           <div id='legend-container'>
           </div>
         </div>
-        ${ this.options.enableEditing ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
+        ${ this.options.enableEditing && this.options.topologySource == "json" ? "<esnet-map-editing-interface></esnet-map-editing-interface>" : "" }
       </div>
       ${ this.options.showSidebar ? "<esnet-map-side-bar></esnet-map-side-bar>" : "" }`;
       this.mapContainer = this.shadow.querySelector(`#map-${this.instanceId}`);
 
       this.editingInterface = this.shadow.querySelector("esnet-map-editing-interface");
       if(this.editingInterface){
-        this.editingInterface.mapCanvas = this;
+        this.editingInterface.setMapCanvas(this);
         this.editingInterface.topology = this.topology;
-        this.editingInterface.updateTopology = this.updateTopology;
       }
 
       this.sideBar = this.shadow.querySelector("esnet-map-side-bar");
       if(this.sideBar){
-        this.sideBar.mapCanvas = this;
+        this.sideBar.setMapCanvas(this);
       }
       // if we have ResizeObserver in our context, do some extra watching
       if(typeof(ResizeObserver) != 'undefined'){
@@ -838,10 +1155,10 @@ export class MapCanvas extends BindableHTMLElement {
         this.mapContainer.style.width = "100%";
       }
     }
-    if(!this.map && this.options && this.topology){
-      this.newMap();
-    }
 
+    if(!this.map && this._options && this.topology){
+      this.refresh();
+    }
     this.map && this.map.renderMap();
     this.bindEvents({
       "#home_map@onclick": this.homeMap,

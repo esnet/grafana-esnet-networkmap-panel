@@ -1,20 +1,36 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView, getValueFormat } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField } from '@grafana/data';
 import { MapOptions } from './types';
-import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
-import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
+import { LAYER_LIMIT, setPath } from "./components/lib/utils.js"
+import { signals } from "./signals.js"
+
 export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
 }
 
+export function toDataFrames(data){
+  let dataFrames = [] as any[];
+
+  data.series.forEach(function (series) {
+    // get frame and ensure it's sorted by timestamp
+    const { timeIndex } = getTimeField(series);
+    const sortedFrame = sortDataFrame(series, timeIndex, true);
+    let frame = new DataFrameView(sortedFrame);
+    dataFrames.push(frame);
+  });
+
+  return dataFrames;
+}
+
 export class MapPanel extends Component<MapPanelProps> {
   mapCanvas: any;
   lastOptions: any;
+  lastTopology: any;
   theme: any;
   mapjsonCache: any;
   subscriptionHandle: any;
@@ -31,10 +47,8 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     this.lastOptions = {...this.props.options};
     this.theme = createTheme();
-    let self = this;
-    PubSub.subscribe('returnMapCenterAndZoom', this.updateCenter);
-    PubSub.subscribe('returnMapViewport', this.updateMapViewport);
-    PubSub.subscribe('topologyRefresh', ()=>{ self.updateMap() });
+    PubSub.global.subscribe(signals.RETURN_MAP_CENTER_AND_ZOOM, this.updateCenter);
+    PubSub.global.subscribe(signals.RETURN_VIEWPORT, this.updateMapViewport);
   }
 
   setDashboardVariables() {
@@ -90,7 +104,7 @@ export class MapPanel extends Component<MapPanelProps> {
 
   // A function to update the map jsons in the Edit panel based on the current map state
   // Used in esmap.js
-  updateMapJson = (mapData) => {
+  updateTopologyEditor = (mapData) => {
     const { options } = this.props;
     let update = { ...options }
     if(!update.layers){
@@ -112,75 +126,6 @@ export class MapPanel extends Component<MapPanelProps> {
     this.props.onOptionsChange(update);
   };
 
-  calculateOptionsChanges = (currOptions) => {
-    let changed: string[];
-    changed = [];
-
-    const optionsToWatch = [
-      'background',
-      'tileset.geographic',
-      'tileset.boundaries',
-      'tileset.labels',
-      'showSidebar',
-      'showViewControls',
-      'showLegend',
-      'customLegend',
-      'customLegendValue',
-      'legendColumnLength',
-      'legendPosition',
-      'thresholds',
-      'enableScrolling',
-      'enableEditing',
-      'enableNodeAnimation',
-      'enableEdgeAnimation',
-      'enableCustomNodeTooltip',
-      'enableCustomEdgeTooltip',
-      'customNodeTooltip',
-      'customEdgeTooltip',
-      'useConfigurationUrl',
-      'configurationUrl',
-      'resolvedLat',
-      'resolvedLng',
-    ];
-    for(let i=0; i<LAYER_LIMIT; i++){
-      optionsToWatch.push(`layers[${i}].visible`);
-      optionsToWatch.push(`layers[${i}].color`);
-      optionsToWatch.push(`layers[${i}].endpointId`);
-      optionsToWatch.push(`layers[${i}].nodeHighlight`);
-      optionsToWatch.push(`layers[${i}].nodeWidth`);
-      optionsToWatch.push(`layers[${i}].mapjson`);
-      optionsToWatch.push(`layers[${i}].edgeWidth`);
-      optionsToWatch.push(`layers[${i}].pathOffset`);
-      optionsToWatch.push(`layers[${i}].name`);
-      optionsToWatch.push(`layers[${i}].legend`);
-      optionsToWatch.push(`layers[${i}].dstFieldLabel`);
-      optionsToWatch.push(`layers[${i}].srcFieldLabel`);
-      optionsToWatch.push(`layers[${i}].dataFieldLabel`);
-    }
-    optionsToWatch.forEach((option) => {
-      let lastValue = resolvePath(this.lastOptions, option);
-      let currentValue = resolvePath(currOptions, option);
-      if(option === 'thresholds'){
-        // test these for relative equality; this object memory ref changes on each option change.
-        lastValue = JSON.stringify(lastValue);
-        currentValue = JSON.stringify(currentValue);
-      }
-      if (lastValue !== currentValue) {
-        if (option === 'background') {
-          this.props.options.background = this.theme.visualization.getColorByName(currOptions.background);
-        }
-        if(Array.isArray(this.props.options[option])){
-          let newOption = [...resolvePath(this.props.options, option)];
-          setPath(this.lastOptions, option, newOption);
-        } else {
-          setPath(this.lastOptions, option, resolvePath(currOptions, option));
-        }
-        changed.push(option);
-      }
-    });
-    return changed;
-  };
-
   // A function to turn layers on or off. Takes in the layer and boolean value
   // Used in SideBar.tsx
   toggleLayer = (layer, value) => {
@@ -197,9 +142,7 @@ export class MapPanel extends Component<MapPanelProps> {
     };
     if (this.props.options.initialViewStrategy === 'variables') {
       let frames: any[];
-      frames = data.series.map((series) => {
-        return new DataFrameView(series);
-      });
+      frames = toDataFrames(data);
       const toResolve = {
         latitudeVar: 'resolvedLat',
         longitudeVar: 'resolvedLng',
@@ -236,8 +179,32 @@ export class MapPanel extends Component<MapPanelProps> {
     return output;
   }
 
+  resolveNodeThresholds(options){
+    let thresholds: any[] = [];
+    for(let layer=0; layer<LAYER_LIMIT; layer++){
+      if(!options.layers[layer]){ continue; }
+      let layerThresholds: any[] = [];
+      options.layers[layer]?.nodeThresholds?.steps.forEach((step)=>{ 
+        layerThresholds.push({
+          color: this.theme.visualization.getColorByName(step.color),
+          value: step.value || 0,
+        })
+      })
+      thresholds.push(layerThresholds);
+    }
+    // snapshot the current options. If they're not the same as the last options, update them.
+    let currOptions = JSON.parse(JSON.stringify(options));
+    thresholds.forEach((layerThresholds, layerIdx)=>{
+      const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
+      if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
+        setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
+      }
+    })
+    return currOptions;
+  }
+
   updateMap(forceRefresh?) {
-    const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
+    const { options, data, replaceVariables, fieldConfig } = this.props;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
@@ -245,13 +212,20 @@ export class MapPanel extends Component<MapPanelProps> {
       this.mapCanvas.current.valueFormat = getValueFormat(fieldConfig.defaults?.unit);
     }
 
-    this.mapCanvas.current.updateTopology = this.updateMapJson;
-
     this.mapCanvas.current.setAttribute('startlat', latLng['resolvedLat']);
     this.mapCanvas.current.setAttribute('startlng', latLng['resolvedLng']);
+    if(data.state === "Done"){
+      let frames = toDataFrames(data);
+      let output = [] as any[];
+      frames.forEach((frame)=>{
+        frame.forEach((row) => {
+          output.push(JSON.parse(JSON.stringify(row)));
+        })
+      })
+      this.mapCanvas.current.data = output
+      this.mapCanvas.current.autodetectTopology();
+    }
 
-    let colors: any[] = [];
-    let fields: any[] = [];
 
     let topology = [
       { nodes: [], edges: [] },
@@ -265,36 +239,23 @@ export class MapPanel extends Component<MapPanelProps> {
     ]
 
     for(let layer=0; layer<LAYER_LIMIT; layer++){
-      if(!options.layers[layer]){ continue; }
-      colors.push({
-        defaultColor: this.mapCanvas?.current?.options?.layers?.[layer]?.color || options.layers[layer].color,
-        nodeThresholds: options.layers[layer].nodeThresholds?.steps || [],
-      })
-      fields.push({
-        srcField: options.layers[layer].srcField,
-        dstField: options.layers[layer].dstField,
-        inboundValueField: options.layers[layer].inboundValueField,
-        outboundValueField: options.layers[layer].outboundValueField,
-        endpointId: options.layers[layer].endpointId,
-        nodeNameMatchField: options.layers[layer].nodeNameMatchField,
-        nodeValueField: options.layers[layer].nodeValueField,
-      })
+
+      const memoryTopology = JSON.stringify(this.mapCanvas?.current?.topology?.[layer] || null)
+      const editorTopology = options.layers?.[layer]?.mapjson;
       // if we have an existing in-memory copy, use it
-      if (!forceRefresh && this.mapCanvas?.current?.topology?.[layer]){
-        topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
-      } else if (options.layers[layer]['mapjson']) {
-        topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
+      if (!forceRefresh && JSON.parse(memoryTopology) && editorTopology === memoryTopology){
+        topologyData[layer] = memoryTopology;
+      } else if (editorTopology !== memoryTopology) {
+        topologyData[layer] = editorTopology;
       } 
 
+      // here, we parse the topology data (as strings in topologyData)
+      // In the case that we have an error, we pass the topologyData along to 
+      // MapCanvas to figure out what went wrong.
+      // @ts-ignore
+
       try {
-        // here, we parse the topology data (as strings in topologyData)
-        // and enrich it with analytics data (from 'data'). This function also
-        // parses the topologyData for errors. In the case that we have an error
-        // we pass the topologyData along to MapCanvas to figure out what went wrong.
-        // Overall, this mechanism should be simplified and generalized so we can
-        // use this outside of a Grafana context.
-        // @ts-ignore
-        topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer);
+        topology[layer] = JSON.parse(topologyData[layer]);
       } catch(e) {
         // ensure that the mapcanvas has jsonResults set up so it can collect errors.
         if(!this.mapCanvas.current.jsonResults){
@@ -302,31 +263,72 @@ export class MapPanel extends Component<MapPanelProps> {
         }
         // @ts-ignore
         topology[layer] = topologyData[layer];
-        console.error(e);
       }
     }
-    this.mapCanvas.current.updateMapTopology(topology);
-    this.mapCanvas.current.updateMapDimensions({ width: width, height: height });
-    PubSub.publish('hideTooltip', null, this.mapCanvas.current);
 
-    PubSub.subscribe('setVariables', this.setDashboardVariables(), this.mapCanvas.current);
-    PubSub.subscribe(
-      'updateTopologyData',
-      () => {
-        this.updateMapJson(this.mapCanvas.current['topology']);
-      },
-      this.mapCanvas.current
-    );
+    // snapshot the current topology. If it's not the same as the last topology, update it.
+    let currTopology = JSON.stringify(topology);
+    if(currTopology !== this.lastTopology){
+      this.mapCanvas.current.setTopology(topology);
+      this.lastTopology = currTopology;
+    }
+
+    let dataFrames = toDataFrames(data);
+    let trafficData = [] as any[];
+    let formatter = null as any;
+    dataFrames.forEach((frame)=>{
+      frame.data.fields.forEach((field)=>{
+        // all numerical fields use the same formatter.
+        // find a numerical field and set up the formatter function here.
+        if(field.type === "number"){
+          let display = field.display;
+          formatter = (value)=>{
+            const formatted = display(value);
+            return `${formatted.text}${formatted.suffix}`;
+          }
+        }
+      })
+      frame.forEach((row)=>{
+        trafficData.push({...row});
+      })
+    });
+
+    this.mapCanvas.current.setTrafficFormat(formatter);
+    this.mapCanvas.current.setTraffic(trafficData);
   }
   componentDidMount() {
-    const { eventBus, options } = this.props;
+    let { eventBus, options, replaceVariables, fieldConfig } = this.props;
+    options = JSON.parse(JSON.stringify(options));
+
+    let thresholds: any[];
+    thresholds = [];
+    fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
+      thresholds.push({
+        color: this.theme.visualization.getColorByName(threshold.color),
+        value: threshold.value,
+      });
+    });
+    options.thresholds = thresholds;
+    options = this.resolveNodeThresholds(options);
+    options.zIndexBase = 200;
+    this._configurationUrl = options.configurationUrl;
+    options.configurationUrl = replaceVariables(options.configurationUrl);
+
+    this.lastOptions.configurationUrl = options.configurationUrl;
+
+    this.mapCanvas.current.setOptions(options);
+
+    this.mapCanvas.current.listen(signals.TOPOLOGY_UPDATED,() => {
+        this.updateTopologyEditor(this.mapCanvas.current['topology']);
+    });
+
     this.updateMap();
     // @ts-ignore
     this.subscriptionHandle = eventBus.getStream({type: "panel-edit-finished"}).subscribe((e)=>{
         if(this.mapCanvas.current){
           // do this async to ensure that the UI has time to update after conclusion of edit.
           setTimeout(()=>{
-            if(!options.useConfigurationUrl){
+            if(options.topologySource !== "url"){
               this.updateMap(true);
             }
           }, 10);
@@ -357,43 +359,6 @@ export class MapPanel extends Component<MapPanelProps> {
     options = JSON.parse(JSON.stringify(options));
     options.configurationUrl = replaceVariables(this._configurationUrl);
 
-    let changed = this.calculateOptionsChanges(options);
-
-    if(changed.indexOf("useConfigurationUrl") >= 0){
-      if(!options.useConfigurationUrl){
-        let thresholds: any[];
-        thresholds = [];
-        fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
-          thresholds.push({
-            color: this.theme.visualization.getColorByName(threshold.color),
-            value: threshold.value,
-          });
-        });
-        options.thresholds = thresholds;
-        options.zIndexBase = 200;
-
-        // need to do something here to kill and rebuild the whole map canvas element.
-        this.mapCanvas.current.options = JSON.parse(JSON.stringify(options));
-        this.mapCanvas.current.shadow.remove();
-        this.mapCanvas.current.shadow = null;
-        this.mapCanvas.current.render();
-        this.mapCanvas.current.newMap();
-        this.mapCanvas.current.topology = null;
-
-      }
-    }
-
-    this.updateMap();
-
-    if (changed.length > 0) {
-      this.mapCanvas.current.updateMapOptions({ options: options, changed: changed });
-    }
-  }
-
-  render() {
-    let { options, width, height, data, replaceVariables, fieldConfig } = this.props;
-    options = JSON.parse(JSON.stringify(options));
-
     let thresholds: any[];
     thresholds = [];
     fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
@@ -403,19 +368,39 @@ export class MapPanel extends Component<MapPanelProps> {
       });
     });
     options.thresholds = thresholds;
+    options = this.resolveNodeThresholds(options);
     options.zIndexBase = 200;
-    this._configurationUrl = options.configurationUrl;
-    options.configurationUrl = replaceVariables(options.configurationUrl);
-    this.lastOptions.configurationUrl = options.configurationUrl;
+
+    let changed = this.mapCanvas.current.calculateOptionsChanges(options);
+
+    if(changed.indexOf("topologySource") >= 0){
+      if(options.topologySource !== "url"){
+        this.mapCanvas.current.setOptions(JSON.parse(JSON.stringify(options)));
+        this.mapCanvas.current.refresh();
+      }
+      if(options.topologySource === "json"){
+        this.mapCanvas.current.setTopology(JSON.parse(this.lastTopology));
+      }
+    }
+
+    this.updateMap();
+
+    if (changed.length > 0) {
+      this.mapCanvas.current.setOptions(options);
+    }
+  }
+
+  render() {
+    let { options, width, height, data, replaceVariables } = this.props;
 
     const output = this.resolveLatLngFromVars(options, data, replaceVariables);
-    return React.createElement('esnet-map-canvas', {
-      options: JSON.stringify(options),
+    const elem = React.createElement('esnet-map-canvas', {
       width: width,
       height: height,
       startlat: output['resolvedLat'],
       startlng: output['resolvedLng'],
       ref: this.mapCanvas,
     });
+    return elem;
   }
 }
