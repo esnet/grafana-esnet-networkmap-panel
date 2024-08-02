@@ -11,7 +11,6 @@ const LAVENDER = "rgb(202, 149, 229)";
 class EditingInterface extends BindableHTMLElement {
     constructor(topology) {
         super();
-        this._topology = {};
         this.srcDstOptions = [];
         this._editMode = null;
         this._edgeEditMode = false; // edge edit turned on when we enter edit mode.
@@ -144,13 +143,6 @@ class EditingInterface extends BindableHTMLElement {
     get dialog(){
         return this._dialog;
     }
-    set topology(newValue){
-        this._topology = newValue;
-        this.render();
-    }
-    get topology(){
-        return this._topology;
-    }
     set selectedLayer(newValue){
         this._selectedLayer = newValue;
         this.setSrcDstOptions();
@@ -241,24 +233,26 @@ class EditingInterface extends BindableHTMLElement {
         this._formTouched = false;
     }
     updateLayerNodes(layer, node, spliceIndex){
+        const newTopology = [];
+        var defaultLayer = {"nodes":[], "edges": []};
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
+        }
+        // coerce to int
+        layer = +layer;
         if(spliceIndex === null){
-            this._topology[layer].nodes.push(node);
+            newTopology[layer].nodes.push(node);
             this.mapCanvas.emit(signals.NODE_CREATED, {"layer": layer, "node": node });
         } else {
-            let oldNode = this._topology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
+            let oldNode = newTopology[layer].nodes.splice(spliceIndex, 1, node); // 'splice' arguments: index, numOfEntriesToReplace, newEntry, [newEntry...]
             this.mapCanvas.emit(signals.NODE_UPDATED, {"layer": layer, "node": node, "oldNode": oldNode });
         }
-        var defaultLayer = {"nodes":[], "edges": []};
-        const mapJson = [];
-        for(let i=0; i<utils.LAYER_LIMIT; i++){
-            mapJson.push(this._topology[i] || defaultLayer);
-        }
-        this.mapCanvas.setTopology(mapJson);
+        this.mapCanvas.setTopology(newTopology);
 
         this.hideDialogs();
 
         setTimeout(()=>{
-            this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer.replace("layer", "") });
+            this.mapCanvas.emit(signals.EDGE_SNAP, {"node": node, "layer": layer });
             this.mapCanvas?.map?.renderMap(); // repaint re-renders the topology layers
         }, 10);
     }
@@ -268,23 +262,19 @@ class EditingInterface extends BindableHTMLElement {
         var node_source = this.shadow.querySelector('#node_source').value;
         var node_destination = this.shadow.querySelector('#node_destination').value;
 
-        var mapJson = [];
-
-        for (var i = 0; i < utils.LAYER_LIMIT; i++) {
-          try {
-            mapJson[i] = this._topology[i];
-          } catch (e) {
-            mapJson[i] = { nodes: [], edges: [] };
-          }
+        const newTopology = [];
+        var defaultLayer = {"nodes":[], "edges": []};
+        for(let i=0; i<utils.LAYER_LIMIT; i++){
+            newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
         }
 
         var coordinates = [null, null];
-        for (let i = 0; i < mapJson[edge_layer].nodes.length; i++) {
-          if (mapJson[edge_layer].nodes[i].name === node_source) {
-            coordinates[0] = mapJson[edge_layer].nodes[i].coordinate;
+        for (let i = 0; i < newTopology[edge_layer].nodes.length; i++) {
+          if (newTopology[edge_layer].nodes[i].name === node_source) {
+            coordinates[0] = newTopology[edge_layer].nodes[i].coordinate;
           }
-          if (mapJson[edge_layer].nodes[i].name === node_destination) {
-            coordinates[1] = mapJson[edge_layer].nodes[i].coordinate;
+          if (newTopology[edge_layer].nodes[i].name === node_destination) {
+            coordinates[1] = newTopology[edge_layer].nodes[i].coordinate;
           }
         }
         let newEdge = {
@@ -303,7 +293,7 @@ class EditingInterface extends BindableHTMLElement {
         let endpointId = this.mapCanvas.options?.layers?.[edge_layer]?.endpointId
         newEdge.meta.endpoint_identifiers[endpointId] = [node_source, node_destination];
 
-        mapJson[edge_layer].edges.push(newEdge);
+        newTopology[edge_layer].edges.push(newEdge);
 
         this.mapCanvas.emit(signals.EDGE_CREATED, {
             "layer": edge_layer,
@@ -312,7 +302,7 @@ class EditingInterface extends BindableHTMLElement {
             "edge": newEdge
         });
 
-        this.mapCanvas.setTopology(mapJson);
+        this.mapCanvas.setTopology(newTopology);
         this.hideDialogs();
 
         setTimeout(function () {
@@ -354,7 +344,7 @@ class EditingInterface extends BindableHTMLElement {
     setSrcDstOptions(){
         let json = { nodes: [] };
         try {
-          json = this._topology[this._selectedLayer];
+          json = this.mapCanvas._topology[this._selectedLayer];
         } catch (e) {
           this.srcDstOptions = [];
           return
