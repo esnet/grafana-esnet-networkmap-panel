@@ -15,6 +15,7 @@ export namespace signals {
     export const MAP_CREATED: string;
     export const SCROLLING_TOGGLED: string;
     export const SELECTION_SET: string;
+    export const SELECTION_CLEARED: string;
     export const VARIABLES_SET: string;
     export const EDITING_SET: string;
     export const LAYER_TOGGLED: string;

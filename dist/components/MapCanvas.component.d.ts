@@ -45,6 +45,7 @@ export class MapCanvas extends BindableHTMLElement {
     set startlng(arg: any);
     get startlng(): any;
     _startlng: any;
+    filterTraffic(newData: any): any;
     get traffic(): any;
     setTraffic(newData: any): any;
     _traffic: any;

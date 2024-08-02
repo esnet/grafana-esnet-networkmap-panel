@@ -12,10 +12,6 @@ export default class NetworkMap {
     sideBar: any;
     esmap: es.EsMap;
     destroy(): void;
-    dispatchEvent(event: any): any;
-    setEdgeEdit(bool: any): void;
-    setNodeEdit(bool: any): void;
-    setEditMode(mode: any): void;
     renderMapLayers(): void;
     renderMap(): any;
 }
