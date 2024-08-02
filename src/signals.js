@@ -20,6 +20,7 @@ export const signals = {
 
     SCROLLING_TOGGLED: "scrolling toggled",
     SELECTION_SET: "selection set",
+    SELECTION_CLEARED: "selection cleared",
     VARIABLES_SET: "variables set",
     EDITING_SET: "editing set",
     LAYER_TOGGLED: "layer toggled",

@@ -55,41 +55,11 @@ export default class NetworkMap {
       this.sideBar,
       d3.curveNatural);
 
-    this.mapCanvas.listen(signals.EDIT_MODE_SET, function(mode){ this.setEditMode(mode) });
   }
 
   destroy(){
     this.esmap.destroy();
     this.esmap = null;
-  }
-
-  dispatchEvent(event){
-    return this.mapCanvas.dispatchEvent(event);
-  }
-
-
-  setEdgeEdit(bool){
-      this.esmap.editNodeMode(false);
-      this.esmap.editEdgeMode(bool);
-  }
-  setNodeEdit(bool){
-      this.esmap.editEdgeMode(false);
-      this.esmap.editNodeMode(bool);
-  }
-
-  setEditMode(mode) {
-    if(mode == "edge"){
-      this.setEdgeEdit(!this.esmap.editEdges);
-      this.setNodeEdit(false);
-    }
-    if(mode=="node"){
-      this.setEdgeEdit(false);
-      this.setNodeEdit(!this.esmap.editNodes);
-    }
-    if(mode === null || mode === undefined){
-      this.setEdgeEdit(false);
-      this.setNodeEdit(false);
-    }
   }
 
   renderMapLayers() {
