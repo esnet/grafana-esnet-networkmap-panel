@@ -8,35 +8,35 @@
 
 </head>
 <body>
-    <table style='width:100%;'>
+    <table style="width:100%;">
         <tr>
-            <th colspan='3'>
+            <th colspan="3">
                 <h1>Autodetected Topology Demonstration page</h1>
             </th>
         <tr>
-            <td style='width:20%'>
-                <a href='/'>Main Demonstration Page</a>&nbsp;&nbsp; 
+            <td style="width:20%">
+                <a href="/">Main Demonstration Page</a>&nbsp;&nbsp; 
             </td>
         <tr>
-            <td colspan='2' style='width:80%;'>
-                <div id='mapContainer'>
-                    <esnet-map-canvas id='mapCanvas' height='400'>
+            <td colspan="2" style="width:80%;">
+                <div id="mapContainer">
+                    <esnet-map-canvas id="mapCanvas" height="400">
                     </esnet-map-canvas>
                 </div>
             </td>
         </tr>
         <tr>
-            <td style='width:40%'>Map Data</td>
-            <td style='width:40%'>Map Options</td>
-            <td style='width:20%'></td>
+            <td style="width:40%">Map Data</td>
+            <td style="width:40%">Map Options</td>
+            <td style="width:20%"></td>
         </tr>
         <tr>
-            <td id='mapDataContainer'>
-                <textarea id='trafficText' style='height:300px; width:100%;'>
+            <td id="mapDataContainer">
+                <textarea id="trafficText" style="height:300px; width:100%;">
                 </textarea>
             </td>
-            <td id='mapOptionsContainer'>
-                <textarea id='optionsText' style='height:300px; width:100%;'>
+            <td id="mapOptionsContainer">
+                <textarea id="optionsText" style="height:300px; width:100%;">
                 </textarea>
             </td>
         </tr>
@@ -124,8 +124,8 @@
             {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":50,"src_longitude":4,"src_name":"IIHE.be","in_bits": 45000000, "out_bits": 450000000},
         ]; 
         var canvas = document.getElementById("mapCanvas");
-        var optionsElem = document.getElementById('optionsText');
-        var trafficElem = document.getElementById('trafficText');
+        var optionsElem = document.getElementById("optionsText");
+        var trafficElem = document.getElementById("trafficText");
 
         console.log("Available signals:", signals);
 
