@@ -76,6 +76,7 @@ export class MapCanvas extends BindableHTMLElement {
       'customLegendValue',
       'legendColumnLength',
       'legendPosition',
+      'legendDefaultBehavior',
       'thresholds',
       'enableScrolling',
       'enableEditing',
@@ -162,7 +163,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(!this.options && this.getAttribute("options")){
       this.options = JSON.parse(this.getAttribute("options"));
     }
-    if(this.options && this.options.legendDefaultBehavior){
+    if(this.options?.legendDefaultBehavior){
       this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
     this.maybeFetchOptions();
@@ -626,6 +627,10 @@ export class MapCanvas extends BindableHTMLElement {
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
       ){
+      this.renderLegend();
+    }
+    if(wasChanged('legendDefaultBehavior', changed)){
+      this.legendMinimized = options.legendDefaultBehavior === "minimized";
       this.renderLegend();
     }
     if(wasChanged('enableEditing', changed)){
