@@ -349,7 +349,7 @@ export class MapCanvas extends BindableHTMLElement {
       let edgeHash = {}
       layerTopology?.edges?.forEach((edge, edgeIdx)=>{
         let endpointId = layerOptions.endpointId;
-        if(this._options.topologySource === "autodetect"){
+        if(this._options?.topologySource === "autodetect"){
           endpointId = "names";
         }
         let endpointIds = edge.meta.endpoint_identifiers[endpointId];
@@ -736,7 +736,7 @@ export class MapCanvas extends BindableHTMLElement {
 
   autodetectTopology(){
     if(!this._traffic) return;
-    if(this._options.topologySource == "autodetect"){
+    if(this._options?.topologySource == "autodetect"){
       this.options.enableEditing = false;
       for(let i=0; i<this._options?.layers.length; i++){
         if(this._topology?.[i]?.autodetected){ continue }
