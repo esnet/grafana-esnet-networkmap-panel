@@ -48,18 +48,6 @@ const ATTRIBUTES = {
 // web component
 export class MapCanvas extends BindableHTMLElement {
 
-/*
-// internal/imperative
-map.clearSelection
-"clearSelection"
-map.setEditSelection
-"setEditSelection"
-map.setSelection
-"setSelection"
-
-*/
-
-
   constructor() {
     super();
     this.instanceId = Math.random().toString(16).substr(2, 8);
