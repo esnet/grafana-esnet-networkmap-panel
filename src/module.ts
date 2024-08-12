@@ -1,4 +1,4 @@
-import { standardEditorsRegistry, FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName } from '@grafana/data';
+import { standardEditorsRegistry, FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName, PanelProps } from '@grafana/data';
 import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
@@ -15,6 +15,7 @@ import {
   defaultCustomEdgeTooltip,
   defaultCustomNodeTooltip
 } from "./options";
+import { ComponentType } from 'react';
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
@@ -26,7 +27,7 @@ const DEFAULT_LAYER_OPTIONS = {
   color: "gray"
 }
 
-export const plugin = new PanelPlugin<MapOptions>(MapPanel);
+export const plugin = new PanelPlugin<MapOptions>(MapPanel as unknown as ComponentType<PanelProps<MapOptions>>);
 
 function checkBools(settings: object) {
   return (config: MapOptions) => {

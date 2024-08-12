@@ -54,7 +54,12 @@ test\:component:
 .PHONY: test\:e2e
 test\:e2e: compose
 	# run e2e tests
-	yarn e2e
+	yarn run e2e
+
+.PHONY: test\:ui
+test\:ui: compose
+	# run e2e tests, but with ui
+	yarn run e2e:ui
 
 .PHONY: testignore
 testignore:

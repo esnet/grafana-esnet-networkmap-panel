@@ -1,3 +1,4 @@
+import { IFlowSheet } from "../../src/types";
 import { IDataSource } from "./DataSource.interface";
 import { ITopology } from "./Topology.interface";
 
@@ -21,14 +22,14 @@ export interface INetworkPanelParams {
      */
     title?: string;
     /**
-     * The uid of the data source for the network map panel overall
+     * The uid of the data source for a single network map panel overall
      */
     uid?: string;
     /**
      * The URL to configure for the panel's query.
      * @var
      */
-    url?: string;
+    flowSheets?: IFlowSheet[];
     /**
      * The query type to configure for the panel's query.
      */

@@ -3,7 +3,7 @@ import e2eConfig from '../e2e/e2e.config.json';
 import { IHostPort } from '../e2e/interfaces/HostPort.interface';
 
 const moduleName = 'config.info';
-const { flowSheetUrl } = e2eConfig;
+const { flowSheets } = e2eConfig;
 const targetGrafanaInstanceName = e2eConfig.grafanaInstanceName || "grafana";
 const grafanaInfo = (dockerInfo as Array<any>).find(nfo => nfo.Name == `/${targetGrafanaInstanceName}`);
 if (!grafanaInfo) {
@@ -13,12 +13,6 @@ if (!grafanaInfo) {
 }
 const { IPAddress } = grafanaInfo?.NetworkSettings;
 const { HostConfig } = grafanaInfo;
-
-export const getGoogleSheetInfo = (): string => {
-  const flowsUrl = flowSheetUrl;
-
-  return flowsUrl;
-};
 
 /**
  * Returns a promise to fetch the basic auth header, plus the version of and URL to the configured Grafana server.
@@ -43,7 +37,8 @@ export const getHostInfo = async (credentials?: {username: string, password: str
     protocolHostPort = `http://${IPAddress || 'localhost'}:${portInfo.HostPort}`;
     let basicAuthHeader = {};
     if (credentials) {
-      const credentialsBuf = Buffer.from(`${credentials.username}:${credentials.password}`, 'base64');
+      const credStr = `${credentials.username}:${credentials.password}`;
+      const credentialsBuf = Buffer.from(credStr);
       basicAuthHeader["Authorization"] = `Basic ${credentialsBuf.toString('base64')}`;
     }
     let version;

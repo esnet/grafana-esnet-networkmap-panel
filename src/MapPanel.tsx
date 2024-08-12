@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, DataFrameView, getValueFormat, EventBus } from '@grafana/data';
+import { PanelProps, createTheme, DataFrameView, getValueFormat, EventBus, GrafanaTheme2 } from '@grafana/data';
 import { MapOptions } from './types';
 import { parseData } from './components/lib/dataParser';
 import { sanitizeTopology } from './components/lib/topologyTools';
@@ -7,14 +7,16 @@ import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
 import { resolvePath, setPath, LAYER_LIMIT } from "./components/lib/utils.js"
+import { withTheme } from './components/hoc/withThemeWrapper';
 
-export interface MapPanelProps extends PanelProps<MapOptions> {
+interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
   eventBus: EventBus;
+  theme: GrafanaTheme2;
 }
 
-export class MapPanel extends Component<MapPanelProps> {
+class MapPanel extends Component<MapPanelProps> {
   mapCanvas: any;
   lastOptions: any;
   theme: any;
@@ -237,7 +239,8 @@ export class MapPanel extends Component<MapPanelProps> {
   }
 
   updateMap(forceRefresh?) {
-    const { options, data, width, height, replaceVariables, fieldConfig } = this.props;
+    const { options, data, width, height, replaceVariables, fieldConfig, theme } = this.props;
+    const vizTheme = theme.visualization;
 
     const latLng = this.resolveLatLngFromVars(options, data, replaceVariables);
 
@@ -283,7 +286,7 @@ export class MapPanel extends Component<MapPanelProps> {
       if (!forceRefresh && this.mapCanvas?.current?.topology?.[layer]){
         topologyData[layer] = JSON.stringify(this.mapCanvas.current.topology[layer]);
       } else if (options.layers[layer]['mapjson']) {
-        topologyData[layer] = options.layers[layer]['mapjson']; // if local data is set, return it
+        topologyData[layer] = `${options.layers[layer]['mapjson']}`; // if local data is set, return it
       } 
 
       try {
@@ -294,7 +297,7 @@ export class MapPanel extends Component<MapPanelProps> {
         // Overall, this mechanism should be simplified and generalized so we can
         // use this outside of a Grafana context.
         // @ts-ignore
-        topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer);
+        topology[layer] = parseData(data, topologyData[layer], colors[layer], fields[layer], layer, vizTheme);
       } catch(e) {
         // ensure that the mapcanvas has jsonResults set up so it can collect errors.
         if(!this.mapCanvas.current.jsonResults){
@@ -378,7 +381,6 @@ export class MapPanel extends Component<MapPanelProps> {
   render() {
     const { options, width, height, data, replaceVariables, fieldConfig } = this.props;
 
-
     let thresholds: any[];
     thresholds = [];
     fieldConfig.defaults?.thresholds?.steps?.forEach((threshold) => {
@@ -401,3 +403,6 @@ export class MapPanel extends Component<MapPanelProps> {
     });
   }
 }
+
+const mapPanelWithTheme = withTheme(MapPanel);
+export { mapPanelWithTheme as MapPanel, MapPanelProps };

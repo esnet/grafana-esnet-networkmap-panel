@@ -1,10 +1,9 @@
 import { PlaywrightTestArgs, PlaywrightTestOptions, PlaywrightWorkerArgs, PlaywrightWorkerOptions, TestType, test as base } from '@playwright/test';
-import { ITargets } from './interfaces/Targets.interface';
+import { IFixtures } from './interfaces/Fixtures.interface';
 import { MapOptions } from '../src/types';
-import { IDataSource } from './interfaces/DataSource.interface';
 
 export type PluginTestOptions = {
-  targets: ITargets;
+  fixtures: IFixtures;
 };
 
 export type PluginTest = TestType<PlaywrightTestArgs & PlaywrightTestOptions & PluginTestOptions, PlaywrightWorkerArgs & PlaywrightWorkerOptions>;
@@ -16,11 +15,31 @@ export type PluginTest = TestType<PlaywrightTestArgs & PlaywrightTestOptions & P
 export interface IPanel {
   type: string;
   title: string;
-  gridPos: { x: number, y: number; w: number; h: number; };
+  gridPos: {[axis: string]: number};
   id: number;
   mode: string;
   content: string;
   targets?: ITarget[];
+}
+
+export interface IQuery {
+  colors: string[];
+  decimalSeperator: string;
+  delmiter: string;
+  filters: any[];
+  format: string;
+  global_query_id: string;
+  header: boolean;
+  hide: boolean;
+  ignoreUnknown: boolean;
+  refId: string;
+  root_selector: string;
+  schema: Array<{ name: string; type: string; }>;
+  skipRows: number;
+  source: string;
+  type: string;
+  url: string;
+  url_options: {[url_option_key: string]: string};
 }
 
 /**
@@ -28,7 +47,8 @@ export interface IPanel {
  */
 export interface INetworkMapPanel extends IPanel {
   options: MapOptions;
-  datasource: Partial<IDataSource>;
+  datasource: { type: string; uid: string; };
+  fieldConfig?: { defaults: {[defaultFieldConfigKey: string]: any}; overrides: any[]; };
 }
 
 export type TimeRange = { to: string; from: string; };
@@ -98,9 +118,8 @@ export interface IDashboard {
 
 export interface ITarget {
   columns?: string[];
-  datasource: Partial<IDataSource>;
-  decimalSeparator: string;
-  delimiter: string;
+  decimalSeparator?: string;
+  delimiter?: string;
   filters?: any[];
   format?: string;
   global_query_id?: string;
@@ -124,7 +143,7 @@ export interface IOrganization {
 }
 
 export const pluginTest: PluginTest = base.extend<PluginTestOptions>({
-    targets: [{
+    fixtures: [{
       targetDashboardUid: '',
       targetFolderUid: '',
       targetDashboard: undefined,
@@ -132,8 +151,11 @@ export const pluginTest: PluginTest = base.extend<PluginTestOptions>({
       targetPanel: undefined,
       targetPanelId: -1,
       orgId: -1,
-    }, {option: true} ]
+    }, {option: true}
+  ]
 });
+
+export const DEFAULT_DATASOURCE_NAME = "network-traffic-flow";
 
 export const makeDashboard = (dbParams?: Partial<IDashboard>): Partial<IDashboard>  => (
   {
@@ -168,3 +190,9 @@ export const makeDashboard = (dbParams?: Partial<IDashboard>): Partial<IDashboar
     ...dbParams
   }
 );
+
+export const FIELD_TYPE_STRING = "string";
+export const FIELD_TYPE_NUMBER = "number";
+export const FIELD_TYPE_DATETIME = "timestamp";
+export const FIELD_TYPE_TS_MS = "timestamp_epoch";
+export const FIELD_TYPE_TS_S = "timestamp_epoch_s";

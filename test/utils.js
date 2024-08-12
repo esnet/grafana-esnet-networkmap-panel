@@ -88,3 +88,16 @@ export function removeRepeats(inStr, target = ' ', limitToTwo = false) {
 	}
 	return acc.join("");
 }
+
+/**
+ * Returns a string with characters written in reverse order of the input string sIn.
+ * @param {string} sIn
+ * @returns {string}
+ */
+export const reverseStr = (sIn) => {
+	const reversedCharArr = sIn.split('').reduce((result, char) => {
+		result.unshift(char);
+		return result;
+	}, []);
+	return reversedCharArr.join('');
+};

@@ -67,7 +67,6 @@ export default class NetworkMap {
     return this.mapCanvas.dispatchEvent(event);
   }
 
-
   setEdgeEdit(bool){
       this.esmap.editNodeMode(false);
       this.esmap.editEdgeMode(bool);

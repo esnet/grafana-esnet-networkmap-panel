@@ -17,16 +17,16 @@ setup('authenticate', async ({ page }: { page: Page }) => {
     await page.getByLabel('Login button').or(page.getByTestId(/Password input field/)).fill(credentials.password);
     await page.getByLabel('Login button').or(page.getByTestId(/Login button/)).click();
 
-    skipBtn = await page.getByLabel('Skip').or(page.getByTestId(/Skip change password button/));
+    skipBtn = page.getByLabel('Skip').or(page.getByTestId(/Skip change password button/));
   } else {
     await page.goto(`${protocolHostPort}/login`);
     await page.getByLabel('Username input field').fill(credentials.username);
     await page.getByLabel('Password input field').fill(credentials.password);
     await page.getByLabel('Login button').click();
 
-    skipBtn = await page.getByLabel('Skip');
+    skipBtn = page.getByLabel('Skip');
   }
-  if (!!skipBtn) {
+  if (await skipBtn.isVisible()) {
     await skipBtn.click();
   }
 
@@ -36,11 +36,12 @@ setup('authenticate', async ({ page }: { page: Page }) => {
   // Wait for the final URL to ensure that the cookies are actually set.
   // Alternatively, you can wait until the page reaches a state where all cookies are set.
   await page.waitForURL("**/?orgId=1");
-  if (!isGrafanaVersionBelow10) {
-    await expect(page.getByTestId('sidemenu').or(page.getByTestId(/Toggle menu/))).toBeVisible();
-  } else {
-    await expect(page.getByTestId('sidemenu')).toBeVisible();
+  let sidebar = await page.getByTestId('sidemenu').or(page.getByTestId(/Toggle menu/i));
+  if (!sidebar.isVisible()) {
+    await page.locator('#menu-menu-toggle').click();
   }
+  sidebar = await page.getByTestId('sidemenu').or(page.getByTestId(/Toggle menu/i));
+  await expect(sidebar).toBeVisible();
   // End of authentication steps.
 
   await page.context().storageState({ path: authFile });

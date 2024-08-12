@@ -1,8 +1,8 @@
-import { getGoogleSheetInfo, getHostInfo } from "./config.info";
+import { getHostInfo } from "./config.info";
 import credentials from '../playwright/.auth/credentials.json';
 import networkMapPanel from '../e2e/networkMapPanel.json';
 import { IDataSource } from "./interfaces/DataSource.interface";
-import { IOrganization, makeDashboard } from "./plugin-def";
+import { IDashboard, IOrganization, makeDashboard } from "./plugin-def";
 
 interface Dashboard {
   dataSource: Partial<IDataSource>;
@@ -10,8 +10,6 @@ interface Dashboard {
   uid: string;
   [key: string]: any;
 }
-
-const DEFAULT_DATASOURCE_NAME = "network-traffic-flow";
 
 /**
  * Creates a datasource. optionally initializing with traffic flow data from a Google sheet, given by its fileId.
@@ -22,10 +20,9 @@ const DEFAULT_DATASOURCE_NAME = "network-traffic-flow";
  * @param {boolean} forceCreate
  * @returns
  */
-export const createDatasource = async (forceCreate = false): Promise<IDataSource> => {
+export const createDatasource = async (datasourceName, forceCreate = false): Promise<IDataSource> => {
   const fnName = "folderDashboardInit.initCSVDatasource";
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
-  let dataFlowUrl: string | null = getGoogleSheetInfo();
 
   let resultDataSource;
   try {
@@ -35,7 +32,7 @@ export const createDatasource = async (forceCreate = false): Promise<IDataSource
     };
 
     // check if datasource exists already
-    const dataSrcCheckResponse: Response = await fetch(`${protocolHostPort}/api/datasources/name/${DEFAULT_DATASOURCE_NAME}`, {
+    const dataSrcCheckResponse: Response = await fetch(`${protocolHostPort}/api/datasources/name/${datasourceName}`, {
       headers: {
         ...basicAuthHeader,
         ...jsonHeaders
@@ -49,7 +46,7 @@ export const createDatasource = async (forceCreate = false): Promise<IDataSource
     } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404 || forceCreate) {
       // if does not exist or forced to create, create it
       const inObj = {
-        name: DEFAULT_DATASOURCE_NAME,
+        name: datasourceName,
         type: "yesoreyeram-infinity-datasource",
         access: "proxy"
       };
@@ -73,6 +70,26 @@ export const createDatasource = async (forceCreate = false): Promise<IDataSource
   }
 
   return resultDataSource;
+}
+
+/**
+ * Deletes a given datasource through its UID dsUid.
+ * @param {string} dsUid
+ */
+export const deleteDatasource = async (dsUid: string) => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const deleteDataSourceResponse: Response = await fetch(`${protocolHostPort}/api/datasources/uid/${dsUid}`, {
+    method: 'DELETE',
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!deleteDataSourceResponse.ok) {
+    throw new Error(`[grafana-api.deleteDatasource]: Error in deleting datasource ${dsUid}; ${deleteDataSourceResponse.statusText}`);
+  }
 }
 
 /**
@@ -200,5 +217,30 @@ export const updateDashboard = async (folderUid: string, targetDashboard): Promi
 
   const responseJson = await dbUpdateResponse.json();
   return responseJson;
-}
+};
 
+/**
+ * Deletes the dashboard given by the target targetDashboardUid.
+ * @param {string} targetDashboardUid
+ * @returns {Promise<void>} A Promise that resolves when the delete operation completes.
+ * @throws {Error} When the Promise returned from this fails to resolve and is rejected.
+ */
+export const deleteDashboard = async (targetDashboardUid: string): Promise<void> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const fnName = 'grafana-api.deleteDashboard';
+
+  const dbDeleteResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${targetDashboardUid}`, {
+    method: "DELETE",
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    }
+  });
+
+  if (dbDeleteResponse.ok) {
+    return;
+  } else {
+    throw new Error(`[${fnName}] Error in deleting dashboard UID ${targetDashboardUid}: ${dbDeleteResponse.statusText}`);
+  }
+}

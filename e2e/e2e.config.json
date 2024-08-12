@@ -3,6 +3,60 @@
     "targetDashboard": "network-map-test-dashboard",
     "targetFolder": "network-map-test-folder",
     "grafanaInstanceName": "esnet-networkmap-panel",
-    "flowSheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsvhttps://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsv",
-    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=tsv"
+    "flowSheets": [
+        {
+            "name": "All",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=0&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "A--B",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1087577778&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "B--C",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1229997386&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "A--C",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1070293343&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "B--A",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1931381716&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "C--A",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=1931381716&single=true&output=tsv",
+            "expectedFlow": "high"
+        },
+        {
+            "name": "C--B",
+            "url": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=2006498127&single=true&output=tsv",
+            "expectedFlow": "high"
+        }
+    ],
+    "topologySheetUrl": "https://docs.google.com/spreadsheets/d/e/2PACX-1vQn18dEVlFjvL3arvbiaOZIKkLseVSIXFg9Gw3Qp4rY2KruDvAZ0FfYMylt31Ia3Nx8Gxm08alIMmtW/pub?gid=261150740&single=true&output=tsv",
+    "edgeColorSwatchThresholds": {
+        "base": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+        ],
+        "high": [
+            "red",
+            "orange",
+            "yellow",
+            "green",
+            "blue",
+            "purple"
+        ]
+    }
 }

@@ -1,7 +1,7 @@
 {
     "datasource": {
         "type": "yesoreyeram-infinity-datasource",
-        "uid": "bdk95xlce6i9sc"
+        "uid": "datasource-uid"
     },
     "fieldConfig": {
         "defaults": {
@@ -62,10 +62,10 @@
                 "jsonFromUrl": false,
                 "mapjsonUrl": "",
                 "nodeHighlight": "",
-                "srcField": "",
-                "dstField": "",
-                "inboundValueField": "",
-                "outboundValueField": "",
+                "srcField": "src",
+                "dstField": "dst",
+                "inboundValueField": "in_bits",
+                "outboundValueField": "out_bits",
                 "nodeThresholds": "",
                 "nodeNameMatchField": "",
                 "nodeValueField": ""
@@ -78,7 +78,10 @@
                 "edgeWidth": 3,
                 "endpointId": "pops",
                 "legend": true,
+                "jsonFromUrl": false,
+                "mapjsonUrl": "",
                 "mapjson": "{\"edges\":[],\"nodes\":[]}",
+                "nodeHighlight": "",
                 "name": "Layer 2",
                 "nodeWidth": 5,
                 "pathOffset": 3,
@@ -92,7 +95,10 @@
                 "edgeWidth": 3,
                 "endpointId": "pops",
                 "legend": true,
+                "jsonFromUrl": false,
+                "mapjsonUrl": "",
                 "mapjson": "{\"edges\":[],\"nodes\":[]}",
+                "nodeHighlight": "",
                 "name": "Layer 3",
                 "nodeWidth": 5,
                 "pathOffset": 3,
@@ -133,15 +139,21 @@
     },
     "targets": [
         {
-            "datasource": {
-                "type": "yesoreyeram-infinity-datasource",
-                "uid": "bdk95xlce6i9sc"
-            },
-            "decimalSeparator": ".",
-            "delimiter": ",",
             "header": true,
             "ignoreUnknown": false,
-            "refId": "A",
+            "refId": "All",
+            "schema": [
+                {
+                    "name": "",
+                    "type": "string"
+                }
+            ],
+            "skipRows": 0
+        },
+        {
+            "header": true,
+            "ignoreUnknown": false,
+            "refId": "A→B",
             "schema": [
                 {
                     "name": "",
