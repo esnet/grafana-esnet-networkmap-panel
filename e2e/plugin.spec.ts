@@ -440,8 +440,6 @@ pluginTest.describe("plugin testing", () => {
       await page.getByTestId('fdc230').click();
 
       await page.getByTestId(/RefreshPicker/).click();
-      await disableAllQueries();
-      await enableTargetQuery(inFs);
 
       // obtain thresholds
       const thresholds: IThreshold[] = await getThresholds(inFs, page);
