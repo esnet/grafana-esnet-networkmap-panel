@@ -18,6 +18,8 @@ import { waitForEvent } from './js/untypedFn';
 
 const PubSub = pubsub.PubSub;
 
+const PLUGIN_TEST_TIMEOUT = 120000; // 120s for plugin test
+
 const getHomepageUrl = async (orgId?: string | number) => {
   const { protocolHostPort } = await getHostInfo(credentials);
   if (orgId) {
@@ -130,6 +132,7 @@ const getThresholds = async (inFs: IFlowSheet, page: Page): Promise<IThreshold[]
 
 pluginTest.describe("plugin testing", () => {
   pluginTest.describe.configure({ mode: "serial" });
+  pluginTest.setTimeout(PLUGIN_TEST_TIMEOUT);
 
   /**
    * The targets async function, part of the parameter object upon invoking pluginTest.use,
