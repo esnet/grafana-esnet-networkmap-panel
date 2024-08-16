@@ -728,12 +728,12 @@ export class MapCanvas extends BindableHTMLElement {
     this._updateOptions && this._updateOptions(newValue);
   }
 
-  toggleLayer(layerData){
+  toggleLayer(layer, visible){
     var newValue = this._options;
-    if(newValue.layers && newValue.layers[layerData.layer]){
-      newValue.layers[layerData.layer].visible = layerData.visible;
+    if(newValue.layers && newValue.layers[layer]){
+      newValue.layers[layer].visible = visible;
     } else {
-      newValue.layers[layerData.layer] = { visible: layerData.visible };
+      newValue.layers[layer] = { visible: visible };
     }
     this.map.renderMap();
     this._updateOptions && this._updateOptions(newValue);

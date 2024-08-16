@@ -34,7 +34,7 @@ class SideBar extends BindableHTMLElement {
 
     const evtData = {"layer": layer, "visible": value};
     this.mapCanvas.emit(signals.LAYER_TOGGLED, evtData);
-    this.mapCanvas.toggleLayer(evtData);
+    this.mapCanvas.toggleLayer(layer, value);
   }
 
   showTooltip(data) {
