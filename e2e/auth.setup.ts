@@ -16,6 +16,7 @@ setup('authenticate', async ({ page }: { page: Page }) => {
     await page.getByLabel('Username input field').or(page.getByTestId(/Username input field/)).fill(credentials.username);
     await page.getByLabel('Login button').or(page.getByTestId(/Password input field/)).fill(credentials.password);
     await page.getByLabel('Login button').or(page.getByTestId(/Login button/)).click();
+    await page.waitForLoadState('networkidle')
 
     skipBtn = page.getByLabel('Skip').or(page.getByTestId(/Skip change password button/));
   } else {
@@ -23,6 +24,7 @@ setup('authenticate', async ({ page }: { page: Page }) => {
     await page.getByLabel('Username input field').fill(credentials.username);
     await page.getByLabel('Password input field').fill(credentials.password);
     await page.getByLabel('Login button').click();
+    await page.waitForLoadState('networkidle')
 
     skipBtn = page.getByLabel('Skip');
   }

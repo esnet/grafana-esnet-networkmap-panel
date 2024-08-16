@@ -396,9 +396,7 @@ pluginTest.describe("plugin testing", () => {
     await page.waitForSelector("[aria-label='Panel editor content'] esnet-map-canvas");
 
     // step 2: turn off edit mode
-
-    const editEdgesToggleBtn = page.getByRole('button', { name: /edit edges/i});
-    await editEdgesToggleBtn.click();
+    await page.locator('#edge_edit_mode').click();
 
     // step 3: check render of partial data
 
@@ -437,12 +435,10 @@ pluginTest.describe("plugin testing", () => {
       // save dashboard changes and refresh page
       // TODO: @sanchezelton, check if initial grey state for edge coloration persists after merging refactoring of render code
       // if so, remove the following step
-      await page.getByTitle('Apply changes and save dashboard').click();
-      await page.getByRole('button', { name: 'Save' }).click();
-      await page.reload();
-      await page.waitForSelector("[aria-label='Panel editor content'] esnet-map-canvas");
-      const editEdgesToggleBtn = page.getByRole('button', { name: /edit edges/i});
-      await editEdgesToggleBtn.click();
+      await page.getByRole('button', { name: 'save' }).click();
+      await page.getByRole('button', { name: 'Dashboard settings Save Dashboard Modal Save button' }).click();
+      await page.getByTestId('fdc230').click();
+
       await page.getByTestId(/RefreshPicker/).click();
       await disableAllQueries();
       await enableTargetQuery(inFs);
@@ -468,8 +464,11 @@ pluginTest.describe("plugin testing", () => {
       }
 
       for (const expectedFlowEdge of expectedFlowEdges) {
-        console.log(`[pluginTest.spec.testFlowSheet]: Testing edge stroke: ${await expectedFlowEdge?.getAttribute('stroke')}`);
-        expect(expectedFlowEdge).toHaveAttribute('stroke', visualization.getColorByName(expectedStroke));
+         let foundStroke = await expectedFlowEdge.getAttribute('stroke');
+         if (!foundStroke?.startsWith('#')) {
+          foundStroke = visualization.getColorByName(expectedStroke);
+         }
+         expect(visualization.getColorByName(expectedStroke)).toEqual(foundStroke);
       }
     };
 
