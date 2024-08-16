@@ -39,6 +39,7 @@ e2e-results/
 .idea
 .vscode
 .DS_store
+*.code-workspace
 
 # Playwright
 playwright*

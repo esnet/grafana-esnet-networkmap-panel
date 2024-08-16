@@ -25,7 +25,11 @@ module.exports = function( config ) {
 
         browsers: ["ChromeHeadless"],
 
-        singleRun: false
+        singleRun: false,
 
+        preprocessors: {
+            '**/*.js': ['coverage'],
+            '**/*.ts': ['coverage']
+        }
     } );
 };
