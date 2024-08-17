@@ -67,9 +67,6 @@
   },
   "main": "index.js",
   "types": "dist/exports.d.ts",
-  "engines": {
-    "node": ">=16"
-  },
   "dependencies": {
     "@emotion/css": "11.10.5",
     "d3": "^7.0.0",
