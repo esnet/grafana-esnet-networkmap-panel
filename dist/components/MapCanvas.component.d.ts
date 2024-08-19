@@ -71,7 +71,7 @@ export class MapCanvas extends BindableHTMLElement {
     updateMapDimensions(newDimensions: any): void;
     recalculateMapZoom(): void;
     updateCenter(centerData: any): void;
-    toggleLayer(layerData: any): void;
+    toggleLayer(layer: any, visible: any): void;
     autodetectTopology(): void;
     getCurrentLeafletMap(): L.Map;
     destroyMap(): void;

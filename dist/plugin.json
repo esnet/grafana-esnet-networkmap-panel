@@ -32,8 +32,8 @@
         "path": "img/networkmap.png"
       }
     ],
-    "version": "3.0.0-beta2",
-    "updated": "2024-08-02"
+    "version": "3.0.0-beta3",
+    "updated": "2024-08-19"
   },
   "dependencies": {
     "grafanaDependency": ">=9.0.0",
