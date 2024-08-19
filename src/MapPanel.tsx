@@ -246,7 +246,7 @@ export class MapPanel extends Component<MapPanelProps> {
       if (!forceRefresh && JSON.parse(memoryTopology) && editorTopology === memoryTopology){
         topologyData[layer] = memoryTopology;
       } else if (editorTopology !== memoryTopology) {
-        topologyData[layer] = editorTopology;
+        topologyData[layer] = editorTopology as string;
       } 
 
       // here, we parse the topology data (as strings in topologyData)
