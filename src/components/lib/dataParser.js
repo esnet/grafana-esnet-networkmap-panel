@@ -1,88 +1,21 @@
 import { DataFrameView } from '@grafana/data';
+import { config } from '@grafana/runtime';
+import { getTheme } from '@grafana/ui';
 
 const ENDPOINT_DELIMITER = '--';
+let initialParseDone = false;
 
-export function parseData(data, mapData, colors, fields, layer) {
-  // helper function to parse grafana colors
-  function fixColor(color) {
-    switch (color) {
-      case 'dark-green':
-        color = '#1A7311';
-        break;
-      case 'semi-dark-green':
-        color = '#36872D';
-        break;
-      case 'light-green':
-        color = '#73BF68';
-        break;
-      case 'super-light-green':
-        color = '#96D88C';
-        break;
-      case 'dark-yellow':
-        color = 'rgb(207, 159, 0)';
-        break;
-      case 'semi-dark-yellow':
-        color = 'rgb(224, 180, 0)';
-        break;
-      case 'light-yellow':
-        color = 'rgb(250, 222, 42)';
-        break;
-      case 'super-light-yellow':
-        color = 'rgb(255, 238, 82)';
-        break;
-      case 'dark-red':
-        color = 'rgb(173, 3, 23)';
-        break;
-      case 'semi-dark-red':
-        color = 'rgb(196, 22, 42)';
-        break;
-      case 'light-red':
-        color = 'rgb(242, 73, 92)';
-        break;
-      case 'super-light-red':
-        color = 'rgb(255, 115, 131)';
-        break;
-      case 'dark-blue':
-        color = 'rgb(18, 80, 176)';
-        break;
-      case 'semi-dark-blue':
-        color = 'rgb(31, 96, 196)';
-        break;
-      case 'light-blue':
-        color = 'rgb(87, 148, 242)';
-        break;
-      case 'super-light-blue':
-        color = 'rgb(138, 184, 255)';
-        break;
-      case 'dark-orange':
-        color = 'rgb(229, 84, 0)';
-        break;
-      case 'semi-dark-orange':
-        color = 'rgb(250, 100, 0)';
-        break;
-      case 'light-orange':
-        color = 'rgb(255, 152, 48)';
-        break;
-      case 'super-light-orange':
-        color = 'rgb(255, 179, 87)';
-        break;
-      case 'dark-purple':
-        color = 'rgb(124, 46, 163)';
-        break;
-      case 'semi-dark-purple':
-        color = 'rgb(143, 59, 184)';
-        break;
-      case 'light-purple':
-        color = 'rgb(184, 119, 217)';
-        break;
-      case 'super-light-purple':
-        color = 'rgb(202, 149, 229)';
-        break;
-      default:
-        break;
-    }
-    return color;
-  }
+/**
+ *
+ * @param {PanelData} data
+ * @param {{[layerName: string]: any}} mapData
+ * @param {*} colors
+ * @param {*} fields
+ * @param {string} layer
+ * @param {import('@grafana/data').ThemeVisualizationColors} vizTheme
+ * @returns
+ */
+export function parseData(data, mapData, colors, fields, layer, vizTheme) {
 
   function thresholdLookup(thresholds, value){
     if(!Array.isArray(thresholds) || thresholds.length === 0){ return null }
@@ -96,18 +29,18 @@ export function parseData(data, mapData, colors, fields, layer) {
     return output;
   }
   // fix the colors
-  colors.defaultColor = fixColor(colors.defaultColor);
+  colors.defaultColor = vizTheme.getColorByName(colors.defaultColor);
   colors.nodeThresholds = colors.nodeThresholds.map((step)=>{
     return {
       value: step.value,
-      color: fixColor(step.color)
+      color: vizTheme.getColorByName(step.color)
     }
   });
 
-  let dataFrames = [];
+  let dataFrameViews = [];
 
   data.series.forEach(function (series) {
-    dataFrames.push(new DataFrameView(series));
+    dataFrameViews.push(new DataFrameView(series));
   });
   var srcKey = fields.srcField;
   var dstKey = fields.dstField;
@@ -146,59 +79,63 @@ export function parseData(data, mapData, colors, fields, layer) {
   // }
 
   // Retrieve panel data from panel
-  dataFrames.forEach((frame) => {
-    frame.forEach((row) => {
-      // if we have both inbound and outbound values defined
-      if (inboundKey !== null && outboundKey !== null) {
-        parsedData.push({
-          in: row[srcKey],
-          out: row[dstKey],
-          azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
-          inboundValue: row[inboundKey],
-          outboundValue: row[outboundKey],
-        });
-        // if we only have an outbound value defined
-      } else if (inboundKey === null && outboundKey !== null) {
-        parsedData.push({
-          in: row[srcKey],
-          out: row[dstKey],
-          azName: `${row[dstKey]}${ENDPOINT_DELIMITER}${row[srcKey]}`, // assemble the edge name backwards
-          // this will cause us to have a situation where we match on the reverse of the
-          // normal edge. our outbound key becomes the inbound value for the z-a edge
-          inboundValue: row[outboundKey],
-          outboundValue: null,
-        });
-      } else if (inboundKey !== null && outboundKey === null) {
-        parsedData.push({
-          in: row[srcKey],
-          out: row[dstKey],
-          azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
-          inboundValue: row[inboundKey],
-          outboundValue: null,
-        });
-      }
+  dataFrameViews.forEach(
+    /**
+     * @param {DataFrameView} frameView
+     **/
+    (frameView) => {
+      frameView.forEach((row) => {
+        // if we have both inbound and outbound values defined
+        if (inboundKey !== null && outboundKey !== null) {
+          parsedData.push({
+            in: row[srcKey],
+            out: row[dstKey],
+            azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
+            inboundValue: row[inboundKey],
+            outboundValue: row[outboundKey],
+          });
+          // if we only have an outbound value defined
+        } else if (inboundKey === null && outboundKey !== null) {
+          parsedData.push({
+            in: row[srcKey],
+            out: row[dstKey],
+            azName: `${row[dstKey]}${ENDPOINT_DELIMITER}${row[srcKey]}`, // assemble the edge name backwards
+            // this will cause us to have a situation where we match on the reverse of the
+            // normal edge. our outbound key becomes the inbound value for the z-a edge
+            inboundValue: row[outboundKey],
+            outboundValue: null,
+          });
+        } else if (inboundKey !== null && outboundKey === null) {
+          parsedData.push({
+            in: row[srcKey],
+            out: row[dstKey],
+            azName: `${row[srcKey]}${ENDPOINT_DELIMITER}${row[dstKey]}`,
+            inboundValue: row[inboundKey],
+            outboundValue: null,
+          });
+        }
 
-      let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
-      if (indexIn >= 0) {
-        infIn[indexIn].value += row[inboundKey];
-      } else {
-        infIn.push({ name: row[srcKey], value: row[inboundKey] });
-      }
+        let indexIn = infIn.findIndex((e) => e.name === row[srcKey]);
+        if (indexIn >= 0) {
+          infIn[indexIn].value += row[inboundKey];
+        } else {
+          infIn.push({ name: row[srcKey], value: row[inboundKey] });
+        }
 
-      let indexOut = infOut.findIndex((e) => e.name === row[dstKey]);
-      if (indexOut >= 0) {
-        infOut[indexOut].value += row[outboundKey];
-      } else {
-        infOut.push({ name: row[dstKey], value: row[outboundKey] });
-      }
+        let indexOut = infOut.findIndex((e) => e.name === row[dstKey]);
+        if (indexOut >= 0) {
+          infOut[indexOut].value += row[outboundKey];
+        } else {
+          infOut.push({ name: row[dstKey], value: row[outboundKey] });
+        }
 
 
-      if(row.hasOwnProperty(nodeNameMatchKey) && row.hasOwnProperty(nodeValueKey)){
-        nodeValues.push({ name: row[nodeNameMatchKey], value: row[nodeValueKey] })
-      }
-
-    });
-  });
+        if(row.hasOwnProperty(nodeNameMatchKey) && row.hasOwnProperty(nodeValueKey)){
+          nodeValues.push({ name: row[nodeNameMatchKey], value: row[nodeValueKey] })
+        }
+      });
+    }
+  );
 
   const mapJson = JSON.parse(mapData);
   const endpointId = fields.endpointId;
@@ -234,33 +171,38 @@ export function parseData(data, mapData, colors, fields, layer) {
     edge.nodeZ = getDisplayName(nodeZ);
     edge.AZname = `${nodeA}${ENDPOINT_DELIMITER}${nodeZ}`;
     edge.ZAname = `${nodeZ}${ENDPOINT_DELIMITER}${nodeA}`;
-    let matchAZ = parsedData.find((d) => d.azName === edge.AZname);
-    let matchZA = parsedData.find((d) => d.azName === edge.ZAname);
+    // TODO: resolve such that matchAZ and matchZA are found with additional criteria (parsedData)
+    let matchAZData = parsedData.filter((d) => d.azName === edge.AZname);
+    let matchZAData = parsedData.filter((d) => d.azName === edge.ZAname);
 
-    if (matchAZ) {
-      // if we get an a-z match, assign inbound and outbound "normally"
-      edge.azValue = matchAZ.inboundValue;
-      let azDisplay = valueField[0].display(edge.azValue);
-      edge.azColor = azDisplay.color;
-      edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
-      if (matchAZ.outboundValue) {
-        edge.zaValue = matchAZ.outboundValue;
-        let zaDisplay = valueField[0].display(edge.zaValue);
-        edge.zaColor = zaDisplay.color;
-        edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
+    if (matchAZData.length > 0) {
+      // for each a-z match, assign inbound and outbound "normally"
+      for (const matchAZ of matchAZData) {
+        edge.azValue = matchAZ.inboundValue;
+        let azDisplay = valueField[0].display(edge.azValue);
+        edge.azColor = azDisplay.color;
+        edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
+        if (matchAZ.outboundValue) {
+          edge.zaValue = matchAZ.outboundValue;
+          let zaDisplay = valueField[0].display(edge.zaValue);
+          edge.zaColor = zaDisplay.color;
+          edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
+        }
       }
     }
-    if (matchZA) {
+    if (matchZAData.length > 0) {
       // if we get a z-a match, flip-flop inbound and outbound
-      edge.zaValue = matchZA.inboundValue;
-      edge.zaColor = valueField[0].display(edge.zaValue).color;
-      let zaDisplay = valueField[0].display(edge.zaValue);
-      edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
-      if (matchZA.outboundValue) {
-        edge.azValue = matchZA.outboundValue;
-        edge.azColor = valueField[0].display(edge.azValue).color;
-        let azDisplay = valueField[0].display(edge.azValue);
-        edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
+      for (const matchZA of matchZAData) {
+        edge.zaValue = matchZA.inboundValue;
+        edge.zaColor = valueField[0].display(edge.zaValue).color;
+        let zaDisplay = valueField[0].display(edge.zaValue);
+        edge.zaDisplayValue = `${zaDisplay.text} ${zaDisplay.suffix || ''}`.trim();
+        if (matchZA.outboundValue) {
+          edge.azValue = matchZA.outboundValue;
+          edge.azColor = valueField[0].display(edge.azValue).color;
+          let azDisplay = valueField[0].display(edge.azValue);
+          edge.azDisplayValue = `${azDisplay.text} ${azDisplay.suffix || ''}`.trim();
+        }
       }
     }
   });

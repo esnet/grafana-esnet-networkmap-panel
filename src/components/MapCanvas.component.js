@@ -62,6 +62,7 @@ export class MapCanvas extends BindableHTMLElement {
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
     this.optionsCache = {};
+    this.isDisabled = false;
   }
 
   // connect component
@@ -71,7 +72,9 @@ export class MapCanvas extends BindableHTMLElement {
 
     PubSub.subscribe('destroyMap', this.destroyMap, this);
     PubSub.subscribe('newMap', this.newMap, this);
-    PubSub.subscribe('renderMap', ()=>{ this.map && this.map.renderMap() }, this)
+    PubSub.subscribe('renderMap', () => {
+      this.map && this.map.renderMap();
+    }, this);
     PubSub.subscribe('toggleLayer', this.toggleLayer, this);
     PubSub.subscribe('updateMapOptions', this.updateMapOptions, this);
     PubSub.subscribe('updateMapTopology', this.updateMapTopology, this);
@@ -322,15 +325,25 @@ export class MapCanvas extends BindableHTMLElement {
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
         populateOptionsAndTopology();
-        return
+        return;
       }
       // otherwise, no hit in cache, let's grab them from the URL
-      fetch(this.options["configurationUrl"]).then((response)=>{
-        response.json().then((config)=>{
-          self.optionsCache[self.options["configurationUrl"]] = config;
-          populateOptionsAndTopology();
-        })
-      })
+      const jsonResponseHandler = (config) => {
+        self.optionsCache[self.options["configurationUrl"]] = config;
+        populateOptionsAndTopology();
+      };
+
+      fetch(this.options["configurationUrl"]).then((response) => {
+        if (response.ok) {
+          response.json().then(jsonResponseHandler);
+        } else if (response.status >= 300 && response.status < 400 && response.headers["location"]) {
+          fetch(response.headers["location"]).then((res) => {
+            if (res.ok) {
+              res.json().then(jsonResponseHandler);
+            }
+          });
+        }
+      });
     }
   }
 
@@ -352,16 +365,21 @@ export class MapCanvas extends BindableHTMLElement {
     function wasChanged(option, changes){
       return changes.indexOf(option) >= 0;
     }
-    if( wasChanged('showLegend', changed) ||
+    if (
+        wasChanged('showLegend', changed) ||
         wasChanged('customLegend', changed) ||
         wasChanged('customLegendValue', changed) ||
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
-      ){
+    ) {
       this.renderLegend();
     }
-    if(wasChanged('enableEditing', changed)){
+    if (wasChanged('thresholds', changed)) {
+      const thresholdChangedEvent = new Event('thresholdsChanged', changed);
+      document.dispatchEvent(thresholdChangedEvent);
+    }
+    if (wasChanged('enableEditing', changed)) {
       if(!options.enableEditing){
         this.disableEditing();
       } else {
@@ -372,13 +390,13 @@ export class MapCanvas extends BindableHTMLElement {
       this.render();
       this.newMap();
     }
-    if(
+    if (
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
         wasChanged('enableScrolling', changed) ||
         wasChanged('resolveLat', changed) ||
         wasChanged('resolveLng', changed)
-      ){
+    ) {
       this.shadow.remove();
       this.shadow = null;
       this.render();
@@ -393,15 +411,16 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
       this.map && this.map.renderMap();
     }
-    if(
+    if (
       wasChanged('background', changed) ||
       wasChanged('enableNodeAnimation', changed) ||
       wasChanged('enableEdgeAnimation', changed)
-    ){
+    ) {
       this.renderStyle();
     }
     this.sideBar && this.sideBar.render();
   }
+
   updateMapTopology(newTopology){
     this._topology = newTopology;
     if(this.editingInterface){

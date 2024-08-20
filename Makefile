@@ -5,7 +5,11 @@ BREW=$(which brew)
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
 PROJECT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
 CONTAINER_NAME=esnet-networkmap-panel
+PROXY_NAME=mitmproxy
+NETWORK_NAME=esnet-networkmap-e2e-net
 CONTAINER_ID=$(shell docker ps -f name=$(CONTAINER_NAME) -q)
+INSTANCES=$(shell docker ps --filter name=$(CONTAINER_NAME) --filter name=$(PROXY_NAME) -qa)
+NETWORKS=$(shell docker network ls --filter name=${NETWORK_NAME} -q)
 
 .PHONY: prod
 prod:
@@ -32,14 +36,16 @@ restart:
 
 .PHONY: compose
 compose:
-	# start grafana docker instance and map project to plugin directory on instance
-	docker-compose up -d
-	# get instance info
+	# start grafana docker instances + network, and map project to plugin directory on instance
+	@if test "$(strip $(INSTANCES))" = ""; then docker -D compose up -d; else echo "Grafana instance found."; fi
+	# get instances info
+	sleep 2
 	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
-
 .PHONY: test
 test: compose
 	yarn test
+	sleep 2
+	yarn e2e
 
 .PHONY: test\:component
 test\:component:
@@ -48,7 +54,12 @@ test\:component:
 .PHONY: test\:e2e
 test\:e2e: compose
 	# run e2e tests
-	yarn e2e
+	yarn run e2e
+
+.PHONY: test\:ui
+test\:ui: compose
+	# run e2e tests, but with ui
+	yarn run e2e:ui
 
 .PHONY: testignore
 testignore:
@@ -75,3 +86,9 @@ push:
 
 .PHONY: publish
 publish: check_version prod testignore confirm push
+
+.PHONY: clean
+clean:
+	@rm -rf ${PROJECT_DIR}.config/env
+	@if test "$(strip $(INSTANCES))" = ""; then echo "No instances to cleanup."; else docker rm -v -f $(INSTANCES); fi
+	@if test "$(strip $(NETWORKS))" = ""; then echo "No network $(NETWORK_NAME) found to remove."; else docker network rm $(NETWORKS); fi

@@ -56,5 +56,17 @@ export interface MapOptions {
     zoom?: number;
   }
 
-  layers: LayerOptions[]
+  layers: Array<Partial<LayerOptions>>;
+}
+
+export interface IColumn {
+  selector: string;
+  text: string;
+  type: string;
+}
+
+export interface IFlowSheet {
+  name: string;
+  url: string;
+  expectedFlow: string;
 }
