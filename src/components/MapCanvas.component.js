@@ -116,6 +116,35 @@ export class MapCanvas extends BindableHTMLElement {
         `layers[${i}].autodetect.srcLongitudeColumn`,
       ]);
     }
+    this._urlMaskedOptions = {
+        "showLegend": "masked",
+        "legendColumnLength": "masked",
+        "legendPosition": "masked",
+        "legendDefaultBehavior": "masked",
+        "customEdgeTooltip": "masked",
+        "customNodeTooltip": "masked",
+        "enableCustomEdgeTooltip": "masked",
+        "enableCustomNodeTooltip": "masked",
+        "enableEdgeAnimation": "masked",
+        "enableNodeAnimation": "masked",
+        "enableScrolling": "masked",
+        "showViewControls": "masked",
+        "thresholds": "masked",
+        "multiLayerNodeSnap": "masked",
+      }
+    this._urlMaskedLayerOptions = {
+        "nodeThresholds": "masked",
+        "nodeNameMatchField": "masked",
+        "nodeValueField": "masked",
+        "srcField": "masked",
+        "dstField": "masked",
+        "inboundValueField": "masked",
+        "outboundValueField": "masked",
+        "dashboardNodeVar": "masked",
+        "dashboardEdgeSrcVar": "masked",
+        "dashboardEdgeDstVar": "masked",
+      }
+
   }
 
 
@@ -136,23 +165,33 @@ export class MapCanvas extends BindableHTMLElement {
   connectedCallback() {
     this.pubsub.setID(this.id, this);
 
+    let self = this;
+    const returnMapCenterAndZoom = () => {
+      let value = {
+        center: self.map.leafletMap.getCenter(),
+        zoom: self.map.leafletMap.getZoom()
+      };
+      PubSub.global.publish(signals.RETURN_MAP_CENTER_AND_ZOOM, value);
+      self.emit(signals.RETURN_MAP_CENTER_AND_ZOOM, value);
+    };
+    const returnViewport = () => {
+      let coords = {  coordinates: self.map.leafletMap.getBounds() };
+      PubSub.publish(signals.RETURN_VIEWPORT, coords);
+      self.emit(signals.RETURN_VIEWPORT, coords);
+    }
+
     PubSub.global.subscribe(signals.REQUEST_MAP_CENTER_AND_ZOOM, (() => {
-      var self = this;
-      return () => {
-        PubSub.global.publish(signals.RETURN_MAP_CENTER_AND_ZOOM, {
-          center: self.map.leafletMap.getCenter(),
-          zoom: self.map.leafletMap.getZoom()
-        })
-      }
+      let self = this;
+      return returnMapCenterAndZoom;
     })());
+    this.listen(signals.REQUEST_MAP_CENTER_AND_ZOOM, returnMapCenterAndZoom);
+
     PubSub.global.subscribe(signals.REQUEST_VIEWPORT, (() => {
-      var self = this;
-      return () => {
-        PubSub.publish(signals.RETURN_VIEWPORT, {
-          coordinates: self.map.leafletMap.getBounds()
-        })
-      }
+      let self = this;
+      return returnViewport;
     })());
+    this.listen(signals.REQUEST_VIEWPORT, returnViewport);
+
     window.addEventListener("resize", ()=>{
       this.recalculateMapZoom();
     })
@@ -189,14 +228,40 @@ export class MapCanvas extends BindableHTMLElement {
     return {};
   }
   setOptions(newValue){
-    let changes = this.calculateOptionsChanges(newValue);
-    this._options = newValue;
+    let newOptions = newValue;
+    if(this._options?.topologySource === "url"){
+      newOptions = { ...this._options };
+      Object.keys(newValue).forEach((key)=>{
+        // deal with per-layer options in a more nuanced way
+        if(key == "layers"){
+          for(let i=0; i<utils.LAYER_LIMIT; i++){
+            if(!newValue.layers[i]) continue;
+            Object.keys(newValue.layers[i]).forEach((layerKey)=>{
+              // if this layer option is masked, set it on the in-memory options object.
+              if(!!this._urlMaskedLayerOptions[layerKey]){
+                newOptions.layers[i][layerKey] = newValue.layers[i][layerKey];
+              }
+            })
+          }
+          // stop processing the key "layers" here, moving on to the next key in the loop.
+          return
+        }
+        // if our option is masked, set it on the in-memory options object.
+        if(!!this._urlMaskedOptions[key]){
+          newOptions[key] = newValue[key];
+        }
+      })
+
+    }
+
+    let changes = this.calculateOptionsChanges(newOptions);
+    this._options = newOptions;
     if(!changes.length) return;
-    this.updateMapOptions({ options: newValue, changed: changes });
+    this.updateMapOptions({ options: newOptions, changed: changes });
     this.matchTraffic();
     this.setEditModeFromUrl();
     this.emit(signals.OPTIONS_UPDATED, JSON.parse(JSON.stringify(this._options)));
-    return newValue;
+    return newOptions;
   }
   setEditModeFromUrl(){
     const params = utils.getUrlSearchParams();
@@ -504,34 +569,6 @@ export class MapCanvas extends BindableHTMLElement {
   maybeFetchOptions(){
     if(this.options?.topologySource == "url"){
       let self = this;
-      let maskedKeys = {
-        "showLegend": "masked",
-        "legendColumnLength": "masked",
-        "legendPosition": "masked",
-        "legendDefaultBehavior": "masked",
-        "customEdgeTooltip": "masked",
-        "customNodeTooltip": "masked",
-        "enableCustomEdgeTooltip": "masked",
-        "enableCustomNodeTooltip": "masked",
-        "enableEdgeAnimation": "masked",
-        "enableNodeAnimation": "masked",
-        "enableScrolling": "masked",
-        "showViewControls": "masked",
-        "thresholds": "masked",
-        "multiLayerNodeSnap": "masked",
-      }
-      let maskedLayerKeys = {
-        "nodeThresholds": "masked",
-        "nodeNameMatchField": "masked",
-        "nodeValueField": "masked",
-        "srcField": "masked",
-        "dstField": "masked",
-        "inboundValueField": "masked",
-        "outboundValueField": "masked",
-        "dashboardNodeVar": "masked",
-        "dashboardEdgeSrcVar": "masked",
-        "dashboardEdgeDstVar": "masked",
-      }
 
       function populateOptionsAndTopology(){
         let newOptions = {...self._options, ...self.optionsCache[self.options["configurationUrl"]]}
@@ -543,7 +580,7 @@ export class MapCanvas extends BindableHTMLElement {
               if(!newOptions.layers[i]) continue;
               Object.keys(newOptions.layers[i]).forEach((layerKey)=>{
                 // if this layer option is not masked, set it on the in-memory options object.
-                if(!maskedLayerKeys[layerKey]){
+                if(!self._urlMaskedLayerOptions[layerKey]){
                   self._options.layers[i][layerKey] = newOptions.layers[i][layerKey];
                 }
               })
@@ -552,7 +589,7 @@ export class MapCanvas extends BindableHTMLElement {
             return
           }
           // if our option is not masked, set it on the in-memory options object.
-          if(!maskedKeys[key]){
+          if(!self._urlMaskedOptions[key]){
             self._options[key] = newOptions[key];
           }
         })
@@ -567,6 +604,7 @@ export class MapCanvas extends BindableHTMLElement {
         self._remoteLoaded = true;
         self.shadow.remove();
         self.shadow = null;
+        self.matchTraffic();
         self.render();
         self.refresh();
         self.sideBar && self.sideBar.render();
@@ -945,6 +983,11 @@ export class MapCanvas extends BindableHTMLElement {
           #map-${this.instanceId} > .home-overlay > .button.selected-only {
               display: ${ selectedOnlyButtonDisplay }
           }
+          #map-${this.instanceId} td {
+            padding-left: 0;
+            padding-right: 0;
+          }
+
           ${ this.options.enableNodeAnimation ? `
           .animated-node {
             animation-name: throb;
