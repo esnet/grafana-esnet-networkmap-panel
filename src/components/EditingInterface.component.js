@@ -59,13 +59,20 @@ class EditingInterface extends BindableHTMLElement {
             this._dialog = null;
             this._spliceIndex = null;
         }
+        let lastEdit = this.mapCanvas.lastValue(signals.private.EDIT_SELECTION_SET);
         if(evtData && evtData['mode'] === "edge"){
             this._edgeEditMode = evtData['value'];
             this._nodeEditMode = false;
+            if(lastEdit?.type == "edges"){
+                this.setEditSelection(lastEdit);
+            }
         } 
         if(evtData && evtData['mode'] === "node"){
             this._edgeEditMode = false;
             this._nodeEditMode = evtData['value'];
+            if(lastEdit?.type == "nodes"){
+                this.setEditSelection(lastEdit);
+            }
         }
         if(evtData && evtData['mode'] === "off"){
             this._edgeEditMode = false;
