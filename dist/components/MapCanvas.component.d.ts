@@ -16,6 +16,34 @@ export class MapCanvas extends BindableHTMLElement {
     pubsub: pubsub.PrivateMessageBus;
     _trafficFormat: typeof utils.formatBits;
     _optionsToWatch: string[];
+    _urlMaskedOptions: {
+        showLegend: string;
+        legendColumnLength: string;
+        legendPosition: string;
+        legendDefaultBehavior: string;
+        customEdgeTooltip: string;
+        customNodeTooltip: string;
+        enableCustomEdgeTooltip: string;
+        enableCustomNodeTooltip: string;
+        enableEdgeAnimation: string;
+        enableNodeAnimation: string;
+        enableScrolling: string;
+        showViewControls: string;
+        thresholds: string;
+        multiLayerNodeSnap: string;
+    };
+    _urlMaskedLayerOptions: {
+        nodeThresholds: string;
+        nodeNameMatchField: string;
+        nodeValueField: string;
+        srcField: string;
+        dstField: string;
+        inboundValueField: string;
+        outboundValueField: string;
+        dashboardNodeVar: string;
+        dashboardEdgeSrcVar: string;
+        dashboardEdgeDstVar: string;
+    };
     setSelection(data: any): void;
     set selection(arg: boolean);
     get selection(): boolean;
