@@ -328,7 +328,7 @@ const options = {
       allowCustomValue: false,
       options: TopologySources,
     },
-    defaultValue: "autodetect",
+    defaultValue: "json",
   },
   "configurationUrl": {
     editor: "text",
