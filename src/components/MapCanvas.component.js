@@ -143,6 +143,7 @@ export class MapCanvas extends BindableHTMLElement {
         "dashboardNodeVar": "masked",
         "dashboardEdgeSrcVar": "masked",
         "dashboardEdgeDstVar": "masked",
+        "endpointId": "masked",
       }
 
   }
@@ -471,12 +472,18 @@ export class MapCanvas extends BindableHTMLElement {
         targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
         targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
         // do the accounting for nodes
-        // in value should be added to the A node's in and the Z node's out
-        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
-        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
-        // out value should be added to the A node's out and the Z node's in
-        layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
-        layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["inTraffic"] += row[values.out];
+        if(targetEdge && targetEdge.nodeA && nodeHash[targetEdge.nodeA]){
+          // in value should be added to the A node's in and the Z node's out
+          layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
+          // out value should be added to the A node's out and the Z node's in
+          layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
+        }
+        if(targetEdge && targetEdge.nodeZ && nodeHash[targetEdge.nodeZ]){
+          // in value should be added to the A node's in and the Z node's out
+          layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
+          // out value should be added to the A node's out and the Z node's in
+          layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["inTraffic"] += row[values.out];
+        }
       })
       // as a final step for nodes, convert the traffic sums to formatted labels
       // and color the node based on the max traffic (in vs out)
