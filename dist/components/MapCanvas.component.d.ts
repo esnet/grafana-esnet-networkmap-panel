@@ -43,6 +43,7 @@ export class MapCanvas extends BindableHTMLElement {
         dashboardNodeVar: string;
         dashboardEdgeSrcVar: string;
         dashboardEdgeDstVar: string;
+        endpointId: string;
     };
     setSelection(data: any): void;
     set selection(arg: boolean);
