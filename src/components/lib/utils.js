@@ -1,6 +1,19 @@
 export const LAYER_LIMIT = 3;
 
-export function getUrlSearchParams() {
+/**
+ * Defines delimiters for object prop paths when using resolvePath and setPath.
+ * @var {RegExp}
+ */
+const PATH_DELIMITER_REGEXP = /[\.\[\]\'\"]/;
+
+/**
+ * Retrives query parameters in the URL from the browser's location as an
+ * object with key-value pairs matching those of the URL parameters, with
+ * any URL encoded characters decoded.
+ *
+ * @returns {{[queryKey: string]: any}]
+ */
+export function getUrlQueryParams() {
   const search = window.location.search.substring(1);
   const searchParamsSegments = search.split('&');
   let params = {};
@@ -24,6 +37,9 @@ export function getUrlSearchParams() {
   return params;
 }
 
+/**
+ * Schema for a topology.
+ */
 const schema = {
   type: 'object',
   properties: {
@@ -58,7 +74,12 @@ const schema = {
   additionalProperties: true,
 };
 
-// helper function for JSON validation: works on arrays
+/**
+ * helper function for JSON validation: works on arrays
+ *
+ * @param {} itemSchema
+ * @param {} data
+ */
 const validateArray = function(itemSchema, data){
   var output = { 'valid': true, errorDetails: {} }
   for(var i=0; i<data.length; i++){
@@ -73,6 +94,15 @@ const validateArray = function(itemSchema, data){
 }
 
 // main JSON validation function: heavily recursive
+/**
+ * Validates a given object against a provided JSON schema.
+ *
+ * @param {any} schema
+ * @param {any} data
+ * @returns {{ valid: boolean, errorDetails: string }}}   An object with a prop valid set to true if validation passes.
+ *                                                        A prop errorDetails contains an empty string if passing, otherwise
+ *                                                        it contains the reason for validation failure.
+ */
 const validate = function(schema, data){
   // do type check
   var output = { "valid": true, "errorDetails": "" }
@@ -122,6 +152,14 @@ const validate = function(schema, data){
   return output;
 }
 
+/**
+ * Returns a tuple, of which the first element is true if data passes validation for a JSON schema,
+ * false otherwise. A false value will replace the second element (which defaults to simply a string 'valid' upon
+ * validation passing), to information regarding the error.
+ *
+ * @param {any} data      The data to validate
+ * @returns {[boolean, any]}
+ */
 export function testJsonSchema(data) {
   const {valid, errorDetails} = validate(schema, data);
   if (valid) {
@@ -131,16 +169,32 @@ export function testJsonSchema(data) {
   }
 }
 
+/**
+ * Gets the specified property or nested property of an object
+ *
+ * @param {object} object           The object from which to get the value using path
+ * @param {string} path             The specified or nested property from which to get the value in object
+ * @param {null|any} defaultValue   Optional. The default value to return in the case that the specified or nested property
+ *                                  is not defined. Defaults to null.
+ * @returns {any} The value of the specified or nested property given path upon object.
+ */
 export function resolvePath(object, path, defaultValue=null){
   return path
-    .split(/[\.\[\]\'\"]/)
+    .split(PATH_DELIMITER_REGEXP)
     .filter(p => p) // remove empty splits
     .reduce((o, p) => o ? o[p] : defaultValue, object)
 }
 
+/**
+ * Sets a newValue upon the specified property or nested property of an object
+ *
+ * @param {object} object  The object in which to set a new value using path
+ * @param {string} path    The specified or nested property at which to set the value
+ * @param {any} newValue   The value to set at path within object.
+ */
 export function setPath(object, path, newValue){
   let splitPath = path
-    .split(/[\.\[\]\'\"]/)
+    .split(PATH_DELIMITER_REGEXP)
     .filter(p => p)
   let o = object;
   let lastItem = splitPath.pop();
@@ -152,7 +206,7 @@ export function setPath(object, path, newValue){
 
 try {
   const Utils = {
-    getUrlSearchParams,
+    getUrlQueryParams,
     schema,
     validateArray,
     validate,
@@ -165,3 +219,46 @@ try {
   exports.Utils = Utils;
 } catch (e) {
 }
+
+export function sanitizeNode(node){
+  let output = {
+    name: node.name,
+    meta: node.meta,
+    coordinate: node.coordinate,
+  };
+  if(node.children && node.children.length > 0){
+    output["children"] = node.children;
+  }
+  return output;
+};
+
+export function sanitizeEdge(edge){
+  return {
+    name: edge.name,
+    meta: edge.meta,
+    coordinates: edge.coordinates,
+    children: edge.children,
+  };
+};
+
+export function sanitizeTopology(layerData) {
+  return {
+    name: layerData.name,
+    layer: layerData.layer,
+    pathLayout: layerData.pathLayout,
+    edges:
+      (layerData.edges &&
+        layerData.edges.reduce((output, edge) => {
+          output.push(sanitizeEdge(edge));
+          return output;
+        }, [])) ||
+      [],
+    nodes:
+      (layerData.nodes &&
+        layerData.nodes.reduce((output, node) => {
+          output.push(sanitizeNode(node));
+          return output;
+        }, [])) ||
+      [],
+  };
+};
