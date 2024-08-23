@@ -11,3 +11,4 @@ yarn-error.log
 .vitest
 playwright-report
 .auth
+test-results
