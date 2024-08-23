@@ -4,7 +4,7 @@ module.exports = function( config ) {
     config.set( {
         frameworks: [
             "mocha",
-            "should",
+            "should"
         ],
 
         files: [
@@ -20,12 +20,25 @@ module.exports = function( config ) {
         exclude: [
             "src/components/lib/leaflet.js",
             "src/components/lib/dataParser.js",
-            "src/components/old/*"
         ],
 
         browsers: ["ChromeHeadless"],
 
-        singleRun: false
+        singleRun: false,
 
+        preprocessors: {
+            'src/components/lib/!(d3\.min|leaflet\.esm|leaflet|pubsub).js': ['coverage'],
+            'src/components/lib/leaflet.global.js': ['coverage'],
+            'src/components/hoc/*.tsx': ['coverage'],
+            'src/components/css/*.js': ['coverage'],
+            'src/components/*.tsx': ['coverage'],
+            'src/components/*.js': ['coverage'],
+            'src/*.tsx': ['coverage'],
+            'src/*.ts': ['coverage'],
+            'src/*.js': ['coverage'],
+        },
+
+        // coverage reporter generates the coverage
+        reporters: ['progress', 'coverage'],
     } );
 };

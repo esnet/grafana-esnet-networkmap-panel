@@ -120,7 +120,7 @@ export class MapCanvas extends BindableHTMLElement {
     }
     this.maybeFetchOptions();
 
-    const params = utils.getUrlSearchParams();
+    const params = utils.getUrlQueryParams();
     if (
       params.editPanel === null ||
       params.editPanel === undefined ||

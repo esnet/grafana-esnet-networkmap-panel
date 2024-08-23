@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { PanelProps, createTheme, DataFrameView, getValueFormat, EventBus, GrafanaTheme2 } from '@grafana/data';
 import { MapOptions } from './types';
 import { parseData } from './components/lib/dataParser';
-import { sanitizeTopology } from './components/lib/topologyTools';
+import { sanitizeTopology } from './components/lib/utils';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
