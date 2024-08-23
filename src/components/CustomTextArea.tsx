@@ -4,7 +4,7 @@ import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
 import { TextArea } from '@grafana/ui';
 import { monospacedFontSize } from '../options';
 
-interface CustomTextAreaSettings extends StringFieldConfigSettings {
+export interface CustomTextAreaSettings extends StringFieldConfigSettings {
   isMonospaced: boolean;
   fontSize: string;
 }
@@ -21,6 +21,17 @@ function unescape(str) {
     .replace(/&quot;/g, '"');
 }
 
+/**
+ * This component renders a customized TextArea that accepts an item defined by Grafana's StandardEditorsRegistryItem
+ * interface.
+ *
+ * @prop {string} value                                           The current value of the standard registry item
+ * @prop {(value?: any): void} onChange                           A callback invoked when the value in the text area changes.
+ * @prop {StandardEditorsRegistryItem<TValue, TSettings>} item    The standard registry item to edit
+ * @prop {TBD} suffix                                             Optional.
+ * @param param0
+ * @returns
+ */
 export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix }) => {
   let textareaRef = useRef<HTMLTextAreaElement>(null);
 

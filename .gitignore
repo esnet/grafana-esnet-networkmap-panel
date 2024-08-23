@@ -40,6 +40,9 @@ e2e-results/
 .vscode
 .DS_store
 
+# vscode
+*.code-workspace
+
 # Playwright
 playwright*
 test-results
