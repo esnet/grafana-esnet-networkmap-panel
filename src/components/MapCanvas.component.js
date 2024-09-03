@@ -131,6 +131,7 @@ export class MapCanvas extends BindableHTMLElement {
         "showViewControls": "masked",
         "thresholds": "masked",
         "multiLayerNodeSnap": "masked",
+        "configurationUrl": "masked",
       }
     this._urlMaskedLayerOptions = {
         "nodeThresholds": "masked",
