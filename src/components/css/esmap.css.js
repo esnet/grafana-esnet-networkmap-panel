@@ -10,20 +10,6 @@ export const esmapCss = `
   position: relative;
 }
 
-#\${instanceId} .flow-tooltip {
-  display: flex;
-  align-items: center;
-  grid-gap: 8px;
-}
-#\${instanceId} .flow-tooltip strong {
-  font-weight: bold;
-}
-#\${instanceId} .flow-tooltip svg {
-  height: 12px;
-  width: 12px;
-  stroke-width: 2px;
-}
-
 #\${instanceId} svg path.edge-az {
   marker-start: url("#arrow");
 }

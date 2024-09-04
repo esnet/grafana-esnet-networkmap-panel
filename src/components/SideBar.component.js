@@ -81,6 +81,20 @@ class SideBar extends BindableHTMLElement {
 
     this.shadow.innerHTML = `
       <style>
+        #sidebar-${this.instanceId} .flow-tooltip {
+          display: flex;
+          align-items: center;
+          grid-gap: 8px;
+        }
+        #sidebar-${this.instanceId} .flow-tooltip strong {
+          font-weight: bold;
+        }
+        #sidebar-${this.instanceId} .flow-tooltip svg {
+          height: 12px;
+          width: 12px;
+          stroke-width: 2px;
+        }
+
         #sidebar-${this.instanceId} div.sidebar-tooltip {
             position: absolute;
             text-align: left;
