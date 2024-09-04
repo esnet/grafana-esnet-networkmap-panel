@@ -183,8 +183,8 @@ export const esmapCss = `
 }
 
 /* a 0-specificity class selector. Allows override for background elements by grafana's version of this class */
-#\${instanceId} div:where(.tight-form-func) { background: #FFF; }
-#\${instanceId} a:where(.tight-form-func) { background: #FFF; }
+div:where(.tight-form-func) { background: #FFF; }
+a:where(.tight-form-func) { background: #FFF; }
 
 #\${instanceId} .animated-node { 
   transform: scale(1.5, 1.5);
