@@ -257,8 +257,8 @@ export class MapCanvas extends BindableHTMLElement {
     }
 
     let changes = this.calculateOptionsChanges(newOptions);
+    if(!changes.length){ return; }
     this._options = newOptions;
-    if(!changes.length) return;
     this.updateMapOptions({ options: newOptions, changed: changes });
     this.matchTraffic();
     this.setEditModeFromUrl();
@@ -609,6 +609,7 @@ export class MapCanvas extends BindableHTMLElement {
           topo.push(JSON.parse(newOptions.layers[i].mapjson));
         }
         self._topology = topo;
+        self.emit(signals.TOPOLOGY_LOAD_SUCCESS, self._topology);
         self._remoteLoaded = true;
         self.shadow.remove();
         self.shadow = null;
@@ -632,6 +633,7 @@ export class MapCanvas extends BindableHTMLElement {
         self._remoteLoaded = true;
         self._remoteLoadError = true;
         self._remoteLoadErrorMessage = `Remote URL:\n${this.options['configurationUrl']}\n\nError Message:\n${err}`;
+        self.emit(signals.TOPOLOGY_LOAD_FAILURE, this.options['configurationUrl']);
         self.shadow.remove();
         self.shadow = null;
         self.render();
