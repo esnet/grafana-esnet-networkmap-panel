@@ -391,7 +391,7 @@ describe( "Class MapCanvas", () => {
         //deltaY.should.equal(-8);
       }
     });
-    /*it("should show the same tooltip on nodes and node control points", ()=>{
+    it("should show the same tooltip on nodes and node control points", ()=>{
       // get canvas
       var canvas = document.querySelector("esnet-map-canvas");
       // turn on editing mode
@@ -419,7 +419,7 @@ describe( "Class MapCanvas", () => {
       // fire click event on layer toggle
       // layer should be invisible
 
-    })*/
+    })
     it("should allow users to style edges in all layers, even when some are not visible", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
@@ -1222,6 +1222,54 @@ describe( "Class MapCanvas", () => {
         // we should find at no "true" results (all 'false')
         expect(results.indexOf(true)).toEqual(-1)
     })
+    it("should snap edges when the node is moved using the edit form", (done) => {
+      var canvas = document.querySelector("esnet-map-canvas");
+
+      // set edit mode
+      canvas.setEditMode("node");
+
+      // get a reference to a node
+      var node = document.querySelector(".control-point-for-node-A");
+
+      var nodeLocation = node.getBoundingClientRect();
+
+      var mouseDownEvent = new MouseEvent('mousedown', { bubbles: true, clientX: 200, clientY: 200, view: window });
+      var mouseUpEvent = new MouseEvent('mouseup', { bubbles: true, clientX: 200, clientY: 200, view: window });
+      // get position of edges of that node
+
+      var edgeClassName = `.cnxn-A`;
+      var edge = document.querySelector(edgeClassName);
+      var edgeLocation = edge.getBoundingClientRect();
+
+      // get form to popup
+
+      node.dispatchEvent(mouseDownEvent);
+      node.dispatchEvent(mouseUpEvent);
+      node.dispatchEvent(mouseDownEvent);
+      node.dispatchEvent(mouseUpEvent);
+
+      var nodeLatEl = document.querySelector('#node_lat');
+      nodeLatEl.value = parseFloat(nodeLatEl.value) - 1;
+
+      // update node location from form
+
+      // var updateNowBtn = document.querySelector('#create_node');
+      var nodeForm = document.querySelector('#add_node_form');
+
+      var newVal = parseFloat(nodeLatEl.value) - 1;
+      nodeLatEl.setAttribute('value', newVal);
+      nodeLatEl.value = newVal;
+
+      nodeForm.onsubmit(new Event('submit'));
+
+      // compare before and after for edges and node
+
+      setTimeout(() => {
+        expect(edge.getBoundingClientRect()).not.toEqual(edgeLocation.y);
+        expect(node.getBoundingClientRect()).not.toEqual(nodeLocation.y);
+        done();
+      }, 50);  // @see EditingInterface.updateLayerNodes: line 236, timeout of 10ms requires > 10ms wait time before validating results
+    });
     it("should render parent-child nodes in the correct order in topologies", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
 
@@ -1461,7 +1509,6 @@ describe( "Class MapCanvas", () => {
       let doneCalled = false;
 
       const topologyFailureCallback = (url)=>{
-        console.log(`failure loading ${url}!`);
         failures[url] = true;
         // if we're working with the first url, and it has failed, now
         // set up the second url and make sure it fails too.
@@ -1470,7 +1517,10 @@ describe( "Class MapCanvas", () => {
           newOptions.configurationUrl = secondTargetUrl;
           canvas.setOptions(newOptions);
         }
-        if(url == secondTargetUrl && !doneCalled){
+        // if this is the second url, and we haven't called "done"
+        // and we've logged two failures now, call done, and pass the test
+        // (if done is not called the test fails)
+        if(url == secondTargetUrl && !doneCalled && Object.keys(failures).length == 2){
           doneCalled = true;
           done();
         }
