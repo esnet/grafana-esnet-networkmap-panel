@@ -2,6 +2,8 @@ export namespace signals {
     export const TOPOLOGY_UPDATED: string;
     export const OPTIONS_UPDATED: string;
     export const TRAFFIC_UPDATED: string;
+    export const TOPOLOGY_LOAD_SUCCESS: string;
+    export const TOPOLOGY_LOAD_FAILURE: string;
     export const NODE_CREATED: string;
     export const NODE_UPDATED: string;
     export const NODE_DELETED: string;

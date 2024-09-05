@@ -31,6 +31,7 @@ export class MapCanvas extends BindableHTMLElement {
         showViewControls: string;
         thresholds: string;
         multiLayerNodeSnap: string;
+        configurationUrl: string;
     };
     _urlMaskedLayerOptions: {
         nodeThresholds: string;
