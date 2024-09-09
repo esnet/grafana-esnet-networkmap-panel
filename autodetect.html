@@ -1,0 +1,155 @@
+<html>
+<head>
+    <title>Embedded Map Demonstration Page</title>
+    <script type="module">
+        import "./src/components/MapCanvas.component.js";
+    </script>
+
+
+</head>
+<body>
+    <table style="width:100%;">
+        <tr>
+            <th colspan="3">
+                <h1>Autodetected Topology Demonstration page</h1>
+            </th>
+        <tr>
+            <td style="width:20%">
+                <a href="/">Main Demonstration Page</a>&nbsp;&nbsp; 
+            </td>
+        <tr>
+            <td colspan="2" style="width:80%;">
+                <div id="mapContainer">
+                    <esnet-map-canvas id="mapCanvas" height="400">
+                    </esnet-map-canvas>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td style="width:40%">Map Data</td>
+            <td style="width:40%">Map Options</td>
+            <td style="width:20%"></td>
+        </tr>
+        <tr>
+            <td id="mapDataContainer">
+                <textarea id="trafficText" style="height:300px; width:100%;">
+                </textarea>
+            </td>
+            <td id="mapOptionsContainer">
+                <textarea id="optionsText" style="height:300px; width:100%;">
+                </textarea>
+            </td>
+        </tr>
+    </table>
+
+    <script type="module">
+        import { sanitizeTopology } from "./src/components/lib/topologyTools.js"
+        import { signals } from "./src/signals.js"
+        var parsedData = {};
+        var lavender = "rgb(202, 149, 229)";
+        var options = {
+            "initialViewStrategy": "viewport",
+            "showSidebar": true,
+            "showViewControls": true,
+            "enableEdgeAnimation": true,
+            "enableNodeAnimation": true,
+            "enableScrolling": true,
+            "enableEditing": true,
+            "background":"#EDEDED",
+            "multiLayerNodeSnap": false,
+            "topologySource": "autodetect",
+            "viewport": {
+                "top": 33,
+                "left": -141,
+                "bottom": 43,
+                "right": -41,
+                "center": {
+                    "lat":38.68,
+                    "lng":-96.96,
+                },
+                "zoom":3.5
+            },
+            "tileset": {
+                // global options
+                // this string corresponds to options in RenderMap.js
+                "geographic":"esri.shaded",
+                // this string (or null) corresponds to options in RenderMap.js
+                "boundaries":null,
+                // this string (or null) corresponds to options in RenderMap.js
+                "labels": null,
+            },
+            "layers": [
+                {
+                    // layer 1 rendering options
+                    "visible":true,
+                    "color": lavender,
+                    "endpointId":"names",
+                    "nodeWidth":4,
+                    "edgeWidth":2,
+                    "pathOffset":2,
+                    "name":"Core Topology",
+                    "srcField": "src_name",
+                    "dstField": "dst_name",
+                    "inboundValueField": "in_bits",
+                    "outboundValueField": "out_bits",
+                    "autodetect": {
+                        "autodetectTopology": "true",
+                        "dstNameColumn": "dst_name",
+                        "dstLatitudeColumn": "dst_latitude",
+                        "dstLongitudeColumn": "dst_longitude",
+                        "srcNameColumn": "src_name",
+                        "srcLatitudeColumn": "src_latitude",
+                        "srcLongitudeColumn": "src_longitude",
+                    },
+                    "name":"Autodetected",
+                    "legend":true,
+                },
+            ]
+        };
+        var traffic = [
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":52,"src_longitude":21,"src_name":"NCBJ.pl","in_bits": 16000000, "out_bits": 160000000},
+            {"dst_latitude":40,"dst_longitude":-74,"dst_name":"PPPL","src_latitude":43,"src_longitude":12,"src_name":"Cineca","in_bits": 4000000, "out_bits": 40000000},
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","in_bits": 1000000, "out_bits": 10000000},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","in_bits": 32000000, "out_bits": 320000000},
+            {"dst_latitude":40,"dst_longitude":-72,"dst_name":"BNL","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 148000000, "out_bits": 1480000000},
+            {"dst_latitude":40,"dst_longitude":-74,"dst_name":"GFDL-Z","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 1000000, "out_bits": 10000000},
+            {"dst_latitude":37,"dst_longitude":-76,"dst_name":"JeffersonLab","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 13000000, "out_bits": 130000000},
+            {"dst_latitude":38,"dst_longitude":-78,"dst_name":"Caltech","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 3000000, "out_bits": 30000000},
+            {"dst_latitude":29,"dst_longitude":-82,"dst_name":"UFlorida","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 12000000, "out_bits": 120000000},
+            {"dst_latitude":34,"dst_longitude":-86,"dst_name":"NASA","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 1000000, "out_bits": 10000000},
+            {"dst_latitude":40,"dst_longitude":-86,"dst_name":"Purdue","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 82000000, "out_bits": 820000000},
+            {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 372000000, "out_bits": 3720000000},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 586000000, "out_bits": 5860000000},
+            {"dst_latitude":40,"dst_longitude":-96,"dst_name":"UNLincoln","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 452000000, "out_bits": 4520000000},
+            {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":50,"src_longitude":4,"src_name":"IIHE.be","in_bits": 45000000, "out_bits": 450000000},
+        ]; 
+        var canvas = document.getElementById("mapCanvas");
+        var optionsElem = document.getElementById("optionsText");
+        var trafficElem = document.getElementById("trafficText");
+
+        console.log("Available signals:", signals);
+
+        const receiveOptionsUpdates = function(options){
+            optionsElem.value = JSON.stringify(options, null, "  ");
+        }
+        const receiveTrafficUpdates = function(traffic){
+            trafficElem.value = JSON.stringify(traffic, null, "  ");
+        }
+        canvas.listen(signals.TRAFFIC_UPDATED, receiveTrafficUpdates);
+        canvas.listen(signals.OPTIONS_UPDATED, receiveOptionsUpdates);
+
+        canvas.setTraffic(traffic);
+        canvas.setOptions(options);
+
+        trafficElem.onchange = function(event){
+            canvas.setTraffic(JSON.parse(event.target.value));
+        }
+
+        optionsElem.onchange = function(event){
+            canvas.setOptions(JSON.parse(event.target.value));
+        }
+
+
+    </script>
+</body>
+</html>

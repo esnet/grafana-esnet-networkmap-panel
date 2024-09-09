@@ -9,6 +9,10 @@ export const BaseTilesets: ({
     label: string;
     value: string;
 })[];
+export const TopologySources: {
+    label: string;
+    value: string;
+}[];
 export const PoliticalBoundaryTilesets: ({
     label: string;
     value: null;

@@ -4,17 +4,17 @@ const PubSub = pubsub.PubSub;
 
 describe( "PubSub Module", () => {
     it("should have a global bus", ()=>{
-        PubSub.global.publish.should.be.a.Function;
-        PubSub.global.subscribe.should.be.a.Function;
-        PubSub.global.last.should.be.a.Function;
-        PubSub.global.clearLast.should.be.a.Function;
-        PubSub.global.clearAllCallbacks.should.be.a.Function;
-        PubSub.global.clearTopicCallbacks.should.be.a.Function;
+        expect(PubSub.global.publish).toBeDefined();
+        expect(PubSub.global.subscribe).toBeDefined();
+        expect(PubSub.global.last).toBeDefined();
+        expect(PubSub.global.clearLast).toBeDefined();
+        expect(PubSub.global.clearAllCallbacks).toBeDefined();
+        expect(PubSub.global.clearTopicCallbacks).toBeDefined();
     });
     it("should have local busses, bound to html elements", ()=>{
         var elem = document.createElement("div");
         var bus = new PrivateMessageBus(elem);
-        bus.should.be.an.instanceOf(PrivateMessageBus);
+        expect(bus instanceof PrivateMessageBus).toBeTruthy();
     });
     it("should implement a private message bus bound to an HTML element", ()=>{
         var elem = document.createElement("div");
@@ -22,7 +22,7 @@ describe( "PubSub Module", () => {
         var privateTestValue = null;
         PubSub.subscribe("test", (value)=>{ privateTestValue = value; }, elem)
         PubSub.publish("test", "value", elem);
-        (String(privateTestValue)).should.equal("value");
+        expect(String(privateTestValue)).toEqual("value");
     });
     it("should allow users to supply a 'debug' parameter when instantiating the bus", ()=>{
         var oldDebug = console.debug;
@@ -31,7 +31,7 @@ describe( "PubSub Module", () => {
         var elem = document.createElement("div");
         new PrivateMessageBus(elem, true);
         PubSub.publish("test", "value", elem);
-        called.should.equal(true);
+        expect(called).toEqual(true);
         console.debug = oldDebug;
     });
     it("should users to set a 'debug' attribute on the global bus", ()=>{
@@ -40,14 +40,14 @@ describe( "PubSub Module", () => {
         console.debug = function(){ called = true; oldDebug.apply(console, arguments); }
         PubSub.global.setDebug(true);
         PubSub.global.publish("test", "value");
-        called.should.equal(true);
+        expect(called).toEqual(true);
         console.debug = oldDebug;
     });
     it("should implement a global message bus in the module scope", ()=>{
         var globalTestValue = null;
         PubSub.global.subscribe("test", (value)=>{ globalTestValue = value; })
         PubSub.publish("test", "value");
-        (String(globalTestValue)).should.equal("value");
+        expect(String(globalTestValue)).toEqual("value");
     });
     it("should not 'hear' local bus events on the global bus", ()=>{
         var elem = document.createElement("div");
@@ -57,8 +57,8 @@ describe( "PubSub Module", () => {
         PubSub.subscribe("test", (value)=>{ privateTestValue = value; }, elem)
         PubSub.global.subscribe("test", (value)=>{ globalTestValue = value; })
         PubSub.publish("test", "value", elem);
-        (String(privateTestValue)).should.equal("value");
-        (String(globalTestValue)).should.equal("null");
+        expect(String(privateTestValue)).toEqual("value");
+        expect(String(globalTestValue)).toEqual("null");
     });
     it("should not 'hear' global bus events on the local bus", ()=>{
         var elem = document.createElement("div");
@@ -68,31 +68,31 @@ describe( "PubSub Module", () => {
         PubSub.subscribe("test", (value)=>{ privateTestValue = value; }, elem)
         PubSub.global.subscribe("test", (value)=>{ globalTestValue = value; })
         PubSub.global.publish("test", "value");
-        (String(privateTestValue)).should.equal("null");
-        (String(globalTestValue)).should.equal("value");
+        expect(String(privateTestValue)).toEqual("null");
+        expect(String(globalTestValue)).toEqual("value");
     });
     it("should return the 'last' value for an event on the local bus", ()=>{
         var elem = document.createElement("div");
         new PrivateMessageBus(elem, true);
         PubSub.publish("test", "value", elem);
-        PubSub.last("test", elem).should.equal("value");
+        expect(PubSub.last("test", elem)).toEqual("value");
     })
     it("should return the 'last' value for an event on the global bus", ()=>{
         PubSub.global.publish("test", "value");
-        PubSub.global.last("test").should.equal("value");
+        expect(PubSub.global.last("test")).toEqual("value");
     })
     it("should allow users to clear the 'last' value for an event on a local bus", ()=>{
         var elem = document.createElement("div");
         new PrivateMessageBus(elem, true);
         PubSub.publish("test", "value", elem);
-        PubSub.last("test", elem).should.equal("value");
+        expect(PubSub.last("test", elem)).toEqual("value");
         PubSub.clearLast("test", elem);
-        String(PubSub.last("test", elem)).should.equal("null");
+        expect(String(PubSub.last("test", elem))).toEqual("null");
     })
     it("should allow users to clear the 'last' value for an event on the global bus", ()=>{
         PubSub.global.publish("test", "value");
-        PubSub.global.last("test").should.equal("value");
+        expect(PubSub.global.last("test")).toEqual("value");
         PubSub.global.clearLast("test");
-        String(PubSub.global.last("test")).should.equal("null");        
+        expect(String(PubSub.global.last("test"))).toEqual("null");
     })
 })

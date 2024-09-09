@@ -1,6 +1,8 @@
 import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
+import * as L from "./lib/leaflet-src.esm.js";
 import { LAYER_LIMIT } from './lib/utils.js'
+import { signals } from "../signals.js";
 const PubSub = pubsub.PubSub;
 
 // these imports are the result of very significant trial and error.
@@ -27,12 +29,6 @@ var locationService = { "partial": function(query){
     const updatedUrl = location.toString();
     window.history.pushState(null, "", updatedUrl);
 } }
-// require is only defined in the webpack context, not ES6
-var L = window['L'];
-try {
-  var L = require('./lib/leaflet.js');
-} catch (e) {
-}
 
 export default class NetworkMap {
   /**
@@ -59,36 +55,11 @@ export default class NetworkMap {
       this.sideBar,
       d3.curveNatural);
 
-    PubSub.subscribe("setEditMode", this.setEditMode, this);
-    PubSub.subscribe("renderMap", this.renderMapLayers, this);
   }
 
-  dispatchEvent(event){
-    return this.mapCanvas.dispatchEvent(event);
-  }
-
-  setEdgeEdit(bool){
-      this.esmap.editNodeMode(false);
-      this.esmap.editEdgeMode(bool);
-  }
-  setNodeEdit(bool){
-      this.esmap.editEdgeMode(false);
-      this.esmap.editNodeMode(bool);
-  }
-
-  setEditMode(mode) {
-    if(mode == "edge"){
-      this.setEdgeEdit(false);
-      this.setEdgeEdit(!this.esmap.editEdges);
-    }
-    if(mode=="node"){
-      this.setEdgeEdit(false);
-      this.setNodeEdit(!this.esmap.editNodes);
-    }
-    if(mode === null || mode === undefined){
-      this.setEdgeEdit(false);
-      this.setNodeEdit(false);
-    }
+  destroy(){
+    this.esmap.destroy();
+    this.esmap = null;
   }
 
   renderMapLayers() {
@@ -108,8 +79,12 @@ export default class NetworkMap {
           for(var e=0; e<layer.edges.length; e++){
             var endpointId = `endpointId`;
             var edge = layer.edges[e];
-            edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][0], layer.nodes);
-            edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId][1], layer.nodes);
+            if(!edge.nodeA){
+              edge.nodeA = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId]?.[0], layer.nodes);
+            }
+            if(!edge.nodeZ){
+              edge.nodeZ = getDisplayName(edge.meta.endpoint_identifiers[this.mapCanvas.options.layers[l].endpointId]?.[1], layer.nodes);
+            }
           }
           l++; // update the layer index
         });
