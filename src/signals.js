@@ -3,6 +3,9 @@ export const signals = {
     OPTIONS_UPDATED: "options updated",
     TRAFFIC_UPDATED: "traffic updated",
 
+    TOPOLOGY_LOAD_SUCCESS: "topology load success",
+    TOPOLOGY_LOAD_FAILURE: "topology load failure",
+
     NODE_CREATED: "node created",
     NODE_UPDATED: "node updated",
     NODE_DELETED: "node deleted",
