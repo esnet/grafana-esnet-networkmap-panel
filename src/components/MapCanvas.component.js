@@ -1131,7 +1131,6 @@ export class MapCanvas extends BindableHTMLElement {
       this.shadow = document.createElement("div");
       this.append(this.shadow);
       let mapCSS = renderTemplate(esmapCss, { instanceId: `map-${this.instanceId}` });
-      console.log(mapCSS);
       this.shadow.innerHTML = `
       <style>
         ${mapCSS}
