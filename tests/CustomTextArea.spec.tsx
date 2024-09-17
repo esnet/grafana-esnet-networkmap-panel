@@ -1,5 +1,6 @@
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { screen } from '@testing-library/dom';
+import { render } from '@testing-library/react';
 import { CustomTextArea, CustomTextAreaSettings } from '../src/components/CustomTextArea';
 import { StandardEditorContext, StandardEditorsRegistryItem } from '@grafana/data';
 
@@ -22,6 +23,6 @@ describe('CustomTextArea', () => {
             />
         );
 
-        expect(screen.getByText('Some default value')).toBeInTheDocument();
-    })
+        expect(screen.getByText('Some default value')).not.toBeUndefined();
+    });
 });
