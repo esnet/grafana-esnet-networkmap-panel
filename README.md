@@ -1,6 +1,6 @@
 [![Build Status](https://api.travis-ci.com/esnet/grafana-esnet-networkmap-panel.svg?branch=main)](https://app.travis-ci.com/github/esnet/grafana-esnet-networkmap-panel)
 
-![Network Map Screenshot](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/v2.0.1/src/img/networkmap.png "Network Map Screenshot")
+![Network Map Screenshot](https://raw.githubusercontent.com/esnet/grafana-esnet-networkmap-panel/v3.0.0/src/img/networkmap.png "Network Map Screenshot")
 
 For setting up in Grafana with an example: See [Introductory Tutorial](#introductory-tutorial)
 For development: See [Development Notes](https://github.com/esnet/grafana-esnet-networkmap-panel/blob/main/docs/development.md)

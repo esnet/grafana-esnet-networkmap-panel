@@ -1,67 +1,54 @@
 export const esmapCss = `
-.leaflet-pane svg path.edge {
+#\${instanceId} .leaflet-pane svg path.edge {
     pointer-events: stroke;
 }
-.leaflet-pane svg path.control {
+#\${instanceId} .leaflet-pane svg path.control {
     pointer-events: stroke;
 }
 
-.map-panel {
+#\${instanceId} .map-panel {
   position: relative;
 }
 
-.flow-tooltip {
-  display: flex;
-  align-items: center;
-  grid-gap: 8px;
-}
-.flow-tooltip strong {
-  font-weight: bold;
-}
-.flow-tooltip svg {
-  height: 12px;
-  width: 12px;
-  stroke-width: 2px;
-}
-
-svg path.edge-az {
+#\${instanceId} svg path.edge-az {
   marker-start: url("#arrow");
 }
 
-svg path.edge-za {
+#\${instanceId} svg path.edge-za {
   marker-start: url("#arrow");
 }
 
-svg circle.node {
+#\${instanceId} svg circle.node {
         /* fill: #999; */
         stroke: #777;
         stroke-width: 1;
         pointer-events: all;
 }
 
-svg path.edge {
+#\${instanceId} svg path.edge {
         stroke-linecap: butt;
         fill:  none;
         pointer-events: visiblePainted !important;
 }
 
-svg path.animated-edge.edge-az {
+#\${instanceId} svg path.animated-edge.edge-az {
         stroke: transparent;
         stroke-linecap: butt;
         fill:  none;
         cursor: crosshair;
 }
 
-svg path.animated-edge.edge-za {
+#\${instanceId} svg path.animated-edge.edge-za {
         stroke: transparent;
         stroke-linecap: butt;
         fill:  none;
         cursor: crosshair;
 }
-svg path.animated-edge.edge-az.selected {
+
+#\${instanceId} svg path.animated-edge.edge-az.selected {
 }
 
-svg path.animated-edge.edge-za.selected {
+#\${instanceId} svg path.animated-edge.edge-za.selected {
 }
 
 @keyframes dash {
@@ -71,7 +58,7 @@ svg path.animated-edge.edge-za.selected {
 }
 
 
-svg path.control {
+#\${instanceId} svg path.control {
         stroke-dasharray: 8 1;
         stroke-width: 6;
         stroke: #f808;
@@ -79,14 +66,14 @@ svg path.control {
     cursor: crosshair;
 }
 
-svg circle.controlPoint {
+#\${instanceId} svg circle.controlPoint {
     stroke: black;
     stroke-width: 1;
         fill: #f80;
         cursor: move;
 }
 
-div.tooltip-hover {
+#\${instanceId} div.tooltip-hover {
   position:absolute;
   border-radius:4px;
   padding:10px;
@@ -96,91 +83,28 @@ div.tooltip-hover {
   font-family: sans-serif;
 }
 
-div.tooltip-hover p:first-of-type {
+#\${instanceId} div.tooltip-hover p:first-of-type {
   margin-top:0;
 }
 
-div.tooltip-hover p {
+#\${instanceId} div.tooltip-hover p {
   margin-top: 6px;
   margin-bottom:0;
 }
 
-div.sidebar-tooltip {
-    position: absolute;
-    text-align: left;
-    height: auto;
-    font: sans-serif;
-    pointer-events: none;
-}
-
-.legend-text {
+#\${instanceId} .legend-text {
   padding-left: 5px;
   vertical-align: middle;
 }
 
-/* The switch - the box around the slider */
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 45px;
-  height: 26px;
-}
 
-/* Hide default HTML checkbox */
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-  margin-top: 5px;
-}
 
-/* The slider */
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 25px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 4px;
-  bottom: 3px;
-  background-color: white;
-  -webkit-transition: .4s;
-  transition: .4s;
-  border-radius: 50%;
-}
-
-input:checked + .slider {
-  background-color: #4EC1E0;
-}
-
-input:focus + .slider {
-  box-shadow: 0 0 1px #4EC1E0;
-}
-
-input:checked + .slider:before {
-  -webkit-transform: translateX(18px);
-  -ms-transform: translateX(18px);
-  transform: translateX(18px);
-}
-
-.home-overlay {
+#\${instanceId} .home-overlay {
     position: absolute;
     margin-top: 12px;
     margin-left: 57px;
 }
-.home-overlay > .button {
+#\${instanceId} .home-overlay > .button {
    border-radius: 4px;
    padding: 5px 10px;
    margin-right: 5px;
@@ -189,7 +113,7 @@ input:checked + .slider:before {
    cursor: pointer;
 }
 
-.legend {
+#\${instanceId} .legend {
     position: absolute;
     padding: 1em 1em 0.3em 1em;
     margin: 0.8em;
@@ -197,23 +121,23 @@ input:checked + .slider:before {
     border-radius: 3px;
 }
 
-.legend.topright {
+#\${instanceId} .legend.topright {
   top: 0;
   right: 0;
 }
 
-.legend.bottomright {
+#\${instanceId} .legend.bottomright {
   bottom: 0;
   right: 0;
   margin: 0.8em 0.8em 1.8em 0.8em;
 }
 
-.legend.bottomleft {
+#\${instanceId} .legend.bottomleft {
   bottom: 0;
   left: 0;
 }
 
-.color-sample {
+#\${instanceId} .color-sample {
   height:1.5em;
   width:1.5em;
   margin-right:0.5em;
@@ -223,12 +147,12 @@ input:checked + .slider:before {
   border-radius: 2px;
 }
 
-.legend p {
+#\${instanceId} .legend p {
     vertical-align: text-top;
     margin-bottom: 0.6em;
 }
 
-.legend h4 {
+#\${instanceId} .legend h4 {
   font-weight:600;
   font-size:1.1em;
   padding: 0;
@@ -236,25 +160,25 @@ input:checked + .slider:before {
   display: inline-block;
 }
 
-.legend .minimize {
+#\${instanceId} .legend .minimize {
   float:right;
 }
 
-.legend .minimize .circle-background {
+#\${instanceId} .legend .minimize .circle-background {
   fill: rgba(128,128,128,0.3); cursor: pointer;
 }
 
-.legend .minimize .circle-background:hover {
+#\${instanceId} .legend .minimize .circle-background:hover {
   fill: rgba(128,128,128,0.5);
 }
 
-.legend-column {
+#\${instanceId} .legend-column {
     display: inline-block;
     vertical-align: top;
     margin-right: 10px;
 }
 
-.legend-column:last-child {
+#\${instanceId} .legend-column:last-child {
   margin-right:0;
 }
 
@@ -262,11 +186,11 @@ input:checked + .slider:before {
 div:where(.tight-form-func) { background: #FFF; }
 a:where(.tight-form-func) { background: #FFF; }
 
-.animated-node { 
+#\${instanceId} .animated-node { 
   transform: scale(1.5, 1.5);
 }
 
-svg .control.control-selected { 
+#\${instanceId} svg .control.control-selected { 
   animation-name: pulse;
   animation-duration: 1s;
   animation-iteration-count: infinite;
@@ -279,6 +203,6 @@ svg .control.control-selected {
   100% { opacity:1.0 }
 }
 
-.loading-overlay, .error-overlay { background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; }
+#\${instanceId} .loading-overlay, .error-overlay { background-color:rgba(0,0,0,0.7); position:absolute; height:100%; width: 100%; color:white; font-weight: bold; justify-content: center; align-items: center; z-index:20000; }
 
 `
