@@ -1,7 +1,8 @@
 import * as pubsub from './lib/pubsub.js';
 import * as utils from "./lib/utils.js";
 const PubSub = pubsub.PubSub;
-import { BindableHTMLElement } from './lib/rubbercement.js'
+import { BindableHTMLElement } from './lib/rubbercement.js';
+import { signals } from "../signals.js";
 
 class SideBar extends BindableHTMLElement {
 
@@ -12,13 +13,13 @@ class SideBar extends BindableHTMLElement {
         "options": {},
         "editingInterface": {}
     }
-    PubSub.subscribe("updateEditMode", this.render, this);
-    PubSub.subscribe("showTooltip", this.showTooltip, this);
-    PubSub.subscribe("hideTooltip", this.hideTooltip, this);
   }
 
-  set mapCanvas(newValue) {
+  setMapCanvas(newValue) {
     this._mapCanvas = newValue;
+    this._mapCanvas.listen(signals.TOOLTIP_VISIBLE, this.showTooltip);
+    this._mapCanvas.listen(signals.TOOLTIP_HIDDEN, this.hideTooltip);
+    this._mapCanvas.listen(signals.EDITING_SET, ()=>{ this.render() });
     this.render();
   }
 
@@ -30,7 +31,10 @@ class SideBar extends BindableHTMLElement {
     var element = event.target;
     var layer = element.id.split("-")[2];
     var value = element.checked;
-    PubSub.publish("toggleLayer", {"layer": layer, "visible": value}, this);
+
+    const evtData = {"layer": layer, "visible": value};
+    this.mapCanvas.emit(signals.LAYER_TOGGLED, evtData);
+    this.mapCanvas.toggleLayer(layer, value);
   }
 
   showTooltip(data) {
@@ -53,7 +57,7 @@ class SideBar extends BindableHTMLElement {
     if (!this.shadow) {
         this.shadow = document.createElement("div");
         this.shadow.setAttribute("class", "tight-form-func");
-        this.shadow.id = "tooltip-"+this.instanceId;
+        this.shadow.id = "sidebar-"+this.instanceId;
         this.append(this.shadow);
     }
 
@@ -77,7 +81,86 @@ class SideBar extends BindableHTMLElement {
 
     this.shadow.innerHTML = `
       <style>
-        #tooltip-${this.instanceId} {
+        #sidebar-${this.instanceId} .flow-tooltip {
+          display: flex;
+          align-items: center;
+          grid-gap: 8px;
+        }
+        #sidebar-${this.instanceId} .flow-tooltip strong {
+          font-weight: bold;
+        }
+        #sidebar-${this.instanceId} .flow-tooltip svg {
+          height: 12px;
+          width: 12px;
+          stroke-width: 2px;
+        }
+
+        #sidebar-${this.instanceId} div.sidebar-tooltip {
+            position: absolute;
+            text-align: left;
+            height: auto;
+            font: sans-serif;
+            pointer-events: none;
+        }
+
+         /* The switch - the box around the slider */
+        #sidebar-${this.instanceId} .switch {
+          position: relative;
+          display: inline-block;
+          width: 45px;
+          height: 26px;
+        }
+
+        /* Hide default HTML checkbox */
+        #sidebar-${this.instanceId} .switch input {
+          opacity: 0;
+          width: 0;
+          height: 0;
+          margin-top: 5px;
+        }
+
+        /* The slider */
+        #sidebar-${this.instanceId} .slider {
+          position: absolute;
+          cursor: pointer;
+          top: 0;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          background-color: #ccc;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 25px;
+        }
+
+        #sidebar-${this.instanceId} .slider:before {
+          position: absolute;
+          content: "";
+          height: 20px;
+          width: 20px;
+          left: 4px;
+          bottom: 3px;
+          background-color: white;
+          -webkit-transition: .4s;
+          transition: .4s;
+          border-radius: 50%;
+        }
+
+        #sidebar-${this.instanceId} input:checked + .slider {
+          background-color: #4EC1E0;
+        }
+
+        #sidebar-${this.instanceId} input:focus + .slider {
+          box-shadow: 0 0 1px #4EC1E0;
+        }
+
+        #sidebar-${this.instanceId} input:checked + .slider:before {
+          -webkit-transform: translateX(18px);
+          -ms-transform: translateX(18px);
+          transform: translateX(18px);
+        }
+
+        #sidebar-${this.instanceId} {
           font-family: sans-serif;
           padding: 0 1em;
           vertical-align: top;
@@ -91,20 +174,20 @@ class SideBar extends BindableHTMLElement {
           margin-top:8px;
           padding: 0 5px;
         }
-        #tooltip-${this.instanceId} .legend-text {
+        #sidebar-${this.instanceId} .legend-text {
           vertical-align: bottom;
           margin-bottom:3px;
           line-height: 27px;
           font-size: 14px;
         }
-        #tooltip-${this.instanceId} .legend-text.small {
+        #sidebar-${this.instanceId} .legend-text.small {
           vertical-align: bottom;
           color: #888;
           line-height: 12px;
           font-size: 12px;
           margin-top:3px;
         }
-        #tooltip-${this.instanceId} h2 {
+        #sidebar-${this.instanceId} h2 {
           margin-bottom: 5px;
           margin-top: 10px;
           font-size:20px;

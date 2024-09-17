@@ -165,3 +165,15 @@ try {
   exports.Utils = Utils;
 } catch (e) {
 }
+
+export function formatBits(bytes, decimals = 2) {
+    if (!+bytes) return '0 Bytes'
+
+    const k = 1000
+    const dm = decimals < 0 ? 0 : decimals
+    const sizes = ['b/s', 'Kb/s', 'Mb/s', 'Gb/s', 'Tb/s', 'Pb/s', 'Eb/s', 'Zb/s', 'Yb/s']
+
+    const i = Math.floor(Math.log(bytes) / Math.log(k))
+
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`
+}

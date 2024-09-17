@@ -11,12 +11,9 @@ export default class NetworkMap {
     svgLayer: any;
     sideBar: any;
     esmap: es.EsMap;
-    dispatchEvent(event: any): any;
-    setEdgeEdit(bool: any): void;
-    setNodeEdit(bool: any): void;
-    setEditMode(mode: any): void;
+    destroy(): void;
     renderMapLayers(): void;
     renderMap(): any;
 }
-import * as es from "./lib/esmap.js";
+import * as es from './lib/esmap.js';
 //# sourceMappingURL=NetworkMap.d.ts.map
