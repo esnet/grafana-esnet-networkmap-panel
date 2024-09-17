@@ -13,7 +13,7 @@ interface Props extends StandardEditorProps<string, CustomTextAreaSettings> {
   suffix?: ReactNode;
 }
 
-function unescape(str: String) {
+function unescape(str) {
   return String(str)
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
