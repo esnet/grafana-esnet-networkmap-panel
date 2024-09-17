@@ -8,7 +8,7 @@ export class MapCanvas extends BindableHTMLElement {
     _data: any;
     map: NetworkMap | null;
     leafletMap: L.Map | null;
-    set jsonResults(arg: any);
+    set jsonResults(newResults: any);
     get jsonResults(): any;
     legendMinimized: boolean;
     userChangedMapFrame: boolean;
@@ -47,7 +47,7 @@ export class MapCanvas extends BindableHTMLElement {
         endpointId: string;
     };
     setSelection(data: any): void;
-    set selection(arg: boolean);
+    set selection(newValue: boolean);
     get selection(): boolean;
     showTooltip(event: any, text: any): void;
     hideTooltip(): void;
@@ -60,19 +60,19 @@ export class MapCanvas extends BindableHTMLElement {
     setEditModeFromUrl(): void;
     calculateOptionsChanges(newOptions: any): any[];
     _jsonResults: any;
-    set updateOptions(arg: any);
+    set updateOptions(newValue: any);
     get updateOptions(): any;
     _updateOptions: any;
-    set height(arg: any);
+    set height(newValue: any);
     get height(): any;
     _height: any;
-    set width(arg: any);
+    set width(newValue: any);
     get width(): any;
     _width: any;
-    set startlat(arg: any);
+    set startlat(newValue: any);
     get startlat(): any;
     _startlat: any;
-    set startlng(arg: any);
+    set startlng(newValue: any);
     get startlng(): any;
     _startlng: any;
     filterTraffic(newData: any): any;
@@ -120,9 +120,9 @@ export class MapCanvas extends BindableHTMLElement {
     editingInterface: Element | null | undefined;
     sideBar: Element | null | undefined;
 }
-import { BindableHTMLElement } from "./lib/rubbercement.js";
+import { BindableHTMLElement } from './lib/rubbercement.js';
 import NetworkMap from "./NetworkMap.js";
 import * as L from "./lib/leaflet-src.esm.js";
-import * as pubsub from "./lib/pubsub.js";
-import * as utils from "./lib/utils.js";
+import * as pubsub from './lib/pubsub.js';
+import * as utils from './lib/utils.js';
 //# sourceMappingURL=MapCanvas.component.d.ts.map

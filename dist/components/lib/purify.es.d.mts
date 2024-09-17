@@ -75,9 +75,9 @@ declare function purify(root: any): {
     removeAllHooks(): void;
 };
 declare namespace purify {
-    const version: string;
-    const removed: any[];
-    const isSupported: any;
+    let version: string;
+    let removed: any[];
+    let isSupported: any;
     /**
      * Sanitize
      * Public method providing core sanitation functionality
