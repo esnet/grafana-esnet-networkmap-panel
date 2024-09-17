@@ -11,6 +11,7 @@ import * as utils from './lib/utils.js';
 import testIds from '../constants.js';
 import * as L from "./lib/leaflet-src.esm.js";
 import { signals } from '../signals.js';
+import { render as renderTemplate } from "./lib/rubbercement.js"
 
 const PubSub = pubsub.PubSub;
 const PrivateMessageBus = pubsub.PrivateMessageBus;
@@ -966,7 +967,6 @@ export class MapCanvas extends BindableHTMLElement {
     mapstyle.innerHTML = `
       <style>
 
-        div.tooltip-hover { z-index: 1000; position:absolute; }
         .home-overlay { z-index: ${zIndexLayers[8]}; }
         .legend {  z-index: ${zIndexLayers[8]}; }
         .leaflet-zoom-box { z-index: ${zIndexLayers[8]}; }
@@ -1130,9 +1130,10 @@ export class MapCanvas extends BindableHTMLElement {
       this._selection = !!this.lastValue(signals.SELECTION_SET);
       this.shadow = document.createElement("div");
       this.append(this.shadow);
+      let mapCSS = renderTemplate(esmapCss, { instanceId: `map-${this.instanceId}` });
       this.shadow.innerHTML = `
       <style>
-        ${esmapCss}
+        ${mapCSS}
       </style>
       <style>
         ${leafletCss}
