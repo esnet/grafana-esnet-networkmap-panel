@@ -1,6 +1,6 @@
 import React from 'react';
-import { screen } from '@testing-library/dom';
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import '@testing-library/dom';
 import { CustomTextArea, CustomTextAreaSettings } from '../src/components/CustomTextArea';
 import { StandardEditorContext, StandardEditorsRegistryItem } from '@grafana/data';
 

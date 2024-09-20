@@ -35,10 +35,6 @@ function unescape(str) {
 export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix }) => {
   let textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  const onPointerCapture = useCallback(() => {
-    // TODO: what to do on pointer capture
-  }, []);
-
   const onValueChange = useCallback(
     (e: React.SyntheticEvent) => {
       let nextValue = value ?? '';
@@ -87,8 +83,6 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
       onBlur={onValueChange}
       onKeyDown={onValueChange}
       ref={textareaRef}
-      onPointerEnterCapture={onPointerCapture}
-      onPointerLeaveCapture={onPointerCapture}
     />
   );
 };

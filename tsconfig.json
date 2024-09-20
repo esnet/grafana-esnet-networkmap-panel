@@ -5,9 +5,11 @@
     "rootDir": "./src",
     "baseUrl": "./src",
     "typeRoots": ["./node_modules/@types"],
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "allowJs": true,
-    "outDir": "$$ts-jest$$"
+    "outDir": "$$ts-jest$$",
+    "moduleResolution": "node"
   },
   "exclude": ["public", "dist", "node_modules", "src/components/lib"]
 }
