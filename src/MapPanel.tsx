@@ -199,12 +199,15 @@ export class MapPanel extends Component<MapPanelProps> {
     }
     // snapshot the current options. If they're not the same as the last options, update them.
     let currOptions = JSON.parse(JSON.stringify(options));
-    thresholds.forEach((layerThresholds, layerIdx)=>{
-      const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
-      if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
-        setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
-      }
-    })
+    if (Array.isArray(thresholds)) {
+      thresholds.forEach((layerThresholds, layerIdx)=>{
+        const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
+        if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
+          setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
+        }
+      });
+    }
+
     return currOptions;
   }
 

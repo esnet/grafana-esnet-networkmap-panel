@@ -45,6 +45,14 @@ export default defineConfig({
       dependencies: ['auth']
     },
     {
+      name: 'edgeColoration',
+      testMatch: /edgeColoration\.spec\.ts/,
+      use: {
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['auth']
+    },
+    {
       name: 'chromium',
       use: {
         ...devices['Desktop Chrome'],

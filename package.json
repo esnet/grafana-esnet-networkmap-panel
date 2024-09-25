@@ -16,7 +16,7 @@
     "sign": "npx --yes @grafana/sign-plugin@latest",
     "start": "yarn watch",
     "test": "karma start --single-run --browsers ChromeHeadless",
-    "test:react": "jest --watch --onlyChanged",
+    "test:react": "jest --coverage",
     "test:ci": "karma start --single-run --browsers ChromeHeadless",
     "typecheck": "tsc --noEmit"
   },
