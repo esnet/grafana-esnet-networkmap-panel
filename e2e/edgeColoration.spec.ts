@@ -175,17 +175,6 @@ ecTest.describe('edge coloration', () => {
     // trigger render
     await page.locator('[id="Network Map Panel"]').first().click();
 
-    // check stroke colors with remotely loaded topology (should populate selected color control)
-    // TODO: @esanchez confer w/ @jkadafer WRT to use case where a choice color is made but a remote URL removes the color control
-    // layer1DefaultColorDropdown = await page.locator(layer1DefaultColorDropdownSelector);
-    // layer1DefaultColorDropdownSelected = await layer1DefaultColorDropdown.innerText();
-    // await checkStrokeColorFn(testEdges, layer1DefaultColorDropdownSelected);
-
-    // in a partial match situation,
-    // 1. Iterate through queries (no need to test default, already done above), using name of query, aka A--Z to determine edges to check
-    //    coloration upon. The rest should be non-colored.
-    // 2. Tests at current only test for base vs. high thresholds
-
     // step 1: navigate to second panel for testing partial flows
 
     const partialFlowsEditNetworkMapPanelUrl = `${await getEditNetworkMapPanelUrl(targetDashboardUid, targetDashboard!, partialFlowsPanelId, orgId)}`;
