@@ -187,7 +187,7 @@ export class MapPanel extends Component<MapPanelProps> {
         continue;
       }
       let layerThresholds: any[] = [];
-      if (Array.isArray(options.layers[layer]?.nodeThresholds)) {
+      if (Array.isArray(options.layers[layer]?.nodeThresholds?.steps)) {
         options.layers[layer]?.nodeThresholds?.steps.forEach((step) => {
           layerThresholds.push({
             color: this.theme.visualization.getColorByName(step.color),

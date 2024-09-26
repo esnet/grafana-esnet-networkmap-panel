@@ -46,6 +46,7 @@ compose:
 test: compose
 	@echo "Starting component tests..."
 	yarn test
+	yarn test:react
 	@echo "Waiting for container to spin up..."
 	@sleep $(SPINUP_SLEEP_T)
 	@echo "Starting E2E Tests..."
