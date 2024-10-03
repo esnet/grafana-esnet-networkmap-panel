@@ -81,6 +81,13 @@ export const esmapCss = `
   max-width:250px;
   box-shadow: 3px 3px 4px rgba(0, 0, 0, 0.2);
   font-family: sans-serif;
+  z-index: 300;
+}
+
+#\${instanceId} div.tooltip-hover svg {
+  height: 12px;
+  width: 12px;
+  stroke-width: 2px;
 }
 
 #\${instanceId} div.tooltip-hover p:first-of-type {
