@@ -78,8 +78,8 @@ describe('CustomTextArea', () => {
     await fireEvent.blur(textareaEl);
 
     expect(onKeyDownCb).toHaveBeenCalled();
-    for (let i = 1; i <= unEscapedTextLen; i++) {
-      expect(onKeyDownCb).toHaveBeenNthCalledWith(i, unEscapedText[i - 1]);
+    for (let i = 0; i < unEscapedTextLen; i++) {
+      expect(onKeyDownCb).toHaveBeenNthCalledWith(i + 1, unEscapedText.substring(0, i + 1));
     }
   })
 });

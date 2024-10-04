@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useRef } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import { StandardEditorsRegistryItem, StringFieldConfigSettings } from '@grafana/data';
 import { TextArea } from '@grafana/ui';
@@ -15,6 +15,53 @@ function unescape(str) {
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
     .replace(/&quot;/g, "'");
+}
+
+function validateMapJsonStr(inStr: string, currentValidationState: ValidationState): ValidationState {
+  let isValid = true;
+  let validationFailedMsg = null;
+  try {
+    const parsedObj = JSON.parse(inStr);
+    if (typeof(parsedObj) != 'object') {
+      throw new Error("Bad topology object");
+    }
+    if (!Array.isArray(parsedObj.edges) || !Array.isArray(parsedObj.nodes)) {
+      throw new Error("Missing or bad edges or nodes from topology object");
+    }
+    for (const edge of parsedObj.edges) {
+      const { name, meta, coordinates, children } = edge;
+      if (
+        !name || typeof(name) != 'string' ||
+        (!!meta && typeof(meta) != 'object') ||
+        !coordinates || !Array.isArray(coordinates) || coordinates.some(coordinate => !Array.isArray(coordinate)) ||
+        !children || !Array.isArray(children)
+      ) {
+        throw new Error("Bad edge definition");
+      }
+    }
+    for (const node of parsedObj.nodes) {
+      const { name, meta, coordinate } = node;
+      if (
+        !name || typeof(name) != 'string' ||
+        (!!meta && typeof(meta) != 'object') ||
+        !coordinate || !Array.isArray(coordinate)
+      ) {
+        throw new Error("Bad node definition");
+      }
+    }
+  } catch (e) {
+    isValid = false;
+    validationFailedMsg = e.message;
+  }
+  const newValidationState: ValidationState = {
+    isPristine: isValid ? currentValidationState.isPristine : false,
+    isTouched: isValid ? currentValidationState.isTouched : false,
+    isValid,
+  };
+  if (!isValid) {
+    newValidationState.errorMessage = validationFailedMsg;
+  }
+  return newValidationState;
 }
 
 const CONTROL_KEYS: (string | RegExp)[] = [
@@ -97,6 +144,18 @@ interface CustomTextAreaProps {
   item: StandardEditorsRegistryItem<any, any>;
 }
 
+interface ValidationState {
+  isPristine: boolean;
+  isTouched: boolean;
+  isValid: boolean;
+  errorMessage?: string;
+}
+const getDefaultValidationState: () => ValidationState = (isValid = true) => ({
+  isPristine: true,
+  isTouched: false,
+  isValid,
+} as ValidationState);
+
 /**
  * This component renders a customized TextArea that accepts an item defined by Grafana's StandardEditorsRegistryItem
  * interface. The CustomTextArea differs from Grafana's TextArea in that changes containing HTML entities (for instance,
@@ -107,22 +166,25 @@ interface CustomTextAreaProps {
  *
  * @prop {string} value                                           The current value of the standard registry item
  * @prop {(newValue?: string): void} onChange                     A callback invoked when the value in the text area changes.
- * @prop {StandardEditorsRegistryItem<TValue, TSettings>} item    The standard registry item to edit
+ * @prop {StandardEditorsRegistryItem<string, CustomTextAreaSettings>} item    The standard registry item to edit
  * @returns
  */
 export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) => {
     let textareaRef = useRef<HTMLTextAreaElement>(null);
 
+    // default value set by state
+    const [ content, setContent ] = useState(value);
+    const [ validationState, setIsValidationState ] = useState(getDefaultValidationState());
+
   const onValueChange = useCallback(
     (e: React.SyntheticEvent) => {
+      let nextValue = '';
       console.log("CustomTextArea.onValueChange invoked!");
-      let nextValue = value ?? '';
       if (e.hasOwnProperty('key')) {
         // handling keyboard event
-        console.log("CustomTextArea.onValueChange: has own key prop!");
         const evt = e as React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>;
         const lcKey = evt.key.toLowerCase();
-        console.log(`CustomTextArea.onValueChange: key = ${evt.key}`);
+
         // if a navigation or control key, we do not need to concern ourselves with it
         if (
           CONTROL_KEYS.find(ctKey => ctKey instanceof RegExp ? ctKey.test(lcKey) : lcKey == ctKey) ||
@@ -130,7 +192,6 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
         ) {
           console.log("CustomTextArea.onValueChange: control or navigation key!");
           // no changes
-          onChange(evt.currentTarget.value);  // no change, but must invoke callback
           return;
         }
         else {
@@ -141,26 +202,11 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
 
           // handle editing keys
           if (['Backspace', 'Delete'].includes(evt.key.toLowerCase())) {
-            console.log("CustomTextArea.onValueChange: Invoking doDelete!");
             nextValue = doDelete(value, evt);
           } else {
-            console.log("CustomTextArea.onValueChange: Invoking doInsert!");
             nextValue = doInsert(value, evt);
           }
           console.log(`CustomTextArea.onValueChange: nextValue = ${nextValue}`);
-
-          // if (typeof(selectionStart) == 'number' && typeof(selectionEnd) == 'number') {
-          //   // handles both no selection (lower and upper bounds being equal) and selection range (not equal)
-          //   const lowerBoundSelection = selectionStart <= selectionEnd ? selectionStart : selectionEnd;
-          //   const upperBoundSelection = selectionStart <= selectionEnd ? selectionEnd : selectionStart;
-          //   nextValue = `${value.substring(0, lowerBoundSelection)}${unescape(newInChar)}${value.substring(upperBoundSelection)}`;
-          // } else if (typeof(selectionStart) == 'number' && typeof(selectionEnd) != 'number') {
-          //   // may need to be implemented for some browsers
-          //   nextValue = `${value.substring(0, selectionStart)}${unescape(newInChar)}`;
-          // } else if (typeof(selectionStart) != 'number' && typeof(selectionEnd) == 'number') {
-          //   // may need to be implemented for some browsers
-          //   nextValue = `${unescape(newInChar)}${value.substring(selectionEnd)}`;
-          // }
         }
       } else {
         // handling form event
@@ -169,9 +215,18 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
       }
       if (nextValue === value) {
         // no changes
-        // onChange(value);  // no change, but must invoke callback
         return;
       }
+      setContent(nextValue);
+
+      // check validity (only checks upon JSON and primary keys
+
+      const newValidationState = validateMapJsonStr(nextValue, {
+        ...validationState,
+        isPristine: false,
+        isTouched: true
+      });
+      setIsValidationState(newValidationState);
       onChange(nextValue === '' ? undefined : nextValue);
     },
     [value, item.settings?.useTextarea, onChange]
@@ -181,7 +236,8 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
     if (!!textareaRef.current) {
       // ensure that the js 'value' property stays in sync with the actual DOM value
       if (textareaRef.current.innerHTML !== textareaRef.current.value) {
-        textareaRef.current.value = unescape(textareaRef.current.innerHTML);
+        // textareaRef.current.value = unescape(textareaRef.current.innerHTML);
+        setContent(unescape(textareaRef.current.innerHTML));
       }
     }
   });
@@ -198,7 +254,7 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
     <TextArea
       {...attribs}
       placeholder={item.settings?.placeholder}
-      defaultValue={value || ''}
+      value={content}
       rows={(item.settings?.useTextarea && item.settings.rows) || 5}
       onBlur={onValueChange}
       onChange={onValueChange}
