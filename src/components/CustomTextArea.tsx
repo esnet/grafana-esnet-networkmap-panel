@@ -19,7 +19,7 @@ function unescape(str) {
 
 function validateMapJsonStr(inStr: string, currentValidationState: ValidationState): ValidationState {
   let isValid = true;
-  let validationFailedMsg = null;
+  let validationFailedMsg: null | string = null;
   try {
     const parsedObj = JSON.parse(inStr);
     if (typeof(parsedObj) != 'object') {
@@ -49,16 +49,18 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
         throw new Error("Bad node definition");
       }
     }
-  } catch (e) {
+  } catch (e: any) {
     isValid = false;
-    validationFailedMsg = e.message;
+    if (e instanceof Error) {
+      validationFailedMsg = e.message;
+    }
   }
   const newValidationState: ValidationState = {
     isPristine: isValid ? currentValidationState.isPristine : false,
     isTouched: isValid ? currentValidationState.isTouched : false,
     isValid,
   };
-  if (!isValid) {
+  if (!isValid && validationFailedMsg) {
     newValidationState.errorMessage = validationFailedMsg;
   }
   return newValidationState;
