@@ -52,34 +52,4 @@ describe('CustomTextArea', () => {
     expect(onChangeCb).toHaveBeenCalled();
     expect(onChangeCb).toHaveBeenCalledWith(unEscapedText);
   });
-
-  it.skip("invokes the onChange callback without transforming the argument's symbols into HTML entities upon the keyDown event", async () => {
-    const user = userEvent.setup();
-    let i = 0;
-    const onKeyDownCb = jest.fn((arg) => {
-      console.log(`Jest.fn Invocation #${i++} with arg = ${arg}`);
-    });
-    const unEscapedText = "Git's diffs are known for using <<< & >>> as tokens.";
-    const unEscapedTextLen = unEscapedText.length;
-    const component = render(
-      // @ts-ignore: bad typing from React.FC or React.VFC; potentially resolved with React 18
-      <CustomTextArea
-        value={""}
-        onChange={onKeyDownCb}
-        item={mockItem}
-      />
-    );
-
-    const inputEl: HTMLElement = await component.findByRole('textbox');
-    expect(inputEl.tagName.toLowerCase()).toBe('textarea');
-    const textareaEl: HTMLTextAreaElement = inputEl as HTMLTextAreaElement;
-
-    await user.type(textareaEl, unEscapedText);
-    await fireEvent.blur(textareaEl);
-
-    expect(onKeyDownCb).toHaveBeenCalled();
-    for (let i = 0; i < unEscapedTextLen; i++) {
-      expect(onKeyDownCb).toHaveBeenNthCalledWith(i + 1, unEscapedText.substring(0, i + 1));
-    }
-  })
 });
