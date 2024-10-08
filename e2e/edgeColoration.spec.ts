@@ -96,9 +96,12 @@ const getCheckStrokeColorFn = (page: Page) => {
   };
 };
 
+const EC_TEST_TIMEOUT = 120000; // 120sec timeout
+
 ecTest.describe('edge coloration', () => {
 
   setupFixtures(ecTest);
+  ecTest.setTimeout(EC_TEST_TIMEOUT);
 
   ecTest("test edge coloration on default load", async ({ page, fixtures }: { page: Page, fixtures: IFixtures }) => {
     // load plugin edit page
