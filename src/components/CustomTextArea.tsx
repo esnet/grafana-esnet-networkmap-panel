@@ -182,7 +182,6 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
   const onValueChange = useCallback(
     (e: React.SyntheticEvent) => {
       let nextValue = '';
-      console.log("CustomTextArea.onValueChange invoked!");
       if (e.hasOwnProperty('key')) {
         // handling keyboard event
         const evt = e as React.KeyboardEvent<HTMLInputElement | HTMLTextAreaElement>;
@@ -193,12 +192,10 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
           CONTROL_KEYS.find(ctKey => ctKey instanceof RegExp ? ctKey.test(lcKey) : lcKey == ctKey) ||
           NAVIGATION_KEYS.find(navKey => navKey instanceof RegExp ? navKey.test(lcKey) : lcKey == navKey)
         ) {
-          console.log("CustomTextArea.onValueChange: control or navigation key!");
           // no changes
           return;
         }
         else {
-          console.log("CustomTextArea.onValueChange: NOT a control or navigation key!");
           e.preventDefault();
           // if no selection, insert key value at cursor
           const { value } = evt.currentTarget;
@@ -209,7 +206,6 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
           } else {
             nextValue = doInsert(value, evt);
           }
-          console.log(`CustomTextArea.onValueChange: nextValue = ${nextValue}`);
         }
       } else {
         // handling form event
