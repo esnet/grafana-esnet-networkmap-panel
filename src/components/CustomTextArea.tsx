@@ -3,6 +3,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { StandardEditorsRegistryItem, StringFieldConfigSettings } from '@grafana/data';
 import { TextArea } from '@grafana/ui';
 import { monospacedFontSize } from '../options';
+import "./css/CustomTextArea.css";
 
 export interface CustomTextAreaSettings extends StringFieldConfigSettings {
   isMonospaced: boolean;
@@ -253,14 +254,21 @@ export const CustomTextArea = ({ value, onChange, item }: CustomTextAreaProps) =
   }
 
   return (
-    <TextArea
-      {...attribs}
-      placeholder={item.settings?.placeholder}
-      value={content}
-      rows={(item.settings?.useTextarea && item.settings.rows) || 5}
-      onBlur={onValueChange}
-      onChange={onValueChange}
-      ref={textareaRef}
-    />
+    <>
+      <div className={`esnet-custom-text-area ${!validationState.isValid && 'invalid'}`}>
+        <TextArea
+          {...attribs}
+          className={`esnet-custom-text-area ${attribs['className']}`}
+          placeholder={item.settings?.placeholder}
+          value={content}
+          invalid={!validationState.isValid}
+          rows={(item.settings?.useTextarea && item.settings.rows) || 5}
+          onBlur={onValueChange}
+          onChange={onValueChange}
+          ref={textareaRef}
+        />
+      </div>
+      <div className="errorMessage">{!validationState.isValid && validationState.errorMessage}</div>
+    </>
   );
 };

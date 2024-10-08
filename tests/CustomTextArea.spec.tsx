@@ -1,6 +1,5 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { userEvent } from '@testing-library/user-event';
 import '@testing-library/dom';
 import { CustomTextArea, CustomTextAreaSettings } from '../src/components/CustomTextArea';
 import { StandardEditorsRegistryItem } from '@grafana/data';
