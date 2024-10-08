@@ -37,3 +37,67 @@ export function getElementText(el) {
 	}
 	return text;
 };
+
+/**
+ * Returns a new string based on inStr but removes any sequential repeats of a specified targetStr by 1.
+ * Single occurances of targetStr are removed.
+ *
+ * @param {String} inStr    		The string to modify
+ * @param {String} target			Optional. The string to match for repeats and alter by reducing the repeated occurance by one.
+ * 									By default, the targetStr will match all occurances of whitespace at the end or start of
+ * 									inStr and remove them (functionally equivolanet to String.trim()).
+ * @param {boolean} limitToTwo  	Optional. By default, all repetitions in a sequence are taken into account when reducing the
+ * 									repeat by one. Set to true to limit such considerations to two repetitions, such as when
+ * 									dealing with paired characters like single or double quotes.
+ * @returns {String}
+ */
+export function removeRepeats(inStr, target = ' ', limitToTwo = false) {
+	const inStrLen = inStr.length;
+	let acc = [];
+	for (let i = 0; i < inStrLen - 1; i++) {
+		let currChar = inStr[i];
+		let nextChar;
+		if (i + 1 < inStrLen) {
+			nextChar = inStr[i + 1];
+		} else {
+			nextChar = null;
+		}
+
+		if (currChar === target) {
+			let iterationCount = Number.MAX_VALUE; 	// no limit
+			if (limitToTwo) {
+				iterationCount = 1;
+			}
+			while (nextChar === target && nextChar !== null && iterationCount > 0) {
+				if (iterationCount > 0) {
+					iterationCount--;
+				}
+				// deliberely skip pushing current char and push next char on accumulator
+				acc.push(nextChar);
+				i++;
+				currChar = nextChar;
+				if (i + 1 < inStrLen) {
+					nextChar = inStr[i + 1];
+				} else {
+					nextChar = null;
+				}
+			}
+		} else {
+			acc.push(currChar);
+		}
+	}
+	return acc.join("");
+}
+
+/**
+ * Returns a string with characters written in reverse order of the input string sIn.
+ * @param {string} sIn
+ * @returns {string}
+ */
+export const reverseStr = (sIn) => {
+	const reversedCharArr = sIn.split('').reduce((result, char) => {
+		result.unshift(char);
+		return result;
+	}, []);
+	return reversedCharArr.join('');
+};

@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField, EventBus } from '@grafana/data';
 import { MapOptions } from './types';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
@@ -11,6 +11,7 @@ import { signals } from "./signals.js"
 export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
+  eventBus: EventBus;
 }
 
 export function toDataFrames(data){
@@ -181,25 +182,32 @@ export class MapPanel extends Component<MapPanelProps> {
 
   resolveNodeThresholds(options){
     let thresholds: any[] = [];
-    for(let layer=0; layer<LAYER_LIMIT; layer++){
-      if(!options.layers[layer]){ continue; }
+    for (let layer=0; layer < LAYER_LIMIT; layer++) {
+      if (!options.layers[layer]) {
+        continue;
+      }
       let layerThresholds: any[] = [];
-      options.layers[layer]?.nodeThresholds?.steps.forEach((step)=>{ 
-        layerThresholds.push({
-          color: this.theme.visualization.getColorByName(step.color),
-          value: step.value || 0,
-        })
-      })
+      if (Array.isArray(options.layers[layer]?.nodeThresholds?.steps)) {
+        options.layers[layer]?.nodeThresholds?.steps.forEach((step) => {
+          layerThresholds.push({
+            color: this.theme.visualization.getColorByName(step.color),
+            value: step.value || 0,
+          });
+        });
+      }
       thresholds.push(layerThresholds);
     }
     // snapshot the current options. If they're not the same as the last options, update them.
     let currOptions = JSON.parse(JSON.stringify(options));
-    thresholds.forEach((layerThresholds, layerIdx)=>{
-      const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
-      if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
-        setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
-      }
-    })
+    if (Array.isArray(thresholds)) {
+      thresholds.forEach((layerThresholds, layerIdx)=>{
+        const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
+        if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
+          setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
+        }
+      });
+    }
+
     return currOptions;
   }
 
@@ -296,6 +304,7 @@ export class MapPanel extends Component<MapPanelProps> {
     this.mapCanvas.current.setTrafficFormat(formatter);
     this.mapCanvas.current.setTraffic(trafficData);
   }
+
   componentDidMount() {
     let { eventBus, options, replaceVariables, fieldConfig } = this.props;
     options = JSON.parse(JSON.stringify(options));

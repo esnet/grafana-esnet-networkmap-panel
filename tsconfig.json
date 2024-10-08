@@ -1,14 +1,16 @@
 {
   "extends": "./.config/tsconfig.json",
-  "include": ["src", "types"],
   "compilerOptions": {
     "jsx": "react",
     "rootDir": "./src",
     "baseUrl": "./src",
     "typeRoots": ["./node_modules/@types"],
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "allowJs": true,
-    "outDir": "$$ts-jest$$"
+    "sourceMap": true,
+    "outDir": "$$ts-jest$$",
+    "moduleResolution": "node"
   },
   "exclude": ["public", "dist", "node_modules", "src/components/lib"]
 }

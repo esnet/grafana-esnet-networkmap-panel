@@ -145,9 +145,6 @@ function renderEdges(g, data, ref, layerId) {
       var layerClass = ' l'+layerId;
       return 'edge edge-az edge-az-' + name + connections + layerClass;
     })
-    .attr('text', function (d) {
-      return d.AZname;
-    })
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
       event.stopPropagation();
@@ -195,9 +192,6 @@ function renderEdges(g, data, ref, layerId) {
       }
       var layerClass = ' l'+layerId;
       return 'edge edge-za edge-za-' + name + connections + layerClass;
-    })
-    .attr('text', function (d) {
-      return d.ZAname;
     })
     .attr('pointer-events', 'stroke')
     .on('mousedown', function(event, d){
@@ -1003,7 +997,6 @@ export class EsMap {
     }
     this.mapCanvas.listen(signals.SELECTION_CLEARED, clearSelection);
 
-    // function nudge(latOrLng, amount){
     const nudge = (latOrLng, amount) => {
       if (this.lastInteractedType === null || this.lastInteractedObject === null) return;
       if (this.lastInteractedType === "nodes") {
@@ -1048,7 +1041,7 @@ export class EsMap {
         default:
           break;
       }
-    })
+    });
   }
 
   destroy(){

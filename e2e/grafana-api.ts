@@ -1,93 +1,168 @@
 import { getHostInfo } from "./config.info";
 import credentials from '../playwright/.auth/credentials.json';
 import networkMapPanel from '../e2e/networkMapPanel.json';
+import { IDataSource } from "./interfaces/DataSource.interface";
+import { IDashboard, IOrganization, makeDashboard } from "./plugin-def";
 
-/**
- * Returns a Promise for a JSON string containing detailed information about a single dashboard by its assigned uid.
- * The response fetched contains information about the various panels, options, and other configuration.
- * @param {dbUid} string        The UID for the dashboard
- * @returns {Promise<string>}
- */
-export const getDashboard = async (dbUid: string): Promise<string> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
-  const dashboardGetResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${dbUid}`, {
-    headers: basicAuthHeader,
-  });
-  const responseJson = await dashboardGetResponse.json();
-  return JSON.stringify(responseJson);
+interface Dashboard {
+  dataSource: Partial<IDataSource>;
+  title: string;
+  uid: string;
+  [key: string]: any;
 }
 
 /**
- * Returns information about the current logged in user as a JSON string. If no information is available or the user
- * is not logged in, a stack trace is issued and the Promise resolves with undefined.
- * @returns {Promise<string | undefined>}
+ * Creates a datasource. optionally initializing with traffic flow data from a Google sheet, given by its fileId.
+ * If one already exists for the given URL the fileId resolves to, the matching datasource is returned unless the
+ * forceCreate flag is set.
+ *
+ * @param {string | null} fileId
+ * @param {boolean} forceCreate
+ * @returns
  */
-export const getCurrentUser = async (): Promise<string | undefined> => {
-  const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+export const createDatasource = async (datasourceName, forceCreate = false): Promise<IDataSource> => {
+  const fnName = "folderDashboardInit.initCSVDatasource";
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+
+  let resultDataSource;
   try {
-    const userResponse: Response = await fetch(`${protocolHostPort}/api/user`, {
+    const jsonHeaders = {
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    };
+
+    // check if datasource exists already
+    const dataSrcCheckResponse: Response = await fetch(`${protocolHostPort}/api/datasources/name/${datasourceName}`, {
       headers: {
         ...basicAuthHeader,
-        'Content-Type': 'application/json'
-      }
+        ...jsonHeaders
+      },
+      redirect: "follow"
     });
-    const responseJsonStr = JSON.stringify(await userResponse.json(), null, 2);
-    return responseJsonStr;
+
+    if (dataSrcCheckResponse.ok && !forceCreate) {
+      // if exists, return info
+      resultDataSource = await dataSrcCheckResponse.json();
+    } else if (!dataSrcCheckResponse.ok && dataSrcCheckResponse.status === 404 || forceCreate) {
+      // if does not exist or forced to create, create it
+      const inObj = {
+        name: datasourceName,
+        type: "yesoreyeram-infinity-datasource",
+        access: "proxy"
+      };
+      // no need to use URL, that is specified at the dashboard level
+      // post url to grafana API for data source config
+      const dataSrcCreateResponse: Response = await fetch(`${protocolHostPort}/api/datasources`, {
+        method: "POST",
+        headers: {
+          ...basicAuthHeader,
+          ...jsonHeaders
+        },
+        body: JSON.stringify(inObj)
+      });
+      const jsonResponse = await dataSrcCreateResponse.json();
+      resultDataSource = jsonResponse.datasource;
+    } else if (!dataSrcCheckResponse.ok) {
+      throw new Error(`HTTP Response ${dataSrcCheckResponse.status}: ${dataSrcCheckResponse.statusText}`);
+    }
   } catch (e) {
-    console.trace(`grafana-api.getCurrentUser: Error in fetching current user: ${e.message}`);
-    return undefined;
+    console.error(`[${fnName}]: Error ${e.message}`);
+  }
+
+  return resultDataSource;
+}
+
+/**
+ * Deletes a given datasource through its UID dsUid.
+ * @param {string} dsUid
+ */
+export const deleteDatasource = async (dsUid: string) => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const deleteDataSourceResponse: Response = await fetch(`${protocolHostPort}/api/datasources/uid/${dsUid}`, {
+    method: 'DELETE',
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json"
+    }
+  });
+
+  if (!deleteDataSourceResponse.ok) {
+    throw new Error(`[grafana-api.deleteDatasource]: Error in deleting datasource ${dsUid}; ${deleteDataSourceResponse.statusText}`);
   }
 }
 
 /**
+ * Returns a Promise for a JSON string containing detailed information about a single dashboard, fetched by
+ * its assigned uid.
+ *
+ * The response fetched contains information about the various panels, options, and other configuration.
+ *
+ * If no dashboard for the given dbUid exists, null is returned.
+ * @param {dbUid} string        The UID for the dashboard
+ * @returns {Promise<string>}
+ * @throws {Error}
+ */
+export const getDashboard = async (dbUid: string): Promise<string | null> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  let responseJson: string | null = null;
+  try {
+    const dashboardGetResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${dbUid}`, {
+      headers: basicAuthHeader,
+    });
+    if (dashboardGetResponse.ok) {
+      responseJson = await dashboardGetResponse.json();
+    } else if (dashboardGetResponse.status === 404) {
+      responseJson = null;
+    }
+  } catch (e) {
+    console.error(`[grafana-api.getDashboard]: Error: ${e.message}`);
+    responseJson = '';
+  }
+  return JSON.stringify(responseJson);
+}
+
+/**
+ * Returns the organization of the current user
+ * @returns {IOrganization}      The JSON string descripting the id, name, and address for the current users organiztion.
+ */
+export const getCurrentOrg = async (): Promise<IOrganization> => {
+  const fnName = "createDashboard";
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+
+  const currentOrgResponse: Response = await fetch(`${protocolHostPort}/api/org`, {
+    headers: basicAuthHeader
+  });
+  const orgResponseJson = await currentOrgResponse.json();
+  return orgResponseJson;
+}
+
+/**
  * Creates a new dashboard with the given title and optional UID.
- * @param {string} folderUid                    The UID of the folder to create the dashboard in.
- * @param {string|undefined} dashboardTitle     Optional. Title for the dashboard. If one is not given,
- *                                              the title 'network-map-test-dashboard' will be assigned.
- * @param {string|undefined} dashboardUid       Optional. A given UID for the created dashboard.
+ * @param {string} folderUid                         The UID of the folder to create the dashboard in.
+ * @param {Partial<Dashboard>|undefined} dbParams    Optional. Used to set dashboard parameters explicitly upon creation.
+ *                                                   If a title is no provided, 'network-map-test-dashboard' will be assigned.
  * @returns {Promise<string>} The JSON string for the created dashboard.
  */
-export const createDashboard = async (folderUid: string, dashboardTitle?: string, dashboardUid?: string): Promise<string> => {
-    const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+export const createDashboard = async (folderUid: string, dbParams?: Partial<Dashboard>): Promise<string> => {
+    const fnName = "createDashboard";
+    const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+    const panels = [networkMapPanel];
+    if (dbParams && dbParams?.dataSource?.uid) {
+      panels[0].datasource.uid = dbParams.dataSource.uid;
+    }
+    const defaultDashboard = makeDashboard();
     const inObj = {
-      dashboard: {
-        id: null,
-        uid: dashboardUid,
-        type: "db",
-        editable: true,
-        fiscalYearStartMonth: 0,
-        graphTooltip: 0,
-        links: [],
-        liveNow: false,
-        title: dashboardTitle || 'network-map-test-dashboard',
-        tags: [],
-        panels: [networkMapPanel],
-        refresh: "",
-        revision: 1,
-        schemaVersion: 38,
-        style: "dark",
-        templating: {
-            list: []
-        },
-        time: {
-            from: "now-6h",
-            to: "now"
-        },
-        timepicker: {},
-        timezone: "",
-        version: 4,
-        weekStart: ""
-      },
+      dashboard: defaultDashboard,
       folderUid,
-      message: "",
-      overwrite: true,
     };
+    const body = JSON.stringify(inObj, null, 2);
     const dashboardCreateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
-      method: 'post',
-      body: JSON.stringify(inObj),
+      method: "POST",
+      body,
       headers: {
         ...basicAuthHeader,
-        'Content-Type': 'application/json'
+        "Content-Type": "application/json"
       }
     });
     const dashboardCreateResponseJson = await dashboardCreateResponse.json();
@@ -101,17 +176,17 @@ export const createDashboard = async (folderUid: string, dashboardTitle?: string
  * @return {Promise<{uid: string, id: string}>} An object with UID and ID for the folder, whether it was created or already existing.
  */
 export const createFolder = async (folderTitle: string, folderUid?: string): Promise<{uid: string, id: string}> => {
-    const { basicAuthHeader, protocolHostPort } = getHostInfo(credentials);
+    const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
     const inObj = {"title": folderTitle};
     if (folderUid) {
-        inObj['uid'] = folderUid;
+        inObj["uid"] = folderUid;
     }
     const folderCreateResponse: Response = await fetch(`${protocolHostPort}/api/folders`, {
-        method: "post",
+        method: "POST",
         body: JSON.stringify(inObj),
         headers: {
             ...basicAuthHeader,
-            'Content-Type': 'application/json'
+            "Content-Type": "application/json"
         }
     });
     const createFolderJsonResponse = await folderCreateResponse.json();
@@ -120,3 +195,52 @@ export const createFolder = async (folderTitle: string, folderUid?: string): Pro
         uid: createFolderJsonResponse.uid,
     };
 };
+
+export const updateDashboard = async (folderUid: string, targetDashboard): Promise<string> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const inObj ={
+    dashboard: targetDashboard.dashboard,
+    folderUid,
+    message: "Populated panel item",
+    overwrite: true
+  };
+
+  const dbUpdateResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/db`, {
+    method: "POST",
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(inObj)
+  });
+
+  const responseJson = await dbUpdateResponse.json();
+  return responseJson;
+};
+
+/**
+ * Deletes the dashboard given by the target targetDashboardUid.
+ * @param {string} targetDashboardUid
+ * @returns {Promise<void>} A Promise that resolves when the delete operation completes.
+ * @throws {Error} When the Promise returned from this fails to resolve and is rejected.
+ */
+export const deleteDashboard = async (targetDashboardUid: string): Promise<void> => {
+  const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
+  const fnName = 'grafana-api.deleteDashboard';
+
+  const dbDeleteResponse: Response = await fetch(`${protocolHostPort}/api/dashboards/uid/${targetDashboardUid}`, {
+    method: "DELETE",
+    headers: {
+      ...basicAuthHeader,
+      "Accept": "application/json",
+      "Content-Type": "application/json",
+    }
+  });
+
+  if (dbDeleteResponse.ok) {
+    return;
+  } else {
+    throw new Error(`[${fnName}] Error in deleting dashboard UID ${targetDashboardUid}: ${dbDeleteResponse.statusText}`);
+  }
+}
