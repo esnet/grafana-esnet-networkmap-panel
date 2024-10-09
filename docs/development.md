@@ -1,8 +1,7 @@
 
 ## Development Notes
 
-This project was built in Node 16.20.2 (LTS Gallium) and must built using Yarn (1.22.0 or higher).
-In order to successfully execute end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen) or later is required.
+This project was built in Node 18.20.4 (LTS Hydrogen) and must built using Yarn (1.22.22 or higher).
 
 ## Table of Contents
 
@@ -29,7 +28,7 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 Project setup (automatically done via Docker):
 
-Pre-requisites: Both Node v18.20.1 (LTS Hydrogen) or later, plus Yarn 1.22.22 or higher must be installed.
+Pre-requisites: Both Node v18.20.4 (LTS Hydrogen) or later, plus Yarn 1.22.22 or higher must be installed.
 Other versions may not build and when they do, stability issues, unexpected failures, or loss of functionality may occur.
 
 It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and manage your Node versions.
@@ -38,8 +37,8 @@ It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and man
 
 ```sh
 $ node --version        # check your current version, if the current node version is already v16.20.2, skip to yarn
-$ nvm install 18.20.1   # this only has to be done once if using nvm, skip to yarn after installation
-$ nvm use 18.20.1       # do this each time if your current node version differs
+$ nvm install 18.20.4   # this only has to be done once if using nvm, skip to yarn after installation
+$ nvm use 18.20.4       # do this each time if your current node version differs
 $ yarn install
 ```
 
@@ -66,7 +65,7 @@ Also, only component testing will be run. Integration E2E tests must be run sepa
 5. Install Playwright browsers for testing (this only needs to be done once).
 
 ```sh
-$ npx playwright install      # only needs to be done once
+$ npx playwright install      # only needs to be done once -or- when an upgrade in browsers is desired
 ```
 
 6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
@@ -142,8 +141,8 @@ To run both component and integration tests:
 
 ```sh
 $ node --version        # check your node version
-$ nvm install 18.20.1   # if not installed, only needs to be done once, then skip to make
-$ nvm use 18.20.1       # if you have installed it but the current node is not matching 18.20.1, switch to it
+$ nvm install 18.20.4   # if not installed, only needs to be done once, then skip to make
+$ nvm use 18.20.4       # if you have installed it but the current node is not matching 18.20.1, switch to it
 $ make test
 ```
 

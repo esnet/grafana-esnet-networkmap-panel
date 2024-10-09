@@ -59,8 +59,6 @@ pluginTest.describe("plugin testing", () => {
 
       // Check table to have an entry with the target dashboard listed after API response
       await apiResponsePromise;
-      // const asListLocator = await page.getByTitle(/View as list/);
-      // asListLocator.click();
       const dbTable = await page.getByRole('table');
       const dbCell = dbTable.getByRole('cell', { name: /network-map-test-folder/ });
       await expect(dbCell).toBeVisible();
@@ -74,7 +72,6 @@ pluginTest.describe("plugin testing", () => {
   });
 
   // limited testing of sliding switches for hide/show map canvas features
-  // TODO: add additional e2e tests, may refactor into seperate tests
   pluginTest("load plugin edit page - view options", async ({ page, fixtures }: { page: Page, fixtures: IFixtures }) => {
     // load plugin edit page
     const _fnName = "plugin.spec['load plugin edit page - view options']";
@@ -136,7 +133,6 @@ pluginTest.describe("plugin testing", () => {
     // CHECK CONTROL ACTIONS (upon click/edit)
 
     // check Show View Controls, reassign to avoid target closure
-    // showViewControlsControl = page.locator('[id="View Options"] > div > div:nth-child(2) > div label').first();
     await showViewControlsControl.click();
     await expect(mapZoomInControl).not.toBeVisible();
     await expect(mapZoomOutControl).not.toBeVisible();
@@ -149,8 +145,5 @@ pluginTest.describe("plugin testing", () => {
     await expect(mapEditNodeToggleControl).not.toBeVisible();
     await expect(mapAddEdgeControl).not.toBeVisible();
     await expect(mapAddNodeControl).not.toBeVisible();
-
-    // check enable node selection animation
-    // TODO
   });
 });

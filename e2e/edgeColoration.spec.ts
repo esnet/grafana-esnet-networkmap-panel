@@ -122,7 +122,6 @@ ecTest.describe('edge coloration', () => {
 
     // step 0: test default topology, should be gray
 
-    // const layer1DefaultColorDropdownSelector = '[id="Layer 1: Basic Options"] > div:nth-child(3) > div:nth-child(2) > div > .css-efx5mg';
     const layer1DefaultColorDropdownSelector = '[id="Layer 1: Basic Options"] > div:nth-child(3) > div:nth-child(2) > div > div';
     let layer1DefaultColorDropdown = await page.locator(layer1DefaultColorDropdownSelector);
     let layer1DefaultColorDropdownSelected = await layer1DefaultColorDropdown.innerText();

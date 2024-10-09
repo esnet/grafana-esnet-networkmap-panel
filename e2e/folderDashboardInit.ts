@@ -216,6 +216,9 @@ export const getFolderDashboardTargets = async (params?: INetworkPanelParams): P
         if (panel.type === "esnet-networkmap-panel") {
           let { options, datasource } = panel as INetworkMapPanel;
           // assigns the topology
+          if (!Array.isArray(options.layers)) {
+            options.layers = [{}];
+          }
           options.layers[0].mapjson = JSON.stringify(params.topology);
           // traffic flow data from a data source
           if (params.uid) {
@@ -282,6 +285,9 @@ export const removeExistingDatasources = async () => {
   }
 }
 
+/**
+ * Removes all existing test dashboards of named 'network-map-test-dashboard'. If none exists, then the function's returned promise resolves.
+ */
 export const removeExistingTestDashboards = async () => {
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
 
