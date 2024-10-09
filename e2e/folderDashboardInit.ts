@@ -60,7 +60,7 @@ const COLUMNS_MAP = {
  *
  * @returns {Promise<IFixtures>}
  */
-export const getFolderDashboardTargets = async (params?: INetworkPanelParams): Promise<IFixtures> => {
+export const getFolderDashboardFixtures = async (params?: INetworkPanelParams): Promise<IFixtures> => {
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);
   const fnName = 'folderDashboardInit.getFolderDashboardTargets';
 

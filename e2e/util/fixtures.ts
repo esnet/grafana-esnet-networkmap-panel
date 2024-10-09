@@ -1,5 +1,5 @@
 import { DEFAULT_DATASOURCE_NAME } from '../plugin-def';
-import { getFolderDashboardTargets, removeExistingDatasources, removeExistingTestDashboards } from '../folderDashboardInit';
+import { getFolderDashboardFixtures, removeExistingDatasources, removeExistingTestDashboards } from '../folderDashboardInit';
 import { createDatasource } from '../grafana-api';
 import { topologySheetUrl as topologyUrl, flowSheets } from '../e2e.config.json';
 import { IFlowSheet } from '../../src/types';
@@ -31,7 +31,7 @@ export const setupFixtures = (pluginTest) => {
       const topology = JSON.parse(await topologyResponse.text());
 
       // setup dashboard, including topology data from datasource uid
-      const fixtures = await getFolderDashboardTargets({
+      const fixtures = await getFolderDashboardFixtures({
         queryType: 'tsv',
         topology,
         flowSheets: flowSheets as IFlowSheet[],
