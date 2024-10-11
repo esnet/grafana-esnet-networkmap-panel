@@ -23,7 +23,7 @@ export interface LayerOptions {
     nodeValueField: string;
 }
 export interface MapOptions {
-    useConfigurationUrl: boolean;
+    topologySource: string;
     configurationUrl: string;
     background: string;
     initialViewStrategy: string;
