@@ -187,12 +187,14 @@ class MapPanel extends Component<MapPanelProps> {
     for(let layer=0; layer<LAYER_LIMIT; layer++){
       if(!options.layers[layer]){ continue; }
       let layerThresholds: any[] = [];
-      options.layers[layer]?.nodeThresholds?.steps.forEach((step)=>{ 
-        layerThresholds.push({
-          color: this.theme.visualization.getColorByName(step.color),
-          value: step.value || 0,
-        })
-      })
+      if (Array.isArray(options.layers[layer]?.nodeThresholds?.steps)) {
+        options.layers[layer]?.nodeThresholds?.steps.forEach((step)=>{
+          layerThresholds.push({
+            color: this.theme.visualization.getColorByName(step.color),
+            value: step.value || 0,
+          });
+        });
+      }
       thresholds.push(layerThresholds);
     }
     // snapshot the current options. If they're not the same as the last options, update them.

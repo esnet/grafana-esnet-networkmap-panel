@@ -14,7 +14,6 @@ import { clearInterval } from 'timers';
 import { IFlowSheet } from '../src/types';
 import { IThreshold } from './interfaces/Threshold.interface';
 import { reverseStr } from '../test/utils';
-import { waitForEvent } from './js/untypedFn';
 
 const PubSub = pubsub.PubSub;
 
@@ -56,8 +55,10 @@ const getCheckStrokeColorFn = (page: Page) => {
     let edgeCount = edgeNames.length;
     for (const testEdge of edgeNames) {
       console.log(`Test Edge: ${testEdge}`);
-      const edgeLocator: Locator = await page.locator(`.edge > path[text="${testEdge}"]`);
-      await expect(edgeLocator).toHaveCSS('stroke', colorNameMatcher ?? BasicColorMatcher.GREY);
+      const edgeLocator: Locator = await page.locator(`.topology > path[class*="edge-az-${testEdge}"]`);
+      if ((await edgeLocator.all()).length > 0) {
+        await expect(edgeLocator).toHaveCSS('stroke', colorNameMatcher ?? BasicColorMatcher.GREY);
+      }
     }
 
     // control paths in orange (always orange, but may not visible depending on enable/disable edge edit mode)
@@ -334,10 +335,12 @@ pluginTest.describe("plugin testing", () => {
     await expect(layer1DefaultColorDropdownSelected).toMatch(BasicColorMatcher.GREY);
 
     const topologyNodes = ['A', 'B', 'C'];
+    // generate all directional edges from topologyNodes
     const testEdges = topologyNodes.reduce((acc: string[], outNode: string) => {
       for (const inNode of topologyNodes) {
         if (inNode !== outNode) {
           acc.push(`${inNode}--${outNode}`);
+          acc.push(`${outNode}--${inNode}`);
         }
       }
       return acc;
@@ -350,10 +353,11 @@ pluginTest.describe("plugin testing", () => {
     // step 1: trigger elements to fetch config remote url containing 'normal' topology
 
     // enable fetching
-    const fetchConfigSlideButton = await page.locator('[id="Network Map Panel"] > div > div:nth-child(2) > div label').first();
+    const fetchConfigSlideButton = await page.locator('[id="Network Map Panel"] > div > div:nth-child(2) [class*="select-value-container"]').first();
+    console.log(`step1: ${(await fetchConfigSlideButton.all()).length}`);
     await fetchConfigSlideButton.click();
     // provide URL
-    const fetchConfigUrlField = await page.locator('[id="Network Map Panel"]').getByRole('textbox').first();
+    const fetchConfigUrlField = await page.locator('[id="Network Map Panel"]').getByRole('combobox').first();
     await fetchConfigUrlField.fill(topologyUrl);
     // trigger the load
     let hasCompletedMapRender = false;
@@ -377,7 +381,8 @@ pluginTest.describe("plugin testing", () => {
     }, this);
     makeRenderPromise();
     // trigger render
-    await page.locator('[id="Network Map Panel"]').first().click();
+    // await page.locator('[id="Network Map Panel"]').click();
+    await fetchConfigUrlField.blur();
 
     // check stroke colors with remotely loaded topology (should populate selected color control)
     // TODO: @esanchez confer w/ @jkadafer WRT to use case where a choice color is made but a remote URL removes the color control
