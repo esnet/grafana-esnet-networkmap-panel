@@ -42,6 +42,9 @@ e2e-results/
 .DS_store
 *.code-workspace
 
+# vscode
+*.code-workspace
+
 # Playwright
 playwright*
 test-results

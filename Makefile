@@ -10,6 +10,7 @@ NETWORK_NAME=esnet-networkmap-e2e-net
 CONTAINER_ID=$(shell docker ps -f name=$(CONTAINER_NAME) -q)
 INSTANCES=$(shell docker ps --filter name=$(CONTAINER_NAME) --filter name=$(PROXY_NAME) -qa)
 NETWORKS=$(shell docker network ls --filter name=${NETWORK_NAME} -q)
+SPINUP_SLEEP_T=5
 
 .PHONY: prod
 prod:
@@ -43,22 +44,32 @@ compose:
 	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
 .PHONY: test
 test: compose
+	@echo "Starting component tests..."
 	yarn test
-	sleep 2
+	yarn test:react
+	@echo "Waiting for container to spin up..."
+	@sleep $(SPINUP_SLEEP_T)
+	@echo "Starting E2E Tests..."
 	yarn e2e
 
 .PHONY: test\:component
 test\:component:
+	@echo "Starting component tests..."
 	yarn test
+	yarn test:react
 
 .PHONY: test\:e2e
 test\:e2e: compose
 	# run e2e tests
+	@echo "Waiting for container to spin up..."
+	@sleep $(SPINUP_SLEEP_T)
+	@echo "Starting E2E Tests..."
 	yarn run e2e
 
 .PHONY: test\:ui
 test\:ui: compose
 	# run e2e tests, but with ui
+	@echo "Starting E2E tests in Playwright UI..."
 	yarn run e2e:ui
 
 .PHONY: testignore

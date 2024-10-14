@@ -24,7 +24,7 @@ export interface LayerOptions {
 }
 
 export interface MapOptions {
-  topologySource: string;
+  useConfigurationUrl: boolean;
   configurationUrl: string;
   background: string;
   initialViewStrategy: string;
@@ -43,6 +43,7 @@ export interface MapOptions {
   legendPosition: string;
   legendDefaultBehavior: string;
   zIndexBase: number;
+  topologySource: string;
 
   viewport: {
     top?: number;

@@ -46,7 +46,7 @@ export interface IQuery {
  * The JSON model for Network Map Panel
  */
 export interface INetworkMapPanel extends IPanel {
-  options: MapOptions;
+  options: Partial<MapOptions>;
   datasource: { type: string; uid: string; };
   fieldConfig?: { defaults: {[defaultFieldConfigKey: string]: any}; overrides: any[]; };
 }
