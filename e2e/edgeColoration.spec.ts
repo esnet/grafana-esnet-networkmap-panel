@@ -12,6 +12,14 @@ import { topologySheetUrl as topologyUrl, flowSheets } from './e2e.config.json';
 import { setupFixtures } from './util/fixtures';
 
 
+/**
+ * Returns a Promise that resolves to an array of IThreshold objects for the provided IFlowSheet inFs.
+ *
+ * @param {IFlowSheet} inFs   The input flow traffic data for the given layer.
+ * @param {Page} page         The Playwright Page provider object.
+ * @returns {Promise<IThreshold[]>} The thresholds for the given traffic.
+ * @see {@link https://playwright.dev/docs/api/class-page} for Playwright API Page documentation.
+ */
 const getThresholds = async (inFs: IFlowSheet, page: Page): Promise<IThreshold[]> => {
   // only need the first swatch for the high value
   let baseThresholdLoc: Locator = page.locator('#Thresholds [class*="inputWrapper"]').getByRole('button').first();
