@@ -1,7 +1,7 @@
 
 ## Development Notes
 
-This project was built in Node 18.20.4 (LTS Hydrogen) and must built using Yarn (1.22.22 or higher).
+This project was built in Node 18.20.4 (LTS Hydrogen) and must be built using Yarn (1.22.22 or higher).
 
 ## Table of Contents
 
@@ -65,7 +65,7 @@ Also, only component testing will be run. Integration E2E tests must be run sepa
 5. Install Playwright browsers for testing (this only needs to be done once).
 
 ```sh
-$ npx playwright install      # only needs to be done once -or- when an upgrade in browsers is desired
+$ npx playwright install      # only needs to be done once -or- when an upgrade in browsers is desired/required
 ```
 
 6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.

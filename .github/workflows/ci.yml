@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Node.js environment for build
+      - name: Setup Node.js environment for build and testing
         uses: actions/setup-node@v2.1.2
         with:
           node-version: "18.x"

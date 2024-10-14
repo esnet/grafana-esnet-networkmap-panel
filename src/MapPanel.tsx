@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField, EventBus } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField, EventBus, GrafanaTheme2 } from '@grafana/data';
 import { MapOptions } from './types';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
@@ -7,11 +7,13 @@ import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
 import { LAYER_LIMIT, setPath } from "./components/lib/utils.js"
 import { signals } from "./signals.js"
+import { withTheme } from "./components/hoc/withThemeWrapper";
 
-export interface MapPanelProps extends PanelProps<MapOptions> {
+interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
   eventBus: EventBus;
+  theme: GrafanaTheme2;
 }
 
 export function toDataFrames(data){
@@ -28,7 +30,7 @@ export function toDataFrames(data){
   return dataFrames;
 }
 
-export class MapPanel extends Component<MapPanelProps> {
+class MapPanel extends Component<MapPanelProps> {
   mapCanvas: any;
   lastOptions: any;
   lastTopology: any;
@@ -413,3 +415,6 @@ export class MapPanel extends Component<MapPanelProps> {
     return elem;
   }
 }
+
+const mapPanelWithTheme = withTheme(MapPanel);
+export { mapPanelWithTheme as MapPanel, MapPanelProps };

@@ -622,7 +622,7 @@ export class MapCanvas extends BindableHTMLElement {
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
         populateOptionsAndTopology();
-        return
+        return;
       }
       // otherwise, no hit in cache, let's grab them from the URL
       fetch(this.options["configurationUrl"]).then((response)=>{
@@ -675,7 +675,7 @@ export class MapCanvas extends BindableHTMLElement {
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
-      ){
+    ) {
       this.renderLegend();
     }
     if(wasChanged('legendDefaultBehavior', changed)){
@@ -693,13 +693,13 @@ export class MapCanvas extends BindableHTMLElement {
       this.render();
       this.refresh();
     }
-    if(
+    if (
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
         wasChanged('enableScrolling', changed) ||
         wasChanged('resolveLat', changed) ||
         wasChanged('resolveLng', changed)
-      ){
+    ) {
       this.shadow.remove();
       this.shadow = null;
       this.render();
@@ -714,15 +714,16 @@ export class MapCanvas extends BindableHTMLElement {
     } else {
       this.map && this.map.renderMap();
     }
-    if(
+    if (
       wasChanged('background', changed) ||
       wasChanged('enableNodeAnimation', changed) ||
       wasChanged('enableEdgeAnimation', changed)
-    ){
+    ) {
       this.renderStyle();
     }
     this.sideBar && this.sideBar.render();
   }
+
   updateMapTopology(newTopology){
     this._topology = newTopology;
     if(this.editingInterface){

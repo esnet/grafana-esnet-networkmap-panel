@@ -8,10 +8,97 @@ import * as pubsub from '../src/components/lib/pubsub';
 import { IFlowSheet } from '../src/types';
 import { getEditNetworkMapPanelUrl, getHomepageUrl } from './util/urlHelpers';
 import { setupFixtures } from './util/fixtures';
+import { BasicColorMatcher } from './matchers/BasicColorMatcher';
+import { IThreshold } from './interfaces/Threshold.interface';
 
 const PubSub = pubsub.PubSub;
 
 const PLUGIN_TEST_TIMEOUT = 120000; // 120s for plugin test
+
+/**
+ *  Checks the color of strokes for a given array of edge names.
+ * */
+const getCheckStrokeColorFn = (page: Page) => {
+  return async (edgeNames: string[], colorNameMatcher?: RegExp | string) => {
+    // actual paths in gray by default
+    let edgeCount = edgeNames.length;
+    for (const testEdge of edgeNames) {
+      console.log(`Test Edge: ${testEdge}`);
+      const edgeLocator: Locator = await page.locator(`.topology > path[class*="edge-az-${testEdge}"]`);
+      if ((await edgeLocator.all()).length > 0) {
+        await expect(edgeLocator).toHaveCSS('stroke', colorNameMatcher ?? BasicColorMatcher.GREY);
+      }
+    }
+
+    // control paths in orange (always orange, but may not visible depending on enable/disable edge edit mode)
+    for (let cpIndex = 0; cpIndex < edgeCount; cpIndex++) {
+      const controlPathLocator: Locator = await page.locator(`.cp > path[data-index="${cpIndex}"]`);
+      if (await controlPathLocator.isVisible()) {
+        await expect(controlPathLocator).toHaveCSS('stroke', BasicColorMatcher.ORANGE);
+      }
+    }
+  };
+};
+
+const getThresholds = async (inFs: IFlowSheet, page: Page): Promise<IThreshold[]> => {
+  // only need the first swatch for the high value
+  let baseThresholdLoc: Locator = page.locator('#Thresholds [class*="inputWrapper"]').getByRole('button').first();
+  const baseLabelAttr = await baseThresholdLoc.getAttribute('aria-label');
+  expect(baseLabelAttr).toMatch(/color/);
+
+  const thresholdsLoc = page.locator('#Thresholds');
+
+  // all remaining swatches work their way from high to base
+  const colorSwatches: Locator[] = await thresholdsLoc.getByRole('button').all();
+  colorSwatches.shift();
+  let thresholdsRemaining = colorSwatches.length;
+  let thresholdsAppended = 0;
+
+  const resultThresholds: IThreshold[] = [];
+
+  while (thresholdsRemaining > 0) {
+    const colorSwatchLoc: Locator = colorSwatches.pop()!;
+
+    // derive color from class
+    const swatchAttr = colorSwatchLoc.getAttribute ? await colorSwatchLoc.getAttribute('aria-label') : null;
+    const attrVals = swatchAttr ? swatchAttr.split(' ') : null;
+    if (!attrVals || attrVals.find(val => /Remove/.test(val))) {
+      thresholdsRemaining--;
+      continue;
+    }
+    const swatchColor = attrVals.filter(s => s !== 'color').join(' ');
+
+    // derive flow threshold level from order
+    let expectedFlow;
+    if (thresholdsRemaining === 1) {
+      expectedFlow = 'high';
+    } else if (thresholdsRemaining > 1 && thresholdsAppended > 0) {
+      expectedFlow = `base+${thresholdsRemaining}`;
+    } else {
+      expectedFlow = 'base';
+    }
+
+    // derive meta data from flowsheet
+    const endpoint = inFs.name;
+
+    // append to thresholds
+    const currentThreshold: IThreshold = {
+      locator: colorSwatchLoc,
+      expectedFlow,
+      swatchColor,
+      meta: {
+        type: 'edge',
+        endpoints: [endpoint]
+      }
+    };
+    resultThresholds.push(currentThreshold);
+    thresholdsAppended++;
+    thresholdsRemaining--;
+  }
+
+  return resultThresholds;
+};
+
 
 pluginTest.describe("plugin testing", () => {
   pluginTest.describe.configure({ mode: "serial" });

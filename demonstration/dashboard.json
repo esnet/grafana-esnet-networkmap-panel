@@ -89,16 +89,14 @@
         "initialViewStrategy": "static",
         "layers": [
           {
-            "color": "#49a7f25e",
-            "dashboardEdgeDstVar": "destination",
-            "dashboardEdgeDstVarL1": "dest",
+            "color": "grey",
+            "dashboardEdgeDstVar": "dest",
             "dashboardEdgeSrcVar": "source",
-            "dashboardEdgeSrcVarL1": "source",
             "dashboardNodeVar": "node",
             "dataFieldLabel": "Volume:",
             "dstField": "dst",
             "dstFieldLabel": "To:",
-            "edgeWidth": 2.5,
+            "edgeWidth": 3,
             "endpointId": "pops",
             "inboundValueField": "in_bits",
             "legend": true,
@@ -106,18 +104,7 @@
             "name": "Layer 1",
             "nodeHighlight": "dark-blue",
             "nodeNameMatchField": "Node",
-            "nodeThresholds": {
-              "mode": "absolute",
-              "steps": [
-                {
-                  "color": "red"
-                },
-                {
-                  "color": "dark-blue",
-                  "value": 1
-                }
-              ]
-            },
+            "nodeThresholds": "",
             "nodeValueField": "Up/Down (1: up, 0:down)",
             "nodeWidth": 5,
             "outboundValueField": "out_bits",
