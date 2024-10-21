@@ -592,6 +592,7 @@ describe( "Class MapCanvas", () => {
       // check callback fired
       expect(closureVar).toEqual("called");
     });
+
     // it appears this test is causing some kind of synchronicity problem. Commenting for now...
     /*it("should allow for editing of same-name nodes in different layers", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
@@ -599,7 +600,7 @@ describe( "Class MapCanvas", () => {
       var newTopology = [
         {
             "edges": [
-                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                {"name":"A--B","meta":{"endpoint_identifiers":{"names":["A","B"]}},
                     "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
                     "azColor":LAVENDER,
@@ -623,7 +624,7 @@ describe( "Class MapCanvas", () => {
         },
         {
             "edges": [
-                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                {"name":"A--B","meta":{"endpoint_identifiers":{"names":["A","B"]}},
                     "coordinates":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
                     "children":[],
                     "azColor":LAVENDER,

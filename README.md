@@ -187,7 +187,7 @@ Leave this set to gray. It will help to show when we've correctly associated edg
 
 **Layer 1 Endpoint Identifier**
 
-This input specifies the attribute of "endpoint_identifiers" prop of each of the "edges" objects in your JSON topology. Each "endpoint_identifiers" entry in the JSON should have a key matching the value specified in this text box (although the assigned JSON value is an array of node names of length two, does not matter). The value for Grafana here should be left as the default "pops".
+This input specifies the attribute of "endpoint_identifiers" prop of each of the "edges" objects in your JSON topology. Each "endpoint_identifiers" entry in the JSON should have a key matching the value specified in this text box (although the assigned JSON value is an array of node names of length two, does not matter). The value for Grafana here should be left as the default "names".
 
 **Layer 1 Node Highlight Color**
 
