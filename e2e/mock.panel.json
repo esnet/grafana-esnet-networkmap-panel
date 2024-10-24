@@ -124,7 +124,6 @@
         "tileset": {
             "geographic": "arcgis"
         },
-        "useConfigurationUrl": false,
         "viewport": {
             "center": {
                 "lat": 39,
