@@ -38,7 +38,15 @@ export default defineConfig({
     },
     {
       name: 'plugin',
-      testMatch: 'plugin.spec.ts',
+      testMatch: /plugin\.spec\.ts/,
+      use: {
+        storageState: 'playwright/.auth/user.json',
+      },
+      dependencies: ['auth']
+    },
+    {
+      name: 'edgeColoration',
+      testMatch: /edgeColoration\.spec\.ts/,
       use: {
         storageState: 'playwright/.auth/user.json',
       },
