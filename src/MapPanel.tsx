@@ -63,17 +63,16 @@ export class MapPanel extends Component<MapPanelProps> {
         setLocation[dstVar] = null;
         setLocation[nodeVar] = null;
       }
-      if (event && event.nodeA && event.nodeZ) {
+      if (event && event.type === 'edge' && event.selection?.nodeA && event.selection?.nodeZ) {
         const srcVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeSrcVar'];
-        setLocation[srcVariable] = event.nodeA;
+        setLocation[srcVariable] = event.selection.nodeA;
         const dstVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeDstVar'];
-        setLocation[dstVariable] = event.nodeZ;
+        setLocation[dstVariable] = event.selection.nodeZ;
       }
       if (event && event.type === 'node') {
         const dashboardVariable = 'var-' + self.props.options.layers[event.layer]['dashboardNodeVar'];
         setLocation[dashboardVariable] = event.selection.name;
       }
-
       locationService.partial(setLocation, false);
     };
   }
@@ -321,6 +320,8 @@ export class MapPanel extends Component<MapPanelProps> {
     this.mapCanvas.current.listen(signals.TOPOLOGY_UPDATED,() => {
         this.updateTopologyEditor(this.mapCanvas.current['topology']);
     });
+
+    this.mapCanvas.current.listen(signals.SELECTION_SET, this.setDashboardVariables())
 
     this.updateMap();
     // @ts-ignore
