@@ -1,8 +1,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import '@testing-library/dom';
-import { CustomTextArea, CustomTextAreaSettings } from '../src/components/CustomTextArea';
+import { CustomTextArea, CustomTextAreaSettings } from '../../src/components/CustomTextArea';
 import { StandardEditorsRegistryItem } from '@grafana/data';
+
+import renderer from 'react-test-renderer';
 
 const mockItem: StandardEditorsRegistryItem<string, CustomTextAreaSettings> = {
   editor: CustomTextArea,
@@ -18,7 +20,7 @@ describe('CustomTextArea', () => {
   it('renders just the text field with the default data', () => {
     const onChangeCb = jest.fn();
     render(
-      // @ts-ignore: bad typing from React.FC or React.VFC; potentially resolved with React 18
+
       <CustomTextArea
         value={'Some default value'}
         onChange={onChangeCb}
@@ -33,7 +35,7 @@ describe('CustomTextArea', () => {
     const onChangeCb = jest.fn();
     const unEscapedText = "Git's diffs are known for using <<< & >>> as tokens.";
     const component = render(
-      // @ts-ignore: bad typing from React.FC or React.VFC; potentially resolved with React 18
+
       <CustomTextArea
         value={""}
         onChange={onChangeCb}
