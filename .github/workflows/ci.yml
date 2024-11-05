@@ -44,8 +44,7 @@ jobs:
         run: yarn build
 
       - name: Test components
-      	run: |
-	  make test:component
+        run: make test:component
 
       - name: Install E2E dependencies
         run: |
