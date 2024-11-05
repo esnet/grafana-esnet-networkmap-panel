@@ -1,7 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
 import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
-import { TextArea } from '@grafana/ui';
 import { monospacedFontSize } from '../options';
 
 interface CustomTextAreaSettings extends StringFieldConfigSettings {
@@ -143,17 +142,20 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
     setCurrentEditorValue(value);
   }, [value])
 
-  const attribs = {};
+  let attribs = {
+    style: {
+      width: "100%",
+      resize: "none",
+    }
+  } as any;
   if (item.settings?.isMonospaced) {
-    attribs['style'] = {
-      fontFamily: "monospace",
-      fontSize: item.settings?.fontSize || monospacedFontSize
-    };
+    attribs.style.fontFamily =  "monospace";
+    attribs.style.fontSize = item.settings?.fontSize || monospacedFontSize;
   }
 
   return (
     <div>
-      <TextArea
+      <textarea
         {...attribs}
         placeholder={item.settings?.placeholder}
         defaultValue={currentEditorValue || ''}

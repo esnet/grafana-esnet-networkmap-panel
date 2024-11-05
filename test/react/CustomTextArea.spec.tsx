@@ -4,8 +4,6 @@ import '@testing-library/dom';
 import { CustomTextArea, CustomTextAreaSettings } from '../../src/components/CustomTextArea';
 import { StandardEditorsRegistryItem } from '@grafana/data';
 
-import renderer from 'react-test-renderer';
-
 const mockItem: StandardEditorsRegistryItem<string, CustomTextAreaSettings> = {
   editor: CustomTextArea,
   id: 'some-mock-id',

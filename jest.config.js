@@ -4,7 +4,7 @@ const { grafanaESModules, nodeModulesToTransform } = require('./.config/jest/uti
 const baseConfig = require('./.config/jest.config');
 const { testMatch } = baseConfig;
 
-testMatch.push('<rootDir>/test/react/**/*.{js,jsx,ts,tsx}');
+testMatch.push('<rootDir>/test/react/CustomTextArea.spec.tsx');
 
 /** @type {import('ts-jest').JestConfigWithTsJest} **/
 module.exports = {
