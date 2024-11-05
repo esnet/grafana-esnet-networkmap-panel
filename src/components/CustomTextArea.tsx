@@ -40,12 +40,16 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
       throw new Error("Missing or bad edges or nodes from topology object");
     }
     for (const edge of parsedObj.edges) {
-      const { name, meta, coordinates, children } = edge;
+      const { name, meta, coordinates } = edge;
       if (
         !name || typeof(name) != 'string' ||
         (!!meta && typeof(meta) != 'object') ||
-        !coordinates || !Array.isArray(coordinates) || coordinates.some(coordinate => !Array.isArray(coordinate)) ||
-        !children || !Array.isArray(children)
+        !coordinates || !Array.isArray(coordinates) ||
+        coordinates.some((coordinate) => {
+          return !Array.isArray(coordinate)
+          || coordinate.length != 2
+          || coordinate.some((coord)=>{ return !Number.isFinite(coord)})
+        })
       ) {
         throw new Error("Bad edge definition");
       }
@@ -56,8 +60,8 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
         !name || typeof(name) != 'string' ||
         (!!meta && typeof(meta) != 'object') ||
         !coordinate || !Array.isArray(coordinate) ||
-        coordinate.length != 2 || !isNumeric(coordinate[0]) ||
-        !isNumeric(coordinate[1])
+        coordinate.length != 2 || !Number.isFinite(coordinate[0]) ||
+        !Number.isFinite(coordinate[1])
       ) {
         throw new Error("Bad node definition");
       }
@@ -95,7 +99,7 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
       if (e.hasOwnProperty('key')) {
         // handling keyboard event
         const evt = e as React.KeyboardEvent<HTMLInputElement>;
-        // if we're not in a <textarea>, the enter key should trigger 
+        // if we're not in a <textarea>, the enter key should trigger
         // essentially a blur equivalent
         if (evt.key === 'Enter' && !item.settings?.useTextarea) {
           nextValue = unescape(evt.currentTarget.value.trim());
@@ -148,8 +152,7 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
   }
 
   return (
-    <>
-    <div className={`esnet-custom-text-area ${!validationState.isValid && 'invalid'}`}>
+    <div>
       <TextArea
         {...attribs}
         placeholder={item.settings?.placeholder}
@@ -159,10 +162,13 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
         onChange={onValueChange}
         ref={textareaRef}
       />
+      {
+        !validationState.isValid ?
+        <div style={{ marginTop: "8px", fontSize:"10px", color: "red" }}>
+          {validationState.errorMessage}
+        </div>
+        : null
+      }
     </div>
-    <div style={ marginTop: "8px", display: (validationState.isValid ? "none" : "block"), color: "red" }>
-      {validationState.errorMessage}
-    </div>
-    </>
   );
 };
