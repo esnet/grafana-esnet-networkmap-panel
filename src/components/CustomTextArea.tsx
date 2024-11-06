@@ -117,7 +117,6 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
         isTouched: true,
       });
       setValidationState(newValidationState);
-      console.log(onChange);
       setCurrentEditorValue(nextValue);
       if (!newValidationState.isValid){
         return; // invalid input; don't fire onchange
@@ -166,7 +165,7 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
       />
       {
         !validationState.isValid ?
-        <div style={{ marginTop: "8px", fontSize:"10px", color: "red" }}>
+        <div className='validation-error' style={{ marginTop: "2px", fontSize:"10px", color: "red" }}>
           {validationState.errorMessage}
         </div>
         : null

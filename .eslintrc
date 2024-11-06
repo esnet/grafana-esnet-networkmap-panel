@@ -1,26 +1,3 @@
 {
-  "env": {
-    "browser": true,
-    "es2021": true,
-    "jest/globals": true
-  },
-  "extends": [
-    "./.config/.eslintrc",
-    "plugin:import/recommended",
-    "plugin:react/recommended",
-    "plugin:jest/recommended",
-    "prettier"
-  ],
-  "rules": {
-    "react/prop-types": "off",
-    "no-underscore-dangle": 0,
-    "import/extensions": [
-      "error",
-      "ignorePackages",
-      {
-        "js": "always",
-        "jsx": "always"
-      }
-    ]
-  }
+  "extends": "./.config/.eslintrc"
 }

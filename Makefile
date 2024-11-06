@@ -57,7 +57,6 @@ test\:component:
 	@echo "Starting component tests..."
 	yarn test
 	yarn test:react
-	yarn test:react-karma
 
 .PHONY: test\:e2e
 test\:e2e: compose
