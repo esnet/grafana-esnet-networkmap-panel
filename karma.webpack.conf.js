@@ -2,9 +2,6 @@ const Path = require( "path" );
 const os = require("os");
 var webpack = require('webpack');
 
-console.log("resolved dirname")
-console.log(Path.resolve(__dirname, './.config/webpack/webpack.config.ts'));
-
 module.exports = function( config ) {
     config.set( {
         frameworks: [
