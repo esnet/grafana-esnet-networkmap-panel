@@ -1,8 +1,7 @@
 
 ## Development Notes
 
-This project was built in Node 16.20.2 (LTS Gallium) and must built using Yarn (1.22.0 or higher).
-In order to successfully execute end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen) or later is required.
+This project was built in Node 18.20.4 (LTS Hydrogen) and must be built using Yarn (1.22.22 or higher).
 
 ## Table of Contents
 
@@ -16,15 +15,20 @@ In order to successfully execute end-to-end (E2E) testing, 18.20.1 (LTS Hydrogen
 
 Pre-requisite: For local development, Grafana must be running locally as a service or as a Docker container.
 
-1. Ensure Grafana is running.
+1. Install Grafana
+    - Via Homebrew (Mac), `brew install grafana` should be sufficient for a locally running service.
+    - To install the containers in Docker, first install Docker (via `brew install docker` on Mac -or- download an
+    installer from https://www.docker.com/products/docker-desktop/), then setup the containers using `make compose`.
+
+2. Ensure Grafana is running.
     - On Homebrew (Mac), `brew services start grafana` should be sufficient.
     - Via Docker, you can start the container using `docker run -d -p 3000:3000  grafana-esnet-networkmap-panel-grafana`
     - On Windows, you may use Docker Desktop to run the container or enable it as a Windows service. (Hit Ctrl-R and enter
     `services.msc` to open the Services dialog, scroll to the Grafana entry, right-click and select Enable.)
 
-Project setup:
+Project setup (automatically done via Docker):
 
-Pre-requisites: Both Node v16.20.2 (LTS Gallium) or later, plus Yarn 1.22.0 or higher must be installed.
+Pre-requisites: Both Node v18.20.4 (LTS Hydrogen) or later, plus Yarn 1.22.22 or higher must be installed.
 Other versions may not build and when they do, stability issues, unexpected failures, or loss of functionality may occur.
 
 It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and manage your Node versions.
@@ -33,8 +37,8 @@ It is recommended to use [nvm](https://github.com/nvm-sh/nvm) to install and man
 
 ```sh
 $ node --version        # check your current version, if the current node version is already v16.20.2, skip to yarn
-$ nvm install 16.20.2   # this only has to be done once if using nvm, skip to yarn after installation
-$ nvm use 16.20.2       # do this each time if your current node version differs
+$ nvm install 18.20.4   # this only has to be done once if using nvm, skip to yarn after installation
+$ nvm use 18.20.4       # do this each time if your current node version differs
 $ yarn install
 ```
 
@@ -51,7 +55,7 @@ plugins = /Users/myuser/grafana-plugins ;/var/lib/grafana/plugins
 When running it as a Docker container using docker-compose, the `docker-compose.yaml` file already maps the generated
 dist directory to the correct location.
 
-Mapping only needs to be done once. Restart Grafana or the container after mapping is complete.
+Mapping only needs to be done once. Restart Grafana after mapping is complete.
 
 4. Build the project once using `make dev`. This will create source maps permit setting of breakpoints in Chrome Debugger during development.
 
@@ -61,7 +65,7 @@ Also, only component testing will be run. Integration E2E tests must be run sepa
 5. Install Playwright browsers for testing (this only needs to be done once).
 
 ```sh
-$ npx playwright install      # only needs to be done once
+$ npx playwright install      # only needs to be done once -or- when an upgrade in browsers is desired/required
 ```
 
 6. Build the project using `make prod` (`prod` is not a typo). A failure during signing is expected for local development.
@@ -80,6 +84,10 @@ and already has its plugins directory mapped (see step 4), there is no need to r
 ```sh
 $ yarn run build_dts
 ```
+
+Note: All further steps may be automatically done by running `make test`; the test will create a dashboard and Network Map Panel
+instance for you, using Google Sheets URLs to create a data source for the panel's topology and sample traffic flows. Read the
+section [Test Execution and Reporting](#test-execution-and-reporting) prior to running `make test`.
 
 8. Open a browser and navigate to your Grafana instance.
 
@@ -133,8 +141,8 @@ To run both component and integration tests:
 
 ```sh
 $ node --version        # check your node version
-$ nvm install 18.20.1   # if not installed, only needs to be done once, then skip to make
-$ nvm use 18.20.1       # if you have installed it but the current node is not matching 18.20.1, switch to it
+$ nvm install 18.20.4   # if not installed, only needs to be done once, then skip to make
+$ nvm use 18.20.4       # if you have installed it but the current node is not matching 18.20.1, switch to it
 $ make test
 ```
 

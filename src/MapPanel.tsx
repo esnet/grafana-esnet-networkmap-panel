@@ -184,11 +184,13 @@ class MapPanel extends Component<MapPanelProps> {
 
   resolveNodeThresholds(options){
     let thresholds: any[] = [];
-    for(let layer=0; layer<LAYER_LIMIT; layer++){
-      if(!options.layers[layer]){ continue; }
+    for (let layer=0; layer < LAYER_LIMIT; layer++) {
+      if (!options.layers[layer]) {
+        continue;
+      }
       let layerThresholds: any[] = [];
       if (Array.isArray(options.layers[layer]?.nodeThresholds?.steps)) {
-        options.layers[layer]?.nodeThresholds?.steps.forEach((step)=>{
+        options.layers[layer]?.nodeThresholds?.steps.forEach((step) => {
           layerThresholds.push({
             color: this.theme.visualization.getColorByName(step.color),
             value: step.value || 0,
@@ -199,12 +201,15 @@ class MapPanel extends Component<MapPanelProps> {
     }
     // snapshot the current options. If they're not the same as the last options, update them.
     let currOptions = JSON.parse(JSON.stringify(options));
-    thresholds.forEach((layerThresholds, layerIdx)=>{
-      const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
-      if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
-        setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
-      }
-    })
+    if (Array.isArray(thresholds)) {
+      thresholds.forEach((layerThresholds, layerIdx)=>{
+        const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
+        if(JSON.stringify(layerThresholds) !== JSON.stringify(currLayerNodeThresholds)){
+          setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
+        }
+      });
+    }
+
     return currOptions;
   }
 
