@@ -42,7 +42,9 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
       const { name, meta, coordinates } = edge;
       if (
         !name || typeof(name) != 'string' ||
-        (!!meta && typeof(meta) != 'object') ||
+        !meta || typeof(meta) != 'object' ||
+        !meta.endpoint_identifiers || typeof(meta.endpoint_identifiers) != 'object' ||
+        !Array.isArray(meta.endpoint_identifiers?.names) ||
         !coordinates || !Array.isArray(coordinates) ||
         coordinates.some((coordinate) => {
           return !Array.isArray(coordinate)
