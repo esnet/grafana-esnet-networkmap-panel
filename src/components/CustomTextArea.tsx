@@ -32,7 +32,7 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
   let validationFailedMsg: null | string = null;
   try {
     const parsedObj = JSON.parse(inStr);
-    if (typeof(parsedObj) != 'object') {
+    if (typeof(parsedObj) !== 'object') {
       throw new Error("Bad topology object");
     }
     if (!Array.isArray(parsedObj.edges) || !Array.isArray(parsedObj.nodes)) {
@@ -41,8 +41,9 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
     for (const edge of parsedObj.edges) {
       const { name, meta, coordinates } = edge;
       if (
-        !name || typeof(name) != 'string' ||
-        (!!meta && typeof(meta) != 'object') ||
+        !name || typeof(name) !== 'string' ||
+        (!!meta && typeof(meta) !== 'object') ||
+        meta?.endpoint_identifiers !== 'object' ||
         !coordinates || !Array.isArray(coordinates) ||
         coordinates.some((coordinate) => {
           return !Array.isArray(coordinate)
@@ -56,10 +57,10 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
     for (const node of parsedObj.nodes) {
       const { name, meta, coordinate } = node;
       if (
-        !name || typeof(name) != 'string' ||
-        (!!meta && typeof(meta) != 'object') ||
+        !name || typeof(name) !== 'string' ||
+        (!!meta && typeof(meta) !== 'object') ||
         !coordinate || !Array.isArray(coordinate) ||
-        coordinate.length != 2 || !Number.isFinite(coordinate[0]) ||
+        coordinate.length !== 2 || !Number.isFinite(coordinate[0]) ||
         !Number.isFinite(coordinate[1])
       ) {
         throw new Error("Bad node definition");

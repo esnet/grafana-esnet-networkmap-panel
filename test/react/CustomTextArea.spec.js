@@ -54,7 +54,6 @@ describe("Component CustomTextArea esmap", () => {
         expect(document.getElementsByTagName("textarea")).toBeTruthy();
     });
     it("should provide an error message if the value is changed to invalid JSON", async ()=>{
-        let errorElems = document.getElementsByClassName("validation-error")[0];
         await act(async () => {
             let elems = document.getElementsByTagName("textarea");
             let elem = elems[0];
@@ -63,5 +62,16 @@ describe("Component CustomTextArea esmap", () => {
         let error = document.getElementsByClassName("validation-error")[0];
 
         expect(error.innerText).toBeTruthy();
+    });
+    it("should provide an error message if the user provides an incomplete edge", async()=>{
+        await act(async () => {
+            let elems = document.getElementsByTagName("textarea");
+            let elem = elems[0];
+            const badEdgeTopology = '{ "edges": [ {"name": "A--L", "coordinates": [[39, -98],[39, -99]], "meta": { } }], "nodes": [ {"name": "L", "coordinate": [39, -98], "meta": {} } ] }';
+            triggerInputChange(elem, badEdgeTopology);
+        })
+        let error = document.getElementsByClassName("validation-error")[0];
+
+        expect(error.innerText).toBe("Bad edge definition");
     })
 })
