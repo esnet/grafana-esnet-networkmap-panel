@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField, EventBus, GrafanaTheme2 } from '@grafana/data';
+import { PanelProps, createTheme, getValueFormat, DataFrameView, sortDataFrame, getTimeField } from '@grafana/data';
 import { MapOptions } from './types';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
@@ -7,13 +7,10 @@ import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
 import { LAYER_LIMIT, setPath } from "./components/lib/utils.js"
 import { signals } from "./signals.js"
-import { withTheme } from "./components/hoc/withThemeWrapper";
 
-interface MapPanelProps extends PanelProps<MapOptions> {
+export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
   options: MapOptions;
-  eventBus: EventBus;
-  theme: GrafanaTheme2;
 }
 
 export function toDataFrames(data){
@@ -30,7 +27,7 @@ export function toDataFrames(data){
   return dataFrames;
 }
 
-class MapPanel extends Component<MapPanelProps> {
+export class MapPanel extends Component<MapPanelProps> {
   mapCanvas: any;
   lastOptions: any;
   lastTopology: any;
@@ -201,6 +198,7 @@ class MapPanel extends Component<MapPanelProps> {
     }
     // snapshot the current options. If they're not the same as the last options, update them.
     let currOptions = JSON.parse(JSON.stringify(options));
+
     if (Array.isArray(thresholds)) {
       thresholds.forEach((layerThresholds, layerIdx)=>{
         const currLayerNodeThresholds = options?.layers?.[layerIdx].nodeThresholds;
@@ -208,9 +206,7 @@ class MapPanel extends Component<MapPanelProps> {
           setPath(currOptions, `layers[${layerIdx}].nodeThresholds`, layerThresholds);
         }
       });
-    }
-
-    return currOptions;
+    }    return currOptions;
   }
 
   updateMap(forceRefresh?) {
@@ -306,7 +302,6 @@ class MapPanel extends Component<MapPanelProps> {
     this.mapCanvas.current.setTrafficFormat(formatter);
     this.mapCanvas.current.setTraffic(trafficData);
   }
-
   componentDidMount() {
     let { eventBus, options, replaceVariables, fieldConfig } = this.props;
     options = JSON.parse(JSON.stringify(options));
@@ -415,6 +410,3 @@ class MapPanel extends Component<MapPanelProps> {
     return elem;
   }
 }
-
-const mapPanelWithTheme = withTheme(MapPanel);
-export { mapPanelWithTheme as MapPanel, MapPanelProps };
