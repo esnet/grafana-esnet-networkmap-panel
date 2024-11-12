@@ -1,6 +1,7 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
-import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
+import { StringFieldConfigSettings } from '@grafana/data/field/overrides/processors';
+import { StandardEditorProps } from '@grafana/data';
 import { monospacedFontSize } from '../options';
 
 interface CustomTextAreaSettings extends StringFieldConfigSettings {
@@ -42,8 +43,9 @@ function validateMapJsonStr(inStr: string, currentValidationState: ValidationSta
       const { name, meta, coordinates } = edge;
       if (
         !name || typeof(name) !== 'string' ||
-        (!!meta && typeof(meta) !== 'object') ||
-        meta?.endpoint_identifiers !== 'object' ||
+        !meta && typeof(meta) !== 'object' ||
+        !meta.endpoint_identifiers || typeof(meta.endpoint_identifiers) != 'object' ||
+        !Array.isArray(meta.endpoint_identifiers?.names) ||
         !coordinates || !Array.isArray(coordinates) ||
         coordinates.some((coordinate) => {
           return !Array.isArray(coordinate)

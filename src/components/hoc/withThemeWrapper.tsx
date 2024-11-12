@@ -1,4 +1,4 @@
-import { useTheme2 } from '@grafana/ui';
+import { useTheme2 } from '@grafana/ui/themes';
 import React from 'react';
 
 /**
