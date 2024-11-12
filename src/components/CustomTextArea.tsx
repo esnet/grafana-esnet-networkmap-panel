@@ -1,7 +1,6 @@
 import React, { ReactNode, useCallback, useEffect, useRef, useState } from 'react';
 
-import { StringFieldConfigSettings } from '@grafana/data/field/overrides/processors';
-import { StandardEditorProps } from '@grafana/data';
+import { StandardEditorProps, StringFieldConfigSettings } from '@grafana/data';
 import { monospacedFontSize } from '../options';
 
 interface CustomTextAreaSettings extends StringFieldConfigSettings {
