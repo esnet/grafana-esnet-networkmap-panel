@@ -1,5 +1,4 @@
 import { standardEditorsRegistry, FieldConfigProperty, PanelPlugin, FieldOverrideContext, getFieldDisplayName } from '@grafana/data';
-import type { PanelProps } from '@grafana/data';
 import { MapOptions } from './types';
 import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
@@ -17,7 +16,6 @@ import {
   defaultCustomEdgeTooltip,
   defaultCustomNodeTooltip
 } from "./options";
-import { ComponentType } from 'react';
 
 const customEditors = {
   "CoordinateButton": CoordinateButton,
@@ -25,11 +23,7 @@ const customEditors = {
   "ViewportCoordinateButton": ViewportCoordinateButton
 }
 
-const DEFAULT_LAYER_OPTIONS = {
-  color: "gray"
-}
-
-export const plugin = new PanelPlugin<MapOptions>(MapPanel as unknown as ComponentType<PanelProps<MapOptions>>);
+export const plugin = new PanelPlugin<MapOptions>(MapPanel);
 
 function checkBools(settings: object) {
   return (config: MapOptions) => {
@@ -132,7 +126,7 @@ let layerOptions = {
     category: "Layer ${i+1}: Basic Options",
     showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true},
     description: 'The default color for nodes and links on Layer ${i+1}',
-    defaultValue: DEFAULT_LAYER_OPTIONS.color,
+    defaultValue: 'grey',
   },
   "layers[${i}].mapjson": {
     name: 'Layer ${i+1} Map data (json)',
