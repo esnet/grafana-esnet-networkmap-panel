@@ -1,14 +1,39 @@
-version: '3.0'
-
 services:
+  mitmproxy:
+    image: mitmproxy/mitmproxy
+    container_name: mitmproxy
+    tty: true
+    ports:
+      - 8080:8080/tcp
+    command: mitmdump --mode transparent --modify-headers "/Access-Control-Allow-Origin/*" --modify-headers "/X-Remote-User/remote" --modify-headers "/X-Forwarded-Host/esnet-networkmap-panel:3000"
+    networks:
+      - esnet-networkmap-e2e-net
+
   grafana:
+    environment:
+      - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
     container_name: 'esnet-networkmap-panel'
     build:
       context: ./.config
+      dockerfile: Dockerfile
       args:
-        grafana_version: ${GRAFANA_VERSION:-9.3.8}
+        grafana_version: ${GRAFANA_VERSION:-10.4.0}
+    restart: always
     ports:
       - 3000:3000/tcp
     volumes:
       - ./dist:/var/lib/grafana/plugins/esnet-networkmap-panel
       - ./provisioning:/etc/grafana/provisioning
+    networks:
+      - esnet-networkmap-e2e-net
+
+networks:
+  esnet-networkmap-e2e-net:
+    name: esnet-networkmap-e2e-net
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        -
+          subnet: 192.168.2.0/24
+

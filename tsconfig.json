@@ -6,8 +6,10 @@
     "rootDir": "./src",
     "baseUrl": "./src",
     "typeRoots": ["./node_modules/@types"],
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "allowJs": true,
+    "sourceMap": true,
     "outDir": "$$ts-jest$$"
   },
   "exclude": ["public", "dist", "node_modules", "src/components/lib"]

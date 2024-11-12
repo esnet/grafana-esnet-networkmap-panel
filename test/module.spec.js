@@ -9,7 +9,7 @@ describe( "Class MapCanvas", () => {
         var canvas = document.querySelector("esnet-map-canvas");
         canvas.remove();
     })
-    beforeEach(async function(){  
+    beforeEach(async function(){
         var elem = document.createElement("esnet-map-canvas");
         elem.setAttribute('width', 800);
         elem.setAttribute('height', 400);
@@ -18,7 +18,7 @@ describe( "Class MapCanvas", () => {
 
         elem.setTopology(TOPOLOGY);
         elem.setOptions(OPTIONS);
-    }); 
+    });
     it( "should append a esnet-map-canvas element", async () => {
       let isInstance = document.querySelector("esnet-map-canvas") instanceof HTMLElement;
       expect(isInstance).toBeTruthy();
@@ -488,10 +488,10 @@ describe( "Class MapCanvas", () => {
       canvas.listen(signals.TOPOLOGY_UPDATED, () => {
         closureVar = "called";
       });
-      canvas.listen(signals.NODE_UPDATED, (e)=>{ 
+      canvas.listen(signals.NODE_UPDATED, (e)=>{
         closureVar3 = true;
       }, canvas);
-      canvas.listen(signals.EDGE_UPDATED, (e)=>{ 
+      canvas.listen(signals.EDGE_UPDATED, (e)=>{
         closureVar2 = true;
       }, canvas);
 
@@ -556,7 +556,7 @@ describe( "Class MapCanvas", () => {
     });
     it("should persist a topology change when a user drags an editable edge control point", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-    
+
       var closureVar = null;
       canvas.listen(signals.TOPOLOGY_UPDATED, () => {
         closureVar = "called";
@@ -599,7 +599,7 @@ describe( "Class MapCanvas", () => {
       var newTopology = [
         {
             "edges": [
-                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                {"name":"A--B","meta":{"endpoint_identifiers":{"names":["A","B"]}},
                     "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
                     "children":[],
                     "azColor":LAVENDER,
@@ -623,7 +623,7 @@ describe( "Class MapCanvas", () => {
         },
         {
             "edges": [
-                {"name":"A--B","meta":{"endpoint_identifiers":{"pops":["A","B"]}},
+                {"name":"A--B","meta":{"endpoint_identifiers":{"names":["A","B"]}},
                     "coordinates":[[49.02,-115.99],[45.81,-111.77],[44.59,-106.06]],
                     "children":[],
                     "azColor":LAVENDER,
@@ -823,7 +823,7 @@ describe( "Class MapCanvas", () => {
                   "name":"A",
                   "meta":{},
                   "coordinate":[30.02,-105.99],
-                  "color":LAVENDER,                  
+                  "color":LAVENDER,
                 },
                 {
                   "name":"Z",
@@ -915,7 +915,7 @@ describe( "Class MapCanvas", () => {
       cPoint.dispatchEvent(downEvent);
       cPoint.dispatchEvent(dragEvent);
       cPoint = canvas.querySelector("circle.control");
-      // drag a node with weird name. 
+      // drag a node with weird name.
       cPoint.dispatchEvent(upEvent);
       // do edges move?
       var edgeAB = canvas.querySelector(".edge-az");
@@ -937,7 +937,7 @@ describe( "Class MapCanvas", () => {
       cPoint.dispatchEvent(dragEvent);
       cPoint = canvas.querySelector("circle.control");
       cPoint.dispatchEvent(upEvent);
-      // drag a node with weird name. 
+      // drag a node with weird name.
       var edgeAB = canvas.querySelector(".edge-az");
       var afterCoords = edgeAB.getBoundingClientRect();
       expect(beforeCoords.x).not.toEqual(afterCoords.x);
@@ -978,7 +978,7 @@ describe( "Class MapCanvas", () => {
         elem2.setTopology(TOPOLOGY);
         elem2.setOptions(newOptions);
         document.body.appendChild(elem2);
-  
+
         var edge = elem2.querySelector('.edge.edge-az');
         let mouseoverEvent = new Event('mouseover', { bubbles: true });
         edge.dispatchEvent(mouseoverEvent);
@@ -998,7 +998,7 @@ describe( "Class MapCanvas", () => {
         document.body.insertBefore(elem2, canvas);
 
         var selectionListenerFired = false;
-        elem2.listen(signals.SELECTION_SET, function(){ 
+        elem2.listen(signals.SELECTION_SET, function(){
           selectionListenerFired = true;
           expect(elem2.querySelectorAll(".dash-selected").length).not.toEqual(0);
         })
@@ -1063,7 +1063,7 @@ describe( "Class MapCanvas", () => {
         var node_matches = 0;
         for(var i=0; i<nodes.length; i++){
           var rect = nodes[i].getBoundingClientRect();
-          if(within(rect.x, newPos.x - 10, newPos.x + 10) && 
+          if(within(rect.x, newPos.x - 10, newPos.x + 10) &&
              within(rect.y, newPos.y - 10, newPos.y + 10)){
             node_matches++;
           }
@@ -1187,7 +1187,7 @@ describe( "Class MapCanvas", () => {
         var resize = new Event('resize');
         window.dispatchEvent(resize);
 
-        // check the positions of each of the nodes. All should be inside of map bounding box.        
+        // check the positions of each of the nodes. All should be inside of map bounding box.
         var nodes = canvas.querySelectorAll(".node.l0");
         var canvasBounds = canvas.getBoundingClientRect();
         var results = []
@@ -1212,7 +1212,7 @@ describe( "Class MapCanvas", () => {
         map.dispatchEvent(upEvent);
         window.dispatchEvent(resize);
 
-        // check the positions of each of the nodes. All should be inside of map bounding box.        
+        // check the positions of each of the nodes. All should be inside of map bounding box.
         var nodes = canvas.querySelectorAll(".node.l0");
         var canvasBounds = canvas.getBoundingClientRect();
         var results = []
@@ -1350,7 +1350,7 @@ describe( "Class MapCanvas", () => {
     })
     it("should support dragging parent-child nodes as groups", ()=>{
       var canvas = document.querySelector("esnet-map-canvas");
-      
+
       let newTopology = JSON.parse(JSON.stringify(TOPOLOGY));
       newTopology[0].nodes = newTopology[0].nodes.concat([
           {
@@ -1391,7 +1391,7 @@ describe( "Class MapCanvas", () => {
         cPoint.dispatchEvent(downEvent);
         cPoint.dispatchEvent(dragEvent);
         cPoint = canvas.querySelector("circle.control");
-        cPoint.dispatchEvent(upEvent);        
+        cPoint.dispatchEvent(upEvent);
       }
 
       // snapshot coordinates for C point and move E point, should change.
@@ -1454,7 +1454,7 @@ describe( "Class MapCanvas", () => {
       ]
       // this appears to be a "load-bearing" reassignment... removing it causes tests to fail?
       var topo = newTopology;
-      /*expect(function(){ 
+      /*expect(function(){
         canvas.setTopology(topo);
       }).toThrow();*/
     });
@@ -1467,7 +1467,7 @@ describe( "Class MapCanvas", () => {
             "meta": {},
             "coordinate": [40.75,-102.315],
             "children": ["A"]
-          },{ 
+          },{
             "name": "A",
             "meta": {},
             "coordinate": [37.553,-105.795]

@@ -1,19 +1,16 @@
 name: CI
 
-on:
-  push:
-    branches:
-      - master
-  pull_request:
-    branches:
-      - master
+on: [
+  push,
+  pull_request
+]
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
-      - name: Setup Node.js environment
+      - name: Setup Node.js environment for build and testing
         uses: actions/setup-node@v2.1.2
         with:
           node-version: "18.x"
@@ -43,8 +40,24 @@ jobs:
       - name: Install dependencies
         run: yarn install --frozen-lockfile
 
-      - name: Build and test frontend
+      - name: Build frontend
         run: yarn build
+
+      - name: Test components
+        run: make test:component
+
+      - name: Install E2E dependencies
+        run: |
+          npx playwright install --with-deps
+
+      - name: Setup E2E testing parameters
+        run: |
+          mkdir -p ./playwright/.auth
+          echo "{\"username\": \"admin\", \"password\": \"admin\" }" > ./playwright/.auth/credentials.json
+
+      - name: E2E testing
+        run: |
+          make test:e2e
 
       - name: Check for backend
         id: check-for-backend
