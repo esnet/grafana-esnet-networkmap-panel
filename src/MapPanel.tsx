@@ -4,7 +4,7 @@ import { MapOptions } from './types';
 import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
-import { locationService } from '@grafana/runtime/services/LocationService';
+import { locationService } from '@grafana/runtime';
 import { LAYER_LIMIT, setPath } from "./components/lib/utils.js"
 import { signals } from "./signals.js"
 
