@@ -56,12 +56,17 @@ export class MapPanel extends Component<MapPanelProps> {
     return function (event) {
       let setLocation = {};
       for (let i = 0; i < LAYER_LIMIT; i++) {
-        const srcVar = 'var-' + self.props.options.layers[i]['dashboardEdgeSrcVar'];
-        const dstVar = 'var-' + self.props.options.layers[i]['dashboardEdgeDstVar'];
-        const nodeVar = 'var-' + self.props.options.layers[i]['dashboardNodeVar'];
-        setLocation[srcVar] = null;
-        setLocation[dstVar] = null;
-        setLocation[nodeVar] = null;
+        let layer = self.props.options.layers[i];
+        const keys = [
+          'dashboardEdgeSrcVar',
+          'dashboardEdgeDstVar',
+          'dashboardNodeVar'
+        ];
+        keys.forEach((k)=>{
+          if(layer[k]){
+            setLocation[`var-${layer[k]}`] = null;
+          }
+        })
       }
       if (event && event.type === 'edge' && event.selection?.nodeA && event.selection?.nodeZ) {
         const srcVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeSrcVar'];
@@ -74,7 +79,7 @@ export class MapPanel extends Component<MapPanelProps> {
         setLocation[dashboardVariable] = event.selection.name;
       }
       locationService.partial(setLocation, false);
-    };
+    }
   }
 
   updateCenter = (centerData) => {
@@ -124,7 +129,6 @@ export class MapPanel extends Component<MapPanelProps> {
     }
     this.props.onOptionsChange(update);
   };
-
   // A function to turn layers on or off. Takes in the layer and boolean value
   // Used in SideBar.tsx
   toggleLayer = (layer, value) => {
@@ -327,7 +331,8 @@ export class MapPanel extends Component<MapPanelProps> {
         this.updateTopologyEditor(this.mapCanvas.current['topology']);
     });
 
-    this.mapCanvas.current.listen(signals.SELECTION_SET, this.setDashboardVariables())
+    this.mapCanvas.current.listen(signals.SELECTION_SET, this.setDashboardVariables() )
+    this.mapCanvas.current.listen(signals.SELECTION_CLEARED, this.setDashboardVariables() )
 
     this.updateMap();
     // @ts-ignore

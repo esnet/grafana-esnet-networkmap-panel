@@ -101,7 +101,10 @@ export const OPTIONS = {
                             "edgeWidth":1.5,
                             "pathOffset":1.5,
                             "name":"Core Topology",
-                            "legend":true,                 
+                            "legend":true,
+                            "dashboardEdgeSrcVar": "src",
+                            "dashboardEdgeDstVar": "dst",
+                            "dashboardNodeVar": "node",
                         },
                         {
                             "visible":false,
@@ -120,7 +123,7 @@ export const OPTIONS = {
                             "edgeWidth":2,
                             "pathOffset":1.5,
                             "name":"Peer Topology",
-                            "legend":true,                  
+                            "legend":true,
                         }
                     ]
                 }
