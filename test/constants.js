@@ -12,6 +12,34 @@ export const LAVENDER = "rgb(202, 149, 229)";
  */
 export const EXPECTED_NODE_MOUSEOVER_REGEX = /A\s+In Volume(\s+|:\s*)\d+\s+Out Volume(\s+|:\s*)\d+/;
 
+export const AUTODETECT_TRAFFIC_DATA = [
+    {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":52,"src_longitude":21,"src_name":"NCBJ.pl","in_bits": 16000000, "out_bits": 160000000},
+    {"dst_latitude":40,"dst_longitude":-74,"dst_name":"PPPL","src_latitude":43,"src_longitude":12,"src_name":"Cineca","in_bits": 4000000, "out_bits": 40000000},
+    {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","in_bits": 1000000, "out_bits": 10000000},
+    {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":49,"src_longitude":8,"src_name":"KIT.de","in_bits": 32000000, "out_bits": 320000000},
+    {"dst_latitude":40,"dst_longitude":-72,"dst_name":"BNL","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 148000000, "out_bits": 1480000000},
+    {"dst_latitude":40,"dst_longitude":-74,"dst_name":"GFDL-Z","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 1000000, "out_bits": 10000000},
+    {"dst_latitude":37,"dst_longitude":-76,"dst_name":"JeffersonLab","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 13000000, "out_bits": 130000000},
+    {"dst_latitude":38,"dst_longitude":-78,"dst_name":"Caltech","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 3000000, "out_bits": 30000000},
+    {"dst_latitude":29,"dst_longitude":-82,"dst_name":"UFlorida","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 12000000, "out_bits": 120000000},
+    {"dst_latitude":34,"dst_longitude":-86,"dst_name":"NASA","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 1000000, "out_bits": 10000000},
+    {"dst_latitude":40,"dst_longitude":-86,"dst_name":"Purdue","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 82000000, "out_bits": 820000000},
+    {"dst_latitude":41,"dst_longitude":-87,"dst_name":"UChicago","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 372000000, "out_bits": 3720000000},
+    {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 586000000, "out_bits": 5860000000},
+    {"dst_latitude":40,"dst_longitude":-96,"dst_name":"UNLincoln","src_latitude":46,"src_longitude":6,"src_name":"CERN","in_bits": 452000000, "out_bits": 4520000000},
+    {"dst_latitude":41,"dst_longitude":-88,"dst_name":"FNAL","src_latitude":50,"src_longitude":4,"src_name":"IIHE.be","in_bits": 45000000, "out_bits": 450000000},
+];
+
+// out -> dst; in -> src
+export const TRAFFIC_DATA = [
+    { "src_name": "A", "dst_name": "B", "in_bits": 1, "out_bits": 100 }, // A.in 1 B.out 100
+    { "src_name": "B", "dst_name": "C", "in_bits": 1, "out_bits": 100 }, // B.in 1 C.out 100
+    { "src_name": "C", "dst_name": "A", "in_bits": 1, "out_bits": 100 }, // C.in 1 A.out 100
+    // all nodes should measure at 101 bits
+    // <- 1
+    // -> 100
+]
+
 export const TOPOLOGY = [
             {
                 "edges":[
@@ -87,6 +115,7 @@ export const OPTIONS = {
                       "boundaries": null,
                       "labels": null,
                     },
+                    "layerLimit": 3,
                     "topologySource": "json",
                     "configurationUrl": "",
                     "edgeWidth":3,
@@ -101,7 +130,14 @@ export const OPTIONS = {
                             "edgeWidth":1.5,
                             "pathOffset":1.5,
                             "name":"Core Topology",
-                            "legend":true,                 
+                            "legend":true,
+                            "dashboardEdgeSrcVar": "src",
+                            "dashboardEdgeDstVar": "dst",
+                            "dashboardNodeVar": "node",
+                            "srcField": "src_name",
+                            "dstField": "dst_name",
+                            "inboundValueField": "in_bits",
+                            "outboundValueField": "out_bits",
                         },
                         {
                             "visible":false,
@@ -120,7 +156,7 @@ export const OPTIONS = {
                             "edgeWidth":2,
                             "pathOffset":1.5,
                             "name":"Peer Topology",
-                            "legend":true,                  
+                            "legend":true,
                         }
                     ]
                 }

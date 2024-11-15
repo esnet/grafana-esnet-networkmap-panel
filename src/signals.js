@@ -6,6 +6,9 @@ export const signals = {
     TOPOLOGY_LOAD_SUCCESS: "topology load success",
     TOPOLOGY_LOAD_FAILURE: "topology load failure",
 
+    LAYER_LOAD_SUCCESS: "layer load success",
+    LAYER_LOAD_FAILURE: "layer load failure",
+
     NODE_CREATED: "node created",
     NODE_UPDATED: "node updated",
     NODE_DELETED: "node deleted",

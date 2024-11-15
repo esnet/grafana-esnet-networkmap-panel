@@ -5,10 +5,9 @@ import "./EditingInterface.component.js"
 import "./SideBar.component.js"
 import * as maplayers from './lib/maplayers.js';
 import * as pubsub from './lib/pubsub.js';
-import { testJsonSchema } from './lib/utils.js';
 import { types, BindableHTMLElement } from './lib/rubbercement.js';
 import * as utils from './lib/utils.js';
-import testIds from '../constants.js';
+import * as constants from "../constants.js";
 import * as L from "./lib/leaflet-src.esm.js";
 import { signals } from '../signals.js';
 import { render as renderTemplate } from "./lib/rubbercement.js"
@@ -63,8 +62,14 @@ export class MapCanvas extends BindableHTMLElement {
     this.legendMinimized = false;
     this.userChangedMapFrame = false;
     this.optionsCache = {};
+    this._layerTopologyCache = {};
     this.pubsub = new PrivateMessageBus(this);
     this._trafficFormat = utils.formatBits;
+
+    this._remoteLayerLoaded = [];
+    this._remoteLayerErrors = [];
+    this._remoteLayerErrorMessages = [];
+
     this._optionsToWatch = [
       'background',
       'tileset.geographic',
@@ -75,6 +80,7 @@ export class MapCanvas extends BindableHTMLElement {
       'showLegend',
       'customLegend',
       'customLegendValue',
+      'layerLimit',
       'legendColumnLength',
       'legendPosition',
       'legendDefaultBehavior',
@@ -93,7 +99,7 @@ export class MapCanvas extends BindableHTMLElement {
       'resolvedLng',
       'multiLayerNodeSnap',
     ];
-    for(let i=0; i<utils.LAYER_LIMIT; i++){
+    for(let i=0; i<constants.LAYER_LIMIT; i++){
       this._optionsToWatch = this._optionsToWatch.concat([
         `layers[${i}].visible`,
         `layers[${i}].color`,
@@ -105,6 +111,7 @@ export class MapCanvas extends BindableHTMLElement {
         `layers[${i}].pathOffset`,
         `layers[${i}].name`,
         `layers[${i}].legend`,
+        `layers[${i}].remoteUrl`,
         `layers[${i}].dstFieldLabel`,
         `layers[${i}].srcFieldLabel`,
         `layers[${i}].dataFieldLabel`,
@@ -208,7 +215,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(this.options?.legendDefaultBehavior){
       this.legendMinimized = this.options.legendDefaultBehavior === "minimized";
     }
-    this.maybeFetchOptions();
+    this.maybeFetchOptionsAndTopology();
 
     this.setEditModeFromUrl();
     this.render();
@@ -219,10 +226,10 @@ export class MapCanvas extends BindableHTMLElement {
   }
   setTopology(newValue){
     // if we already have a topology set, we should re-render.
-    const render = this._topology;
+    let render = !!this._topology;
     this._topology = newValue;
-    this.emit(signals.TOPOLOGY_UPDATED, newValue);
     render && this.render();
+    this.emit(signals.TOPOLOGY_UPDATED, newValue);
     return newValue;
   }
 
@@ -232,12 +239,13 @@ export class MapCanvas extends BindableHTMLElement {
   }
   setOptions(newValue){
     let newOptions = newValue;
-    if(this._options?.topologySource === "url"){
+
+    if(this._options?.topologySource === "url" && newValue.topologySource === "url"){
       newOptions = { ...this._options };
       Object.keys(newValue).forEach((key)=>{
         // deal with per-layer options in a more nuanced way
         if(key == "layers"){
-          for(let i=0; i<utils.LAYER_LIMIT; i++){
+          for(let i=0; i<constants.LAYER_LIMIT; i++){
             if(!newValue.layers[i]) continue;
             Object.keys(newValue.layers[i]).forEach((layerKey)=>{
               // if this layer option is masked, set it on the in-memory options object.
@@ -254,7 +262,6 @@ export class MapCanvas extends BindableHTMLElement {
           newOptions[key] = newValue[key];
         }
       })
-
     }
 
     let changes = this.calculateOptionsChanges(newOptions);
@@ -388,7 +395,7 @@ export class MapCanvas extends BindableHTMLElement {
   setTraffic(newData){
     this._traffic = this.filterTraffic(newData);
     if(this._options?.topologySource == "autodetect"){
-      for(let i=0; i<utils.LAYER_LIMIT; i++){
+      for(let i=0; i<constants.LAYER_LIMIT; i++){
         if(this._topology?.[i]?.autodetected){
           delete this._topology[i].autodetected;
         }
@@ -474,13 +481,13 @@ export class MapCanvas extends BindableHTMLElement {
         targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
         targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
         // do the accounting for nodes
-        if(targetEdge && targetEdge.nodeA && nodeHash[targetEdge.nodeA]){
+        if(targetEdge && targetEdge.nodeA && nodeHash.hasOwnProperty(targetEdge.nodeA)){
           // in value should be added to the A node's in and the Z node's out
           layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
           // out value should be added to the A node's out and the Z node's in
           layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
         }
-        if(targetEdge && targetEdge.nodeZ && nodeHash[targetEdge.nodeZ]){
+        if(targetEdge && targetEdge.nodeZ && nodeHash.hasOwnProperty(targetEdge.nodeZ)){
           // in value should be added to the A node's in and the Z node's out
           layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
           // out value should be added to the A node's out and the Z node's in
@@ -527,7 +534,7 @@ export class MapCanvas extends BindableHTMLElement {
   }
 
   listen(signal, callback){
-    this.pubsub.subscribe(signal, callback, this);
+    this.pubsub.subscribe(signal, callback, this);    
   }
   emit(signal, data){
     this.pubsub.publish(signal, data, this);
@@ -575,8 +582,12 @@ export class MapCanvas extends BindableHTMLElement {
     this.emit(signals.SCROLLING_TOGGLED, false);
   }
 
-  maybeFetchOptions(){
-    if(this.options?.topologySource == "url"){
+  fetchAndCacheConfigurationUrl(){
+      // first clear load error states for full configuration
+      this._remoteLoaded = true;
+      this._remoteLoadError = false;
+      this._remoteLoadErrorMessage = "";
+
       let self = this;
 
       function populateOptionsAndTopology(){
@@ -585,7 +596,7 @@ export class MapCanvas extends BindableHTMLElement {
         Object.keys(newOptions).forEach((key)=>{
           // deal with per-layer options in a more nuanced way
           if(key == "layers"){
-            for(let i=0; i<utils.LAYER_LIMIT; i++){
+            for(let i=0; i<constants.LAYER_LIMIT; i++){
               if(!newOptions.layers[i]) continue;
               Object.keys(newOptions.layers[i]).forEach((layerKey)=>{
                 // if this layer option is not masked, set it on the in-memory options object.
@@ -622,7 +633,7 @@ export class MapCanvas extends BindableHTMLElement {
       // if we have a hit in cache, create a merged options object from cache
       if(self.optionsCache[self.options["configurationUrl"]]){
         populateOptionsAndTopology();
-        return
+        return;
       }
       // otherwise, no hit in cache, let's grab them from the URL
       fetch(this.options["configurationUrl"]).then((response)=>{
@@ -639,28 +650,109 @@ export class MapCanvas extends BindableHTMLElement {
         self.shadow = null;
         self.render();
       })
+  }
+
+  fetchAndCacheLayerTopologyUrls(){
+    this._remoteLayerLoaded = [];
+    this._remoteLayerErrors = [];
+    this._remoteLayerErrorMessages = [];
+
+    let layerUrls = [];
+    let topo = [];
+
+    const setLayerTopology = (layer, layerTopology, url)=>{
+      topo.push(layerTopology);
+      this.emit(signals.LAYER_LOAD_SUCCESS, { layer: layer, topology: layerTopology, url: url });
+      this._topology = topo;
+      this._remoteLayerLoaded[layer] = true;
+      this.shadow.remove();
+      this.shadow = null;
+      this.matchTraffic();
+      this.render();
+      this.refresh();
+      this.sideBar && this.sideBar.render();
+    }
+
+    for(let layer=0; layer<(this._options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); layer++){
+      let layerOptions = this._options.layers[layer];
+      layerUrls[layer] = layerOptions?.remoteUrl;
+
+      if(!layerUrls[layer]){
+        // "log" an error and continue
+        this._remoteLayerLoaded[layer] = true;
+        this._remoteLayerErrors[layer] = true;
+        this._remoteLayerErrorMessages[layer] = `Malformed Topology URL: '${layerUrls[layer]}'`
+        this.emit(signals.LAYER_LOAD_FAILURE, { layer: layer, url: layerUrls[layer] });
+        continue;
+      }
+
+      if(this._layerTopologyCache.hasOwnProperty(layerUrls[layer])){
+        let layerTopology = JSON.parse(this._layerTopologyCache[layerUrls[layer]]);
+        setLayerTopology(layer, layerTopology, layerUrls[layer])
+        continue;
+      }
+
+      fetch(layerUrls[layer]).then((response)=>{
+        response.json().then((layerTopology)=>{
+          this._layerTopologyCache[layerUrls[layer]] = JSON.stringify(layerTopology);
+          setLayerTopology(layer, layerTopology, layerUrls[layer])
+        }).catch((err)=>{
+          this._remoteLayerLoaded[layer] = true;
+          this._remoteLayerErrors[layer] = true;
+          this._remoteLayerErrorMessages[layer] = `Invalid JSON from '${layerUrls[layer]}'`
+          this.emit(signals.LAYER_LOAD_FAILURE, { layer: layer, url: layerUrls[layer] });
+          //this.render();
+          this.sideBar && this.sideBar.render();
+        })
+      }).catch((err)=>{
+        this._remoteLayerLoaded[layer] = true;
+        this._remoteLayerErrors[layer] = true;
+        this._remoteLayerErrorMessages[layer] = `Failed to load '${layerUrls[layer]}'`
+        this.emit(signals.LAYER_LOAD_FAILURE, { layer: layer, url: layerUrls[layer] });
+        //this.render();
+        this.sideBar && this.sideBar.render();
+      })
+    }
+  }
+
+  maybeFetchOptionsAndTopology(){
+    if(this.options?.topologySource == "url"){
+      this.fetchAndCacheConfigurationUrl();
+    }
+
+    if(this.options?.topologySource == "layerurls"){
+      this.fetchAndCacheLayerTopologyUrls();
     }
   }
 
   updateMapOptions(changedOptions){
     var {options, changed} = changedOptions;
     function wasChanged(option, changes){
-      return changes.indexOf(option) >= 0;
+      let transformedChanges = changes.map((change)=>{
+        // replace e.g. layers[1] with layers[] so we can
+        // compare layer changes reasonably well
+        return change.replace(/\[\d+\]/, "[]");
+      });
+      return transformedChanges.indexOf(option) >= 0;
     }
 
     if(wasChanged('topologySource', changed)){
       this._options['topologySource'] = options['topologySource'];
-      this.maybeFetchOptions();
     }
     if(wasChanged('configurationUrl', changed)){
       this._options['configurationUrl'] = options['configurationUrl'];
       // show loading curtain
       this._remoteLoaded = false;
+    }
+    if( wasChanged('topologySource', changed) ||
+        wasChanged('configurationUrl', changed) ||
+        wasChanged('layers[].remoteUrl', changed)
+      ){
       this.shadow?.remove();
       this.shadow = null;
       this.render();
       // fetch remote data
-      this.maybeFetchOptions();
+      this.maybeFetchOptionsAndTopology();
     }
 
     // options is sparse -- it includes only updated options.
@@ -675,7 +767,7 @@ export class MapCanvas extends BindableHTMLElement {
         wasChanged('thresholds', changed) ||
         wasChanged('legendColumnLength', changed) ||
         wasChanged('legendPosition', changed)
-      ){
+    ) {
       this.renderLegend();
     }
     if(wasChanged('legendDefaultBehavior', changed)){
@@ -693,13 +785,13 @@ export class MapCanvas extends BindableHTMLElement {
       this.render();
       this.refresh();
     }
-    if(
+    if (
         wasChanged('showSidebar', changed) ||
         wasChanged('showViewControls', changed) ||
         wasChanged('enableScrolling', changed) ||
         wasChanged('resolveLat', changed) ||
         wasChanged('resolveLng', changed)
-      ){
+    ) {
       this.shadow.remove();
       this.shadow = null;
       this.render();
@@ -708,21 +800,23 @@ export class MapCanvas extends BindableHTMLElement {
     if (
       wasChanged('tileset.geographic', changed) ||
       wasChanged('tileset.boundaries', changed) ||
-      wasChanged('tileset.labels', changed)
+      wasChanged('tileset.labels', changed) ||
+      wasChanged('layerLimit', changed)
     ) {
       this.refresh();
     } else {
       this.map && this.map.renderMap();
     }
-    if(
+    if (
       wasChanged('background', changed) ||
       wasChanged('enableNodeAnimation', changed) ||
       wasChanged('enableEdgeAnimation', changed)
-    ){
+    ) {
       this.renderStyle();
     }
     this.sideBar && this.sideBar.render();
   }
+
   updateMapTopology(newTopology){
     this._topology = newTopology;
     if(this.editingInterface){
@@ -730,11 +824,11 @@ export class MapCanvas extends BindableHTMLElement {
     }
     if(this.topology){
       this.jsonResults = this.topology.map((layer)=>{
-        return testJsonSchema(layer);
+        return utils.testJsonSchema(layer);
       })
     } else {
       this.jsonResults = [];
-      for(let i=0; i<utils.LAYER_LIMIT; i++){
+      for(let i=0; i<constants.LAYER_LIMIT; i++){
         this.jsonResults.push([false, "No Topology data available."]);
       }
     }
@@ -792,6 +886,7 @@ export class MapCanvas extends BindableHTMLElement {
     if(!this._traffic) return;
     if(this._options?.topologySource == "autodetect"){
       this.options.enableEditing = false;
+      this._topology = [];
       for(let i=0; i<this._options?.layers.length; i++){
         if(this._topology?.[i]?.autodetected){ continue }
         let layerTopology = { "nodes": [], "edges": [], "nodeHash": {}, "pathLayout": { "type": "curveBasis" }, "autodetected": true }
@@ -833,9 +928,6 @@ export class MapCanvas extends BindableHTMLElement {
           layerTopology["edges"].push(edgeObj);
         })
         layerTopology["nodes"] = Object.values(layerTopology["nodeHash"]);
-        if(!this._topology){
-          this._topology = []
-        }
         this._topology[i] = layerTopology;
       }
     }
@@ -890,11 +982,11 @@ export class MapCanvas extends BindableHTMLElement {
     }
     let zoomIn = this.querySelector(".leaflet-control-zoom-in");
     zoomIn?.classList.add("tight-form-func");
-    zoomIn?.setAttribute("data-testid", testIds.zoomInBtn);
+    zoomIn?.setAttribute("data-testid", constants.testIds.zoomInBtn);
     zoomIn?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     let zoomOut = this.querySelector(".leaflet-control-zoom-out")
     zoomOut?.classList.add("tight-form-func");
-    zoomOut?.setAttribute("data-testid", testIds.zoomOutBtn);
+    zoomOut?.setAttribute("data-testid", constants.testIds.zoomOutBtn);
     zoomOut?.addEventListener("click", ()=>{ this.userChangedMapFrame = true; })
     this.leafletMap.on("zoomend", (event)=>{
         if(!window[this.id + "mapPosition"]) window[this.id + "mapPosition"] = {};
@@ -922,8 +1014,6 @@ export class MapCanvas extends BindableHTMLElement {
       this.map.destroy();
       this.map = null;
     }
-    // needs research
-    PubSub.clearTopicCallbacks('');
     this.emit(signals.MAP_DESTROYED);
   }
 
@@ -935,11 +1025,11 @@ export class MapCanvas extends BindableHTMLElement {
   refresh(){
       if(this.topology){
         this.jsonResults = this.topology.map((layer)=>{
-          return testJsonSchema(layer);
+          return utils.testJsonSchema(layer);
         })
       } else {
         this.jsonResults = [];
-        for(let i=0; i<utils.LAYER_LIMIT; i++){
+        for(let i=0; i<constants.LAYER_LIMIT; i++){
           this.jsonResults[i] = [false, "No Topology data available."];
         }
         return;
@@ -1146,7 +1236,7 @@ export class MapCanvas extends BindableHTMLElement {
         <div class="loading-overlay" style="display: ${ this.options["topologySource"] != "url" || !!this._remoteLoaded ? "none" : "flex"}">
           Loading Topology Data...
         </div>
-        <div class="error-overlay" style="display: ${ !this._remoteLoadError ? "none" : "flex"}">
+        <div class="error-overlay" style="display: ${ this.options["topologySource"] === "url" && !!this._remoteLoadError ? "flex" : "none"}">
           <div style='width:50%; margin:auto; padding-top:10px;'>
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="red" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style='margin: 0 3px -7px 0'>
           <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/>
