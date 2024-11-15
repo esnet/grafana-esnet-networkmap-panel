@@ -60,4 +60,8 @@ export const defaultCustomEdgeTooltip: "\n  <div class=\"flow-tooltip\">\n    <s
  * The default tooltip markup to render for edges.
  */
 export const defaultEdgeTooltip: "\n  <div class=\"flow-tooltip\">\n    <strong>\n      ${forward.from} → ${forward.to}\n      <br />\n      \n  <svg xmlns=\"http://www.w3.org/2000/svg\"\n      role=\"graphics-symbol\"\n      aria-labelledby=\"Rate\"\n      width=\"24\"\n      height=\"24\"\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      stroke-linecap=\"round\"\n      stroke-linejoin=\"round\"\n      class=\"lucide lucide-gauge\"\n  >\n      <path d=\"m12 14 4-4\"/>\n      <path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>\n  </svg>\n ${forward.dataPoint}\n    </strong>\n  </div>\n  <div class=\"flow-tooltip\">\n    <span>\n      ${reverse.from} → ${reverse.to}\n      <br />\n      \n  <svg xmlns=\"http://www.w3.org/2000/svg\"\n      role=\"graphics-symbol\"\n      aria-labelledby=\"Rate\"\n      width=\"24\"\n      height=\"24\"\n      viewBox=\"0 0 24 24\"\n      fill=\"none\"\n      stroke=\"currentColor\"\n      stroke-linecap=\"round\"\n      stroke-linejoin=\"round\"\n      class=\"lucide lucide-gauge\"\n  >\n      <path d=\"m12 14 4-4\"/>\n      <path d=\"M3.34 19a10 10 0 1 1 17.32 0\"/>\n  </svg>\n ${reverse.dataPoint}\n    </span>\n  </div>\n";
+export const LayerOptions: {
+    label: string;
+    value: number;
+}[];
 //# sourceMappingURL=options.d.ts.map

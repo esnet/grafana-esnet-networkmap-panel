@@ -16,6 +16,7 @@ export declare class MapPanel extends Component<MapPanelProps> {
     subscriptionHandle: any;
     variableChangeHandle: any;
     _configurationUrl: any;
+    updateListener: any;
     constructor(props: MapPanelProps);
     setDashboardVariables(): (event: any) => void;
     updateCenter: (centerData: any) => void;

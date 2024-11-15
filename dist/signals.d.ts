@@ -4,6 +4,8 @@ export namespace signals {
     export let TRAFFIC_UPDATED: string;
     export let TOPOLOGY_LOAD_SUCCESS: string;
     export let TOPOLOGY_LOAD_FAILURE: string;
+    export let LAYER_LOAD_SUCCESS: string;
+    export let LAYER_LOAD_FAILURE: string;
     export let NODE_CREATED: string;
     export let NODE_UPDATED: string;
     export let NODE_DELETED: string;
