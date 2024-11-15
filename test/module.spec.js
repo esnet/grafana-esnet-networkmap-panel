@@ -1616,7 +1616,6 @@ describe( "Class MapCanvas", () => {
       let failures = {};
 
       const topologyFailureCallback = (url)=>{
-        console.log("failure callback fired", url);
         failures[url] = true;
         expect(failures.hasOwnProperty(targetUrl)).toBeTruthy()
 
@@ -1625,10 +1624,8 @@ describe( "Class MapCanvas", () => {
       }
 
       const topologySuccessCallback = () => {
-        console.log("success callback fired");
         var canvas = document.querySelector("esnet-map-canvas");
         canvas.render();
-        console.log(canvas);
         let elems = canvas.querySelector(".node");
         expect(elems).toBeTruthy();
         expect(elems.hasOwnProperty("length")).toBeTruthy();
@@ -1655,7 +1652,6 @@ describe( "Class MapCanvas", () => {
 
       const topologySuccessCallback = (data)=>{
         successes[data.url] = true;
-        console.log(failures.hasOwnProperty(targetUrl), successes.hasOwnProperty(targetUrl2));
         if(successes.hasOwnProperty(targetUrl) &&
           failures.hasOwnProperty(targetUrl2)){
           done();
@@ -1663,9 +1659,6 @@ describe( "Class MapCanvas", () => {
       }
       const topologyFailureCallback = (data)=>{
         failures[data.url] = true;
-        console.log(data.url, targetUrl);
-        console.log(data.url == targetUrl);
-        console.log(failures.hasOwnProperty(targetUrl), successes.hasOwnProperty(targetUrl2));
         if(successes.hasOwnProperty(targetUrl) &&
           failures.hasOwnProperty(targetUrl2)){
           done();
