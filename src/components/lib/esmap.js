@@ -217,8 +217,10 @@ function renderEdges(g, data, ref, layerId) {
     .on('mouseout', doEdgeMouseOut);
   zaLines.exit().remove();
 
-  function selectEdge(selectionData){
-      if(!selectionData || selectionData.type!='edge') return;
+  function selectEdge(stale){
+    return (selectionData) => {
+      // if no selectiondata, selectiondata isn't an edge, or this is the wrong layer, return.
+      if(!selectionData || selectionData.type!='edge' || selectionData['layer'] != layerId) return;
 
       var dashes = document.querySelectorAll(".dash-selected, .dash-over");
       for(var i=0; i<dashes.length; i++){
@@ -256,13 +258,13 @@ function renderEdges(g, data, ref, layerId) {
             .classed('selected', true)
             .classed('animated-edge', true);
       })
+    }
   }
 
-  ref.mapCanvas.listen(signals.SELECTION_SET, selectEdge);
+  ref.mapCanvas.listen(signals.SELECTION_SET, selectEdge(false));
 
   var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET);
-  selectEdge(selection);
-
+  selectEdge(true)(selection);
 }
 
 function deleteControlPoint(evt, d, edgeData, ref, layerId){
@@ -704,6 +706,7 @@ function renderNodes(g, data, ref, layerId) {
         type: "node",
       }
       ref.mapCanvas.setSelection(selectionData);
+      ref.mapCanvas.emit(signals.VARIABLES_SET, selectionData);
     })
     .select(function(d){
       return this.childNodes[0];
@@ -723,24 +726,21 @@ function renderNodes(g, data, ref, layerId) {
 
 
   function selectNode(selectionData){
-      if(selectionData && selectionData.type=='node'){
-        d3.selectAll(".selected")
-          .classed('selected', false)
-          .classed('animated-node', false)
+    if(selectionData && selectionData.type=='node'){
+      d3.selectAll(".selected")
+        .classed('selected', false)
+        .classed('animated-node', false)
 
-        d3.select(`.l${selectionData.layer}.node-${sanitizeName(selectionData.selection.name)} .scale-container`)
-          .classed('selected', true)
-          .classed('animated-node', true);
-
-        ref.mapCanvas.emit(signals.VARIABLES_SET, selectionData);
-      }
+      d3.select(`.l${selectionData.layer}.node-${sanitizeName(selectionData.selection.name)} .scale-container`)
+        .classed('selected', true)
+        .classed('animated-node', true);
+    }
   }
 
 
   ref.mapCanvas.listen(signals.SELECTION_SET, selectNode);
   var selection = ref.mapCanvas.lastValue(signals.SELECTION_SET, ref.svg.node());
   selectNode(selection);
-
 
   g.selectAll('g.node').attr('transform', function (d) {
     var ll = L.latLng(d.coordinate);

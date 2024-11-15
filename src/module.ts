@@ -4,7 +4,8 @@ import { MapPanel } from './MapPanel';
 import { CustomTextArea } from './components/CustomTextArea';
 import { CoordinateButton } from './components/CoordinateButton';
 import { ViewportCoordinateButton } from './components/ViewportCoordinateButton';
-import { resolvePath, LAYER_LIMIT } from './components/lib/utils';
+import { resolvePath } from './components/lib/utils';
+import { LAYER_LIMIT } from './constants';
 import {
   ViewStrategies,
   BaseTilesets,
@@ -14,7 +15,8 @@ import {
   LegendBehaviorOptions,
   TopologySources,
   defaultCustomEdgeTooltip,
-  defaultCustomNodeTooltip
+  defaultCustomNodeTooltip,
+  LayerOptions,
 } from "./options";
 
 const customEditors = {
@@ -40,9 +42,29 @@ function checkBools(settings: object) {
         // otherwise, keep looping, checking that everything matches
       // if we're passed anything other than an array, make sure it's an exact match
       } else {
-        if (resolvePath(config, settingName) !== value) {
-          // if it's not an exact match, return false
-          return false;
+        // if "__" is in our setting name, we're doing a gt/lt/gte/lte comparison
+        if(settingName.indexOf("__") >= 0){
+          let [name, comparison] = settingName.split("__");
+          const comparators = {
+            "lte": function(val, target){ return val <= target; },
+            "gte": function(val, target){ return val >= target; },
+            "gt" : function(val, target){ return val > target; },
+            "lt" : function(val, target){ return val < target; }
+          }
+          // if the comparison isn't in the list... return false
+          if(!comparators.hasOwnProperty(comparison)){
+            return false
+          }
+          // if the comparison returns false, return false
+          if (!comparators[comparison](resolvePath(config, name), value)){
+            return false
+          }
+        // otherwise, this is a "standard" equality test
+        } else {
+          if (resolvePath(config, settingName) !== value) {
+            // if it's not an exact match, return false
+            return false;
+          }
         }
         // otherwise, keep looping, checking that everything matches
       }
@@ -101,30 +123,38 @@ let layerOptions = {
     editor: "boolean",
     name: 'Layer ${i+1} on',
     category: "Layers",
-    showIf: { "topologySource": ["autodetect", "json"] },
-    defaultValue: true,
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layerLimit__gt": "${i}" },
+    defaultValue: (layer)=>{ return layer < 3 },
   },
-
 
   "layers[${i}].legend": {
     editor: "boolean",
     name: 'Show Layer ${i+1} toggle',
     category: "Layer ${i+1}: Basic Options",
     showIf: { "showSidebar": true, "layers[${i}].visible": true},
-    defaultValue: true,
+    defaultValue: (layer)=>{ return layer < 3 },
   },
+
+  "layers[${i}].remoteUrl": {
+    editor: "text",
+    name: "Layer ${i+1}: Remote JSON URL",
+    category: "Layer ${i+1}: Basic Options",
+    showIf: { "layers[${i}].visible": true, "topologySource": "layerurls" },
+    defaultValue: "",
+  },
+
   "layers[${i}].name": {
     editor: "text",
     name: 'Layer ${i+1} Display Name',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layers[${i}].visible": true },
     defaultValue: 'Layer ${i+1}',
   },
   "layers[${i}].color": {
     editor: "color",
     name: 'Layer ${i+1} Default color',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layers[${i}].visible": true},
     description: 'The default color for nodes and links on Layer ${i+1}',
     defaultValue: 'grey',
   },
@@ -141,7 +171,7 @@ let layerOptions = {
     editor: "text",
     name: 'Layer ${i+1} Endpoint Identifier',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["url", "json"], "layers[${i}].visible": true},
+    showIf: { "topologySource": ["url", "json", "layerurls"], "layers[${i}].visible": true},
     description: 'Which topology "meta" field should be used to match topology nodes to query data?',
     defaultValue: 'names',
   },
@@ -150,7 +180,7 @@ let layerOptions = {
     name: 'Layer ${i+1} Edge Width',
     defaultValue: 3,
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layers[${i}].visible": true},
     settings: {
       min: 1,
       max: 15,
@@ -163,7 +193,7 @@ let layerOptions = {
     description: 'The offset between AZ path and ZA path',
     defaultValue: 3,
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layers[${i}].visible": true},
     settings: {
       min: 1,
       max: 15,
@@ -175,7 +205,7 @@ let layerOptions = {
     editor: "slider",
     name: 'Layer ${i+1} Node Size',
     category: "Layer ${i+1}: Basic Options",
-    showIf: { "topologySource": ["autodetect", "json"], "layers[${i}].visible": true},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "layers[${i}].visible": true},
     defaultValue: 5,
     settings: {
       min: 1,
@@ -330,6 +360,17 @@ const options = {
     },
     defaultValue: "json",
   },
+  "layerLimit": {
+    editor: "select",
+    name: "Number of Layers",
+    description: "How many layers to display in the map?",
+    settings: {
+      allowCustomValue: false,
+      options: LayerOptions,
+    },
+    showIf: {"topologySource": ["json", "layerurls", "autodetect"]},
+    defaultValue: 2
+  },
   "configurationUrl": {
     editor: "text",
     name: 'URL to Fetch Configuration From',
@@ -340,7 +381,7 @@ const options = {
     editor: 'color',
     name: 'Map Background Color',
     description: 'The default color for the background, with no tileset',
-    showIf: { "topologySource": ["autodetect", "json"] },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: '#EDEDED',
   },
   "tileset.geographic": {
@@ -351,7 +392,7 @@ const options = {
       allowCustomValue: false,
       options: BaseTilesets,
     },
-    showIf: { "topologySource": ["autodetect", "json"] },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: "arcgis",
   },
   "tileset.boundaries": {
@@ -362,7 +403,7 @@ const options = {
       allowCustomValue: false,
       options: PoliticalBoundaryTilesets,
     },
-    showIf: { "topologySource": ["autodetect", "json"] },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: null,
   },
   "tileset.labels": {
@@ -373,7 +414,7 @@ const options = {
       allowCustomValue: false,
       options: PoliticalLabelTilesets,
     },
-    showIf: { "topologySource": ["autodetect", "json"] },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: null,
   },
   //////////////
@@ -385,14 +426,14 @@ const options = {
       description: 'Strategy to set the initial center and zoom level of the map',
       category: "Viewport Options",
       settings: { allowCustomValue: false, options: ViewStrategies, },
-      showIf: { "topologySource": ["autodetect", "json"] },
+      showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
       defaultValue: "static",
   },
   "setLatLngZoom": {
     name: 'Set Default Latitude / Longitude / Zoom',
     description:
       'Set the default Latitude, Longitude and Zoom level to the current map Latitude, Longitude and Zoom level.',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'static'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'static'},
     settings: { label: 'Set Lat/Lng & Zoom' },
     category: "Viewport Options",
     editor: "CoordinateButton",
@@ -401,7 +442,7 @@ const options = {
   "viewport.center.lat": {
     name: 'Starting Latitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'static'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'static'},
     defaultValue: 39,
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
@@ -410,7 +451,7 @@ const options = {
   "viewport.center.lng": {
     name: 'Starting Longitude of map',
     description: 'This will be the center of the map when it loads',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'static'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'static'},
     defaultValue: -98,
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
@@ -421,7 +462,7 @@ const options = {
     editor: "select",
     name: 'Latitude Variable',
     description: 'Select a dashboard or query variable to set initial latitude of map',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'variables'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'variables'},
     category: "Viewport Options",
     settings: {
       allowCustomValue: false,
@@ -432,7 +473,7 @@ const options = {
     editor: "select",
     name: 'Longitude Variable',
     description: 'Select a dashboard or query variable to set initial longitude of map',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'variables'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'variables'},
     category: "Viewport Options",
     settings: {
       allowCustomValue: false,
@@ -444,7 +485,7 @@ const options = {
   "viewport.zoom": {
     editor: "slider",
     name: 'Starting zoom level of map',
-    showIf: { "topologySource": ["autodetect", "json"], 'initialViewStrategy': ['static', 'variables']},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], 'initialViewStrategy': ['static', 'variables']},
     category: "Viewport Options",
     defaultValue: 5,
     settings: {
@@ -457,7 +498,7 @@ const options = {
   "setViewport": {
     name: 'Set Zoom Viewport to Current Map View',
     description: 'Set the top-left Lat & Lng and bottom-right Lat & Lng to the currently displayed map viewport.',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'viewport'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'viewport'},
     settings: { label: 'Set Viewport Coordinates' },
     category: "Viewport Options",
     editor: "ViewportCoordinateButton",
@@ -465,7 +506,7 @@ const options = {
   "viewport.top": {
     name: 'Initial viewport: Northern Boundary (Latitude)',
     description: 'Zoom viewport: Top, left coordinate, Latitude. (numbers only)',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'viewport'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -473,7 +514,7 @@ const options = {
   "viewport.left": {
     name: 'Initial viewport: Western Boundary (Longitude)',
     description: 'Zoom viewport: Top, left coordinate, Longitude. (numbers only)',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'viewport'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -481,7 +522,7 @@ const options = {
   "viewport.bottom": {
     name: 'Initial viewport: Eastern Boundary (Latitude)',
     description: 'Zoom viewport: Bottom, right coordinate, Latitude. (numbers only)',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'viewport'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -489,7 +530,7 @@ const options = {
   "viewport.right": {
     name: 'Initial viewport: Southern Boundary (Longitude)',
     description: 'Zoom viewport: Bottom, right coordinate, Longitude. (numbers only)',
-    showIf: { "topologySource": ["autodetect", "json"], "initialViewStrategy": 'viewport'},
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"], "initialViewStrategy": 'viewport'},
     settings: { useTextarea: true, rows: 1 },
     category: "Viewport Options",
     editor: "CustomTextArea",
@@ -539,7 +580,7 @@ const options = {
     name: 'Show Map Sidebar',
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
     category: "View Options",
-    showIf: { "topologySource": ["autodetect", "json"] },
+    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: true,
   },
 
@@ -644,17 +685,24 @@ for(let i=0; i<LAYER_LIMIT; i++){
     if(options[option].hasOwnProperty("defaultValue") && typeof(options[option].defaultValue) === "string"){
       options[option].defaultValue = options[option].defaultValue.replace("${i+1}", (i+1).toString());
     }
+    if(options[option].hasOwnProperty("defaultValue") && typeof(options[option].defaultValue) === "function"){
+      options[option].defaultValue = options[option].defaultValue(i);
+    }
     // reformat the keys in the "showIf" conditions if they exist
     // showIf: {"layer[${i}].visible": true}
     // becomes
     // showIf: { "layer[0].visible": true }
     if(options[option].hasOwnProperty("showIf")){
       let copy = {...options[option].showIf};
-      for(let showIfName in options[option].showIf){
+      for(let [showIfName, showIfValue] of Object.entries(options[option].showIf)) {
+        let accessor = showIfName;
         if(showIfName.indexOf("${i}") >= 0){
-          let accessor = showIfName.replace("${i}", i.toString())
+          accessor = showIfName.replace("${i}", i.toString())
           copy[accessor] = copy[showIfName];
           delete copy[showIfName]
+        }
+        if(typeof(showIfValue) === "string" && showIfValue.indexOf("${i}") >= 0){
+          copy[accessor] = showIfValue.replace("${i}", i.toString());
         }
       }
       options[option].showIf = copy;

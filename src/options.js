@@ -1,3 +1,4 @@
+import { LAYER_LIMIT } from "./constants.js"
 
 export const ViewStrategies = [
   {
@@ -253,3 +254,15 @@ export const defaultEdgeTooltip = `
     </span>
   </div>
 `;
+
+// Options for Layers up to the Limit
+export const LayerOptions = (()=>{
+  let options = [];
+  for(var i=1; i<LAYER_LIMIT; i++){
+    options.push({
+      label: `${i}`,
+      value: i
+    })
+  }
+  return options;
+})()

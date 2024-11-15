@@ -1,5 +1,3 @@
-export const LAYER_LIMIT = 3;
-
 export function getUrlSearchParams() {
   const search = window.location.search.substring(1);
   const searchParamsSegments = search.split('&');
@@ -159,7 +157,6 @@ try {
     testJsonSchema,
     resolvePath,
     setPath,
-    LAYER_LIMIT
   }
   module.exports.Utils = Utils;
   exports.Utils = Utils;

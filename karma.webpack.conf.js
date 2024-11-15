@@ -29,6 +29,7 @@ module.exports = function( config ) {
               '@emotion/react',
               '@emotion/css',
               //'@grafana/runtime', // this is commented in favor of the NormalModuleReplacementPlugin entry below.
+              //'@grafana/ui',      // this is commented in favor of the NormalModuleReplacementPlugin entry below.
               '@grafana/slate-react',
               'react-redux',
               'redux',
@@ -38,7 +39,6 @@ module.exports = function( config ) {
               'slate',
               'slate-plain-serializer',
               'prismjs',
-              '@grafana/ui',
               'jquery',
               'moment',
               'angular',
@@ -79,7 +79,8 @@ module.exports = function( config ) {
                 ],
             },
             plugins: [
-              new webpack.NormalModuleReplacementPlugin(/@grafana\/runtime/, "../test/react/LocationService.ts")
+              new webpack.NormalModuleReplacementPlugin(/@grafana\/runtime/, "../test/react/LocationService.ts"),
+              new webpack.NormalModuleReplacementPlugin(/@grafana\/ui/, "../../test/react/TextArea.tsx"),
             ],
             resolve: {
               extensions: ['.js', '.jsx', '.ts', '.tsx'],
