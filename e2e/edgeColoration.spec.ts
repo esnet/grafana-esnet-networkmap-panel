@@ -156,7 +156,7 @@ ecTest.describe('edge coloration', () => {
     const topologySourceDropdownSelector = `${topologySidebarCtrlGrp} [role="combobox"]`;
     const topologySourceDropdown = page.locator(topologySourceDropdownSelector).first();
     await topologySourceDropdown.click();
-    const topologySourceUrlDropdownItem = page.getByRole('listbox').locator('[aria-label*="Select option"]', { hasText: 'URL' });
+    const topologySourceUrlDropdownItem = page.getByRole('listbox').locator('[aria-label*="Select option"]', { hasText: 'Load config and all topologies from one URL' });
     await topologySourceUrlDropdownItem.click();
     // provide URL
     const fetchConfigUrlField = await page.locator('[id="Network Map Panel"]').getByRole('textbox').first();
