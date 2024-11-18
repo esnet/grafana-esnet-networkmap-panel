@@ -1,19 +1,6 @@
 import { CustomTextArea } from "../../src/testables.ts";
 import * as React from "react";
-import * as ReactDOM from "react-dom/client";
 import { act } from "react-dom/test-utils";
-
-function createReactRoot(){
-    window.reactRoot = null;
-    window.currentTextarea = null;
-    const rootId = "testRoot";
-    let rootElem = document.createElement("div");
-    rootElem.id = rootId;
-    document.body.appendChild(rootElem);
-    rootElem = document.getElementById(rootId);
-    window.reactRoot = ReactDOM.createRoot(rootElem);
-}
-createReactRoot();
 
 const inputTypes = [
     window.HTMLInputElement,
@@ -32,7 +19,7 @@ function triggerInputChange(node, value = '') {
     }
 };
 
-describe("Component CustomTextArea esmap", () => {
+describe("Component CustomTextArea", () => {
     beforeEach(async function(){
         let props = {
             item: {

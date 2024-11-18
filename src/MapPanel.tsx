@@ -5,8 +5,9 @@ import { sanitizeTopology } from './components/lib/topologyTools';
 import './components/MapCanvas.component.js';
 import { PubSub } from './components/lib/pubsub.js';
 import { locationService } from '@grafana/runtime';
-import { LAYER_LIMIT, setPath } from "./components/lib/utils.js"
+import { setPath } from "./components/lib/utils.js"
 import { signals } from "./signals.js"
+import * as constants from "./constants.js"
 
 export interface MapPanelProps extends PanelProps<MapOptions> {
   fieldConfig: any;
@@ -36,6 +37,7 @@ export class MapPanel extends Component<MapPanelProps> {
   subscriptionHandle: any;
   variableChangeHandle: any;
   _configurationUrl: any;
+  updateListener: any;
 
   constructor(props: MapPanelProps) {
     super(props);
@@ -55,27 +57,31 @@ export class MapPanel extends Component<MapPanelProps> {
     let self = this;
     return function (event) {
       let setLocation = {};
-      for (let i = 0; i < LAYER_LIMIT; i++) {
-        const srcVar = 'var-' + self.props.options.layers[i]['dashboardEdgeSrcVar'];
-        const dstVar = 'var-' + self.props.options.layers[i]['dashboardEdgeDstVar'];
-        const nodeVar = 'var-' + self.props.options.layers[i]['dashboardNodeVar'];
-        setLocation[srcVar] = null;
-        setLocation[dstVar] = null;
-        setLocation[nodeVar] = null;
+      for (let i = 0; i < (self?.props?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); i++) {
+        let layer = self.props.options.layers[i];
+        const keys = [
+          'dashboardEdgeSrcVar',
+          'dashboardEdgeDstVar',
+          'dashboardNodeVar'
+        ];
+        keys.forEach((k)=>{
+          if(layer?.[k]){
+            setLocation[`var-${layer[k]}`] = null;
+          }
+        })
       }
-      if (event && event.nodeA && event.nodeZ) {
+      if (event && event.type === 'edge' && event.selection?.nodeA && event.selection?.nodeZ) {
         const srcVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeSrcVar'];
-        setLocation[srcVariable] = event.nodeA;
+        setLocation[srcVariable] = event.selection.nodeA;
         const dstVariable = 'var-' + self.props.options.layers[event.layer]['dashboardEdgeDstVar'];
-        setLocation[dstVariable] = event.nodeZ;
+        setLocation[dstVariable] = event.selection.nodeZ;
       }
       if (event && event.type === 'node') {
         const dashboardVariable = 'var-' + self.props.options.layers[event.layer]['dashboardNodeVar'];
         setLocation[dashboardVariable] = event.selection.name;
       }
-
       locationService.partial(setLocation, false);
-    };
+    }
   }
 
   updateCenter = (centerData) => {
@@ -115,7 +121,7 @@ export class MapPanel extends Component<MapPanelProps> {
         options.layers[1].mapjson,
         options.layers[2].mapjson,
     ];
-    for(let i=0; i<LAYER_LIMIT; i++){
+    for(let i=0; i < (this.props?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); i++){
       if (mapData[i] != null) {
         layerUpdates[i] = JSON.stringify(sanitizeTopology(mapData[i]));
       }
@@ -125,7 +131,6 @@ export class MapPanel extends Component<MapPanelProps> {
     }
     this.props.onOptionsChange(update);
   };
-
   // A function to turn layers on or off. Takes in the layer and boolean value
   // Used in SideBar.tsx
   toggleLayer = (layer, value) => {
@@ -181,7 +186,7 @@ export class MapPanel extends Component<MapPanelProps> {
 
   resolveNodeThresholds(options){
     let thresholds: any[] = [];
-    for (let layer=0; layer < LAYER_LIMIT; layer++) {
+    for (let layer=0; layer < (this.props?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); layer++) {
       if (!options.layers[layer]) {
         continue;
       }
@@ -244,7 +249,7 @@ export class MapPanel extends Component<MapPanelProps> {
       "",
     ]
 
-    for(let layer=0; layer<LAYER_LIMIT; layer++){
+    for(let layer=0; layer < (this.props?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); layer++){
 
       const memoryTopology = JSON.stringify(this.mapCanvas?.current?.topology?.[layer] || null)
       const editorTopology = options.layers?.[layer]?.mapjson;
@@ -253,10 +258,10 @@ export class MapPanel extends Component<MapPanelProps> {
         topologyData[layer] = memoryTopology;
       } else if (editorTopology !== memoryTopology) {
         topologyData[layer] = editorTopology as string;
-      } 
+      }
 
       // here, we parse the topology data (as strings in topologyData)
-      // In the case that we have an error, we pass the topologyData along to 
+      // In the case that we have an error, we pass the topologyData along to
       // MapCanvas to figure out what went wrong.
       // @ts-ignore
 
@@ -328,6 +333,9 @@ export class MapPanel extends Component<MapPanelProps> {
         this.updateTopologyEditor(this.mapCanvas.current['topology']);
     });
 
+    this.mapCanvas.current.listen(signals.SELECTION_SET, this.setDashboardVariables() )
+    this.mapCanvas.current.listen(signals.SELECTION_CLEARED, this.setDashboardVariables() )
+
     this.updateMap();
     // @ts-ignore
     this.subscriptionHandle = eventBus.getStream({type: "panel-edit-finished"}).subscribe((e)=>{
@@ -385,7 +393,12 @@ export class MapPanel extends Component<MapPanelProps> {
         this.mapCanvas.current.refresh();
       }
       if(options.topologySource === "json"){
+        this.mapCanvas.current.pubsub.clearTopicCallbacks(signals.TOPOLOGY_UPDATED);
         this.mapCanvas.current.setTopology(JSON.parse(this.lastTopology));
+        this.mapCanvas.current.setOptions(options, true);
+        this.mapCanvas.current.listen(signals.TOPOLOGY_UPDATED,() => {
+          this.updateTopologyEditor(this.mapCanvas.current['topology']);
+        });
       }
     }
 

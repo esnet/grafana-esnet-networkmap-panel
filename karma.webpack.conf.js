@@ -28,7 +28,8 @@ module.exports = function( config ) {
               'emotion',
               '@emotion/react',
               '@emotion/css',
-              '@grafana/runtime',
+              //'@grafana/runtime', // this is commented in favor of the NormalModuleReplacementPlugin entry below.
+              //'@grafana/ui',      // this is commented in favor of the NormalModuleReplacementPlugin entry below.
               '@grafana/slate-react',
               'react-redux',
               'redux',
@@ -38,11 +39,8 @@ module.exports = function( config ) {
               'slate',
               'slate-plain-serializer',
               'prismjs',
-              '@grafana/ui',
               'jquery',
               'moment',
-              'lodash',
-              'rxjs',
               'angular',
             ],
             module: {
@@ -80,6 +78,10 @@ module.exports = function( config ) {
                     },
                 ],
             },
+            plugins: [
+              new webpack.NormalModuleReplacementPlugin(/@grafana\/runtime/, "../test/react/LocationService.ts"),
+              new webpack.NormalModuleReplacementPlugin(/@grafana\/ui/, "../../test/react/TextArea.tsx"),
+            ],
             resolve: {
               extensions: ['.js', '.jsx', '.ts', '.tsx'],
               // handle resolving "rootDir" paths
@@ -120,7 +122,6 @@ module.exports = function( config ) {
             "src/components/old/*"
         ],
         browsers: ["ChromeHeadless"],
-        singleRun: true,
         webpackMiddleware: { noInfo: true },
         browserNoActivityTimeout: 60000 // 60s; wait for webpack to compile :-(
     } );

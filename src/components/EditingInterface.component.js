@@ -2,7 +2,7 @@ import * as pubsub from './lib/pubsub.js';
 import * as utils from './lib/utils.js';
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js';
-import testIds from '../constants.js';
+import * as constants from '../constants.js';
 import { signals } from '../signals.js';
 import DOMPurify from './lib/purify.es.mjs';
 
@@ -242,7 +242,7 @@ class EditingInterface extends BindableHTMLElement {
     updateLayerNodes(layer, node, spliceIndex){
         const newTopology = [];
         var defaultLayer = {"nodes":[], "edges": []};
-        for(let i=0; i<utils.LAYER_LIMIT; i++){
+        for(let i=0; i<constants.LAYER_LIMIT; i++){
             newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
         }
         // coerce to int
@@ -271,7 +271,7 @@ class EditingInterface extends BindableHTMLElement {
 
         const newTopology = [];
         var defaultLayer = {"nodes":[], "edges": []};
-        for(let i=0; i<utils.LAYER_LIMIT; i++){
+        for(let i=0; i<constants.LAYER_LIMIT; i++){
             newTopology.push(JSON.parse(JSON.stringify(this.mapCanvas?._topology?.[i] || defaultLayer)));
         }
 
@@ -432,8 +432,10 @@ class EditingInterface extends BindableHTMLElement {
 
         let selectedLayerOptions = "";
 
-        for(let i=0; i<utils.LAYER_LIMIT; i++){
-            selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>Layer ${i+1}</option>`;
+        for(let i=0; i < (this.mapCanvas?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); i++){
+            selectedLayerOptions += `<option value='${i}' ${ parseInt(this._selectedLayer) === i && "selected" || ""}>
+                ${ this?.mapCanvas?._options?.layers?.[i]?.name || "Layer "+(i+1) }
+            </option>`;
         }
 
         this.shadow.innerHTML = `
@@ -588,7 +590,7 @@ class EditingInterface extends BindableHTMLElement {
             </style>
             <div id="dialog" class="dialog">
                 <!-- add node dialog -->
-                <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${testIds.map}">
+                <div class="dialog-form tight-form-func" id="add_node_dialog" data-testid="${constants.testIds.map}">
                   <form id='add_node_form'>
                     <table>
                       <tr>
@@ -703,18 +705,18 @@ class EditingInterface extends BindableHTMLElement {
                 </div>
             </div>
             <div class="button-overlay">
-              <div role='button' aria-label='Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='edge_edit_mode' data-testid='${testIds.editEdgeToggleBtn}'>
+              <div role='button' aria-label='Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='edge_edit_mode' data-testid='${constants.testIds.editEdgeToggleBtn}'>
                 Edit Edges: ${ this._edgeEditMode ? "On" : "Off" }
               </div>
-              <div role='button' aria-label='Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='node_edit_mode' data-testid='${testIds.editNodeToggleBtn}'>
+              <div role='button' aria-label='Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }' class='button edit-mode-only tight-form-func' id='node_edit_mode' data-testid='${constants.testIds.editNodeToggleBtn}'>
                 Edit Nodes: ${ this._nodeEditMode ? "On" : "Off" }
               </div>
             </div>
             <div class="tools-overlay">
-              <div class='button edit-mode-only tight-form-func' id='add_node' data-testid='${testIds.addNodeBtn}'>
+              <div class='button edit-mode-only tight-form-func' id='add_node' data-testid='${constants.testIds.addNodeBtn}'>
                 +&nbsp;Node
               </div>
-              <div class='button edit-mode-only tight-form-func' id='add_edge' data-testid='${testIds.addEdgeBtn}'>
+              <div class='button edit-mode-only tight-form-func' id='add_edge' data-testid='${constants.testIds.addEdgeBtn}'>
                 +&nbsp;Edge
               </div>
               <div class='button edit-mode-only tight-form-func' id='delete_selection' style='${ (this._selectedObject && this._selectedLayer !== null && this._selectedType) ? "display: block" : "display: none" }'>

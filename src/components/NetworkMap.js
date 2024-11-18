@@ -1,7 +1,7 @@
 import * as es from './lib/esmap.js';
 import * as pubsub from './lib/pubsub.js';
 import * as L from "./lib/leaflet-src.esm.js";
-import { LAYER_LIMIT } from './lib/utils.js'
+import * as constants from '../constants.js'
 import { signals } from "../signals.js";
 const PubSub = pubsub.PubSub;
 
@@ -95,7 +95,7 @@ export default class NetworkMap {
     // Draw the map json topology data!!! Currently supports up to 3 layers
     let emptyLayer = { "nodes": [], "edges": [] };
     let emptyTopology = [emptyLayer, emptyLayer, emptyLayer];
-    for(let i=0; i<LAYER_LIMIT; i++){
+    for(let i=0; i<(this.mapCanvas?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); i++){
       emptyTopology.push(emptyLayer);
       let layer = emptyLayer;
       if(this.mapCanvas.topology[i] && typeof(this.mapCanvas.topology[i]) != "string"){

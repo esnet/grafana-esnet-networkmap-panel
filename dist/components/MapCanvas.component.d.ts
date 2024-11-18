@@ -13,8 +13,12 @@ export class MapCanvas extends BindableHTMLElement {
     legendMinimized: boolean;
     userChangedMapFrame: boolean;
     optionsCache: {};
+    _layerTopologyCache: {};
     pubsub: pubsub.PrivateMessageBus;
     _trafficFormat: typeof utils.formatBits;
+    _remoteLayerLoaded: any[];
+    _remoteLayerErrors: any[];
+    _remoteLayerErrorMessages: any[];
     _optionsToWatch: string[];
     _urlMaskedOptions: {
         showLegend: string;
@@ -94,9 +98,13 @@ export class MapCanvas extends BindableHTMLElement {
     setEditMode(mode: any): void;
     enableScrolling(): void;
     disableScrolling(): void;
-    maybeFetchOptions(): void;
-    updateMapOptions(changedOptions: any): void;
+    fetchAndCacheConfigurationUrl(): void;
+    _remoteLoadError: boolean | undefined;
+    _remoteLoadErrorMessage: string | undefined;
+    fetchAndCacheLayerTopologyUrls(): void;
     shadow: HTMLDivElement | null | undefined;
+    maybeFetchOptionsAndTopology(): void;
+    updateMapOptions(changedOptions: any): void;
     updateMapTopology(newTopology: any): void;
     updateMapDimensions(newDimensions: any): void;
     recalculateMapZoom(): void;

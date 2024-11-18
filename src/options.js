@@ -1,3 +1,4 @@
+import { LAYER_LIMIT } from "./constants.js"
 
 export const ViewStrategies = [
   {
@@ -55,13 +56,17 @@ export const TopologySources = [
     value: "json"
   },
   {
-    label: "Load from URL",
-    value: "url"
-  },
-  {
     label: "Autodetect from Data",
     value: "autodetect"
-  }
+  },
+  {
+    label: "Load separate URLs for each layer",
+    value: "layerurls"
+  },
+  {
+    label: "Load config and all topologies from one URL",
+    value: "url"
+  },
 ]
 
 export const PoliticalBoundaryTilesets = [
@@ -249,3 +254,15 @@ export const defaultEdgeTooltip = `
     </span>
   </div>
 `;
+
+// Options for Layers up to the Limit
+export const LayerOptions = (()=>{
+  let options = [];
+  for(var i=1; i<LAYER_LIMIT; i++){
+    options.push({
+      label: `${i}`,
+      value: i
+    })
+  }
+  return options;
+})()

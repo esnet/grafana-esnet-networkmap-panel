@@ -22,6 +22,7 @@ module.exports = function( config ) {
             { pattern: "src/**/*.js", type: "module", included: true, served: true },
             { pattern: "src/**/*.mjs", type: "module", included: true, served: true },
         ],
+        reporters: ['dots'],
         exclude: [
             "src/components/lib/leaflet.js",
             "src/components/old/*"

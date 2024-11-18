@@ -1,15 +1,28 @@
 import * as pubsub from '../src/components/lib/pubsub.js';
 import * as utils from './utils.js';
-import { LAVENDER, EXPECTED_NODE_MOUSEOVER_REGEX, TOPOLOGY, OPTIONS } from "./constants.js";
+import {
+  LAVENDER,
+  EXPECTED_NODE_MOUSEOVER_REGEX,
+  TOPOLOGY,
+  OPTIONS,
+  TRAFFIC_DATA,
+  AUTODETECT_TRAFFIC_DATA
+} from "./constants.js";
 import { signals } from "../src/signals.js";
 const PubSub = pubsub.PubSub;
 
+function skip(){
+  return
+}
+
 describe( "Class MapCanvas", () => {
-    afterEach(async function(){
-        var canvas = document.querySelector("esnet-map-canvas");
-        canvas.remove();
+    afterEach(function(){
+        var canvases = document.querySelectorAll("esnet-map-canvas");
+        canvases.forEach((canvas)=>{
+          canvas.remove();
+        })
     })
-    beforeEach(async function(){
+    beforeEach(function(){
         var elem = document.createElement("esnet-map-canvas");
         elem.setAttribute('width', 800);
         elem.setAttribute('height', 400);
@@ -423,7 +436,7 @@ describe( "Class MapCanvas", () => {
     it("should allow users to style edges in all layers, even when some are not visible", ()=>{
       // enter editing mode
       var canvas = document.querySelector("esnet-map-canvas");
-      var newTopology = canvas.topology;
+      var newTopology = JSON.parse(JSON.stringify(canvas.topology));
       newTopology[1] = newTopology[0];
       newTopology[2] = newTopology[0];
       canvas.setTopology(newTopology);
@@ -945,6 +958,7 @@ describe( "Class MapCanvas", () => {
     })
     it("should not animate nodes if the appropriate option is set", ()=>{
       let canvas = document.querySelector("esnet-map-canvas");
+      canvas.setTopology(JSON.parse(JSON.stringify(TOPOLOGY)));
       let node = canvas.querySelector(".node-A circle");
       let style = window.getComputedStyle(node);
       let originalPos = node.getBoundingClientRect();
@@ -1015,6 +1029,36 @@ describe( "Class MapCanvas", () => {
         var canvas = document.querySelector("esnet-map-canvas");
 
         var newOptions = JSON.parse(JSON.stringify(canvas.options));
+        var newTopology = JSON.parse(JSON.stringify(canvas.topology));
+
+        newTopology.push({
+          "edges": [{"name":"A--B","meta":{
+              "endpoint_identifiers":{"names":["A","B"]}},
+              "coordinates":[[39.02,-105.99],[35.81,-101.77],[34.59,-96.06]],
+              "children":[],
+              "azColor":LAVENDER,
+              "zaColor":LAVENDER,
+              "layer":1,
+          }],
+          "nodes": [{
+              "name":"A",
+              "meta":{},
+              "coordinate":[39.027718840211605,-105.99609375000001],
+              "color":LAVENDER,
+              "inValue": 1234567890,
+              "outValue": 9876543210,
+            },
+            {
+              "name":"B",
+              "meta":{},
+              "coordinate":[34.59704151614417,-96.064453125],
+              "color":LAVENDER,
+              "inValue": 3213213213,
+              "outValue": 31313131313,
+          }]
+        })
+        canvas.setTopology(newTopology);
+
         newOptions.multiLayerNodeSnap = true;
         newOptions.layers[1].visible = true;
         canvas.setOptions(newOptions);
@@ -1529,5 +1573,128 @@ describe( "Class MapCanvas", () => {
       canvas.listen(signals.TOPOLOGY_LOAD_FAILURE, topologyFailureCallback)
       canvas.setOptions(newOptions);
 
+    });
+    it("should have an 'autodetect topology' mode", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      let newOptions = JSON.parse(JSON.stringify(canvas.options));
+      newOptions.topologySource = "autodetect";
+      newOptions.layers[0].autodetect = {
+        autodetectTopology: true,
+        srcNameColumn: "src_name",
+        srcLatitudeColumn: "src_latitude",
+        srcLongitudeColumn: "src_longitude",
+        dstNameColumn: "dst_name",
+        dstLatitudeColumn: "dst_latitude",
+        dstLongitudeColumn: "dst_longitude"
+      }
+      let trafficData = AUTODETECT_TRAFFIC_DATA;
+      canvas.setTraffic(trafficData);
+      canvas.setOptions(newOptions);
+    });
+    it("should accurately account for bits in/out of nodes", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      canvas.setTopology(TOPOLOGY);
+      canvas.setOptions(OPTIONS);
+      let trafficData = TRAFFIC_DATA;
+      canvas.setTraffic(trafficData);
+      let node = canvas.querySelector("g.node > g.scale-container > circle");
+      var originalNodePos = node.getBoundingClientRect();
+      let over = new Event("mouseover", {"bubbles": true, clientX: originalNodePos.x, clientY: originalNodePos.y, view: window});
+      node.dispatchEvent(over);
+      const tooltip = canvas.querySelector("#sidebar-tooltip");
+      expect(tooltip.innerText).toBeTruthy();
+      expect(tooltip.innerText).toContain("101 b/s");
+    });
+    skip("should smoothly toggle between configuration loaded from URL and from local JSON", (done)=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      let urlOptions = JSON.parse(JSON.stringify(OPTIONS));
+      let targetUrl = "http://test.example.com/path/to/topology";
+      urlOptions.topologySource = "url";
+      urlOptions.configurationUrl = targetUrl;
+      let jsonOptions = JSON.parse(JSON.stringify(OPTIONS));
+      jsonOptions.topologySource = "json";
+      let failures = {};
+
+      const topologyFailureCallback = (url)=>{
+        failures[url] = true;
+        expect(failures.hasOwnProperty(targetUrl)).toBeTruthy()
+
+        canvas.setTopology(JSON.parse(JSON.stringify(TOPOLOGY)));
+        canvas.setOptions(jsonOptions);
+      }
+
+      const topologySuccessCallback = () => {
+        var canvas = document.querySelector("esnet-map-canvas");
+        canvas.render();
+        let elems = canvas.querySelector(".node");
+        expect(elems).toBeTruthy();
+        expect(elems.hasOwnProperty("length")).toBeTruthy();
+        expect(elems.length).toBeTruthy();
+        done();
+      }
+
+      canvas.listen(signals.TOPOLOGY_LOAD_FAILURE, topologyFailureCallback);
+      canvas.listen(signals.OPTIONS_UPDATED, topologySuccessCallback);
+      canvas.setOptions(urlOptions);
+
+
+    })
+    it("should have a mode to load discreet topologies per layer from URLs", (done)=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      let newOptions = JSON.parse(JSON.stringify(canvas.options));
+      newOptions.topologySource = "layerurls";
+      let targetUrl = "data:text/plain;charset=utf-8;base64,eyJlZGdlcyI6IFsNCiAgew0KICAgICJuYW1lIjogIkEtLUIiLA0KICAgICJtZXRhIjogeyAiZW5kcG9pbnRfaWRlbnRpZmllcnMiOiB7Im5hbWVzIjogWyJBIiwgIkIiXSB9IH0sDQogICAgImNvb3JkaW5hdGVzIjogW1szOSwgLTk4XSwgWzM5LCAtOTddXQ0KICB9LA0KICB7DQogICAgIm5hbWUiOiAiQS0tQyIsDQogICAgIm1ldGEiOiB7ICJlbmRwb2ludF9pZGVudGlmaWVycyI6IHsibmFtZXMiOiBbIkEiLCAiQyJdIH0gfSwNCiAgICAiY29vcmRpbmF0ZXMiOiBbWzM5LCAtOThdLCBbMzgsIC05N11dDQogIH0NCl0sDQoibm9kZXMiOiBbDQogIHsibmFtZSI6ICJBIiwgIm1ldGEiOiB7InN2ZyI6ICIiIH0sICJjb29yZGluYXRlIjogWzM5LCAtOThdfSwNCiAgeyJuYW1lIjogIkIiLCAibWV0YSI6IHsic3ZnIjogIiIgfSwgImNvb3JkaW5hdGUiOiBbMzksIC05N119LA0KICB7Im5hbWUiOiAiQyIsICJtZXRhIjogeyJzdmciOiAiIiB9LCAiY29vcmRpbmF0ZSI6IFszOCwgLTk3XX0NCl0gfQ==";
+      let targetUrl2 = "http://test.example.com/path/to/layertopology2";
+      newOptions.layers[0].remoteUrl = targetUrl;
+      newOptions.layers[1].remoteUrl = targetUrl2;
+      let failures = {};
+      let successes = {};
+
+      const topologySuccessCallback = (data)=>{
+        successes[data.url] = true;
+        if(successes.hasOwnProperty(targetUrl) &&
+          failures.hasOwnProperty(targetUrl2)){
+          done();
+        }
+      }
+      const topologyFailureCallback = (data)=>{
+        failures[data.url] = true;
+        if(successes.hasOwnProperty(targetUrl) &&
+          failures.hasOwnProperty(targetUrl2)){
+          done();
+        }
+      }
+
+      canvas.listen(signals.LAYER_LOAD_SUCCESS, topologySuccessCallback);
+      canvas.listen(signals.LAYER_LOAD_FAILURE, topologyFailureCallback);
+      canvas.setOptions(newOptions)
+    })
+    it("should support more than 3 layers", ()=>{
+      var canvas = document.querySelector("esnet-map-canvas");
+      let newOptions = JSON.parse(JSON.stringify(OPTIONS));
+      newOptions.layerLimit = 7;
+      for(let i=0; i<4; i++){
+        newOptions.layers.push({
+            "visible":true,
+            "endpointId":"names",
+            "nodeHighlight":"red",
+            "nodeWidth":6.5,
+            "edgeWidth":2,
+            "pathOffset":1.5,
+            "name":"Peer Topology",
+            "legend":true,
+        })
+      }
+      canvas.setTopology([
+        {"nodes": [], "edges": []},
+        {"nodes": [], "edges": []},
+        {"nodes": [], "edges": []},
+        {"nodes": [], "edges": []},
+        {"nodes": [], "edges": []},
+        {"nodes": [{"name": "Test Node Layer 6", "coordinate": [39, -98], "meta": {"svg": ""} }], "edges": []},
+      ])
+      canvas.setOptions(newOptions);
+      let node = canvas.querySelector(".node");
+      expect(node).toBeTruthy();
     })
 } );

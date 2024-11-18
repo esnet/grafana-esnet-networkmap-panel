@@ -1,5 +1,6 @@
-export default testIds;
-declare namespace testIds {
+export const LAYER_LIMIT: 20;
+export const DEFAULT_LAYER_LIMIT: 3;
+export namespace testIds {
     let sidebar: string;
     let map: string;
     let zoomInBtn: string;

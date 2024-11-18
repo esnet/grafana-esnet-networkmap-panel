@@ -1,5 +1,5 @@
 import { expect, Locator, Page } from '@playwright/test';
-import testIds from '../src/constants';
+import { testIds } from '../src/constants';
 import { pluginTest } from './plugin-def';
 import { getHostInfo } from './config.info';
 import credentials from '../playwright/.auth/credentials.json';

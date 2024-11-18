@@ -21,6 +21,7 @@ export interface LayerOptions {
   nodeThresholds: any;
   nodeNameMatchField: string;
   nodeValueField: string;
+  remoteUrl?: string;
 }
 
 export interface MapOptions {
@@ -28,6 +29,7 @@ export interface MapOptions {
   background: string;
   initialViewStrategy: string;
   latitudeVar: string;
+  layerLimit: number;
   longitudeVar: string;
   showSidebar: boolean;
   showViewControls: boolean;

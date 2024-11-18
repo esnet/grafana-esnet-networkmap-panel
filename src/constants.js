@@ -1,4 +1,7 @@
-const testIds = {
+export const LAYER_LIMIT = 20;
+export const DEFAULT_LAYER_LIMIT=3;
+
+export const testIds = {
     "sidebar": "867730",
     "map": "b28582",
     "zoomInBtn": "ad1cfd",
@@ -9,4 +12,3 @@ const testIds = {
     "editNodeToggleBtn": "f8f403"
 };
 
-export default testIds;

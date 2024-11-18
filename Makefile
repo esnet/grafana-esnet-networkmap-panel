@@ -19,6 +19,11 @@ prod:
 .PHONY: build
 build:
 	yarn test
+	yarn test:react
+	@echo "Waiting for container to spin up..."
+	@sleep $(SPINUP_SLEEP_T)
+	@echo "Starting E2E Tests..."
+	yarn e2e
 	yarn build
 	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
 	yarn run "build_dts"

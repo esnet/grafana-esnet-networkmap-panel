@@ -1,5 +1,5 @@
 import * as pubsub from './lib/pubsub.js';
-import * as utils from "./lib/utils.js";
+import * as constants from "../constants.js";
 const PubSub = pubsub.PubSub;
 import { BindableHTMLElement } from './lib/rubbercement.js';
 import { signals } from "../signals.js";
@@ -53,6 +53,23 @@ class SideBar extends BindableHTMLElement {
     }
   }
 
+  renderValidityMessage(layer){
+    if(this.mapCanvas.options['topologySource'] == "json"){
+      if(this.mapCanvas?.jsonResults?.[layer]?.[0]){
+        return "JSON Schema valid"
+      } else {
+        return `JSON Schema invalid${this.mapCanvas.jsonResults?.[layer]?.[1] ? ": " + this.mapCanvas.jsonResults[layer][1] : "" }`
+      }
+    }
+
+    if(this.mapCanvas.options['topologySource'] == "layerurls"){
+      if(this.mapCanvas?._remoteLayerErrors[layer]){
+        return `${this.mapCanvas._remoteLayerErrorMessages[layer]}`
+      }
+    }
+    return "";
+  }
+
   render() {
     if (!this.shadow) {
         this.shadow = document.createElement("div");
@@ -63,7 +80,7 @@ class SideBar extends BindableHTMLElement {
 
     let sidebarLayerContent = "";
 
-    for (let i = 0; i < utils.LAYER_LIMIT; i++) {
+    for (let i = 0; i < (this.mapCanvas?.options?.layerLimit || constants.DEFAULT_LAYER_LIMIT); i++) {
       if (!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i] || !this.mapCanvas.jsonResults) {
         continue;
       }
@@ -74,7 +91,7 @@ class SideBar extends BindableHTMLElement {
         </label>
         <text class="legend-text">${ this.mapCanvas.options.layers[i].name || "Layer " + (i+1) }</text>
         <div class="legend-text small" style="${this.mapCanvas.editingInterface && !this.mapCanvas.editingInterface.editMode ? 'display: none' : "" }">
-          JSON Schema: ${ (this.mapCanvas.jsonResults && this.mapCanvas.jsonResults[i] && this.mapCanvas.jsonResults[i][0] ) ? "valid" : `invalid${this.mapCanvas.jsonResults?.[i]?.[1] ? ": " + this.mapCanvas.jsonResults[i][1] : "" }` }
+          ${this.renderValidityMessage(i)}
         </div>
       </div>`
     }
@@ -207,7 +224,7 @@ class SideBar extends BindableHTMLElement {
 
     // attach event handlers and element events via bindings
     var bindings = {}
-    for(let i=0; i<utils.LAYER_LIMIT; i++){
+    for(let i=0; i<constants.LAYER_LIMIT; i++){
       if(!this.mapCanvas.options.layers || !this.mapCanvas.options.layers[i]){
         continue;
       }
