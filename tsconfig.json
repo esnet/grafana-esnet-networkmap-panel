@@ -12,5 +12,6 @@
     "sourceMap": true,
     "outDir": "$$ts-jest$$"
   },
+  "compileOnSave": true,
   "exclude": ["public", "dist", "node_modules", "src/components/lib"]
 }
