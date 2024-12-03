@@ -17,13 +17,7 @@ prod:
 	make build
 
 .PHONY: build
-build:
-	yarn test
-	yarn test:react
-	@echo "Waiting for container to spin up..."
-	@sleep $(SPINUP_SLEEP_T)
-	@echo "Starting E2E Tests..."
-	yarn e2e
+build: test 
 	yarn build
 	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
 	yarn run "build_dts"
@@ -47,32 +41,27 @@ compose:
 	# get instances info
 	sleep 2
 	docker inspect $(CONTAINER_NAME) > $(PROJECT_DIR)/e2e/grafana-docker.json
+
 .PHONY: test
-test: compose
+test: compose test-component test-e2e
+
+.PHONY: test-component
+test-component:
 	@echo "Starting component tests..."
 	yarn test
 	yarn test:react
-	@echo "Waiting for container to spin up..."
-	@sleep $(SPINUP_SLEEP_T)
-	@echo "Starting E2E Tests..."
-	yarn e2e
+	rm -R test/dist/*
 
-.PHONY: test\:component
-test\:component:
-	@echo "Starting component tests..."
-	yarn test
-	yarn test:react
-
-.PHONY: test\:e2e
-test\:e2e: compose
+.PHONY: test-e2e
+test-e2e: compose
 	# run e2e tests
 	@echo "Waiting for container to spin up..."
 	@sleep $(SPINUP_SLEEP_T)
 	@echo "Starting E2E Tests..."
 	yarn run e2e
 
-.PHONY: test\:ui
-test\:ui: compose
+.PHONY: test-ui
+test-ui: compose
 	# run e2e tests, but with ui
 	@echo "Starting E2E tests in Playwright UI..."
 	yarn run e2e:ui
