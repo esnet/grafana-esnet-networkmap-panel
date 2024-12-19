@@ -1697,4 +1697,63 @@ describe( "Class MapCanvas", () => {
       let node = canvas.querySelector(".node");
       expect(node).toBeTruthy();
     })
+    it("should allow users to show and hide the sidebar even when loading the full configuration from a url", ()=>{
+      let canvas = document.querySelector("esnet-map-canvas");
+      let newOptions = JSON.parse(JSON.stringify(canvas.options));
+
+      // this data url is a valid base-64 encoded terranova-style response.
+      let targetUrl = "data:text/plain;charset=utf-8;base64,ew0KICAiaW5pdGlhbFZpZXdTdHJhdGVneSI6ICJzdGF0aWMiLA0KICAibGF0aXR1ZGVWYXIiOiBudWxsLA0KICAibG9uZ2l0dWRlVmFyIjogbnVsbCwNCiAgInZpZXdwb3J0Ijogew0KICAgICJjZW50ZXIiOiB7DQogICAgICAibGF0IjogMzguOTU5LA0KICAgICAgImxuZyI6IC05Ny45OTgNCiAgICB9LA0KICAgICJ0b3AiOiBudWxsLA0KICAgICJsZWZ0IjogbnVsbCwNCiAgICAiYm90dG9tIjogbnVsbCwNCiAgICAicmlnaHQiOiBudWxsLA0KICAgICJ6b29tIjogNA0KICB9LA0KICAiYmFja2dyb3VuZCI6ICIjREREREREIiwNCiAgInRpbGVzZXQiOiB7DQogICAgImdlb2dyYXBoaWMiOiAiYXJjZ2lzIiwNCiAgICAiYm91bmRhcmllcyI6IG51bGwsDQogICAgImxhYmVscyI6IG51bGwNCiAgfSwNCiAgImVkaXRNb2RlIjogZmFsc2UsDQogICJzaG93U2lkZWJhciI6IGZhbHNlLA0KICAic2hvd1ZpZXdDb250cm9scyI6IHRydWUsDQogICJzaG93TGVnZW5kIjogZmFsc2UsDQogICJsZWdlbmRDb2x1bW5MZW5ndGgiOiAzLA0KICAibGVnZW5kUG9zaXRpb24iOiAiYm90dG9tTGVmdCIsDQogICJsZWdlbmREZWZhdWx0QmVoYXZpb3IiOiAibWluaW1pemVkIiwNCiAgImVuYWJsZVNjcm9sbGluZyI6IHRydWUsDQogICJlbmFibGVFZGl0aW5nIjogdHJ1ZSwNCiAgImVuYWJsZU5vZGVBbmltYXRpb24iOiB0cnVlLA0KICAiZW5hYmxlRWRnZUFuaW1hdGlvbiI6IHRydWUsDQogICJ0aHJlc2hvbGRzIjogW10sDQogICJ6SW5kZXhCYXNlIjogMTAsDQogICJsYXllcnMiOiBbDQogICAgew0KICAgICAgInZpc2libGUiOiB0cnVlLA0KICAgICAgIm5hbWUiOiAiTGF5ZXIgMSIsDQogICAgICAiY29sb3IiOiAiI0FBQUFGRiIsDQogICAgICAiZWRnZVdpZHRoIjogMi41LA0KICAgICAgInBhdGhPZmZzZXQiOiAxLjc1LA0KICAgICAgIm5vZGVXaWR0aCI6IDYuNSwNCiAgICAgICJqc29uRnJvbVVybCI6IGZhbHNlLA0KICAgICAgIm1hcGpzb24iOiAieyJub2RlcyI6W3sibmFtZSI6IkIiLCJjb2xvciI6IiNBQUFBRkYiLCJtZXRhIjp7ImRpc3BsYXlfbmFtZSI6IiIsInN2ZyI6IjxzdmcgeT1cIi01XCIgeD1cIi01XCIgd2lkdGg9XCIxMFwiIGhlaWdodD1cIjEwXCIgdmlld0JveD1cIi01LjUgLTUuNSAxMSAxMVwiPjxjaXJjbGUgcj1cIjVcIj48L2NpcmNsZT48L3N2Zz48dGV4dCBzdHlsZT1cImZvbnQtc2l6ZToxMnB4OyBmaWx0ZXI6IGRyb3Atc2hhZG93KDBweCAwcHggMXB4IHJnYmEoMjU1LDI1NSwyNTUsMS4wKSk7XCIgc3Ryb2tlPVwibm9uZVwiIGZpbGw9XCIjMTExMTExXCIgeT1cIjNcIiB4PVwiLTE4XCI+QjwvdGV4dD4iLCJ0ZW1wbGF0ZSI6IiJ9LCJjb29yZGluYXRlIjpbNDQuMDg4LC0xMDguNjMzXSwiY2hpbGRyZW4iOltdLCJzb3J0IjowLCJwYXJlbnRzIjpbXX0seyJuYW1lIjoiQSIsImNvbG9yIjoiI0FBQUFGRiIsIm1ldGEiOnsiZGlzcGxheV9uYW1lIjoiIiwic3ZnIjoiPHN2ZyB5PVwiLTVcIiB4PVwiLTVcIiB3aWR0aD1cIjEwXCIgaGVpZ2h0PVwiMTBcIiB2aWV3Qm94PVwiLTUuNSAtNS41IDExIDExXCI+PGNpcmNsZSByPVwiNVwiPjwvY2lyY2xlPjwvc3ZnPjx0ZXh0IHN0eWxlPVwiZm9udC1zaXplOjEycHg7IGZpbHRlcjogZHJvcC1zaGFkb3coMHB4IDBweCAxcHggcmdiYSgyNTUsMjU1LDI1NSwxLjApKTtcIiBzdHJva2U9XCJub25lXCIgZmlsbD1cIiMxMTExMTFcIiB5PVwiM1wiIHg9XCI4XCI+QTwvdGV4dD4iLCJ0ZW1wbGF0ZSI6IiJ9LCJjb29yZGluYXRlIjpbNDMuODM1LC05Mi44MTNdLCJjaGlsZHJlbiI6W10sInNvcnQiOjAsInBhcmVudHMiOltdfSx7Im5hbWUiOiJDIiwiY29sb3IiOiIjQUFBQUZGIiwibWV0YSI6eyJkaXNwbGF5X25hbWUiOiIiLCJzdmciOiI8c3ZnIHk9XCItNVwiIHg9XCItNVwiIHdpZHRoPVwiMTBcIiBoZWlnaHQ9XCIxMFwiIHZpZXdCb3g9XCItNS41IC01LjUgMTEgMTFcIj48Y2lyY2xlIHI9XCI1XCI+PC9jaXJjbGU+PC9zdmc+PHRleHQgc3R5bGU9XCJmb250LXNpemU6MTJweDsgZmlsdGVyOiBkcm9wLXNoYWRvdygwcHggMHB4IDFweCByZ2JhKDI1NSwyNTUsMjU1LDEuMCkpO1wiIHN0cm9rZT1cIm5vbmVcIiBmaWxsPVwiIzExMTExMVwiIHk9XCIzXCIgeD1cIjhcIj5DPC90ZXh0PiIsInRlbXBsYXRlIjoiIn0sImNvb3JkaW5hdGUiOlszNC40NTIsLTEwMC4xOTVdLCJjaGlsZHJlbiI6W10sInNvcnQiOjAsInBhcmVudHMiOltdfV0sImVkZ2VzIjpbeyJuYW1lIjoiQS0tQiIsIm1ldGEiOnsiZW5kcG9pbnRfaWRlbnRpZmllcnMiOnsibmFtZXMiOlsiQSIsIkIiXX19LCJsYXllciI6IjAiLCJhekNvbG9yIjoiI0FBQUFGRiIsInphQ29sb3IiOiIjQUFBQUZGIiwiY29vcmRpbmF0ZXMiOltbNDMuODM0NTI2NzgyMjM2ODQsLTkyLjgxMjUwMDAwMDAwMDAxXSxbNDQuMDg3NTg1MDI4MjQ1MTgsLTEwOC42MzI4MTI1MDAwMDAwMV1dLCJjaGlsZHJlbiI6W10sIm5vZGVBIjoiQSIsIm5vZGVaIjoiQiIsInBvaW50cyI6W1s2MDMsMjQxXSxbNjkzLDI0M11dLCJyZWplY3RlZCI6MCwiY29udHJvbFBvaW50UGF0aCI6Ik02OTMsMjQzTDYwMywyNDEiLCJhelBhdGgiOiJNNjkyLjk3Nzc4MzI2MjcxNDksMjQzLjk5OTc1MzE3NzgzMTYyTDYwMi45NjY2Nzk2OTE1OTQ0LDI0MS45OTk0NDQ3MjQzNTgzNyIsInphUGF0aCI6Ik02MDMuMDIyMjE2NzM3Mjg1MSwyNDAuMDAwMjQ2ODIyMTY4MzhMNjkzLjAzMzMyMDMwODQwNTYsMjQyLjAwMDU1NTI3NTY0MTYzIiwic29ydCI6MX0seyJuYW1lIjoiQS0tQyIsIm1ldGEiOnsiZW5kcG9pbnRfaWRlbnRpZmllcnMiOnsibmFtZXMiOlsiQSIsIkMiXX19LCJsYXllciI6IjAiLCJhekNvbG9yIjoiI0FBQUFGRiIsInphQ29sb3IiOiIjQUFBQUZGIiwiY29vcmRpbmF0ZXMiOltbNDMuODM0NTI2NzgyMjM2ODQsLTkyLjgxMjUwMDAwMDAwMDAxXSxbMzQuNDUyMjE4NDcyODI2NTY2LC0xMDAuMTk1MzEyNTAwMDAwMDFdXSwiY2hpbGRyZW4iOltdLCJub2RlQSI6IkEiLCJub2RlWiI6IkMiLCJwb2ludHMiOltbNjUxLDMxMl0sWzY5MywyNDNdXSwicmVqZWN0ZWQiOjAsImNvbnRyb2xQb2ludFBhdGgiOiJNNjkzLDI0M0w2NTEsMzEyIiwiYXpQYXRoIjoiTTY5My44NTQxOTg1NTU2MTQ0LDI0My41MTk5NDY5NDY4OTU3NEw2NTEuODQ3Njk2ODE4ODgzMywzMTIuNTMwNDgxMDExMjEwODQiLCJ6YVBhdGgiOiJNNjUwLjE0NTgwMTQ0NDM4NTYsMzExLjQ4MDA1MzA1MzEwNDI2TDY5Mi4xNTIzMDMxODExMTY3LDI0Mi40Njk1MTg5ODg3ODkxMyIsInNvcnQiOjF9LHsibmFtZSI6IkItLUMiLCJtZXRhIjp7ImVuZHBvaW50X2lkZW50aWZpZXJzIjp7Im5hbWVzIjpbIkIiLCJDIl19fSwibGF5ZXIiOiIwIiwiYXpDb2xvciI6IiNBQUFBRkYiLCJ6YUNvbG9yIjoiI0FBQUFGRiIsImNvb3JkaW5hdGVzIjpbWzQ0LjA4NzU4NTAyODI0NTE4LC0xMDguNjMyODEyNTAwMDAwMDFdLFszNC40NTIyMTg0NzI4MjY1NjYsLTEwMC4xOTUzMTI1MDAwMDAwMV1dLCJjaGlsZHJlbiI6W10sIm5vZGVBIjoiQiIsIm5vZGVaIjoiQyIsInBvaW50cyI6W1s2NTEsMzEyXSxbNjAzLDI0MV1dLCJyZWplY3RlZCI6MCwiY29udHJvbFBvaW50UGF0aCI6Ik02MDMsMjQxTDY1MSwzMTIiLCJhelBhdGgiOiJNNjAzLjgyODQ0MjY0ODk1MDcsMjQwLjQzOTkyNjA5NjQ4NDA0TDY1MS44MzQ5MjA4NzI3NDUzLDMxMS40NDk2MzAwMDA1ODY3IiwiemFQYXRoIjoiTTY1MC4xNzE1NTczNTEwNDkzLDMxMi41NjAwNzM5MDM1MTU5Nkw2MDIuMTY1MDc5MTI3MjU0NywyNDEuNTUwMzY5OTk5NDEzMyIsInNvcnQiOjF9XSwibGF5ZXIiOiJ0YWlsIiwibmFtZSI6Ik51bGwgRGF0YXNldCIsInBhdGhMYXlvdXQiOnsidHlwZSI6ImN1cnZlQ2FyZGluYWwiLCJ0ZW5zaW9uIjowLjZ9fSIsDQogICAgICAibWFwanNvblVybCI6ICJodHRwczovL3RlcnJhbm92YS1pbnRlcm5hbC5lcy5uZXQvdGVycmFub3ZhL2FwaS92MS9vdXRwdXQvZGF0YXNldC9MbGtkQ3VZL2dlb2dyYXBoaWMvbGl2ZS8/dGVtcGxhdGU9WGNqNmV5WCIsDQogICAgICAiZW5kcG9pbnRJZCI6ICJuYW1lcyIsDQogICAgICAiaW5ib3VuZFZhbHVlRmllbGQiOiAiYXRveiIsDQogICAgICAib3V0Ym91bmRWYWx1ZUZpZWxkIjogInp0b2EiLA0KICAgICAgInNyY0ZpZWxkIjogInNyYyIsDQogICAgICAiZHN0RmllbGQiOiAiZHN0IiwNCiAgICAgICJsZWdlbmQiOiB0cnVlLA0KICAgICAgIm5vZGVIaWdobGlnaHQiOiAiI0FBRkZBQSINCiAgICB9DQogIF0NCn0=";
+
+      newOptions.configurationUrl = targetUrl;
+      newOptions.showSidebar = true;
+
+      canvas.setOptions(newOptions);
+
+      let node = canvas.querySelector(".esmap-sidebar");
+      expect(node).toBeTruthy();
+
+      newOptions = JSON.parse(JSON.stringify(canvas.options));
+      newOptions.showSidebar = false;
+
+      canvas.setOptions(newOptions);
+
+      node = canvas.querySelector(".esmap-sidebar");
+      expect(node).not.toBeTruthy();
+    });
+    it("should color nodes when there's a matching edge datapoint, even without a matching edge", ()=>{
+      let canvas = document.querySelector("esnet-map-canvas");
+      let newOptions = JSON.parse(JSON.stringify(canvas.options));
+
+      newOptions.layers[0].nodeThresholds = [{"value": 0, "color": "#E04040"}, {"value": 200000000, "color": "#5bb436"}]
+      let traffic = [
+          {"src_latitude":39,"src_longitude":-98,"src_name":"NodeA","in_bits": 16000000, "out_bits": 160000000},
+          {"src_latitude":42,"src_longitude":-102,"src_name":"NodeB","in_bits": 320000000, "out_bits": 32000000},
+      ]; 
+      let topology = [{
+          "edges": [],
+          "nodes": [
+              { "name": "NodeA", "coordinate": [39, -98], "meta": { 
+                      "svg": "<g><circle r='15' /><text x='20' y='4' stroke='none' fill='black'>NodeA</text></g>" 
+                  } 
+              },
+              { "name": "NodeB", "coordinate": [42, -102], "meta": { 
+                      "svg": "<g><circle r='15' /><text x='20' y='4' stroke='none' fill='black'>NodeB</text></g>" 
+                  } 
+              }
+          ]
+      }];
+
+      canvas.setOptions(newOptions);
+      canvas.setTopology(topology);
+      canvas.setTraffic(traffic);
+
+      let nodeA = canvas.querySelector(".node-NodeA circle");
+      expect(nodeA).toBeTruthy();
+      let style = getComputedStyle(nodeA);
+      expect(style.fill).toEqual("rgb(224, 64, 64)");
+      let nodeB = canvas.querySelector(".node-NodeB circle");
+      expect(nodeB).toBeTruthy();
+      style = getComputedStyle(nodeB);
+      expect(style.fill).toEqual("rgb(91, 180, 54)")
+    })
 } );

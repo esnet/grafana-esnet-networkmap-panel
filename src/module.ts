@@ -580,7 +580,6 @@ const options = {
     name: 'Show Map Sidebar',
     description: 'Show sidebar. If hidden, tooltips will appear on hover.',
     category: "View Options",
-    showIf: { "topologySource": ["autodetect", "json", "layerurls"] },
     defaultValue: true,
   },
 

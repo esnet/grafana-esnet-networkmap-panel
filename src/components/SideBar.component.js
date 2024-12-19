@@ -73,7 +73,7 @@ class SideBar extends BindableHTMLElement {
   render() {
     if (!this.shadow) {
         this.shadow = document.createElement("div");
-        this.shadow.setAttribute("class", "tight-form-func");
+        this.shadow.setAttribute("class", "tight-form-func esmap-sidebar");
         this.shadow.id = "sidebar-"+this.instanceId;
         this.append(this.shadow);
     }

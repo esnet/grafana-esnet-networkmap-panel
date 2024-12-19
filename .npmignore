@@ -12,3 +12,4 @@ yarn-error.log
 playwright-report
 .auth
 test-results
+test/dist

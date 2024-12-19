@@ -46,7 +46,13 @@ const doPublish = function(topic, eventData, messageBus) {
         console.debug("publishing event on topic", topic, scopeMessage);
     }
     var accessor = `${messageBus.instanceId}.lastEvents.${topic}`;
-    localStorage.setItem(accessor, JSON.stringify(eventData));
+    try {
+        localStorage.setItem(accessor, JSON.stringify(eventData));
+    } catch(e) {
+        console.error(e);
+        console.log("received error saving to localStorage. clearing localStorage.");
+        localStorage.clear();
+    }
     var subscriberData = messageBus.topics[topic];
     if (!subscriberData) return;
     var subscribers = Object.values(subscriberData);
