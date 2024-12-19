@@ -137,6 +137,7 @@ export class MapCanvas extends BindableHTMLElement {
         "enableNodeAnimation": "masked",
         "enableScrolling": "masked",
         "showViewControls": "masked",
+        "showSidebar": "masked",
         "thresholds": "masked",
         "multiLayerNodeSnap": "masked",
         "configurationUrl": "masked",
@@ -472,6 +473,12 @@ export class MapCanvas extends BindableHTMLElement {
         }
         // set the traffic sample by single-point match if no match yet. Use forward directionality
         if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
+        // if there's no matching edge, we won't find one.
+        // still, we must check for the case that we can match this datapoint to a node.
+        if(!targetEdge && nodeHash.hasOwnProperty(singleIdSelector)){
+          // in this case, create a dummy edge so we can still do node traffic accounting.
+          targetEdge = { nodeA: singleIdSelector }
+        }
         // if no match at all, don't mark up this edge with match data.
         if(!targetEdge){ return }
         targetEdge.azValue = row[values.in];
