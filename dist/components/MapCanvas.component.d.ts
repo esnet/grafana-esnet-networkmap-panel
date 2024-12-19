@@ -33,6 +33,7 @@ export class MapCanvas extends BindableHTMLElement {
         enableNodeAnimation: string;
         enableScrolling: string;
         showViewControls: string;
+        showSidebar: string;
         thresholds: string;
         multiLayerNodeSnap: string;
         configurationUrl: string;
