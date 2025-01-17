@@ -16,8 +16,8 @@ interface Dashboard {
  * If one already exists for the given URL the fileId resolves to, the matching datasource is returned unless the
  * forceCreate flag is set.
  *
- * @param {string | null} fileId
- * @param {boolean} forceCreate
+ * @param {string} datasourceName       The name for the new datasource
+ * @param {boolean} forceCreate         Optional. Set to true to attempt to create a new datasource with a name duplicated by another datasource.
  * @returns
  */
 export const createDatasource = async (datasourceName, forceCreate = false): Promise<IDataSource> => {
@@ -73,8 +73,8 @@ export const createDatasource = async (datasourceName, forceCreate = false): Pro
 }
 
 /**
- * Deletes a given datasource through its UID dsUid.
- * @param {string} dsUid
+ * Deletes a given datasource through its datasource UID dsUid.
+ * @param {string} dsUid      The datasource UID
  */
 export const deleteDatasource = async (dsUid: string) => {
   const { basicAuthHeader, protocolHostPort } = await getHostInfo(credentials);

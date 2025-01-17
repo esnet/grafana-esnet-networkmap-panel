@@ -3,7 +3,7 @@ export interface ITopologyEdge {
     name: string;
     meta: {
         endpoint_identifiers: {
-            pops: [string, string]
+            names: [string, string]
         }
     },
     coordinates: [number, number, number];
