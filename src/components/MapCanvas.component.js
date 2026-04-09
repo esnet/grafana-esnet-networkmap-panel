@@ -447,7 +447,7 @@ export class MapCanvas extends BindableHTMLElement {
         }
         edgeHash[edge._matchname] = edgeIdx;
       })
-      
+
       // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
       if(!layerOptions.srcField && !layerOptions.dstField){ return; }
 
@@ -501,6 +501,12 @@ export class MapCanvas extends BindableHTMLElement {
           layerTopology.nodes[nodeHash[sanatized_nodeA]]["outTraffic"] += row[values.out];
           // Add any other data sent via traffic as available metadata for use in custom tooltips
           layerTopology.nodes[nodeHash[sanatized_nodeA]]["meta"] = utils.deepJsonFix(row);
+          // If a node only has a single identifier, see if the row data has 'isStatus' assigned
+          // Set a flag for the node to not use the max value of its edges, but the value (status) given for the node
+          if ('isStatus' in row && row.isStatus) {
+            layerTopology.nodes[nodeHash[sanatized_nodeA]]['isStatus'] = row.isStatus
+            layerTopology.nodes[nodeHash[sanatized_nodeA]]['status'] = row.status
+          }
         }
         if(targetEdge && targetEdge.nodeZ && nodeHash.hasOwnProperty(targetEdge.nodeZ.split("--")[0])){
           let sanatized_nodeZ = targetEdge.nodeZ.split("--")[0];
@@ -515,10 +521,17 @@ export class MapCanvas extends BindableHTMLElement {
       // as a final step for nodes, convert the traffic sums to formatted labels
       // and color the node based on the max traffic (in vs out)
       layerTopology?.nodes?.forEach((node, nodeIdx)=>{
-        let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
-        node.inValue = this._trafficFormat(node.inTraffic);
-        node.outValue = this._trafficFormat(node.outTraffic);
-        node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
+        if ('isStatus' in node && node.isStatus) {
+          // Do not calculate max traffic from edges, just use the value given
+          node.color = this._trafficColor(node.status, layerOptions.nodeThresholds, layerOptions.color)
+          node.inValue = this._trafficFormat(node.status);
+          node.outValue = this._trafficFormat(node.status);
+        } else {
+          let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
+          node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
+          node.inValue = this._trafficFormat(node.inTraffic);
+          node.outValue = this._trafficFormat(node.outTraffic);
+        }
       })
     })
   }
