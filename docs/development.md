@@ -22,7 +22,7 @@ Pre-requisite: For local development, Grafana must be running locally as a servi
 
 2. Ensure Grafana is running.
     - On Homebrew (Mac), `brew services start grafana` should be sufficient.
-    - Via Docker, you can start the container using `docker run -d -p 3000:3000  grafana-grnoc-esnet-networkmap-panel-grafana`
+    - Via Docker, you can start the container using `docker run -d -p 3000:3000  grafana-esnet-networkmap-panel-grafana`
     - On Windows, you may use Docker Desktop to run the container or enable it as a Windows service. (Hit Ctrl-R and enter
     `services.msc` to open the Services dialog, scroll to the Grafana entry, right-click and select Enable.)
 
@@ -45,7 +45,7 @@ $ yarn install
 3. Configure Grafana to read plugins from the parent directory of the project.
 
 When installed as a service, the most likely place for the configuration file is `/usr/local/etc/grafana/grafana.ini`
-For example, if the project is located in /Users/myuser/grafana-plugins/grafana-grnoc-esnet-networkmap-panel, set the
+For example, if the project is located in /Users/myuser/grafana-plugins/grafana-esnet-networkmap-panel, set the
 plugins value to the parent directory:
 
 ```grafana.ini

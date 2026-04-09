@@ -5,22 +5,15 @@ services:
     tty: true
     ports:
       - 8080:8080/tcp
-    command: mitmdump --mode transparent --modify-headers "/Access-Control-Allow-Origin/*" --modify-headers "/X-Remote-User/remote" --modify-headers "/X-Forwarded-Host/grnoc-esnet-networkmap-panel:3000"
+    command: mitmdump --mode transparent --modify-headers "/Access-Control-Allow-Origin/*" --modify-headers "/X-Remote-User/remote" --modify-headers "/X-Forwarded-Host/esnet-networkmap-panel:3000"
     networks:
       - esnet-networkmap-e2e-net
 
   grafana:
-    # This sets the actual version to use
     image: grafana/grafana:12.3.1
     environment:
-      # Automatically install infinity plugin
       - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
-      # Used just for redirecting via apache to point to the container
-      - GF_SERVER_ROOT_URL=http://jdmcnama-dev-8.grnoc.iu.edu/grafana
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
-      # Lets our plugin be allowed to be installed
-      - GF_PLUGINS_ALLOW_LOADING_UNSIGNED_PLUGINS=grnoc-esnet-networkmap-panel
-    container_name: 'grnoc-esnet-networkmap-panel'
+    container_name: 'esnet-networkmap-panel'
     build:
       context: ./.config
       dockerfile: Dockerfile
@@ -31,8 +24,7 @@ services:
     ports:
       - 3000:3000/tcp
     volumes:
-      # Install local plugin into Grafana
-      - ./dist:/var/lib/grafana/plugins/grnoc-esnet-networkmap-panel
+      - ./dist:/var/lib/grafana/plugins/esnet-networkmap-panel
       - ./provisioning:/etc/grafana/provisioning
     networks:
       - esnet-networkmap-e2e-net

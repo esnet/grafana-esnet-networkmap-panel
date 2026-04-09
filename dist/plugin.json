@@ -1,8 +1,8 @@
 {
   "$schema": "https://raw.githubusercontent.com/grafana/grafana/master/docs/sources/developers/plugins/plugin.schema.json",
   "type": "panel",
-  "name": "GRNOC Network Map Panel",
-  "id": "grnoc-esnet-networkmap-panel",
+  "name": "Network Map Panel",
+  "id": "esnet-networkmap-panel",
   "info": {
     "description": "Topology map of a network. Graphs network traffic between nodes",
     "author": {
@@ -19,11 +19,11 @@
     "links": [
       {
         "name": "Website",
-        "url": "https://github.com/JoshuaMcNamara98/grafana-esnet-networkmap-panel"
+        "url": "https://github.com/esnet/grafana-esnet-networkmap-panel"
       },
       {
         "name": "License",
-        "url": "https://github.com/JoshuaMcNamara98/grafana-esnet-networkmap-panel/blob/main/LICENSE"
+        "url": "https://github.com/esnet/grafana-esnet-networkmap-panel/blob/main/LICENSE"
       }
     ],
     "screenshots": [

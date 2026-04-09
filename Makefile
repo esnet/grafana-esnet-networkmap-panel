@@ -4,7 +4,7 @@ GRAFANA_PATH="node_modules/@grafana/toolkit/bin/grafana-toolkit.js"
 BREW=$(which brew)
 CLI_TOOLS_PATH=~/work/cli-tools/stardust_map_topology
 PROJECT_DIR := $(dir $(realpath $(lastword $(MAKEFILE_LIST))))
-CONTAINER_NAME=grnoc-esnet-networkmap-panel
+CONTAINER_NAME=esnet-networkmap-panel
 PROXY_NAME=mitmproxy
 NETWORK_NAME=esnet-networkmap-e2e-net
 CONTAINER_ID=$(shell docker ps -f name=$(CONTAINER_NAME) -q)
@@ -17,7 +17,7 @@ prod:
 	make build
 
 .PHONY: build
-build:
+build: test
 	yarn build
 	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
 	yarn run "build_dts"

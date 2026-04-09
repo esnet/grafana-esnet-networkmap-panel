@@ -213,7 +213,7 @@ export const getFolderDashboardFixtures = async (params?: INetworkPanelParams): 
       const { panels } = dashboardInfo.dashboard || { panels: currentPanels };
       const updatedPanels: INetworkMapPanel[] = [];
       for (const panel of panels) {
-        if (panel.type === "grnoc-esnet-networkmap-panel") {
+        if (panel.type === "esnet-networkmap-panel") {
           let { options, datasource } = panel as INetworkMapPanel;
           // assigns the topology
           if (!Array.isArray(options.layers)) {

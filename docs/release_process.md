@@ -19,7 +19,7 @@ We should specifically exclude any files not intended to be published in a `.npm
 Internally, this command does something like this:
 
 ```
-npm pack && tar -tf grnoc-esnet-networkmap-panel-\*.tgz | sort && rm grnoc-esnet-networkmap-panel-\*
+npm pack && tar -tf esnet-networkmap-panel-\*.tgz | sort && rm esnet-networkmap-panel-\*
 ```
 
 and presents the user with a command prompt to check the file manifest.
