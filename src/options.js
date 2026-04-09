@@ -255,6 +255,17 @@ export const defaultEdgeTooltip = `
   </div>
 `;
 
+/**
+ * The tooltip for when "displayName" is set
+ */
+export const defaultDisplayNameTooltip = `
+  <div class="flow-tooltip">
+    <strong>
+      \${meta.displayName}
+    </strong>
+  </div>
+`;
+
 // Options for Layers up to the Limit
 export const LayerOptions = (()=>{
   let options = [];

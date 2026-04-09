@@ -10,14 +10,16 @@ services:
       - esnet-networkmap-e2e-net
 
   grafana:
+    image: grafana/grafana:12.3.1
     environment:
       - GF_INSTALL_PLUGINS=yesoreyeram-infinity-datasource
     container_name: 'esnet-networkmap-panel'
     build:
       context: ./.config
       dockerfile: Dockerfile
+      # This doesn't work
       args:
-        grafana_version: ${GRAFANA_VERSION:-10.4.0}
+        grafana_version: ${GRAFANA_VERSION:-12.3.1}
     restart: always
     ports:
       - 3000:3000/tcp

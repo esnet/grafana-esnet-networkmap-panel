@@ -148,6 +148,46 @@ export function setPath(object, path, newValue){
   o[lastItem] = newValue;
 }
 
+export function deepJsonFix(value, path = "") {
+  // If it's an array, recurse into each element
+  if (Array.isArray(value)) {
+    return value.map((v, i) => deepJsonFix(v, `${path}[${i}]`));
+  }
+
+  // If it's an object, recurse into its keys
+  if (value && typeof value === "object") {
+    for (const k of Object.keys(value)) {
+      value[k] = deepJsonFix(value[k], `${path}.${k}`);
+    }
+    return value;
+  }
+
+  // If it's a string, see if it should be parsed
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+
+    // Detect destroyed objects
+    if (trimmed === "[object Object]") {
+      console.warn(`Lost JSON at ${path} → "[object Object]"`);
+      return null;
+    }
+
+    // Try to parse valid JSON strings
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return deepJsonFix(JSON.parse(trimmed), path);
+      } catch {
+        return value;
+      }
+    }
+  }
+
+  return value;
+}
+
 try {
   const Utils = {
     getUrlSearchParams,
@@ -157,6 +197,7 @@ try {
     testJsonSchema,
     resolvePath,
     setPath,
+    deepJsonFix,
   }
   module.exports.Utils = Utils;
   exports.Utils = Utils;

@@ -17,7 +17,7 @@ prod:
 	make build
 
 .PHONY: build
-build: test 
+build: test
 	yarn build
 	yarn sign "--rootUrls" https://dashboard.stardust.es.net/,https://gf.gc1.dev-stage.stardust.es.net/
 	yarn run "build_dts"

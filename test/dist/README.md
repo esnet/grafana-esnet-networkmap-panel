@@ -1,1 +1,0 @@
-This folder will be used to store webpack build files for tests. Committed this readme to ensure it is created.

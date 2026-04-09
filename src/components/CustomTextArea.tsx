@@ -63,9 +63,11 @@ export const CustomTextArea: React.FC<Props> = ({ value, onChange, item, suffix 
     };
   }
 
+  const TA = TextArea as any;
+
   return (
-    <TextArea
-      {...attribs}
+    <TA
+      {...(attribs)}
       placeholder={item.settings?.placeholder}
       defaultValue={value || ''}
       rows={(item.settings?.useTextarea && item.settings.rows) || 5}

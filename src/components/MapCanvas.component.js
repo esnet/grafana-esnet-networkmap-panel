@@ -364,7 +364,13 @@ export class MapCanvas extends BindableHTMLElement {
         let edgeName = null;
         // match for for the case where both src and dst fields are set for the layer
         if(layerOptions?.srcField && layerOptions?.dstField){
-          edgeName = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}`;
+          // Make each edge unique incase there are multiple edges going to the same src/dst
+          let unique_id = crypto.randomUUID();
+          edgeName = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${row[layerOptions.dstField]}${EDGE_DELIMITER}${unique_id}`;
+          if(this._options?.topologySource == "autodetect") {
+            row[layerOptions.srcField] = `${row[layerOptions.srcField]}${EDGE_DELIMITER}${unique_id}`;
+            row[layerOptions.dstField] = `${row[layerOptions.dstField]}${EDGE_DELIMITER}${unique_id}`;
+          }
         }
         // match for the case where we have a row with a single metadata point as src
         if(!edgeName){
@@ -441,7 +447,7 @@ export class MapCanvas extends BindableHTMLElement {
         }
         edgeHash[edge._matchname] = edgeIdx;
       })
-      
+
       // if we don't have a src or dst field for this layer, don't bother working through O(n) for each row.
       if(!layerOptions.srcField && !layerOptions.dstField){ return; }
 
@@ -451,7 +457,7 @@ export class MapCanvas extends BindableHTMLElement {
         node.inTraffic = 0;
         node.outTraffic = 0;
         node.color = layerOptions.color;
-        nodeHash[node.name] = nodeIdx
+        nodeHash[node.name.split("--")[0]] = nodeIdx
       });
       this._traffic?.forEach((row)=>{
         // match for the case where we have A--Z in order
@@ -463,13 +469,11 @@ export class MapCanvas extends BindableHTMLElement {
         // set the traffic sample by forward match
         let targetEdge = layerTopology.edges[edgeHash[forwardEdgeSelector]];
         let values = { in: layerOptions.inboundValueField, out: layerOptions.outboundValueField };
-        let edgeIsReversed = false;
         // set the traffic sample by reverse match if no match yet
         if(!targetEdge){
           targetEdge = layerTopology.edges[edgeHash[reverseEdgeSelector]];
           // be sure to reverse directionality of match
           values = { in: layerOptions.outboundValueField, out: layerOptions.inboundValueField };
-          edgeIsReversed = true;
         }
         // set the traffic sample by single-point match if no match yet. Use forward directionality
         if(!targetEdge){ targetEdge = layerTopology.edges[edgeHash[singleIdSelector]] }
@@ -488,29 +492,48 @@ export class MapCanvas extends BindableHTMLElement {
         targetEdge.zaDisplayValue = this._trafficFormat(row[values.out]);
         targetEdge.zaColor = this._trafficColor(row[values.out], this._options.thresholds, layerOptions.color);
         // do the accounting for nodes
-        if(targetEdge && targetEdge.nodeA && nodeHash.hasOwnProperty(targetEdge.nodeA)){
+        if(targetEdge && targetEdge.nodeA && nodeHash.hasOwnProperty(targetEdge.nodeA.split("--")[0])){
+          // Remove the unique ID from node names during lookup to correctly add in/out traffic values
+          let sanatized_nodeA = targetEdge.nodeA.split("--")[0];
           // in value should be added to the A node's in and the Z node's out
-          layerTopology.nodes[nodeHash[targetEdge.nodeA]]["inTraffic"] += row[values.in];
+          layerTopology.nodes[nodeHash[sanatized_nodeA]]["inTraffic"] += row[values.in];
           // out value should be added to the A node's out and the Z node's in
-          layerTopology.nodes[nodeHash[targetEdge.nodeA]]["outTraffic"] += row[values.out];
+          layerTopology.nodes[nodeHash[sanatized_nodeA]]["outTraffic"] += row[values.out];
+          // Add any other data sent via traffic as available metadata for use in custom tooltips
+          layerTopology.nodes[nodeHash[sanatized_nodeA]]["meta"] = utils.deepJsonFix(row);
+          // If a node only has a single identifier, see if the row data has 'isStatus' assigned
+          // Set a flag for the node to not use the max value of its edges, but the value (status) given for the node
+          if ('isStatus' in row && row.isStatus) {
+            layerTopology.nodes[nodeHash[sanatized_nodeA]]['isStatus'] = row.isStatus
+            layerTopology.nodes[nodeHash[sanatized_nodeA]]['status'] = row.status
+          }
         }
-        if(targetEdge && targetEdge.nodeZ && nodeHash.hasOwnProperty(targetEdge.nodeZ)){
+        if(targetEdge && targetEdge.nodeZ && nodeHash.hasOwnProperty(targetEdge.nodeZ.split("--")[0])){
+          let sanatized_nodeZ = targetEdge.nodeZ.split("--")[0];
           // in value should be added to the A node's in and the Z node's out
-          layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["outTraffic"] += row[values.in];
+          layerTopology.nodes[nodeHash[sanatized_nodeZ]]["outTraffic"] += row[values.in];
           // out value should be added to the A node's out and the Z node's in
-          layerTopology.nodes[nodeHash[targetEdge.nodeZ]]["inTraffic"] += row[values.out];
+          layerTopology.nodes[nodeHash[sanatized_nodeZ]]["inTraffic"] += row[values.out];
+          // Add any other data sent via traffic as available metadata for use in custom tooltips
+          layerTopology.nodes[nodeHash[sanatized_nodeZ]]["meta"] = utils.deepJsonFix(row);
         }
       })
       // as a final step for nodes, convert the traffic sums to formatted labels
       // and color the node based on the max traffic (in vs out)
       layerTopology?.nodes?.forEach((node, nodeIdx)=>{
-        let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
-        node.inValue = this._trafficFormat(node.inTraffic);
-        node.outValue = this._trafficFormat(node.outTraffic);
-        node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
+        if ('isStatus' in node && node.isStatus) {
+          // Do not calculate max traffic from edges, just use the value given
+          node.color = this._trafficColor(node.status, layerOptions.nodeThresholds, layerOptions.color)
+          node.inValue = this._trafficFormat(node.status);
+          node.outValue = this._trafficFormat(node.status);
+        } else {
+          let maxTraffic = Math.max.apply(Math, [node.inTraffic, node.outTraffic]);
+          node.color = this._trafficColor(maxTraffic, layerOptions.nodeThresholds, layerOptions.color);
+          node.inValue = this._trafficFormat(node.inTraffic);
+          node.outValue = this._trafficFormat(node.outTraffic);
+        }
       })
     })
-
   }
 
   setTrafficFormat(fn){
@@ -668,7 +691,7 @@ export class MapCanvas extends BindableHTMLElement {
     let topo = [];
 
     const setLayerTopology = (layer, layerTopology, url)=>{
-      topo.push(layerTopology);
+      topo[layer] = layerTopology;
       this.emit(signals.LAYER_LOAD_SUCCESS, { layer: layer, topology: layerTopology, url: url });
       this._topology = topo;
       this._remoteLayerLoaded[layer] = true;
@@ -893,7 +916,6 @@ export class MapCanvas extends BindableHTMLElement {
     if(!this._traffic) return;
     if(this._options?.topologySource == "autodetect"){
       this.options.enableEditing = false;
-      this._topology = [];
       for(let i=0; i<this._options?.layers.length; i++){
         if(this._topology?.[i]?.autodetected){ continue }
         let layerTopology = { "nodes": [], "edges": [], "nodeHash": {}, "pathLayout": { "type": "curveBasis" }, "autodetected": true }
@@ -923,14 +945,23 @@ export class MapCanvas extends BindableHTMLElement {
 
           layerTopology["nodeHash"][source.name] = source;
           layerTopology["nodeHash"][dest.name] = dest;
-          let y_dist = source.coordinate[0] - dest.coordinate[0];
-          let x_dist = source.coordinate[1] - dest.coordinate[1];
-          let distance = Math.sqrt((x_dist**2) + (y_dist**2));
-          let midpoint = [dest.coordinate[0] + (y_dist/2 + (0.12 * distance)),  dest.coordinate[1] + (x_dist/2)];
+          
           let edgeObj = {
             "name": `${source.name}--${dest.name}`,
-            "coordinates": [source.coordinate, midpoint, dest.coordinate],
+            "coordinates": [],
             "meta": { "endpoint_identifiers": { "names": [source.name, dest.name] } }
+          }
+          if ("anchors" in edge && edge.anchors.length > 0) {
+            // Use the given list of coordinates
+            edgeObj["coordinates"] = [source.coordinate, ...JSON.parse(edge["anchors"]), dest.coordinate];
+          } else {
+            // Calculate a mid-point coordinate if this edge has no
+            // custom defined list of coordinates
+            let y_dist = source.coordinate[0] - dest.coordinate[0];
+            let x_dist = source.coordinate[1] - dest.coordinate[1];
+            let distance = Math.sqrt((x_dist**2) + (y_dist**2));
+            let midpoint = [dest.coordinate[0] + (y_dist/2 + (0.12 * distance)),  dest.coordinate[1] + (x_dist/2)];
+            edgeObj["coordinates"] = [source.coordinate, midpoint, dest.coordinate];
           }
           layerTopology["edges"].push(edgeObj);
         })
